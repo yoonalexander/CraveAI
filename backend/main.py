@@ -11,6 +11,7 @@ logger = logging.getLogger(__name__)
 def create_app() -> FastAPI:
     """Application factory for the CraveAI backend service."""
     settings = get_settings()
+    settings.validate()
     logger.info("Launching CraveAI backend in %s environment.", settings.ENVIRONMENT)
 
     app = FastAPI(

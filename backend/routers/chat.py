@@ -55,6 +55,10 @@ class Recommendation(BaseModel):
 class ChatResponse(BaseModel):
     """Structured response returned to the frontend."""
 
+    reply: str = Field(
+        default="",
+        description="Primary assistant response summarizing the recommendations.",
+    )
     messages: List[ChatMessage] = Field(
         default_factory=list,
         description="Ordered transcript containing the assistant reply.",
@@ -90,6 +94,7 @@ async def generate_chat_response(payload: ChatRequest) -> ChatResponse:
     ]
 
     return ChatResponse(
+        reply=rag_result.get("reply", ""),
         messages=[assistant_message],
         recommendations=recommendations,
     )

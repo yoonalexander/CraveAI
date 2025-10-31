@@ -1,0 +1,30 @@
+# Python artifacts
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+dist/
+build/
+
+# Environments & secrets
+.env
+.env.*
+!.env.example
+.venv/
+venv/
+
+# Testing & tooling caches
+.pytest_cache/
+.mypy_cache/
+.coverage*
+coverage.xml
+.cache/
+
+# Editors & OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db

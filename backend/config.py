@@ -4,6 +4,7 @@ import os
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
+import logging
 
 from dotenv import load_dotenv
 
@@ -13,6 +14,8 @@ DOTENV_PATH = PROJECT_ROOT / ".env"
 # Load environment variables from .env if present. Values already present in the
 # environment take precedence because override defaults to False.
 load_dotenv(DOTENV_PATH, override=False)
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -26,9 +29,20 @@ class Config:
     MODEL_NAME: str = os.getenv("MODEL_NAME", "gpt-4-turbo")
     ENVIRONMENT: str = os.getenv("APP_ENV", "development")
 
+    def validate(self) -> None:
+        """Verify that mandatory configuration values are provided."""
+        required_fields = ("OPENAI_API_KEY", "GOOGLE_API_KEY")
+        missing = [field for field in required_fields if not getattr(self, field)]
+        if missing:
+            message = (
+                "Missing required configuration values: "
+                + ", ".join(missing)
+            )
+            logger.error(message)
+            raise RuntimeError(message)
+
 
 @lru_cache()
 def get_settings() -> Config:
     """Return a cached settings instance."""
     return Config()
-
