@@ -1,0 +1,34 @@
+from __future__ import annotations
+
+import os
+from dataclasses import dataclass
+from functools import lru_cache
+from pathlib import Path
+
+from dotenv import load_dotenv
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+DOTENV_PATH = PROJECT_ROOT / ".env"
+
+# Load environment variables from .env if present. Values already present in the
+# environment take precedence because override defaults to False.
+load_dotenv(DOTENV_PATH, override=False)
+
+
+@dataclass(frozen=True)
+class Config:
+    """Central application settings."""
+
+    OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
+    GOOGLE_API_KEY: str = os.getenv("GOOGLE_API_KEY", "")
+    CHROMA_PATH: str = os.getenv("CHROMA_PATH", "./data/chroma_db")
+    REDIS_URL: str = os.getenv("REDIS_URL", "redis://localhost:6379")
+    MODEL_NAME: str = os.getenv("MODEL_NAME", "gpt-4-turbo")
+    ENVIRONMENT: str = os.getenv("APP_ENV", "development")
+
+
+@lru_cache()
+def get_settings() -> Config:
+    """Return a cached settings instance."""
+    return Config()
+

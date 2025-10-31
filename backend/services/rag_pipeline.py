@@ -16,13 +16,17 @@ try:
 except ImportError:  # pragma: no cover - optional dependency during scaffolding
     Chroma = None  # type: ignore
 
+from backend.config import get_settings
+
 logger = logging.getLogger(__name__)
 
-# TODO: Wire these configuration values through a dedicated settings module.
-OPENAI_CHAT_MODEL = os.getenv("OPENAI_CHAT_MODEL", "gpt-4o-mini")
+settings = get_settings()
+
+OPENAI_API_KEY = settings.OPENAI_API_KEY
+OPENAI_CHAT_MODEL = settings.MODEL_NAME
 OPENAI_EMBEDDING_MODEL = os.getenv("OPENAI_EMBEDDING_MODEL", "text-embedding-3-small")
-GOOGLE_PLACES_API_KEY = os.getenv("GOOGLE_API_KEY", "")
-CHROMA_PATH = os.getenv("CHROMA_PATH", "./data/chroma_db")
+GOOGLE_PLACES_API_KEY = settings.GOOGLE_API_KEY
+CHROMA_PATH = settings.CHROMA_PATH
 DEFAULT_SEARCH_RADIUS_METERS = int(os.getenv("GOOGLE_SEARCH_RADIUS", "5000"))
 MAX_CUISINES = 5
 MAX_PLACES_PER_CUISINE = 5
@@ -97,6 +101,7 @@ def _build_chat_model() -> ChatOpenAI:
         model=OPENAI_CHAT_MODEL,
         temperature=0.2,
         max_tokens=500,
+        api_key=OPENAI_API_KEY or None,
     )
 
 
@@ -155,7 +160,10 @@ async def _retrieve_similar_cuisines(intent: Dict[str, List[str]]) -> List[str]:
         return query_terms[:MAX_CUISINES]
 
     try:
-        embeddings = OpenAIEmbeddings(model=OPENAI_EMBEDDING_MODEL)
+        embeddings = OpenAIEmbeddings(
+            model=OPENAI_EMBEDDING_MODEL,
+            api_key=OPENAI_API_KEY or None,
+        )
         vector_store = await asyncio.to_thread(
             Chroma,
             persist_directory=CHROMA_PATH,
@@ -277,7 +285,7 @@ async def _rank_candidates(
         parsed = json.loads(raw)
         parsed["recommendations"] = _sanitize_recommendations(parsed.get("recommendations", []))
         parsed["reply"] = parsed.get("reply") or (
-            "Here are a few places that seem to fit—let me know what you think!"
+            "Here are a few places that seem to fit - let me know what you think!"
         )
         return parsed
     except Exception as exc:  # pragma: no cover - defensive fallback
@@ -319,4 +327,3 @@ def _placeholder_places(cuisines: Sequence[str]) -> List[Dict[str, Any]]:
             }
         )
     return placeholders
-
