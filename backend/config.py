@@ -31,15 +31,15 @@ class Config:
 
     def validate(self) -> None:
         """Verify that mandatory configuration values are provided."""
-        required_fields = ("OPENAI_API_KEY", "GOOGLE_API_KEY")
-        missing = [field for field in required_fields if not getattr(self, field)]
-        if missing:
-            message = (
-                "Missing required configuration values: "
-                + ", ".join(missing)
-            )
+        if not self.OPENAI_API_KEY:
+            message = "Missing required configuration value: OPENAI_API_KEY"
             logger.error(message)
             raise RuntimeError(message)
+
+        if not self.GOOGLE_API_KEY:
+            logger.warning(
+                "GOOGLE_API_KEY not configured; restaurant searches will fall back to placeholder data."
+            )
 
 
 @lru_cache()
