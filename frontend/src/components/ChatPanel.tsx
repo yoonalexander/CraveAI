@@ -1,10 +1,15 @@
 import { FormEvent, useState } from "react";
+import { sendChat, ChatRecommendation } from "../api/chat";
 
 type Message = {
   id: string;
   role: "user" | "assistant";
   content: string;
+  recommendations?: ChatRecommendation[];
 };
+
+const createMessageId = (prefix: string): string =>
+  `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
 const seededMessages: Message[] = [
   {
@@ -28,30 +33,77 @@ const seededMessages: Message[] = [
 export function ChatPanel(): JSX.Element {
   const [messages, setMessages] = useState<Message[]>(seededMessages);
   const [draft, setDraft] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (isLoading) {
+      return;
+    }
+
     const trimmed = draft.trim();
     if (!trimmed) {
       return;
     }
 
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: `user-${Date.now()}`,
-        role: "user",
-        content: trimmed,
-      },
-      {
-        id: `assistant-${Date.now()}`,
-        role: "assistant",
-        content:
-          "Nice! Once the backend is connected I'll fetch real recommendations.",
-      },
-    ]);
+    const userMessage: Message = {
+      id: createMessageId("user"),
+      role: "user",
+      content: trimmed,
+    };
 
+    setMessages((prev) => [...prev, userMessage]);
     setDraft("");
+    setError(null);
+    setIsLoading(true);
+
+    try {
+      const response = await sendChat(trimmed);
+      const recommendations =
+        response.recommendations.length > 0
+          ? response.recommendations
+          : undefined;
+
+      const assistantMessages: Message[] =
+        response.messages.length > 0
+          ? response.messages.map((message, index) => ({
+              id: createMessageId("assistant"),
+              role: "assistant",
+              content: message.content,
+              recommendations:
+                index === 0 && recommendations ? recommendations : undefined,
+            }))
+          : [
+              {
+                id: createMessageId("assistant"),
+                role: "assistant",
+                content:
+                  response.reply ||
+                  "I've gathered a few ideas you might enjoy.",
+                recommendations,
+              },
+            ];
+
+      setMessages((prev) => [...prev, ...assistantMessages]);
+    } catch (err) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : "Unexpected issue while contacting the assistant.";
+      setError(message);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: createMessageId("assistant"),
+          role: "assistant",
+          content:
+            "Sorry, I ran into a problem fetching recommendations. Please try again.",
+        },
+      ]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -84,24 +136,70 @@ export function ChatPanel(): JSX.Element {
               }`}
             >
               {message.content}
+              {!!message.recommendations?.length && (
+                <div className="mt-3 space-y-2">
+                  {message.recommendations.map(
+                    (recommendation: ChatRecommendation, index: number) => (
+                      <div
+                        key={`${message.id}-rec-${index}`}
+                        className="rounded-2xl border border-slate-700/60 bg-slate-900/40 px-4 py-3 text-xs text-slate-200"
+                      >
+                        <p className="text-sm font-semibold text-white">
+                          {recommendation.name}
+                        </p>
+                        {typeof recommendation.rating === "number" && (
+                          <p className="mt-1 text-slate-300">
+                            Rating: {recommendation.rating.toFixed(1)}
+                          </p>
+                        )}
+                        {recommendation.reason && (
+                          <p className="mt-2 text-slate-300">
+                            {recommendation.reason}
+                          </p>
+                        )}
+                        {recommendation.address && (
+                          <p className="mt-2 text-slate-500">
+                            {recommendation.address}
+                          </p>
+                        )}
+                      </div>
+                    ),
+                  )}
+                </div>
+              )}
             </div>
           </div>
         ))}
+        {isLoading && (
+          <div className="flex justify-start">
+            <div className="max-w-[80%] rounded-2xl bg-slate-800 px-4 py-3 text-sm leading-relaxed text-slate-100">
+              Thinking...
+            </div>
+          </div>
+        )}
       </div>
+
+      {error && (
+        <div className="mx-6 mb-3 rounded-2xl border border-red-500/40 bg-red-500/10 px-4 py-2 text-xs text-red-200">
+          {error}
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="border-t border-slate-800 p-4">
         <div className="flex items-center gap-3 rounded-full bg-slate-800 px-4">
           <input
             className="flex-1 bg-transparent py-3 text-sm text-white placeholder:text-slate-500 focus:outline-none"
-            placeholder="Try “Cozy soup spots under $20 near Yonge & Bloor.”"
+            placeholder='Try "Cozy soup spots under $20 near Yonge & Bloor."'
             value={draft}
             onChange={(event) => setDraft(event.target.value)}
+            disabled={isLoading}
           />
           <button
             type="submit"
-            className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-primary-dark"
+            className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-primary-dark disabled:opacity-70"
+            disabled={isLoading}
           >
-            Send
+            {isLoading ? "Sending..." : "Send"}
           </button>
         </div>
       </form>

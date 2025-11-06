@@ -22,9 +22,16 @@ venv/
 coverage.xml
 .cache/
 
+# Frontend / JS dependencies
+node_modules/
+frontend/node_modules/
+frontend/.next/
+frontend/dist/
+
 # Editors & OS
 .vscode/
 .idea/
 *.swp
 .DS_Store
 Thumbs.db
+tests/CraveAI Backend - Swagger UI.html

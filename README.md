@@ -1,3 +1,8 @@
+Here’s your **merged and polished `README.md`**, combining your original documentation with the complete **local setup & run instructions** in one unified file — perfect for GitHub or sharing your project.
+
+---
+
+````markdown
 # 🍜 CraveAI – AI-Powered Food Recommender Chatbot
 
 > An intelligent, conversational chatbot that helps users discover nearby restaurants based on their cravings, mood, and dietary preferences — powered by Retrieval-Augmented Generation (RAG), GPT-4, and real-time location data.
@@ -41,57 +46,187 @@ docs/ (PRD.md, TECHNICAL_DESIGN.md)
 
 ---
 
-## ⚙️ Installation
+## ⚙️ Installation & Local Development Guide
 
-### 1. Clone the Repository
+### 🧩 1. Open the Project
 
-```bash
-git clone https://github.com/<your-username>/craveai.git
-cd craveai
+In VS Code (or your terminal), make sure you’re in the **project root directory**:
+
+```powershell
+C:\Users\alexy\Projects\Project 2025++\CraveAI\CraveAI
 ```
 
-### 2. Create a Virtual Environment
+---
 
-```bash
-python -m venv venv
-source venv/bin/activate   # on macOS/Linux
-venv\Scripts\activate      # on Windows
+### 🧠 2. Activate the Python Virtual Environment (Backend)
+
+If you already have a `venv` folder inside `backend/`, run:
+
+```powershell
+cd backend
+.\venv\Scripts\activate
 ```
 
-### 3. Install Backend Dependencies
+You should see `(venv)` appear at the start of your terminal line — that means it’s active.
 
-```bash
-pip install -r backend/requirements.txt
+---
+
+### ⚙️ 3. Install Backend Dependencies
+
+Still inside the `backend` folder, run:
+
+```powershell
+pip install -r requirements.txt
 ```
 
-### 4. Set Environment Variables
+That installs all required packages (FastAPI, Uvicorn, OpenAI, etc.) into your virtual environment.
 
-Create a `.env` file in the project root (or copy from `.env.example`):
+---
 
-```bash
-OPENAI_API_KEY=your-openai-api-key
-GOOGLE_API_KEY=your-google-api-key
-CHROMA_PATH=./data/chroma_db
-REDIS_URL=redis://localhost:6379
-MODEL_NAME=gpt-4-turbo
-```
+### 🚀 4. Start the Backend Server
 
-### 5. Run the Backend
+While inside the project root (`…\CraveAI\CraveAI>`), run:
 
-```bash
+```powershell
 uvicorn backend.main:create_app --factory --reload
 ```
 
-### 6. Run the Frontend
+✅ You should see:
 
-```bash
-cd frontend
+```
+INFO:     Uvicorn running on http://127.0.0.1:8000
+INFO:     Application startup complete.
+```
+
+Now your **FastAPI backend** is running on port **8000**.
+Keep this terminal open while you work — it must stay running.
+
+---
+
+### 🌐 5. Enable CORS (if not already)
+
+In `backend/main.py`, confirm this snippet exists:
+
+```python
+from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # or ["http://localhost:5173"] for stricter config
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+```
+
+If missing, add it and restart the backend so the frontend can make API calls.
+
+---
+
+### 🧱 6. Set Up the Frontend Environment
+
+Open a **new terminal tab/window** (don’t close the backend one).
+Then navigate to your frontend folder:
+
+```powershell
+cd C:\Users\alexy\Projects\Project 2025++\CraveAI\CraveAI\frontend
+```
+
+---
+
+#### ➜ Install dependencies (first time only)
+
+```powershell
 npm install
+```
+
+---
+
+#### ➜ Create a `.env` file inside `frontend/`
+
+Add:
+
+```
+VITE_API_BASE_URL=http://127.0.0.1:8000
+```
+
+This tells your frontend where the backend lives.
+
+---
+
+### 🧠 7. Start the Frontend Dev Server
+
+Run:
+
+```powershell
 npm run dev
 ```
 
-Backend defaults to [http://localhost:8000](http://localhost:8000)
-Frontend defaults to [http://localhost:5173](http://localhost:5173)
+✅ You should see:
+
+```
+VITE vX.X.X  ready in 300ms
+Local: http://localhost:5173/
+```
+
+This launches the **React + Vite frontend** on port **5173**.
+
+---
+
+### 💬 8. Test the Full Connection
+
+Now you have:
+
+* Backend → running on **[http://127.0.0.1:8000](http://127.0.0.1:8000)**
+* Frontend → running on **[http://localhost:5173](http://localhost:5173)**
+
+Open your browser at **[http://localhost:5173](http://localhost:5173)**, then type something like:
+
+> “I want something cold and sweet”
+
+If connected properly, the chat will send a POST request to:
+
+```
+http://127.0.0.1:8000/chat
+```
+
+You’ll see a response like:
+
+```json
+{
+  "reply": "Here are some nearby spots that match what you're craving...",
+  "recommendations": [...]
+}
+```
+
+Your chat panel should render this response.
+
+---
+
+### 🧰 9. Stopping Everything
+
+When finished:
+
+* In the **backend terminal**, press `Ctrl + C`
+* In the **frontend terminal**, press `Ctrl + C`
+* To deactivate your Python venv:
+
+  ```powershell
+  deactivate
+  ```
+
+---
+
+### ✅ Quick Recap
+
+| Step | Task                          | Command                                                          |
+| ---- | ----------------------------- | ---------------------------------------------------------------- |
+| 1    | Go to project root            | `cd "C:\Users\alexy\Projects\Project 2025++\CraveAI\CraveAI"`    |
+| 2    | Activate backend venv         | `cd backend && .\venv\Scripts\activate`                          |
+| 3    | Run backend                   | `uvicorn backend.main:create_app --factory --reload`             |
+| 4    | New terminal → go to frontend | `cd ..\frontend`                                                 |
+| 5    | Run frontend                  | `npm run dev`                                                    |
+| 6    | Visit frontend in browser     | `http://localhost:5173`                                          |
+| 7    | Test API                      | Type in chat or visit Swagger UI at `http://127.0.0.1:8000/docs` |
 
 ---
 
@@ -143,8 +278,8 @@ POST /chat
 
 1. **Intent Parsing:** GPT-4 analyzes user text for mood, cravings, and diet cues.
 2. **Retrieval:** Embedding search via **ChromaDB** finds relevant cuisines.
-3. **API Query:** Google Places API fetches nearby restaurants.
-4. **Ranking:** GPT-4 ranks results with natural explanations.
+3. **API Query:** Google Places API (or mock fallback) fetches nearby restaurants.
+4. **Ranking:** GPT-4 ranks results and explains reasoning.
 5. **Response:** FastAPI returns JSON used by the chat UI and map view.
 
 ---
@@ -204,3 +339,5 @@ Passionate about creating human-centered AI experiences that combine creativity 
 ## 🪪 License
 
 MIT License © 2025 Alex Yoon
+
+```

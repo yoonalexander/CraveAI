@@ -1,6 +1,7 @@
 import logging
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from backend.routers import chat, feedback, favorites
 from backend.config import get_settings
@@ -21,6 +22,13 @@ def create_app() -> FastAPI:
     )
 
     app.state.settings = settings
+
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
     app.include_router(chat.router)
     app.include_router(feedback.router)
