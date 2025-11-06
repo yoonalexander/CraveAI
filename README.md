@@ -325,14 +325,12 @@ docker run -p 8000:8000 craveai-backend
 ##  Author
 
 **Alex Yoon**
-Application Developer & AI Engineer
+Software Developer & ML Engineer
 Passionate about creating human-centered AI experiences that combine creativity and data.
-🔗 [LinkedIn](https://linkedin.com/in/yoonalexander) • [GitHub](https://github.com/yoonalexander)
+🔗 [LinkedIn](https://linkedin.com/in/yoonalex) • [GitHub](https://github.com/yoonalexander)
 
 ---
 
 ## License
 
 MIT License © 2025 Alex Yoon
-
-```
