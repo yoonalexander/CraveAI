@@ -1,21 +1,16 @@
-Here’s your **merged and polished `README.md`**, combining your original documentation with the complete **local setup & run instructions** in one unified file — perfect for GitHub or sharing your project.
-
----
-
-````markdown
-# 🍜 CraveAI – AI-Powered Food Recommender Chatbot
+# CraveAI – AI-Powered Food Recommender Chatbot
 
 > An intelligent, conversational chatbot that helps users discover nearby restaurants based on their cravings, mood, and dietary preferences — powered by Retrieval-Augmented Generation (RAG), GPT-4, and real-time location data.
 
 ---
 
-## 🚀 Overview
+## Overview
 **CraveAI** combines **LangChain**, **GPT-4**, **Google Places API**, and **ChromaDB** to generate context-aware restaurant recommendations.  
 Users simply chat (“I want something spicy but light”) and CraveAI interprets intent, retrieves relevant cuisines, fetches nearby options, and explains its reasoning.
 
 ---
 
-## 🧱 Architecture
+## Architecture
 ```plaintext
 frontend/ (React + Tailwind + Mapbox)
 backend/
@@ -33,7 +28,7 @@ backend/
  └── requirements.txt
 data/ (Chroma vector store, sample cuisines)
 docs/ (PRD.md, TECHNICAL_DESIGN.md)
-````
+```
 
 **Core Stack**
 
@@ -46,9 +41,9 @@ docs/ (PRD.md, TECHNICAL_DESIGN.md)
 
 ---
 
-## ⚙️ Installation & Local Development Guide
+## Installation & Local Development Guide
 
-### 🧩 1. Open the Project
+### 1. Open the Project
 
 In VS Code (or your terminal), make sure you’re in the **project root directory**:
 
@@ -58,7 +53,7 @@ C:\Users\alexy\Projects\Project 2025++\CraveAI\CraveAI
 
 ---
 
-### 🧠 2. Activate the Python Virtual Environment (Backend)
+### 2. Activate the Python Virtual Environment (Backend)
 
 If you already have a `venv` folder inside `backend/`, run:
 
@@ -71,7 +66,7 @@ You should see `(venv)` appear at the start of your terminal line — that means
 
 ---
 
-### ⚙️ 3. Install Backend Dependencies
+### 3. Install Backend Dependencies
 
 Still inside the `backend` folder, run:
 
@@ -83,7 +78,7 @@ That installs all required packages (FastAPI, Uvicorn, OpenAI, etc.) into your v
 
 ---
 
-### 🚀 4. Start the Backend Server
+### 4. Start the Backend Server
 
 While inside the project root (`…\CraveAI\CraveAI>`), run:
 
@@ -91,7 +86,7 @@ While inside the project root (`…\CraveAI\CraveAI>`), run:
 uvicorn backend.main:create_app --factory --reload
 ```
 
-✅ You should see:
+You should see:
 
 ```
 INFO:     Uvicorn running on http://127.0.0.1:8000
@@ -103,7 +98,7 @@ Keep this terminal open while you work — it must stay running.
 
 ---
 
-### 🌐 5. Enable CORS (if not already)
+### 5. Enable CORS (if not already)
 
 In `backend/main.py`, confirm this snippet exists:
 
@@ -122,7 +117,7 @@ If missing, add it and restart the backend so the frontend can make API calls.
 
 ---
 
-### 🧱 6. Set Up the Frontend Environment
+### 6. Set Up the Frontend Environment
 
 Open a **new terminal tab/window** (don’t close the backend one).
 Then navigate to your frontend folder:
@@ -153,7 +148,7 @@ This tells your frontend where the backend lives.
 
 ---
 
-### 🧠 7. Start the Frontend Dev Server
+### 7. Start the Frontend Dev Server
 
 Run:
 
@@ -161,7 +156,7 @@ Run:
 npm run dev
 ```
 
-✅ You should see:
+You should see:
 
 ```
 VITE vX.X.X  ready in 300ms
@@ -172,7 +167,7 @@ This launches the **React + Vite frontend** on port **5173**.
 
 ---
 
-### 💬 8. Test the Full Connection
+### 8. Test the Full Connection
 
 Now you have:
 
@@ -202,7 +197,7 @@ Your chat panel should render this response.
 
 ---
 
-### 🧰 9. Stopping Everything
+### 9. Stopping Everything
 
 When finished:
 
@@ -216,7 +211,7 @@ When finished:
 
 ---
 
-### ✅ Quick Recap
+### Quick Recap
 
 | Step | Task                          | Command                                                          |
 | ---- | ----------------------------- | ---------------------------------------------------------------- |
@@ -230,7 +225,7 @@ When finished:
 
 ---
 
-## 💬 API Overview
+## API Overview
 
 | Endpoint               | Method | Description                                                         |
 | ---------------------- | ------ | ------------------------------------------------------------------- |
@@ -274,7 +269,7 @@ POST /chat
 
 ---
 
-## 🧠 How It Works
+## How It Works
 
 1. **Intent Parsing:** GPT-4 analyzes user text for mood, cravings, and diet cues.
 2. **Retrieval:** Embedding search via **ChromaDB** finds relevant cuisines.
@@ -284,7 +279,7 @@ POST /chat
 
 ---
 
-## 🧪 Testing
+## Testing
 
 Run all tests:
 
@@ -300,7 +295,7 @@ pytest tests/test_chat_route.py
 
 ---
 
-## 🌍 Deployment
+## Deployment
 
 **Option 1 – Docker**
 
@@ -316,7 +311,7 @@ docker run -p 8000:8000 craveai-backend
 
 ---
 
-## 📈 Roadmap
+## Roadmap
 
 * [ ] Enable live Google Places API calls
 * [ ] Add caching and favorites persistence
@@ -327,7 +322,7 @@ docker run -p 8000:8000 craveai-backend
 
 ---
 
-## 👨‍💻 Author
+##  Author
 
 **Alex Yoon**
 Application Developer & AI Engineer
@@ -336,7 +331,7 @@ Passionate about creating human-centered AI experiences that combine creativity 
 
 ---
 
-## 🪪 License
+## License
 
 MIT License © 2025 Alex Yoon
 
