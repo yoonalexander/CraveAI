@@ -28,6 +28,9 @@ frontend/node_modules/
 frontend/.next/
 frontend/dist/
 
+# Local databases
+data/*.db
+
 # Editors & OS
 .vscode/
 .idea/

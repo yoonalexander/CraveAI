@@ -3,8 +3,9 @@ import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from backend.routers import chat, feedback, favorites
 from backend.config import get_settings
+from backend.routers import chat, feedback, favorites
+from backend.services.storage import init_storage
 
 logger = logging.getLogger(__name__)
 
@@ -14,6 +15,7 @@ def create_app() -> FastAPI:
     settings = get_settings()
     settings.validate()
     logger.info("Launching CraveAI backend in %s environment.", settings.ENVIRONMENT)
+    init_storage()
 
     app = FastAPI(
         title="CraveAI Backend",

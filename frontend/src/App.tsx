@@ -1,5 +1,9 @@
+import { useEffect, useMemo, useState } from "react";
+
 import { ChatPanel } from "./components/ChatPanel";
 import { SuggestionCard } from "./components/SuggestionCard";
+import { MapView } from "./components/MapView";
+import { ChatRecommendation } from "./api/chat";
 
 const sampleSuggestions = [
   {
@@ -28,7 +32,77 @@ const sampleSuggestions = [
   },
 ];
 
+const HAMILTON_FALLBACK = {
+  lat: 43.2557,
+  lng: -79.8711,
+  city: "Hamilton",
+  radius: 5000,
+};
+
+type Coordinates = {
+  lat: number;
+  lng: number;
+};
+
 function App(): JSX.Element {
+  const [userLocation, setUserLocation] = useState<Coordinates | null>(null);
+  const [locationStatus, setLocationStatus] = useState(
+    "Calibrating your location\u2026",
+  );
+  const [mapRecommendations, setMapRecommendations] = useState<
+    ChatRecommendation[]
+  >([]);
+
+  useEffect(() => {
+    if (!("geolocation" in navigator)) {
+      setLocationStatus(
+        "Geolocation not supported; using Hamilton, ON as a fallback.",
+      );
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setUserLocation({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        });
+        setLocationStatus("Live location locked. Refining searches nearby.");
+      },
+      (error) => {
+        if (error.code === error.PERMISSION_DENIED) {
+          setLocationStatus(
+            "Location permission denied; relying on Hamilton, ON for now.",
+          );
+        } else {
+          setLocationStatus(
+            "Unable to read device location; using Hamilton, ON fallback.",
+          );
+        }
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0,
+      },
+    );
+  }, []);
+
+  const chatLocation = useMemo(() => {
+    if (userLocation) {
+      return {
+        ...userLocation,
+        radius: 5000,
+      };
+    }
+    return HAMILTON_FALLBACK;
+  }, [userLocation]);
+
+  const mapLocation = userLocation ?? {
+    lat: HAMILTON_FALLBACK.lat,
+    lng: HAMILTON_FALLBACK.lng,
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
       <header className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-6 pb-10 pt-14 text-white md:flex-row md:items-center md:justify-between">
@@ -57,9 +131,19 @@ function App(): JSX.Element {
 
       <main className="mx-auto grid w-full max-w-6xl gap-6 px-6 pb-16 md:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <section className="h-[600px] md:h-[720px]">
-          <ChatPanel />
+          <ChatPanel
+            location={chatLocation}
+            locationStatus={locationStatus}
+            onRecommendations={setMapRecommendations}
+          />
         </section>
         <aside className="flex flex-col gap-4">
+          <MapView
+            userLocation={mapLocation}
+            recommendations={mapRecommendations}
+            hasLiveLocation={Boolean(userLocation)}
+            statusMessage={locationStatus}
+          />
           <div className="rounded-3xl border border-slate-800 bg-slate-900/40 p-5 text-slate-100">
             <h2 className="text-lg font-semibold text-white">
               Today&apos;s Suggested Spots

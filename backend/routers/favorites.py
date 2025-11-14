@@ -5,6 +5,12 @@ from typing import List
 from fastapi import APIRouter, status
 from pydantic import BaseModel, Field
 
+from backend.services.storage import (
+    add_favorite as store_favorite,
+    get_favorites as fetch_favorites,
+    serialize_favorites,
+)
+
 router = APIRouter(prefix="/favorites", tags=["favorites"])
 
 
@@ -35,23 +41,15 @@ class FavoriteCreateRequest(BaseModel):
 
 @router.get("/{user_id}", response_model=FavoritesResponse)
 async def list_favorites(user_id: str) -> FavoritesResponse:
-    """
-    Retrieve the saved favorites for a given user.
-
-    Currently serves static data until persistence is implemented.
-    """
-    placeholder_favorites = [
-        FavoriteEntry(restaurant="Sample Sushi Bar", note="Saved during initial testing.")
-    ]
-    return FavoritesResponse(user_id=user_id, favorites=placeholder_favorites)
+    """Retrieve saved favorites for a given user."""
+    stored_records = await fetch_favorites(user_id)
+    favorites = [FavoriteEntry(**record_dict) for record_dict in serialize_favorites(stored_records)]
+    return FavoritesResponse(user_id=user_id, favorites=favorites)
 
 
 @router.post("", response_model=FavoriteEntry, status_code=status.HTTP_201_CREATED)
 async def add_favorite(payload: FavoriteCreateRequest) -> FavoriteEntry:
-    """
-    Store a new favorite restaurant for a user.
-
-    The data store integration will be added in a future milestone.
-    """
-    return FavoriteEntry(restaurant=payload.restaurant, note=payload.note)
-
+    """Store a new favorite restaurant for a user."""
+    record = await store_favorite(payload.user_id, payload.restaurant, payload.note)
+    record_dict = serialize_favorites([record])[0]
+    return FavoriteEntry(**record_dict)

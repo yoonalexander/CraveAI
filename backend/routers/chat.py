@@ -50,6 +50,8 @@ class Recommendation(BaseModel):
         default=None,
         description="Explanation for why this venue was recommended.",
     )
+    lat: Optional[float] = Field(default=None, description="Latitude for the venue, if known.")
+    lng: Optional[float] = Field(default=None, description="Longitude for the venue, if known.")
 
 
 class ChatResponse(BaseModel):
@@ -89,6 +91,8 @@ async def generate_chat_response(payload: ChatRequest) -> ChatResponse:
             rating=item.get("rating"),
             address=item.get("address"),
             reason=item.get("reason"),
+            lat=item.get("lat"),
+            lng=item.get("lng"),
         )
         for item in rag_result.get("recommendations", [])
     ]

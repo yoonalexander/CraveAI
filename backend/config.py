@@ -24,6 +24,7 @@ class Config:
 
     OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
     GOOGLE_API_KEY: str = os.getenv("GOOGLE_API_KEY", "")
+    SQLITE_DB_PATH: str = os.getenv("SQLITE_DB_PATH", "./data/craveai.db")
     CHROMA_PATH: str = os.getenv("CHROMA_PATH", "./data/chroma_db")
     REDIS_URL: str = os.getenv("REDIS_URL", "redis://localhost:6379")
     MODEL_NAME: str = os.getenv("MODEL_NAME", "gpt-4-turbo")

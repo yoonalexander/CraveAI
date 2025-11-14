@@ -3,6 +3,8 @@ from __future__ import annotations
 from fastapi import APIRouter, status
 from pydantic import BaseModel, Field
 
+from backend.services.storage import record_feedback
+
 router = APIRouter(prefix="/feedback", tags=["feedback"])
 
 
@@ -33,5 +35,10 @@ async def submit_feedback(payload: FeedbackRequest) -> FeedbackResponse:
 
     The persistence layer will be connected in a later iteration.
     """
+    await record_feedback(
+        user_id=payload.user_id,
+        restaurant=payload.restaurant,
+        liked=payload.liked,
+        notes=payload.notes,
+    )
     return FeedbackResponse()
-

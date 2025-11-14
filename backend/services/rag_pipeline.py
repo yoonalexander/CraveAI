@@ -199,7 +199,7 @@ async def _fetch_candidate_places(
 
     if not GOOGLE_PLACES_API_KEY:
         logger.info("Google Places API key not configured; returning placeholder venues.")
-        return _placeholder_places(cuisines)
+        return _placeholder_places(cuisines, location)
 
     lat = location.get("lat")
     lng = location.get("lng")
@@ -250,6 +250,8 @@ async def _query_places_api(
     payload = response.json()
     candidates: List[Dict[str, Any]] = []
     for item in payload.get("results", [])[:MAX_PLACES_PER_CUISINE]:
+        geometry = item.get("geometry") or {}
+        coordinates = geometry.get("location") if isinstance(geometry, dict) else {}
         candidates.append(
             {
                 "name": item.get("name"),
@@ -257,6 +259,8 @@ async def _query_places_api(
                 "address": item.get("vicinity"),
                 "reason": f"Matches cuisine query '{cuisine}'",
                 "place_id": item.get("place_id"),
+                "lat": coordinates.get("lat") if isinstance(coordinates, dict) else None,
+                "lng": coordinates.get("lng") if isinstance(coordinates, dict) else None,
             }
         )
     return candidates
@@ -309,13 +313,17 @@ def _sanitize_recommendations(raw_items: Sequence[Dict[str, Any]]) -> List[Dict[
                 "rating": item.get("rating"),
                 "address": item.get("address"),
                 "reason": item.get("reason") or "",
+                "lat": item.get("lat"),
+                "lng": item.get("lng"),
             }
         )
     return cleaned
 
 
-def _placeholder_places(cuisines: Sequence[str]) -> List[Dict[str, Any]]:
+def _placeholder_places(cuisines: Sequence[str], location: Dict[str, Any] | None) -> List[Dict[str, Any]]:
     """Fallback data used when the external API is not reachable."""
+    lat = (location or {}).get("lat")
+    lng = (location or {}).get("lng")
     placeholders: List[Dict[str, Any]] = []
     for cuisine in cuisines[:3]:
         placeholders.append(
@@ -324,6 +332,8 @@ def _placeholder_places(cuisines: Sequence[str]) -> List[Dict[str, Any]]:
                 "rating": 4.5,
                 "address": f"{cuisine.title()} District, Sample City",
                 "reason": f"Sample recommendation for {cuisine}",
+                "lat": lat,
+                "lng": lng,
             }
         )
     return placeholders

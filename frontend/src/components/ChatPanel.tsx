@@ -1,5 +1,5 @@
 import { FormEvent, useState } from "react";
-import { sendChat, ChatRecommendation } from "../api/chat";
+import { sendChat, ChatRecommendation, LocationHint } from "../api/chat";
 
 type Message = {
   id: string;
@@ -30,7 +30,17 @@ const seededMessages: Message[] = [
   },
 ];
 
-export function ChatPanel(): JSX.Element {
+type ChatPanelProps = {
+  location?: LocationHint | null;
+  locationStatus?: string;
+  onRecommendations?: (recommendations: ChatRecommendation[]) => void;
+};
+
+export function ChatPanel({
+  location,
+  locationStatus,
+  onRecommendations,
+}: ChatPanelProps): JSX.Element {
   const [messages, setMessages] = useState<Message[]>(seededMessages);
   const [draft, setDraft] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -59,11 +69,16 @@ export function ChatPanel(): JSX.Element {
     setIsLoading(true);
 
     try {
-      const response = await sendChat(trimmed);
+      const response = await sendChat(trimmed, {
+        location: location ?? undefined,
+      });
       const recommendations =
         response.recommendations.length > 0
           ? response.recommendations
           : undefined;
+      if (onRecommendations) {
+        onRecommendations(recommendations ?? []);
+      }
 
       const assistantMessages: Message[] =
         response.messages.length > 0
@@ -92,6 +107,7 @@ export function ChatPanel(): JSX.Element {
           ? err.message
           : "Unexpected issue while contacting the assistant.";
       setError(message);
+      onRecommendations?.([]);
       setMessages((prev) => [
         ...prev,
         {
@@ -106,6 +122,12 @@ export function ChatPanel(): JSX.Element {
     }
   };
 
+  const resolvedLocationStatus =
+    locationStatus ||
+    (location
+      ? "Using your current location for nearby matches."
+      : "Share your location in the browser to dial in the map.");
+
   return (
     <div className="flex h-full flex-col rounded-3xl border border-slate-800 bg-slate-900/60 shadow-lg">
       <header className="flex items-center justify-between border-b border-slate-800 px-6 py-4">
@@ -114,6 +136,7 @@ export function ChatPanel(): JSX.Element {
           <p className="text-sm text-slate-400">
             Describe your mood, craving, or dietary needs.
           </p>
+          <p className="mt-1 text-xs text-slate-500">{resolvedLocationStatus}</p>
         </div>
         <span className="rounded-full bg-emerald-500/20 px-3 py-1 text-xs font-medium text-emerald-300">
           Prototype

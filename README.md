@@ -39,7 +39,20 @@ docs/ (PRD.md, TECHNICAL_DESIGN.md)
 * **Deployment:** Docker, Render/Vercel
 * **Testing:** pytest, Postman
 
----
+## Environment Variables
+
+| Variable | Location | Purpose |
+| -------- | -------- | ------- |
+| `OPENAI_API_KEY` | `.env` | Enables GPT-powered intent/ranking. |
+| `GOOGLE_API_KEY` | `.env` | Unlocks Google Places lookups for live recommendations. |
+| `SQLITE_DB_PATH` | `.env` | File path for the local favorites/feedback store (`./data/craveai.db` by default). |
+| `CHROMA_PATH` | `.env` | Points to the persisted Chroma vector store. |
+| `REDIS_URL` | `.env` | Reserved for future caching. |
+| `MODEL_NAME` | `.env` | Chat completion model identifier. |
+| `VITE_API_BASE_URL` | `frontend/.env` | Base URL for the FastAPI backend during local dev. |
+| `VITE_GOOGLE_MAPS_API_KEY` | `frontend/.env` | Powers the in-app Google Maps view and geolocation overlays. |
+
+--- 
 
 ## Installation & Local Development Guide
 
@@ -267,6 +280,13 @@ POST /chat
 }
 ```
 
+## Location & Map Experience
+
+* The browser now requests **geolocation permission** on load. If access is denied or unavailable we fall back to Hamilton, ON and surface that status in the chat header.
+* A dedicated **Google Maps card** (powered by `@react-google-maps/api`) renders the user location plus any recommendations that return latitude/longitude from Google Places.
+* Configure both `GOOGLE_API_KEY` (backend) and `VITE_GOOGLE_MAPS_API_KEY` (frontend) with a valid Places/Maps key �?" the project currently ships with the provided key so everything runs out-of-the-box.
+* When no map key is present the UI gracefully falls back with guidance instead of crashing.
+
 ---
 
 ## How It Works
@@ -277,7 +297,14 @@ POST /chat
 4. **Ranking:** GPT-4 ranks results and explains reasoning.
 5. **Response:** FastAPI returns JSON used by the chat UI and map view.
 
----
+## Favorites & Feedback Persistence
+
+* A lightweight **SQLite database** (`./data/craveai.db`) now backs the `/favorites` and `/feedback` endpoints.
+* Tables are automatically created the first time the FastAPI app starts �?" no manual migrations required.
+* Use `GET /favorites/{user_id}` and `POST /favorites`/`POST /feedback` to read/write data; entries are written asynchronously to avoid blocking the event loop.
+* Customize the storage location via `SQLITE_DB_PATH` if you prefer a different directory.
+
+--- 
 
 ## Testing
 
@@ -292,6 +319,16 @@ Mock the RAG pipeline for integration testing:
 ```bash
 pytest tests/test_chat_route.py
 ```
+
+### Latency Benchmark
+
+Use the bundled harness to stress the `/chat` endpoint (with a stubbed RAG pipeline) and verify sub-second responses:
+
+```bash
+python scripts/benchmark_latency.py -n 25
+```
+
+The script prints average, max, and p95 latencies so you can track regressions over time.
 
 ---
 
