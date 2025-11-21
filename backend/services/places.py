@@ -136,7 +136,7 @@ async def _fetch_and_filter(
     for item in results:
         rating = item.get("rating")
         if rating and rating >= min_rating:
-            candidates.append(_parse_place_item(item, "High rated nearby"))
+            candidates.append(_parse_place_item(item))
     return candidates
 
 
@@ -168,20 +168,252 @@ async def _query_places_api(
     return candidates
 
 
-def _parse_place_item(item: Dict[str, Any], reason: str) -> Dict[str, Any]:
+def _parse_place_item(item: Dict[str, Any]) -> Dict[str, Any]:
     geometry = item.get("geometry") or {}
     coordinates = geometry.get("location") if isinstance(geometry, dict) else {}
+    rating = item.get("rating")
+    total_reviews = item.get("user_ratings_total")
+    vicinity = item.get("vicinity")
+
+    reason_parts: List[str] = []
+    if rating:
+        reason_parts.append(f"{rating}★")
+    if total_reviews:
+        reason_parts.append(f"{total_reviews} reviews")
+    if vicinity:
+        reason_parts.append(vicinity)
+    reason = " · ".join(reason_parts) if reason_parts else "Highly rated nearby"
+
+    tags = _clean_tags(item.get("types", []) or [], item.get("name", ""))
+
     return {
         "name": item.get("name"),
-        "rating": item.get("rating"),
-        "address": item.get("vicinity"),
+        "rating": rating,
+        "address": vicinity,
         "reason": reason,
         "place_id": item.get("place_id"),
         "lat": coordinates.get("lat") if isinstance(coordinates, dict) else None,
         "lng": coordinates.get("lng") if isinstance(coordinates, dict) else None,
-        "tags": item.get("types", [])[:3], # Extract some tags
-        "user_ratings_total": item.get("user_ratings_total"),
+        "tags": tags,
+        "user_ratings_total": total_reviews,
     }
+
+
+def _clean_tags(raw_types: List[str], name_str: str) -> List[str]:
+    """Filter and humanize Google Places types."""
+    blacklist = {"point_of_interest", "establishment", "food", "restaurant"}
+
+    cuisine_map = {
+        "italian": "Italian",
+        "mexican": "Mexican",
+        "chinese": "Chinese",
+        "japanese": "Japanese",
+        "korean": "Korean",
+        "thai": "Thai",
+        "vietnamese": "Vietnamese",
+        "indian": "Indian",
+        "greek": "Greek",
+        "mediterranean": "Mediterranean",
+        "middle_eastern": "Middle Eastern",
+        "pizza": "Pizza",
+        "sushi": "Sushi",
+        "seafood": "Seafood",
+        "steakhouse": "Steakhouse",
+        "barbecue": "BBQ",
+        "bbq": "BBQ",
+        "burger": "Burgers",
+        "sandwich": "Sandwiches",
+        "cafe": "Cafe",
+        "bakery": "Bakery",
+        "dessert": "Dessert",
+        "ice_cream": "Ice Cream",
+        "vegan": "Vegan",
+        "vegetarian": "Vegetarian",
+        "tapas": "Tapas",
+        "spanish": "Spanish",
+        "french": "French",
+        "latin": "Latin",
+        "caribbean": "Caribbean",
+        "halal": "Halal",
+        "kosher": "Kosher",
+    }
+
+    general_map = {
+        "bar": "Bar",
+        "meal_takeaway": "Takeout",
+        "meal_delivery": "Delivery",
+        "night_club": "Nightlife",
+        "brewery": "Brewery",
+        "pub": "Pub",
+    }
+
+    tags: List[str] = []
+
+    name_lower = (name_str or "").lower()
+    name_hints = {
+        "pizza": "Pizza",
+        "pizzeria": "Pizza",
+        "trattoria": "Italian",
+        "ristorante": "Italian",
+                "taqueria": "Mexican",
+        "taco": "Mexican",
+        "sushi": "Sushi",
+        "ramen": "Japanese",
+        "izakaya": "Japanese",
+        "noodle": "Noodles",
+        "kebab": "Middle Eastern",
+        "shawarma": "Middle Eastern",
+        "bbq": "BBQ",
+        "barbecue": "BBQ",
+        "steak": "Steakhouse",
+        "burger": "Burgers",
+        "burrito": "Mexican",
+        "deli": "Deli",
+        "bagel": "Bakery",
+        "bakery": "Bakery",
+        "cafe": "Cafe",
+        "coffee": "Cafe",
+        "brew": "Brewery",
+        "tapas": "Tapas",
+    }
+
+    def add_tag(label: str) -> None:
+        if label not in tags and len(tags) < 3:
+            tags.append(label)
+
+    for t in raw_types:
+        if t in blacklist:
+            continue
+        if t in cuisine_map:
+            add_tag(cuisine_map[t])
+
+    for t in raw_types:
+        if t in blacklist or len(tags) >= 3:
+            continue
+        if t in general_map:
+            add_tag(general_map[t])
+        else:
+            # Generic title-cased fallback for anything unhandled.
+            add_tag(t.replace("_", " ").title())
+
+    if len(tags) < 3 and name_lower:
+        for needle, label in name_hints.items():
+            if needle in name_lower:
+                add_tag(label)
+                if len(tags) >= 3:
+                    break
+
+    return tags
+
+
+# Refined override: prefer explicit cuisine types, avoid mislabeling ("Cantina" etc.),
+# and only use name-based hints when Google types lack a cuisine.
+def _clean_tags(raw_types: List[str], name_str: str) -> List[str]:
+    blacklist = {"point_of_interest", "establishment", "food", "restaurant"}
+
+    cuisine_map = {
+        "italian": "Italian",
+        "mexican": "Mexican",
+        "chinese": "Chinese",
+        "japanese": "Japanese",
+        "korean": "Korean",
+        "thai": "Thai",
+        "vietnamese": "Vietnamese",
+        "indian": "Indian",
+        "greek": "Greek",
+        "mediterranean": "Mediterranean",
+        "middle_eastern": "Middle Eastern",
+        "pizza": "Pizza",
+        "sushi": "Sushi",
+        "seafood": "Seafood",
+        "steakhouse": "Steakhouse",
+        "barbecue": "BBQ",
+        "bbq": "BBQ",
+        "burger": "Burgers",
+        "sandwich": "Sandwiches",
+        "cafe": "Cafe",
+        "bakery": "Bakery",
+        "dessert": "Dessert",
+        "ice_cream": "Ice Cream",
+        "vegan": "Vegan",
+        "vegetarian": "Vegetarian",
+        "tapas": "Tapas",
+        "spanish": "Spanish",
+        "french": "French",
+        "latin": "Latin",
+        "caribbean": "Caribbean",
+        "halal": "Halal",
+        "kosher": "Kosher",
+    }
+
+    general_map = {
+        "bar": "Bar",
+        "meal_takeaway": "Takeout",
+        "meal_delivery": "Delivery",
+        "night_club": "Nightlife",
+        "brewery": "Brewery",
+        "pub": "Pub",
+    }
+
+    name_hints = {
+        "pizza": "Pizza",
+        "pizzeria": "Pizza",
+        "trattoria": "Italian",
+        "ristorante": "Italian",
+        "osteria": "Italian",
+        "taqueria": "Mexican",
+        "taco": "Mexican",
+        "sushi": "Sushi",
+        "ramen": "Japanese",
+        "izakaya": "Japanese",
+        "noodle": "Noodles",
+        "kebab": "Middle Eastern",
+        "shawarma": "Middle Eastern",
+        "bbq": "BBQ",
+        "barbecue": "BBQ",
+        "steak": "Steakhouse",
+        "burger": "Burgers",
+        "burrito": "Mexican",
+        "deli": "Deli",
+        "bagel": "Bakery",
+        "bakery": "Bakery",
+        "cafe": "Cafe",
+        "coffee": "Cafe",
+        "brew": "Brewery",
+        "tapas": "Tapas",
+    }
+
+    tags: List[str] = []
+    name_lower = (name_str or "").lower()
+
+    def add_tag(label: str) -> None:
+        if label not in tags and len(tags) < 3:
+            tags.append(label)
+
+    cuisine_added = False
+    for t in raw_types:
+        if t in blacklist:
+            continue
+        if t in cuisine_map:
+            add_tag(cuisine_map[t])
+            cuisine_added = True
+
+    for t in raw_types:
+        if t in blacklist or len(tags) >= 3:
+            continue
+        if t in general_map:
+            add_tag(general_map[t])
+        else:
+            add_tag(t.replace("_", " ").title())
+
+    if len(tags) < 3 and not cuisine_added and name_lower:
+        for needle, label in name_hints.items():
+            if needle in name_lower:
+                add_tag(label)
+                if len(tags) >= 3:
+                    break
+
+    return tags
 
 
 def _placeholder_places(cuisines: List[str], lat: Optional[float], lng: Optional[float]) -> List[Dict[str, Any]]:
