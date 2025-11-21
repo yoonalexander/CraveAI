@@ -34,10 +34,10 @@ export function MapView({
 
   if (!apiKey) {
     return (
-      <div className="rounded-3xl border border-slate-800 bg-slate-900/40">
-        <div className="border-b border-slate-800 px-5 py-4">
-          <h3 className="text-base font-semibold text-white">Nearby Map</h3>
-          <p className="text-sm text-slate-400">
+      <div className="rounded-3xl border border-border bg-secondary/40">
+        <div className="border-b border-border px-5 py-4">
+          <h3 className="text-base font-semibold text-foreground">Nearby Map</h3>
+          <p className="text-sm text-muted-foreground">
             Add <code className="text-primary">VITE_GOOGLE_MAPS_API_KEY</code> to enable the map.
           </p>
         </div>
@@ -95,14 +95,14 @@ export function MapView({
   }
 
   return (
-    <div className="rounded-3xl border border-slate-800 bg-slate-900/40">
-      <div className="border-b border-slate-800 px-5 py-4">
+    <div className="rounded-3xl border border-border bg-secondary/40">
+      <div className="border-b border-border px-5 py-4">
         <p className="text-sm uppercase tracking-[0.25em] text-primary">Live Map</p>
-        <h3 className="text-base font-semibold text-white">Restaurants Near You</h3>
-        <p className="text-xs text-slate-400">
+        <h3 className="text-base font-semibold text-foreground">Restaurants Near You</h3>
+        <p className="text-xs text-muted-foreground">
           {subtitle} {markers.length ? `Plotting ${markers.length} matches.` : "Waiting for a conversation to begin."}
         </p>
-        <p className="mt-1 text-xs text-slate-500">{statusMessage}</p>
+        <p className="mt-1 text-xs text-muted-foreground">{statusMessage}</p>
       </div>
       <div className="h-[320px] overflow-hidden rounded-b-3xl">{mapContent}</div>
     </div>

@@ -83,22 +83,22 @@ export function ChatPanel({
       const assistantMessages: Message[] =
         response.messages.length > 0
           ? response.messages.map((message, index) => ({
+            id: createMessageId("assistant"),
+            role: "assistant",
+            content: message.content,
+            recommendations:
+              index === 0 && recommendations ? recommendations : undefined,
+          }))
+          : [
+            {
               id: createMessageId("assistant"),
               role: "assistant",
-              content: message.content,
-              recommendations:
-                index === 0 && recommendations ? recommendations : undefined,
-            }))
-          : [
-              {
-                id: createMessageId("assistant"),
-                role: "assistant",
-                content:
-                  response.reply ||
-                  "I've gathered a few ideas you might enjoy.",
-                recommendations,
-              },
-            ];
+              content:
+                response.reply ||
+                "I've gathered a few ideas you might enjoy.",
+              recommendations,
+            },
+          ];
 
       setMessages((prev) => [...prev, ...assistantMessages]);
     } catch (err) {
@@ -129,16 +129,16 @@ export function ChatPanel({
       : "Share your location in the browser to dial in the map.");
 
   return (
-    <div className="flex h-full flex-col rounded-3xl border border-slate-800 bg-slate-900/60 shadow-lg">
-      <header className="flex items-center justify-between border-b border-slate-800 px-6 py-4">
+    <div className="flex h-full flex-col rounded-3xl border border-border bg-secondary/60 shadow-lg backdrop-blur-sm">
+      <header className="flex items-center justify-between border-b border-border px-6 py-4">
         <div>
-          <h2 className="text-lg font-semibold text-white">CraveAI Concierge</h2>
-          <p className="text-sm text-slate-400">
+          <h2 className="text-lg font-semibold text-foreground">CraveAI Concierge</h2>
+          <p className="text-sm text-muted-foreground">
             Describe your mood, craving, or dietary needs.
           </p>
-          <p className="mt-1 text-xs text-slate-500">{resolvedLocationStatus}</p>
+          <p className="mt-1 text-xs text-muted-foreground">{resolvedLocationStatus}</p>
         </div>
-        <span className="rounded-full bg-emerald-500/20 px-3 py-1 text-xs font-medium text-emerald-300">
+        <span className="rounded-full bg-primary/20 px-3 py-1 text-xs font-medium text-primary">
           Prototype
         </span>
       </header>
@@ -147,16 +147,14 @@ export function ChatPanel({
         {messages.map((message) => (
           <div
             key={message.id}
-            className={`flex ${
-              message.role === "user" ? "justify-end" : "justify-start"
-            }`}
+            className={`flex ${message.role === "user" ? "justify-end" : "justify-start"
+              }`}
           >
             <div
-              className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
-                message.role === "user"
-                  ? "bg-primary text-white"
-                  : "bg-slate-800 text-slate-100"
-              }`}
+              className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${message.role === "user"
+                ? "bg-primary text-primary-foreground"
+                : "bg-secondary text-secondary-foreground"
+                }`}
             >
               {message.content}
               {!!message.recommendations?.length && (
@@ -165,23 +163,23 @@ export function ChatPanel({
                     (recommendation: ChatRecommendation, index: number) => (
                       <div
                         key={`${message.id}-rec-${index}`}
-                        className="rounded-2xl border border-slate-700/60 bg-slate-900/40 px-4 py-3 text-xs text-slate-200"
+                        className="rounded-2xl border border-border bg-background/40 px-4 py-3 text-xs text-foreground"
                       >
-                        <p className="text-sm font-semibold text-white">
+                        <p className="text-sm font-semibold text-foreground">
                           {recommendation.name}
                         </p>
                         {typeof recommendation.rating === "number" && (
-                          <p className="mt-1 text-slate-300">
+                          <p className="mt-1 text-muted-foreground">
                             Rating: {recommendation.rating.toFixed(1)}
                           </p>
                         )}
                         {recommendation.reason && (
-                          <p className="mt-2 text-slate-300">
+                          <p className="mt-2 text-muted-foreground">
                             {recommendation.reason}
                           </p>
                         )}
                         {recommendation.address && (
-                          <p className="mt-2 text-slate-500">
+                          <p className="mt-2 text-muted-foreground">
                             {recommendation.address}
                           </p>
                         )}
@@ -195,7 +193,7 @@ export function ChatPanel({
         ))}
         {isLoading && (
           <div className="flex justify-start">
-            <div className="max-w-[80%] rounded-2xl bg-slate-800 px-4 py-3 text-sm leading-relaxed text-slate-100">
+            <div className="max-w-[80%] rounded-2xl bg-secondary px-4 py-3 text-sm leading-relaxed text-secondary-foreground">
               Thinking...
             </div>
           </div>
@@ -208,10 +206,10 @@ export function ChatPanel({
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="border-t border-slate-800 p-4">
-        <div className="flex items-center gap-3 rounded-full bg-slate-800 px-4">
+      <form onSubmit={handleSubmit} className="border-t border-border p-4">
+        <div className="flex items-center gap-3 rounded-full border border-input bg-background px-4 shadow-sm focus-within:ring-1 focus-within:ring-ring">
           <input
-            className="flex-1 bg-transparent py-3 text-sm text-white placeholder:text-slate-500 focus:outline-none"
+            className="flex-1 bg-transparent py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
             placeholder='Try "Cozy soup spots under $20 near Yonge & Bloor."'
             value={draft}
             onChange={(event) => setDraft(event.target.value)}
@@ -219,7 +217,7 @@ export function ChatPanel({
           />
           <button
             type="submit"
-            className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-primary-dark disabled:opacity-70"
+            className="rounded-full bg-secondary px-4 py-2 text-sm font-semibold text-secondary-foreground transition hover:opacity-90 disabled:opacity-70 dark:bg-primary dark:text-primary-foreground"
             disabled={isLoading}
           >
             {isLoading ? "Sending..." : "Send"}

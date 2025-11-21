@@ -2,7 +2,55 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  :root {
+    /* Light Mode (Nature-Inspired) */
+    --background: #FFFFFF;
+    --foreground: #1C1C1C;
+
+    /* Pistachio */
+    --primary: #9DC08B;
+    --primary-foreground: #1C1C1C;
+
+    /* Green Herb */
+    --secondary: #609966;
+    --secondary-foreground: #FFFFFF;
+
+    /* Green Herb (mapped from Accent) */
+    --accent: #609966;
+    --accent-foreground: #FFFFFF;
+
+    /* Vibrant Yellow */
+    --highlight: #F4CE14;
+    --highlight-foreground: #1C1C1C;
+  }
+
+  .dark {
+    /* Dark Mode (Existing Slate/Orange) */
+    --background: #020617;
+    /* Slate 950 */
+    --foreground: #FFFFFF;
+
+    /* Orange 500 */
+    --primary: #f97316;
+    --primary-foreground: #FFFFFF;
+
+    /* Slate 800 */
+    --secondary: #1e293b;
+    --secondary-foreground: #e2e8f0;
+
+    /* Sky 500 */
+    --accent: #0ea5e9;
+    --accent-foreground: #FFFFFF;
+
+    /* Reuse Primary for consistency or specific dark highlight */
+    --highlight: #f97316;
+    --highlight-foreground: #FFFFFF;
+  }
+}
+
 body {
+  @apply bg-background text-foreground;
   font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;
 }

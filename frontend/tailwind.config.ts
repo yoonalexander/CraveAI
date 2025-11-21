@@ -2,14 +2,28 @@ import type { Config } from "tailwindcss";
 
 const config: Config = {
   content: ["./index.html", "./src/**/*.{ts,tsx}"],
+  darkMode: "class",
   theme: {
     extend: {
       colors: {
+        background: "var(--background)",
+        foreground: "var(--foreground)",
         primary: {
-          DEFAULT: "#f97316",
-          dark: "#ea580c",
+          DEFAULT: "var(--primary)",
+          foreground: "var(--primary-foreground)",
         },
-        accent: "#0ea5e9",
+        secondary: {
+          DEFAULT: "var(--secondary)",
+          foreground: "var(--secondary-foreground)",
+        },
+        accent: {
+          DEFAULT: "var(--accent)",
+          foreground: "var(--accent-foreground)",
+        },
+        highlight: {
+          DEFAULT: "var(--highlight)",
+          foreground: "var(--highlight-foreground)",
+        },
       },
     },
   },
