@@ -17,6 +17,7 @@ except ImportError:  # pragma: no cover - optional dependency during scaffolding
     Chroma = None  # type: ignore
 
 from backend.config import get_settings
+from backend.services.places import search_nearby_places
 
 logger = logging.getLogger(__name__)
 
@@ -207,63 +208,12 @@ async def _fetch_candidate_places(
         logger.warning("Location payload missing 'lat'/'lng'; cannot query Places API.")
         return []
 
-    async with httpx.AsyncClient(timeout=httpx.Timeout(10.0)) as client:
-        tasks = [
-            _query_places_api(client, cuisine, lat=lat, lng=lng, radius=location.get("radius"))
-            for cuisine in cuisines
-        ]
-        results = await asyncio.gather(*tasks, return_exceptions=True)
-
-    merged: Dict[str, Dict[str, Any]] = {}
-    for result in results:
-        if isinstance(result, Exception):
-            logger.warning("Error during Places API lookup: %s", result)
-            continue
-        for place in result:
-            place_id = place.get("place_id") or f"{place['name']}::{place.get('address')}"
-            if place_id not in merged:
-                merged[place_id] = place
-    return list(merged.values())
-
-
-async def _query_places_api(
-    client: httpx.AsyncClient,
-    cuisine: str,
-    *,
-    lat: float,
-    lng: float,
-    radius: Optional[int] = None,
-) -> List[Dict[str, Any]]:
-    """Fetch nearby restaurants for a single cuisine keyword."""
-    params = {
-        "key": GOOGLE_PLACES_API_KEY,
-        "location": f"{lat},{lng}",
-        "radius": radius or DEFAULT_SEARCH_RADIUS_METERS,
-        "type": "restaurant",
-        "keyword": cuisine,
-    }
-    response = await client.get(
-        "https://maps.googleapis.com/maps/api/place/nearbysearch/json",
-        params=params,
+    return await search_nearby_places(
+        cuisines,
+        lat=lat,
+        lng=lng,
+        radius=location.get("radius"),
     )
-    response.raise_for_status()
-    payload = response.json()
-    candidates: List[Dict[str, Any]] = []
-    for item in payload.get("results", [])[:MAX_PLACES_PER_CUISINE]:
-        geometry = item.get("geometry") or {}
-        coordinates = geometry.get("location") if isinstance(geometry, dict) else {}
-        candidates.append(
-            {
-                "name": item.get("name"),
-                "rating": item.get("rating"),
-                "address": item.get("vicinity"),
-                "reason": f"Matches cuisine query '{cuisine}'",
-                "place_id": item.get("place_id"),
-                "lat": coordinates.get("lat") if isinstance(coordinates, dict) else None,
-                "lng": coordinates.get("lng") if isinstance(coordinates, dict) else None,
-            }
-        )
-    return candidates
 
 
 async def _rank_candidates(
@@ -320,20 +270,4 @@ def _sanitize_recommendations(raw_items: Sequence[Dict[str, Any]]) -> List[Dict[
     return cleaned
 
 
-def _placeholder_places(cuisines: Sequence[str], location: Dict[str, Any] | None) -> List[Dict[str, Any]]:
-    """Fallback data used when the external API is not reachable."""
-    lat = (location or {}).get("lat")
-    lng = (location or {}).get("lng")
-    placeholders: List[Dict[str, Any]] = []
-    for cuisine in cuisines[:3]:
-        placeholders.append(
-            {
-                "name": f"Placeholder {cuisine.title()} Spot",
-                "rating": 4.5,
-                "address": f"{cuisine.title()} District, Sample City",
-                "reason": f"Sample recommendation for {cuisine}",
-                "lat": lat,
-                "lng": lng,
-            }
-        )
-    return placeholders
+

@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from backend.config import get_settings
-from backend.routers import chat, feedback, favorites
+from backend.routers import chat, feedback, favorites, places
 from backend.services.storage import init_storage
 
 logger = logging.getLogger(__name__)
@@ -35,6 +35,7 @@ def create_app() -> FastAPI:
     app.include_router(chat.router)
     app.include_router(feedback.router)
     app.include_router(favorites.router)
+    app.include_router(places.router)
 
     return app
 
