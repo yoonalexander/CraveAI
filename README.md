@@ -56,6 +56,28 @@ docs/ (PRD.md, TECHNICAL_DESIGN.md)
 
 ## Installation & Local Development Guide
 
+### Simple Guide:
+
+Backend:
+```powershell
+cd backend
+.\venv\Scripts\activate
+pip install -r requirements.txt
+cd ..     #go back to the project root
+uvicorn backend.main:create_app --factory --reload
+```
+backend server site docs:
+http://127.0.0.1:8000/docs
+
+Frontend: (New terminal)
+```powershell
+cd frontend
+npm install
+npm run dev
+```
+frontend site:
+http://localhost:5173
+
 ### 1. Open the Project
 
 In VS Code (or your terminal), make sure you’re in the **project root directory**:
@@ -96,6 +118,7 @@ That installs all required packages (FastAPI, Uvicorn, OpenAI, etc.) into your v
 While inside the project root (`…\CraveAI\CraveAI>`), run:
 
 ```powershell
+cd ..     #go back to the project root
 uvicorn backend.main:create_app --factory --reload
 ```
 

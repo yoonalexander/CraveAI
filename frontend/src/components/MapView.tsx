@@ -64,7 +64,7 @@ export function MapView({
       </div>
     );
   } else if (!isLoaded) {
-    mapContent = <div className={emptyStateClass}>Loading live map\u2026</div>;
+    mapContent = <div className={emptyStateClass}>Loading live map…</div>;
   } else {
     mapContent = (
       <GoogleMap
@@ -73,24 +73,6 @@ export function MapView({
         zoom={mapZoom}
         options={{
           disableDefaultUI: true,
-          styles: [
-            {
-              elementType: "geometry",
-              stylers: [{ color: "#0f172a" }],
-            },
-            {
-              elementType: "labels.icon",
-              stylers: [{ visibility: "off" }],
-            },
-            {
-              elementType: "labels.text.fill",
-              stylers: [{ color: "#94a3b8" }],
-            },
-            {
-              elementType: "labels.text.stroke",
-              stylers: [{ color: "#0f172a" }],
-            },
-          ],
         }}
       >
         <Marker

@@ -38,3 +38,8 @@ data/*.db
 .DS_Store
 Thumbs.db
 tests/CraveAI Backend - Swagger UI.html
+
+# Ignore Chroma vector store files
+data/chroma_db/chroma.sqlite3
+data/chroma_db/
+data/chroma_db/*.sqlite3
