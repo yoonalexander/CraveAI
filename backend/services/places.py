@@ -168,7 +168,7 @@ async def _query_places_api(
     return candidates
 
 
-def _parse_place_item(item: Dict[str, Any]) -> Dict[str, Any]:
+def _parse_place_item(item: Dict[str, Any], reason_hint: Optional[str] = None) -> Dict[str, Any]:
     geometry = item.get("geometry") or {}
     coordinates = geometry.get("location") if isinstance(geometry, dict) else {}
     rating = item.get("rating")
@@ -176,6 +176,8 @@ def _parse_place_item(item: Dict[str, Any]) -> Dict[str, Any]:
     vicinity = item.get("vicinity")
 
     reason_parts: List[str] = []
+    if reason_hint:
+        reason_parts.append(reason_hint)
     if rating:
         reason_parts.append(f"{rating}★")
     if total_reviews:

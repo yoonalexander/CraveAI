@@ -39,7 +39,7 @@ INTENT_PROMPT = ChatPromptTemplate.from_messages(
             (
                 "You are an intent parser for a food recommendation assistant. "
                 "Extract core craving details and respond with compact JSON following this schema:\n"
-                '{"mood": ["<mood>"], "cravings": ["<craving>"], "diet": ["<restriction>"]}. '
+                '{{"mood": ["<mood>"], "cravings": ["<craving>"], "diet": ["<restriction>"]}}. '
                 "Use empty arrays if a field is not present. Keep the response valid JSON with double quotes."
             ),
         ),
@@ -58,9 +58,9 @@ RANKING_PROMPT = ChatPromptTemplate.from_messages(
             (
                 "You are a culinary recommendation expert. Given the user craving and candidate restaurants, "
                 "select the three best matches, craft a conversational summary, and output JSON with:\n"
-                '{"reply": "<assistant summary>", "recommendations": ['
-                '{"name": "...", "rating": <float or null>, "address": "...", "reason": "..."}'
-                "]}. Keep the tone warm and concise."
+                '{{"reply": "<assistant summary>", "recommendations": ['
+                '{{"name": "...", "rating": <float or null>, "address": "...", "reason": "..."}}'
+                "]}}. Keep the tone warm and concise."
             ),
         ),
         (
@@ -268,6 +268,5 @@ def _sanitize_recommendations(raw_items: Sequence[Dict[str, Any]]) -> List[Dict[
             }
         )
     return cleaned
-
 
 
