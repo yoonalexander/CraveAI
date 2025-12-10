@@ -27,6 +27,7 @@ function App(): JSX.Element {
   const [locationStatus, setLocationStatus] = useState(
     "Calibrating your location\u2026",
   );
+  const [locationReady, setLocationReady] = useState(false);
   const [mapRecommendations, setMapRecommendations] = useState<
     ChatRecommendation[]
   >([]);
@@ -40,6 +41,7 @@ function App(): JSX.Element {
       setLocationStatus(
         "Geolocation not supported; using Hamilton, ON as a fallback.",
       );
+      setLocationReady(true);
       return;
     }
 
@@ -50,6 +52,7 @@ function App(): JSX.Element {
           lng: position.coords.longitude,
         });
         setLocationStatus("Live location locked. Refining searches nearby.");
+        setLocationReady(true);
       },
       (error) => {
         if (error.code === error.PERMISSION_DENIED) {
@@ -61,6 +64,7 @@ function App(): JSX.Element {
             "Unable to read device location; using Hamilton, ON fallback.",
           );
         }
+        setLocationReady(true);
       },
       {
         enableHighAccuracy: true,
@@ -71,10 +75,13 @@ function App(): JSX.Element {
   }, []);
 
   useEffect(() => {
+    if (!locationReady) return;
+
     const fetchNearby = async () => {
       let timeoutId: number | undefined;
       let timedOut = false;
 
+      setSuggestions([]);
       setIsLoadingSuggestions(true);
       setSuggestionError(null);
 
@@ -100,6 +107,7 @@ function App(): JSX.Element {
       } catch (error) {
         console.error("Failed to fetch suggestions:", error);
         if (!timedOut) {
+          setSuggestions([]);
           setSuggestionError(
             "Failed to load suggestions. Verify location access and your Google Places API setup.",
           );
@@ -115,7 +123,7 @@ function App(): JSX.Element {
     };
 
     fetchNearby();
-  }, [userLocation]);
+  }, [userLocation, locationReady]);
 
   useEffect(() => {
     if (suggestions.length === 0) return;
