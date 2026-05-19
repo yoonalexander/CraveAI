@@ -1,0 +1,16 @@
+{
+  "rewrites": [
+    {
+      "source": "/craveai/assets/:path*",
+      "destination": "/assets/:path*"
+    },
+    {
+      "source": "/craveai/:path*",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/craveai",
+      "destination": "/index.html"
+    }
+  ]
+}
