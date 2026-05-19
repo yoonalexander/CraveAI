@@ -1,4 +1,6 @@
-const API_BASE_URL = "http://localhost:8000";
+const API_URL =
+    import.meta.env.VITE_API_URL?.toString()?.trim() ||
+    "http://127.0.0.1:8000";
 
 export interface Suggestion {
     name: string;
@@ -18,7 +20,7 @@ export async function fetchSuggestions(
     radius: number = 5000,
 ): Promise<Suggestion[]> {
     const response = await fetch(
-        `${API_BASE_URL}/places/suggestions?lat=${lat}&lng=${lng}&radius=${radius}`,
+        `${API_URL}/places/suggestions?lat=${lat}&lng=${lng}&radius=${radius}`,
     );
     if (!response.ok) {
         throw new Error("Failed to fetch suggestions");

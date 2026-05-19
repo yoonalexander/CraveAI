@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import List, Optional
 
 from fastapi import APIRouter
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 from backend.services.rag_pipeline import generate_recommendations
 
@@ -26,11 +26,24 @@ class LocationPayload(BaseModel):
 class ChatRequest(BaseModel):
     """Incoming chat request from the frontend."""
 
-    query: str = Field(..., description="Natural language craving or mood description.")
+    query: Optional[str] = Field(
+        default=None,
+        description="Natural language craving or mood description.",
+    )
+    message: Optional[str] = Field(
+        default=None,
+        description="Alternate chat message field accepted by deployed clients.",
+    )
     user_id: Optional[str] = Field(
         default=None, description="Optional identifier for the active user session."
     )
     location: Optional[LocationPayload] = Field(default=None, description="Structured location data.")
+
+    @model_validator(mode="after")
+    def require_chat_text(self) -> "ChatRequest":
+        if not (self.query or self.message):
+            raise ValueError("Either query or message is required.")
+        return self
 
 
 class ChatMessage(BaseModel):
@@ -80,7 +93,7 @@ async def generate_chat_response(payload: ChatRequest) -> ChatResponse:
     """
     location_payload = payload.location.model_dump() if payload.location else {}
     rag_result = await generate_recommendations(
-        user_query=payload.query,
+        user_query=payload.query or payload.message or "",
         location=location_payload,
     )
 

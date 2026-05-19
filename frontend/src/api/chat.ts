@@ -7,6 +7,7 @@ export type LocationHint = {
 
 type ChatRequestPayload = {
   query: string;
+  message: string;
   user_id: string;
   location: LocationHint;
 };
@@ -38,6 +39,10 @@ const FALLBACK_LOCATION: LocationHint = {
   radius: 5000,
 };
 
+const API_URL =
+  import.meta.env.VITE_API_URL?.toString()?.trim() ||
+  "http://127.0.0.1:8000";
+
 /**
  * Send a chat query to the backend chat endpoint.
  */
@@ -46,9 +51,6 @@ export async function sendChat(
   options: { userId?: string; location?: LocationHint } = {},
 ): Promise<ChatResponse> {
   const { userId = "testuser", location } = options;
-  const baseUrl =
-    import.meta.env.VITE_API_BASE_URL?.toString()?.trim() ||
-    "http://127.0.0.1:8000";
 
   const locationPayload: LocationHint = location
     ? { ...FALLBACK_LOCATION, ...location }
@@ -56,11 +58,12 @@ export async function sendChat(
 
   const payload: ChatRequestPayload = {
     query,
+    message: query,
     user_id: userId,
     location: locationPayload,
   };
 
-  const response = await fetch(`${baseUrl}/chat`, {
+  const response = await fetch(`${API_URL}/chat`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
