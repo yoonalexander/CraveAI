@@ -149,13 +149,20 @@ function App(): JSX.Element {
         radius: 5000,
       };
     }
-    return HAMILTON_FALLBACK;
-  }, [userLocation]);
+    return locationReady ? HAMILTON_FALLBACK : null;
+  }, [userLocation, locationReady]);
 
-  const mapLocation = userLocation ?? {
-    lat: HAMILTON_FALLBACK.lat,
-    lng: HAMILTON_FALLBACK.lng,
-  };
+  const mapLocation = userLocation
+    ? {
+        lat: userLocation.lat,
+        lng: userLocation.lng,
+      }
+    : locationReady
+      ? {
+          lat: HAMILTON_FALLBACK.lat,
+          lng: HAMILTON_FALLBACK.lng,
+        }
+      : null;
 
   return (
     <ThemeProvider defaultTheme="light" storageKey="craveai-theme">
@@ -200,6 +207,7 @@ function App(): JSX.Element {
               userLocation={mapLocation}
               recommendations={mapRecommendations}
               hasLiveLocation={Boolean(userLocation)}
+              isLocating={!locationReady}
               statusMessage={locationStatus}
             />
             <div className="rounded-3xl border border-border bg-secondary/40 p-5 text-foreground">
