@@ -1,5 +1,10 @@
 import { FormEvent, useState } from "react";
-import { sendChat, ChatRecommendation, LocationHint } from "../api/chat";
+import {
+  ChatQuotaError,
+  sendChat,
+  ChatRecommendation,
+  LocationHint,
+} from "../api/chat";
 
 type Message = {
   id: string;
@@ -102,6 +107,20 @@ export function ChatPanel({
 
       setMessages((prev) => [...prev, ...assistantMessages]);
     } catch (err) {
+      if (err instanceof ChatQuotaError) {
+        setError(err.message);
+        onRecommendations?.([]);
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: createMessageId("assistant"),
+            role: "assistant",
+            content: err.message,
+          },
+        ]);
+        return;
+      }
+
       const message =
         err instanceof Error
           ? err.message

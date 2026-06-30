@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import os
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from functools import lru_cache
 from pathlib import Path
 import logging
@@ -18,17 +18,42 @@ load_dotenv(DOTENV_PATH, override=False)
 logger = logging.getLogger(__name__)
 
 
+def _env_bool(name: str, default: bool) -> bool:
+    value = os.getenv(name)
+    if value is None:
+        return default
+    return value.strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _env_int(name: str, default: int) -> int:
+    value = os.getenv(name)
+    if value is None:
+        return default
+    try:
+        return int(value)
+    except ValueError:
+        logger.warning("Invalid integer for %s=%r; using %s.", name, value, default)
+        return default
+
+
 @dataclass(frozen=True)
 class Config:
     """Central application settings."""
 
-    OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
-    GOOGLE_API_KEY: str = os.getenv("GOOGLE_API_KEY", "")
-    SQLITE_DB_PATH: str = os.getenv("SQLITE_DB_PATH", "./data/craveai.db")
-    CHROMA_PATH: str = os.getenv("CHROMA_PATH", "./data/chroma_db")
-    REDIS_URL: str = os.getenv("REDIS_URL", "redis://localhost:6379")
-    MODEL_NAME: str = os.getenv("MODEL_NAME", "gpt-4-turbo")
-    ENVIRONMENT: str = os.getenv("APP_ENV", "development")
+    OPENAI_API_KEY: str = field(default_factory=lambda: os.getenv("OPENAI_API_KEY", ""))
+    GOOGLE_API_KEY: str = field(default_factory=lambda: os.getenv("GOOGLE_API_KEY", ""))
+    SQLITE_DB_PATH: str = field(default_factory=lambda: os.getenv("SQLITE_DB_PATH", "./data/craveai.db"))
+    CHROMA_PATH: str = field(default_factory=lambda: os.getenv("CHROMA_PATH", "./data/chroma_db"))
+    REDIS_URL: str = field(default_factory=lambda: os.getenv("REDIS_URL", "redis://localhost:6379"))
+    MODEL_NAME: str = field(default_factory=lambda: os.getenv("MODEL_NAME", "gpt-4-turbo"))
+    ENVIRONMENT: str = field(default_factory=lambda: os.getenv("APP_ENV", "development"))
+    USAGE_LIMITS_ENABLED: bool = field(
+        default_factory=lambda: _env_bool("USAGE_LIMITS_ENABLED", True)
+    )
+    DAILY_TOKEN_LIMIT: int = field(default_factory=lambda: _env_int("DAILY_TOKEN_LIMIT", 10000))
+    CHAT_REQUEST_TOKEN_COST: int = field(
+        default_factory=lambda: _env_int("CHAT_REQUEST_TOKEN_COST", 1500)
+    )
 
     def validate(self) -> None:
         """Verify that mandatory configuration values are provided."""

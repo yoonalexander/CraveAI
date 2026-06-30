@@ -2,10 +2,18 @@ from __future__ import annotations
 
 from typing import List, Optional
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException, Request, Response, status
 from pydantic import BaseModel, Field, model_validator
 
+from backend.config import get_settings
 from backend.services.rag_pipeline import generate_recommendations
+from backend.services.usage_limits import (
+    DailyQuotaExceeded,
+    UsageReservation,
+    rate_limit_headers,
+    reserve_daily_quota,
+    resolve_usage_user_id,
+)
 
 router = APIRouter(prefix="/chat", tags=["chat"])
 
@@ -67,6 +75,15 @@ class Recommendation(BaseModel):
     lng: Optional[float] = Field(default=None, description="Longitude for the venue, if known.")
 
 
+class UsageMetadata(BaseModel):
+    """Daily demo quota metadata returned with chat responses."""
+
+    limit: int
+    used: int
+    remaining: int
+    reset_at: str
+
+
 class ChatResponse(BaseModel):
     """Structured response returned to the frontend."""
 
@@ -82,15 +99,48 @@ class ChatResponse(BaseModel):
         default_factory=list,
         description="Ranked restaurant suggestions that match the user's craving.",
     )
+    usage: Optional[UsageMetadata] = Field(
+        default=None,
+        description="Daily demo token quota state for the resolved user.",
+    )
 
 
 @router.post("", response_model=ChatResponse)
-async def generate_chat_response(payload: ChatRequest) -> ChatResponse:
+async def generate_chat_response(
+    payload: ChatRequest,
+    request: Request,
+    response: Response,
+) -> ChatResponse:
     """
     Produce a chat response for the user's craving request.
 
     Delegates to the RAG pipeline to retrieve relevant recommendations.
     """
+    settings = get_settings()
+    usage: UsageReservation | None = None
+    if settings.USAGE_LIMITS_ENABLED:
+        client_host = request.client.host if request.client else None
+        usage_user_id = resolve_usage_user_id(payload.user_id, client_host)
+        try:
+            usage = await reserve_daily_quota(
+                user_id=usage_user_id,
+                token_cost=settings.CHAT_REQUEST_TOKEN_COST,
+                daily_limit=settings.DAILY_TOKEN_LIMIT,
+            )
+        except DailyQuotaExceeded as exc:
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail={
+                    "code": "daily_token_quota_exceeded",
+                    "message": "Daily demo token quota exceeded.",
+                    "usage": _usage_metadata(exc.usage).model_dump(),
+                },
+                headers=rate_limit_headers(exc.usage, include_retry_after=True),
+            ) from exc
+
+        for header, value in rate_limit_headers(usage).items():
+            response.headers[header] = value
+
     location_payload = payload.location.model_dump() if payload.location else {}
     rag_result = await generate_recommendations(
         user_query=payload.query or payload.message or "",
@@ -114,4 +164,14 @@ async def generate_chat_response(payload: ChatRequest) -> ChatResponse:
         reply=rag_result.get("reply", ""),
         messages=[assistant_message],
         recommendations=recommendations,
+        usage=_usage_metadata(usage) if usage else None,
+    )
+
+
+def _usage_metadata(usage: UsageReservation) -> UsageMetadata:
+    return UsageMetadata(
+        limit=usage.limit,
+        used=usage.used,
+        remaining=usage.remaining,
+        reset_at=usage.reset_at,
     )

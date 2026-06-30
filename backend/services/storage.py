@@ -15,13 +15,14 @@ class FavoriteRecord:
     note: str | None = None
 
 
-settings = get_settings()
-DB_PATH = Path(settings.SQLITE_DB_PATH).resolve()
-DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+def _get_db_path() -> Path:
+    db_path = Path(get_settings().SQLITE_DB_PATH).resolve()
+    db_path.parent.mkdir(parents=True, exist_ok=True)
+    return db_path
 
 
 def _get_connection() -> sqlite3.Connection:
-    connection = sqlite3.connect(DB_PATH, check_same_thread=False)
+    connection = sqlite3.connect(_get_db_path(), check_same_thread=False)
     connection.row_factory = sqlite3.Row
     return connection
 
@@ -51,6 +52,19 @@ def init_storage() -> None:
                     liked INTEGER NOT NULL,
                     notes TEXT,
                     created_at TEXT DEFAULT CURRENT_TIMESTAMP
+                )
+                """
+            )
+            connection.execute(
+                """
+                CREATE TABLE IF NOT EXISTS usage_limits (
+                    user_id TEXT NOT NULL,
+                    usage_date TEXT NOT NULL,
+                    tokens_used INTEGER NOT NULL DEFAULT 0,
+                    request_count INTEGER NOT NULL DEFAULT 0,
+                    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+                    PRIMARY KEY (user_id, usage_date)
                 )
                 """
             )
