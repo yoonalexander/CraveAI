@@ -3,8 +3,11 @@ from __future__ import annotations
 import asyncio
 from dataclasses import dataclass
 from datetime import datetime, time, timedelta, timezone
+from math import ceil
 
 from backend.services.storage import _get_connection
+
+GLOBAL_USAGE_USER_ID = "__global__"
 
 
 @dataclass(frozen=True)
@@ -26,21 +29,30 @@ class DailyQuotaExceeded(Exception):
         self.usage = usage
 
 
-def resolve_usage_user_id(user_id: str | None, client_host: str | None) -> str:
-    """Return the stable quota identity used for daily accounting."""
-    normalized = (user_id or "").strip()
-    if normalized:
-        return normalized
+def resolve_usage_user_id(client_host: str | None) -> str:
+    """Return a server-derived quota identity that clients cannot rename."""
     return f"ip:{client_host or 'unknown'}"
+
+
+def estimate_chat_token_cost(
+    user_text: str,
+    minimum_cost: int,
+    pipeline_overhead: int,
+) -> int:
+    """Conservatively estimate the bounded multi-stage chat pipeline cost."""
+    estimated_input_tokens = max(1, ceil(len(user_text.encode("utf-8")) / 4))
+    estimated_pipeline_cost = max(pipeline_overhead, 0) + (estimated_input_tokens * 2)
+    return max(minimum_cost, estimated_pipeline_cost, 0)
 
 
 async def reserve_daily_quota(
     user_id: str,
     token_cost: int,
     daily_limit: int,
+    global_daily_limit: int | None = None,
     now: datetime | None = None,
 ) -> UsageReservation:
-    """Atomically reserve estimated tokens for a user's daily quota."""
+    """Atomically reserve per-actor and optional service-wide daily quota."""
     if token_cost < 0:
         token_cost = 0
     if daily_limit < 0:
@@ -53,22 +65,16 @@ async def reserve_daily_quota(
     usage_date = timestamp.date().isoformat()
     reset_at = _reset_at(timestamp)
     timestamp_iso = _isoformat_z(timestamp)
+    effective_global_limit = (
+        max(global_daily_limit, 0) if global_daily_limit is not None else None
+    )
 
     def _reserve() -> UsageReservation:
         connection = _get_connection()
         try:
             connection.execute("BEGIN IMMEDIATE")
-            row = connection.execute(
-                """
-                SELECT tokens_used, request_count
-                FROM usage_limits
-                WHERE user_id = ? AND usage_date = ?
-                """,
-                (user_id, usage_date),
-            ).fetchone()
-
-            current_used = int(row["tokens_used"]) if row else 0
-            current_count = int(row["request_count"]) if row else 0
+            row = _load_usage_row(connection, user_id, usage_date)
+            current_used, current_count = _usage_values(row)
             if current_used + token_cost > daily_limit:
                 connection.rollback()
                 raise DailyQuotaExceeded(
@@ -81,26 +87,44 @@ async def reserve_daily_quota(
                     )
                 )
 
+            global_row = None
+            global_used = 0
+            global_count = 0
+            if effective_global_limit is not None:
+                global_row = _load_usage_row(connection, GLOBAL_USAGE_USER_ID, usage_date)
+                global_used, global_count = _usage_values(global_row)
+                if global_used + token_cost > effective_global_limit:
+                    connection.rollback()
+                    raise DailyQuotaExceeded(
+                        UsageReservation(
+                            limit=effective_global_limit,
+                            used=global_used,
+                            remaining=max(effective_global_limit - global_used, 0),
+                            reset_at=reset_at,
+                            request_count=global_count,
+                        )
+                    )
+
             next_used = current_used + token_cost
             next_count = current_count + 1
-            if row:
-                connection.execute(
-                    """
-                    UPDATE usage_limits
-                    SET tokens_used = ?, request_count = ?, updated_at = ?
-                    WHERE user_id = ? AND usage_date = ?
-                    """,
-                    (next_used, next_count, timestamp_iso, user_id, usage_date),
-                )
-            else:
-                connection.execute(
-                    """
-                    INSERT INTO usage_limits (
-                        user_id, usage_date, tokens_used, request_count, created_at, updated_at
-                    )
-                    VALUES (?, ?, ?, ?, ?, ?)
-                    """,
-                    (user_id, usage_date, next_used, next_count, timestamp_iso, timestamp_iso),
+            _write_usage_row(
+                connection,
+                existing=row is not None,
+                user_id=user_id,
+                usage_date=usage_date,
+                tokens_used=next_used,
+                request_count=next_count,
+                timestamp_iso=timestamp_iso,
+            )
+            if effective_global_limit is not None:
+                _write_usage_row(
+                    connection,
+                    existing=global_row is not None,
+                    user_id=GLOBAL_USAGE_USER_ID,
+                    usage_date=usage_date,
+                    tokens_used=global_used + token_cost,
+                    request_count=global_count + 1,
+                    timestamp_iso=timestamp_iso,
                 )
             connection.commit()
             return UsageReservation(
@@ -119,6 +143,55 @@ async def reserve_daily_quota(
             connection.close()
 
     return await asyncio.to_thread(_reserve)
+
+
+def _load_usage_row(connection, user_id: str, usage_date: str):
+    return connection.execute(
+        """
+        SELECT tokens_used, request_count
+        FROM usage_limits
+        WHERE user_id = ? AND usage_date = ?
+        """,
+        (user_id, usage_date),
+    ).fetchone()
+
+
+def _usage_values(row) -> tuple[int, int]:
+    if not row:
+        return 0, 0
+    return int(row["tokens_used"]), int(row["request_count"])
+
+
+def _write_usage_row(
+    connection,
+    *,
+    existing: bool,
+    user_id: str,
+    usage_date: str,
+    tokens_used: int,
+    request_count: int,
+    timestamp_iso: str,
+) -> None:
+    if existing:
+        connection.execute(
+            """
+            UPDATE usage_limits
+            SET tokens_used = ?, request_count = ?, updated_at = ?
+            WHERE user_id = ? AND usage_date = ?
+            """,
+            (tokens_used, request_count, timestamp_iso, user_id, usage_date),
+        )
+        return
+
+    connection.execute(
+        """
+        INSERT INTO usage_limits (
+            user_id, usage_date, tokens_used, request_count, created_at, updated_at
+        )
+        VALUES (?, ?, ?, ?, ?, ?)
+        """,
+        (user_id, usage_date, tokens_used, request_count, timestamp_iso, timestamp_iso),
+    )
 
 
 def rate_limit_headers(usage: UsageReservation, include_retry_after: bool = False) -> dict[str, str]:

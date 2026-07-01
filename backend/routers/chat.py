@@ -3,47 +3,65 @@ from __future__ import annotations
 from typing import List, Optional
 
 from fastapi import APIRouter, HTTPException, Request, Response, status
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from backend.config import get_settings
 from backend.services.rag_pipeline import generate_recommendations
 from backend.services.usage_limits import (
     DailyQuotaExceeded,
     UsageReservation,
+    estimate_chat_token_cost,
     rate_limit_headers,
     reserve_daily_quota,
     resolve_usage_user_id,
 )
 
 router = APIRouter(prefix="/chat", tags=["chat"])
+MAX_CHAT_MESSAGE_CHARS = 2000
 
 
 class LocationPayload(BaseModel):
     """Location information supplied by the frontend."""
 
-    lat: float = Field(..., description="Latitude component of the user's location.")
-    lng: float = Field(..., description="Longitude component of the user's location.")
+    lat: float = Field(
+        ...,
+        ge=-90,
+        le=90,
+        description="Latitude component of the user's location.",
+    )
+    lng: float = Field(
+        ...,
+        ge=-180,
+        le=180,
+        description="Longitude component of the user's location.",
+    )
     city: Optional[str] = Field(
-        default=None, description="Optional human-readable location label."
+        default=None,
+        max_length=120,
+        description="Optional human-readable location label.",
     )
     radius: Optional[int] = Field(
-        default=None, description="Search radius hint in meters (optional)."
+        default=None,
+        ge=100,
+        le=20000,
+        description="Search radius hint in meters (optional).",
     )
 
 
 class ChatRequest(BaseModel):
     """Incoming chat request from the frontend."""
 
+    model_config = ConfigDict(extra="forbid")
+
     query: Optional[str] = Field(
         default=None,
+        max_length=MAX_CHAT_MESSAGE_CHARS,
         description="Natural language craving or mood description.",
     )
     message: Optional[str] = Field(
         default=None,
+        max_length=MAX_CHAT_MESSAGE_CHARS,
         description="Alternate chat message field accepted by deployed clients.",
-    )
-    user_id: Optional[str] = Field(
-        default=None, description="Optional identifier for the active user session."
     )
     location: Optional[LocationPayload] = Field(default=None, description="Structured location data.")
 
@@ -117,15 +135,22 @@ async def generate_chat_response(
     Delegates to the RAG pipeline to retrieve relevant recommendations.
     """
     settings = get_settings()
+    user_text = payload.query or payload.message or ""
     usage: UsageReservation | None = None
     if settings.USAGE_LIMITS_ENABLED:
         client_host = request.client.host if request.client else None
-        usage_user_id = resolve_usage_user_id(payload.user_id, client_host)
+        usage_user_id = resolve_usage_user_id(client_host)
+        token_cost = estimate_chat_token_cost(
+            user_text,
+            settings.CHAT_REQUEST_TOKEN_COST,
+            settings.CHAT_PIPELINE_TOKEN_OVERHEAD,
+        )
         try:
             usage = await reserve_daily_quota(
                 user_id=usage_user_id,
-                token_cost=settings.CHAT_REQUEST_TOKEN_COST,
+                token_cost=token_cost,
                 daily_limit=settings.DAILY_TOKEN_LIMIT,
+                global_daily_limit=settings.GLOBAL_DAILY_TOKEN_LIMIT,
             )
         except DailyQuotaExceeded as exc:
             raise HTTPException(
@@ -143,7 +168,7 @@ async def generate_chat_response(
 
     location_payload = payload.location.model_dump() if payload.location else {}
     rag_result = await generate_recommendations(
-        user_query=payload.query or payload.message or "",
+        user_query=user_text,
         location=location_payload,
     )
 

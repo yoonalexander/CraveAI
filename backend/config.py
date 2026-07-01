@@ -51,8 +51,20 @@ class Config:
         default_factory=lambda: _env_bool("USAGE_LIMITS_ENABLED", True)
     )
     DAILY_TOKEN_LIMIT: int = field(default_factory=lambda: _env_int("DAILY_TOKEN_LIMIT", 10000))
+    GLOBAL_DAILY_TOKEN_LIMIT: int = field(
+        default_factory=lambda: _env_int("GLOBAL_DAILY_TOKEN_LIMIT", 100000)
+    )
     CHAT_REQUEST_TOKEN_COST: int = field(
         default_factory=lambda: _env_int("CHAT_REQUEST_TOKEN_COST", 1500)
+    )
+    CHAT_PIPELINE_TOKEN_OVERHEAD: int = field(
+        default_factory=lambda: _env_int("CHAT_PIPELINE_TOKEN_OVERHEAD", 4000)
+    )
+    PLACES_REQUEST_TOKEN_COST: int = field(
+        default_factory=lambda: _env_int("PLACES_REQUEST_TOKEN_COST", 500)
+    )
+    IDENTITY_SIGNING_SECRET: str = field(
+        default_factory=lambda: os.getenv("IDENTITY_SIGNING_SECRET", "")
     )
 
     def validate(self) -> None:
@@ -66,6 +78,16 @@ class Config:
             logger.warning(
                 "GOOGLE_API_KEY not configured; restaurant searches will fall back to placeholder data."
             )
+
+        if (
+            self.ENVIRONMENT.lower() == "production"
+            and len(self.IDENTITY_SIGNING_SECRET) < 32
+        ):
+            message = (
+                "IDENTITY_SIGNING_SECRET must contain at least 32 characters in production"
+            )
+            logger.error(message)
+            raise RuntimeError(message)
 
 
 @lru_cache()

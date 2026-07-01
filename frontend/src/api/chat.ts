@@ -8,7 +8,6 @@ export type LocationHint = {
 type ChatRequestPayload = {
   query: string;
   message: string;
-  user_id: string;
   location: LocationHint;
 };
 
@@ -69,45 +68,14 @@ const API_URL =
   import.meta.env.VITE_API_URL?.toString()?.trim() ||
   "http://127.0.0.1:8000";
 
-const DEMO_USER_ID_KEY = "craveai-demo-user-id";
-let inMemoryDemoUserId: string | null = null;
-
-export function getDemoUserId(): string {
-  if (typeof window === "undefined") {
-    return "demo-server";
-  }
-
-  try {
-    const existing = window.localStorage.getItem(DEMO_USER_ID_KEY);
-    if (existing) {
-      return existing;
-    }
-
-    const generated =
-      typeof window.crypto?.randomUUID === "function"
-        ? window.crypto.randomUUID()
-        : `demo-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
-    window.localStorage.setItem(DEMO_USER_ID_KEY, generated);
-    return generated;
-  } catch {
-    if (!inMemoryDemoUserId) {
-      inMemoryDemoUserId =
-        typeof window.crypto?.randomUUID === "function"
-          ? window.crypto.randomUUID()
-          : `demo-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
-    }
-    return inMemoryDemoUserId;
-  }
-}
-
 /**
  * Send a chat query to the backend chat endpoint.
  */
 export async function sendChat(
   query: string,
-  options: { userId?: string; location?: LocationHint } = {},
+  options: { location?: LocationHint } = {},
 ): Promise<ChatResponse> {
-  const { userId = getDemoUserId(), location } = options;
+  const { location } = options;
 
   const locationPayload: LocationHint = location
     ? { ...FALLBACK_LOCATION, ...location }
@@ -116,7 +84,6 @@ export async function sendChat(
   const payload: ChatRequestPayload = {
     query,
     message: query,
-    user_id: userId,
     location: locationPayload,
   };
 

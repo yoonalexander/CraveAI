@@ -49,6 +49,10 @@ docs/ (PRD.md, TECHNICAL_DESIGN.md)
 | `CHROMA_PATH` | `.env` | Points to the persisted Chroma vector store. |
 | `REDIS_URL` | `.env` | Reserved for future caching. |
 | `MODEL_NAME` | `.env` | Chat completion model identifier. |
+| `GLOBAL_DAILY_TOKEN_LIMIT` | `.env` | Service-wide hard ceiling shared by chat and Places requests. |
+| `CHAT_PIPELINE_TOKEN_OVERHEAD` | `.env` | Conservative fixed cost reserved for the multi-stage chat pipeline. |
+| `PLACES_REQUEST_TOKEN_COST` | `.env` | Quota cost reserved before each public Places lookup. |
+| `IDENTITY_SIGNING_SECRET` | `.env` | HMAC secret used by the trusted auth issuer for favorites bearer tokens. Required in production. |
 | `VITE_API_BASE_URL` | `frontend/.env` | Base URL for the FastAPI backend during local dev. |
 | `VITE_GOOGLE_MAPS_API_KEY` | `frontend/.env` | Powers the in-app Google Maps view and geolocation overlays. |
 
@@ -275,7 +279,6 @@ When finished:
 ```json
 POST /chat
 {
-  "user_id": "alex123",
   "message": "I'm craving something warm and spicy",
   "location": { "lat": 43.2557, "lng": -79.8711 }
 }
@@ -324,7 +327,8 @@ POST /chat
 
 * A lightweight **SQLite database** (`./data/craveai.db`) now backs the `/favorites` and `/feedback` endpoints.
 * Tables are automatically created the first time the FastAPI app starts �?" no manual migrations required.
-* Use `GET /favorites/{user_id}` and `POST /favorites`/`POST /feedback` to read/write data; entries are written asynchronously to avoid blocking the event loop.
+* Favorites endpoints require `Authorization: Bearer <signed-subject-token>`. Tokens must be issued server-side by a trusted authentication service with `backend.services.identity.issue_identity_token`; never expose `IDENTITY_SIGNING_SECRET` to the browser.
+* Use `GET /favorites/{user_id}` and `POST /favorites` to access only the subject named by the signed token. Feedback remains an unauthenticated telemetry endpoint.
 * Customize the storage location via `SQLITE_DB_PATH` if you prefer a different directory.
 
 --- 

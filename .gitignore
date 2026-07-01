@@ -37,6 +37,7 @@ data/*.db
 *.swp
 .DS_Store
 Thumbs.db
+LOCAL_TODO.md
 tests/CraveAI Backend - Swagger UI.html
 
 # Ignore Chroma vector store files

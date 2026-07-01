@@ -7,7 +7,7 @@ from types import ModuleType
 from datetime import datetime, timezone
 
 import pytest
-from httpx import AsyncClient
+from httpx import ASGITransport, AsyncClient
 
 # Ensure environment variables are set before importing application modules.
 os.environ.setdefault("OPENAI_API_KEY", "test-openai")
@@ -102,9 +102,15 @@ if "langchain_community" not in sys.modules:
 
 from backend.config import get_settings
 from backend.main import create_app
+from backend.routers import places as places_router
 from backend.services import rag_pipeline
+from backend.services.identity import issue_identity_token, verify_identity_token
 from backend.services.storage import init_storage
-from backend.services.usage_limits import DailyQuotaExceeded, reserve_daily_quota
+from backend.services.usage_limits import (
+    DailyQuotaExceeded,
+    estimate_chat_token_cost,
+    reserve_daily_quota,
+)
 
 
 @pytest.fixture(autouse=True)
@@ -117,7 +123,11 @@ def configure_test_settings(monkeypatch, tmp_path):
     monkeypatch.setenv("SQLITE_DB_PATH", str(tmp_path / "craveai-test.db"))
     monkeypatch.setenv("USAGE_LIMITS_ENABLED", "true")
     monkeypatch.setenv("DAILY_TOKEN_LIMIT", "10000")
+    monkeypatch.setenv("GLOBAL_DAILY_TOKEN_LIMIT", "100000")
     monkeypatch.setenv("CHAT_REQUEST_TOKEN_COST", "1500")
+    monkeypatch.setenv("CHAT_PIPELINE_TOKEN_OVERHEAD", "0")
+    monkeypatch.setenv("PLACES_REQUEST_TOKEN_COST", "500")
+    monkeypatch.setenv("IDENTITY_SIGNING_SECRET", "test-identity-signing-secret")
     get_settings.cache_clear()
 
     settings = get_settings()
@@ -178,7 +188,10 @@ def test_chat_endpoint_returns_mocked_response(mocked_pipeline):
     app = create_app()
 
     async def exercise():
-        async with AsyncClient(app=app, base_url="http://test") as client:
+        async with AsyncClient(
+            transport=ASGITransport(app=app),
+            base_url="http://test",
+        ) as client:
             payload = {
                 "query": "I want a cozy bowl of ramen tonight.",
                 "location": {"lat": 43.6532, "lng": -79.3832},
@@ -216,9 +229,11 @@ def test_chat_endpoint_returns_429_before_pipeline_when_quota_exhausted(
     app = create_app()
 
     async def exercise():
-        async with AsyncClient(app=app, base_url="http://test") as client:
+        async with AsyncClient(
+            transport=ASGITransport(app=app),
+            base_url="http://test",
+        ) as client:
             payload = {
-                "user_id": "quota-user",
                 "query": "I want a cozy bowl of ramen tonight.",
                 "location": {"lat": 43.6532, "lng": -79.3832},
             }
@@ -279,23 +294,163 @@ def test_usage_quota_resets_on_new_utc_date():
     assert second.remaining == 200
 
 
-def test_chat_endpoint_uses_deterministic_fallback_identity(mocked_pipeline):
+def test_chat_endpoint_rejects_caller_selected_quota_identity(mocked_pipeline):
     app = create_app()
 
     async def exercise():
-        async with AsyncClient(app=app, base_url="http://test") as client:
-            payload = {
+        async with AsyncClient(
+            transport=ASGITransport(app=app),
+            base_url="http://test",
+        ) as client:
+            safe_payload = {
                 "query": "I want a cozy bowl of ramen tonight.",
                 "location": {"lat": 43.6532, "lng": -79.3832},
             }
-            first = await client.post("/chat", json=payload)
-            second = await client.post("/chat", json=payload)
+            first = await client.post("/chat", json=safe_payload)
+            forged_payload = {**safe_payload, "user_id": "fresh-attacker-bucket"}
+            second = await client.post("/chat", json=forged_payload)
             return first, second
 
     first_response, second_response = asyncio.run(exercise())
     assert first_response.status_code == 200
-    assert second_response.status_code == 200
+    assert second_response.status_code == 422
 
     assert first_response.json()["usage"]["used"] == 1500
-    assert second_response.json()["usage"]["used"] == 3000
-    assert mocked_pipeline["intent"] == 2
+    assert mocked_pipeline["intent"] == 1
+
+
+def test_chat_cost_estimate_scales_with_bounded_input():
+    short = estimate_chat_token_cost("ramen", minimum_cost=100, pipeline_overhead=1000)
+    long = estimate_chat_token_cost("x" * 2000, minimum_cost=100, pipeline_overhead=1000)
+
+    assert short == 1004
+    assert long == 2000
+    assert long > short
+
+
+def test_chat_rejects_oversized_input_before_pipeline(mocked_pipeline):
+    app = create_app()
+
+    async def exercise():
+        async with AsyncClient(
+            transport=ASGITransport(app=app),
+            base_url="http://test",
+        ) as client:
+            return await client.post(
+                "/chat",
+                json={
+                    "query": "x" * 2001,
+                    "location": {"lat": 43.6532, "lng": -79.3832},
+                },
+            )
+
+    response = asyncio.run(exercise())
+    assert response.status_code == 422
+    assert mocked_pipeline == {"intent": 0, "places": 0, "rank": 0}
+
+
+def test_global_quota_cannot_be_bypassed_with_multiple_actor_ids():
+    init_storage()
+
+    first = asyncio.run(
+        reserve_daily_quota(
+            user_id="ip:203.0.113.1",
+            token_cost=600,
+            daily_limit=1000,
+            global_daily_limit=1000,
+        )
+    )
+    assert first.used == 600
+
+    with pytest.raises(DailyQuotaExceeded) as exc_info:
+        asyncio.run(
+            reserve_daily_quota(
+                user_id="ip:203.0.113.2",
+                token_cost=600,
+                daily_limit=1000,
+                global_daily_limit=1000,
+            )
+        )
+    assert exc_info.value.usage.limit == 1000
+    assert exc_info.value.usage.used == 600
+
+
+def test_places_endpoint_reserves_quota_before_provider_call(monkeypatch):
+    monkeypatch.setenv("DAILY_TOKEN_LIMIT", "1000")
+    monkeypatch.setenv("PLACES_REQUEST_TOKEN_COST", "600")
+    get_settings.cache_clear()
+    calls = 0
+
+    async def fake_places(*_args, **_kwargs):
+        nonlocal calls
+        calls += 1
+        return []
+
+    monkeypatch.setattr(places_router, "get_top_rated_nearby", fake_places)
+    app = create_app()
+
+    async def exercise():
+        async with AsyncClient(
+            transport=ASGITransport(app=app),
+            base_url="http://test",
+        ) as client:
+            first = await client.get("/places/suggestions?lat=43.65&lng=-79.38")
+            second = await client.get("/places/suggestions?lat=43.65&lng=-79.38")
+            return first, second
+
+    first_response, second_response = asyncio.run(exercise())
+    assert first_response.status_code == 200
+    assert first_response.headers["x-ratelimit-remaining"] == "400"
+    assert second_response.status_code == 429
+    assert calls == 1
+
+
+def test_favorites_require_signed_owner_identity():
+    settings = get_settings()
+    alice_token = issue_identity_token("alice", settings.IDENTITY_SIGNING_SECRET)
+    headers = {"Authorization": f"Bearer {alice_token}"}
+    app = create_app()
+
+    async def exercise():
+        async with AsyncClient(
+            transport=ASGITransport(app=app),
+            base_url="http://test",
+        ) as client:
+            own_create = await client.post(
+                "/favorites",
+                headers=headers,
+                json={"user_id": "alice", "restaurant": "Safe Ramen", "note": "Mine"},
+            )
+            own_read = await client.get("/favorites/alice", headers=headers)
+            cross_read = await client.get("/favorites/bob", headers=headers)
+            cross_write = await client.post(
+                "/favorites",
+                headers=headers,
+                json={"user_id": "bob", "restaurant": "Injected"},
+            )
+            missing_token = await client.get("/favorites/alice")
+            forged_token = await client.get(
+                "/favorites/alice",
+                headers={"Authorization": "Bearer YWxpY2U.invalid"},
+            )
+            return own_create, own_read, cross_read, cross_write, missing_token, forged_token
+
+    own_create, own_read, cross_read, cross_write, missing_token, forged_token = asyncio.run(
+        exercise()
+    )
+    assert own_create.status_code == 201
+    assert own_read.status_code == 200
+    assert own_read.json()["favorites"][0]["restaurant"] == "Safe Ramen"
+    assert cross_read.status_code == 403
+    assert cross_write.status_code == 403
+    assert missing_token.status_code == 401
+    assert forged_token.status_code == 401
+
+
+def test_identity_tokens_expire():
+    secret = get_settings().IDENTITY_SIGNING_SECRET
+    token = issue_identity_token("alice", secret, ttl_seconds=60, now=100)
+
+    assert verify_identity_token(token, secret, now=159) == "alice"
+    with pytest.raises(ValueError, match="expired"):
+        verify_identity_token(token, secret, now=160)
