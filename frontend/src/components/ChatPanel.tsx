@@ -17,6 +17,8 @@ type Message = {
 const createMessageId = (prefix: string): string =>
   `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
+const DEFAULT_DAILY_TOKEN_LIMIT = 10000;
+
 const seededMessages: Message[] = [
   {
     id: "intro",
@@ -154,6 +156,9 @@ export function ChatPanel({
     usage && usage.limit > 0
       ? Math.min(100, Math.max(0, (usage.used / usage.limit) * 100))
       : 0;
+  const displayedLimit = usage?.limit ?? DEFAULT_DAILY_TOKEN_LIMIT;
+  const displayedUsed = usage?.used ?? 0;
+  const displayedRemaining = usage?.remaining ?? displayedLimit;
   const resetTime = usage
     ? new Intl.DateTimeFormat(undefined, {
         hour: "numeric",
@@ -176,27 +181,25 @@ export function ChatPanel({
           <span className="rounded-full bg-primary/20 px-3 py-1 text-xs font-medium text-primary">
             Prototype
           </span>
-          {usage && (
-            <div
-              className="w-40 rounded-2xl border border-border bg-background/70 px-3 py-2 text-right shadow-sm"
-              aria-label={`Daily quota: ${usage.remaining} tokens remaining`}
-            >
-              <div className="flex items-center justify-between gap-2 text-[11px] font-semibold text-foreground">
-                <span>Daily quota</span>
-                <span>{usage.remaining.toLocaleString()} left</span>
-              </div>
-              <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-secondary">
-                <div
-                  className="h-full rounded-full bg-primary transition-all"
-                  style={{ width: `${usagePercent}%` }}
-                />
-              </div>
-              <p className="mt-1 text-[10px] text-muted-foreground">
-                {usage.used.toLocaleString()} / {usage.limit.toLocaleString()} tokens
-                {resetTime ? ` - resets ${resetTime}` : ""}
-              </p>
+          <div
+            className="w-44 rounded-2xl border border-border bg-background/70 px-3 py-2 text-right shadow-sm"
+            aria-label={`Daily quota: ${displayedRemaining} tokens left`}
+          >
+            <div className="flex items-center justify-between gap-2 text-[11px] font-semibold text-foreground">
+              <span>Daily quota</span>
+              <span>{displayedRemaining.toLocaleString()} tokens left</span>
             </div>
-          )}
+            <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-secondary">
+              <div
+                className="h-full rounded-full bg-primary transition-all"
+                style={{ width: `${usagePercent}%` }}
+              />
+            </div>
+            <p className="mt-1 text-[10px] text-muted-foreground">
+              {displayedUsed.toLocaleString()} / {displayedLimit.toLocaleString()} tokens
+              {resetTime ? ` - resets ${resetTime}` : " - updates after chat"}
+            </p>
+          </div>
         </div>
       </header>
 
