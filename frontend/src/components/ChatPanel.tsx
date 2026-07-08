@@ -4,6 +4,7 @@ import {
   sendChat,
   ChatRecommendation,
   LocationHint,
+  UsageMetadata,
 } from "../api/chat";
 
 type Message = {
@@ -50,6 +51,7 @@ export function ChatPanel({
   const [draft, setDraft] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [usage, setUsage] = useState<UsageMetadata | null>(null);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -77,6 +79,7 @@ export function ChatPanel({
       const response = await sendChat(trimmed, {
         location: location ?? undefined,
       });
+      setUsage(response.usage ?? null);
       const recommendations =
         response.recommendations.length > 0
           ? response.recommendations
@@ -108,6 +111,7 @@ export function ChatPanel({
       setMessages((prev) => [...prev, ...assistantMessages]);
     } catch (err) {
       if (err instanceof ChatQuotaError) {
+        setUsage(err.usage ?? null);
         setError(err.message);
         onRecommendations?.([]);
         setMessages((prev) => [
@@ -146,6 +150,17 @@ export function ChatPanel({
     (location
       ? "Using your current location for nearby matches."
       : "Share your location in the browser to dial in the map.");
+  const usagePercent =
+    usage && usage.limit > 0
+      ? Math.min(100, Math.max(0, (usage.used / usage.limit) * 100))
+      : 0;
+  const resetTime = usage
+    ? new Intl.DateTimeFormat(undefined, {
+        hour: "numeric",
+        minute: "2-digit",
+        timeZoneName: "short",
+      }).format(new Date(usage.reset_at))
+    : null;
 
   return (
     <div className="flex h-full flex-col rounded-3xl border border-border bg-secondary/60 shadow-lg backdrop-blur-sm">
@@ -157,9 +172,32 @@ export function ChatPanel({
           </p>
           <p className="mt-1 text-xs text-muted-foreground">{resolvedLocationStatus}</p>
         </div>
-        <span className="rounded-full bg-primary/20 px-3 py-1 text-xs font-medium text-primary">
-          Prototype
-        </span>
+        <div className="flex flex-col items-end gap-2">
+          <span className="rounded-full bg-primary/20 px-3 py-1 text-xs font-medium text-primary">
+            Prototype
+          </span>
+          {usage && (
+            <div
+              className="w-40 rounded-2xl border border-border bg-background/70 px-3 py-2 text-right shadow-sm"
+              aria-label={`Daily quota: ${usage.remaining} tokens remaining`}
+            >
+              <div className="flex items-center justify-between gap-2 text-[11px] font-semibold text-foreground">
+                <span>Daily quota</span>
+                <span>{usage.remaining.toLocaleString()} left</span>
+              </div>
+              <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-secondary">
+                <div
+                  className="h-full rounded-full bg-primary transition-all"
+                  style={{ width: `${usagePercent}%` }}
+                />
+              </div>
+              <p className="mt-1 text-[10px] text-muted-foreground">
+                {usage.used.toLocaleString()} / {usage.limit.toLocaleString()} tokens
+                {resetTime ? ` - resets ${resetTime}` : ""}
+              </p>
+            </div>
+          )}
+        </div>
       </header>
 
       <div className="flex-1 space-y-4 overflow-y-auto px-6 py-4">
