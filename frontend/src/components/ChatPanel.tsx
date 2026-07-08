@@ -18,6 +18,7 @@ const createMessageId = (prefix: string): string =>
   `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
 const DEFAULT_DAILY_TOKEN_LIMIT = 10000;
+const FALLBACK_CHAT_TOKEN_COST = 1500;
 
 const seededMessages: Message[] = [
   {
@@ -81,7 +82,9 @@ export function ChatPanel({
       const response = await sendChat(trimmed, {
         location: location ?? undefined,
       });
-      setUsage(response.usage ?? null);
+      setUsage((currentUsage) =>
+        response.usage ?? estimateNextUsage(currentUsage),
+      );
       const recommendations =
         response.recommendations.length > 0
           ? response.recommendations
@@ -113,7 +116,7 @@ export function ChatPanel({
       setMessages((prev) => [...prev, ...assistantMessages]);
     } catch (err) {
       if (err instanceof ChatQuotaError) {
-        setUsage(err.usage ?? null);
+        setUsage((currentUsage) => err.usage ?? currentUsage);
         setError(err.message);
         onRecommendations?.([]);
         setMessages((prev) => [
@@ -152,13 +155,13 @@ export function ChatPanel({
     (location
       ? "Using your current location for nearby matches."
       : "Share your location in the browser to dial in the map.");
-  const usagePercent =
-    usage && usage.limit > 0
-      ? Math.min(100, Math.max(0, (usage.used / usage.limit) * 100))
-      : 0;
   const displayedLimit = usage?.limit ?? DEFAULT_DAILY_TOKEN_LIMIT;
   const displayedUsed = usage?.used ?? 0;
   const displayedRemaining = usage?.remaining ?? displayedLimit;
+  const remainingPercent =
+    displayedLimit > 0
+      ? Math.min(100, Math.max(0, (displayedRemaining / displayedLimit) * 100))
+      : 0;
   const resetTime = usage
     ? new Intl.DateTimeFormat(undefined, {
         hour: "numeric",
@@ -192,7 +195,7 @@ export function ChatPanel({
             <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-secondary">
               <div
                 className="h-full rounded-full bg-primary transition-all"
-                style={{ width: `${usagePercent}%` }}
+                style={{ width: `${remainingPercent}%` }}
               />
             </div>
             <p className="mt-1 text-[10px] text-muted-foreground">
@@ -286,4 +289,30 @@ export function ChatPanel({
       </form>
     </div>
   );
+}
+
+function estimateNextUsage(currentUsage: UsageMetadata | null): UsageMetadata {
+  const limit = currentUsage?.limit ?? DEFAULT_DAILY_TOKEN_LIMIT;
+  const used = Math.min(
+    limit,
+    (currentUsage?.used ?? 0) + FALLBACK_CHAT_TOKEN_COST,
+  );
+
+  return {
+    limit,
+    used,
+    remaining: Math.max(limit - used, 0),
+    reset_at: currentUsage?.reset_at ?? nextUtcResetAt(),
+  };
+}
+
+function nextUtcResetAt(): string {
+  const now = new Date();
+  return new Date(
+    Date.UTC(
+      now.getUTCFullYear(),
+      now.getUTCMonth(),
+      now.getUTCDate() + 1,
+    ),
+  ).toISOString();
 }

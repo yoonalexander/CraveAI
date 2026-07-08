@@ -26,23 +26,22 @@ async def get_suggestions(
     Get a list of high-rated restaurant suggestions near the user.
     """
     settings = get_settings()
-    if settings.USAGE_LIMITS_ENABLED:
-        client_host = request.client.host if request.client else None
-        try:
-            usage = await reserve_daily_quota(
-                user_id=resolve_usage_user_id(client_host),
-                token_cost=settings.PLACES_REQUEST_TOKEN_COST,
-                daily_limit=settings.DAILY_TOKEN_LIMIT,
-                global_daily_limit=settings.GLOBAL_DAILY_TOKEN_LIMIT,
-            )
-        except DailyQuotaExceeded as exc:
-            raise HTTPException(
-                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-                detail={"code": "daily_token_quota_exceeded"},
-                headers=rate_limit_headers(exc.usage, include_retry_after=True),
-            ) from exc
-        for header, value in rate_limit_headers(usage).items():
-            response.headers[header] = value
+    client_host = request.client.host if request.client else None
+    try:
+        usage = await reserve_daily_quota(
+            user_id=resolve_usage_user_id(client_host),
+            token_cost=settings.PLACES_REQUEST_TOKEN_COST,
+            daily_limit=settings.DAILY_TOKEN_LIMIT,
+            global_daily_limit=settings.GLOBAL_DAILY_TOKEN_LIMIT,
+        )
+    except DailyQuotaExceeded as exc:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail={"code": "daily_token_quota_exceeded"},
+            headers=rate_limit_headers(exc.usage, include_retry_after=True),
+        ) from exc
+    for header, value in rate_limit_headers(usage).items():
+        response.headers[header] = value
 
     suggestions = await get_top_rated_nearby(lat, lng, radius)
     return suggestions

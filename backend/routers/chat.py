@@ -136,35 +136,33 @@ async def generate_chat_response(
     """
     settings = get_settings()
     user_text = payload.query or payload.message or ""
-    usage: UsageReservation | None = None
-    if settings.USAGE_LIMITS_ENABLED:
-        client_host = request.client.host if request.client else None
-        usage_user_id = resolve_usage_user_id(client_host)
-        token_cost = estimate_chat_token_cost(
-            user_text,
-            settings.CHAT_REQUEST_TOKEN_COST,
-            settings.CHAT_PIPELINE_TOKEN_OVERHEAD,
+    client_host = request.client.host if request.client else None
+    usage_user_id = resolve_usage_user_id(client_host)
+    token_cost = estimate_chat_token_cost(
+        user_text,
+        settings.CHAT_REQUEST_TOKEN_COST,
+        settings.CHAT_PIPELINE_TOKEN_OVERHEAD,
+    )
+    try:
+        usage = await reserve_daily_quota(
+            user_id=usage_user_id,
+            token_cost=token_cost,
+            daily_limit=settings.DAILY_TOKEN_LIMIT,
+            global_daily_limit=settings.GLOBAL_DAILY_TOKEN_LIMIT,
         )
-        try:
-            usage = await reserve_daily_quota(
-                user_id=usage_user_id,
-                token_cost=token_cost,
-                daily_limit=settings.DAILY_TOKEN_LIMIT,
-                global_daily_limit=settings.GLOBAL_DAILY_TOKEN_LIMIT,
-            )
-        except DailyQuotaExceeded as exc:
-            raise HTTPException(
-                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-                detail={
-                    "code": "daily_token_quota_exceeded",
-                    "message": "Daily demo token quota exceeded.",
-                    "usage": _usage_metadata(exc.usage).model_dump(),
-                },
-                headers=rate_limit_headers(exc.usage, include_retry_after=True),
-            ) from exc
+    except DailyQuotaExceeded as exc:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail={
+                "code": "daily_token_quota_exceeded",
+                "message": "Daily demo token quota exceeded.",
+                "usage": _usage_metadata(exc.usage).model_dump(),
+            },
+            headers=rate_limit_headers(exc.usage, include_retry_after=True),
+        ) from exc
 
-        for header, value in rate_limit_headers(usage).items():
-            response.headers[header] = value
+    for header, value in rate_limit_headers(usage).items():
+        response.headers[header] = value
 
     location_payload = payload.location.model_dump() if payload.location else {}
     rag_result = await generate_recommendations(
@@ -189,7 +187,7 @@ async def generate_chat_response(
         reply=rag_result.get("reply", ""),
         messages=[assistant_message],
         recommendations=recommendations,
-        usage=_usage_metadata(usage) if usage else None,
+        usage=_usage_metadata(usage),
     )
 
 

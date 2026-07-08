@@ -250,6 +250,36 @@ def test_chat_endpoint_returns_cumulative_usage_after_each_chat(mocked_pipeline)
     assert mocked_pipeline["intent"] == 2
 
 
+def test_chat_endpoint_enforces_quota_even_if_disable_flag_is_false(
+    monkeypatch,
+    mocked_pipeline,
+):
+    monkeypatch.setenv("USAGE_LIMITS_ENABLED", "false")
+    get_settings.cache_clear()
+    app = create_app()
+
+    async def exercise():
+        async with AsyncClient(
+            transport=ASGITransport(app=app),
+            base_url="http://test",
+        ) as client:
+            return await client.post(
+                "/chat",
+                json={
+                    "query": "I want cozy Indian food tonight.",
+                    "location": {"lat": 43.6532, "lng": -79.3832},
+                },
+            )
+
+    response = asyncio.run(exercise())
+
+    assert response.status_code == 200
+    assert response.json()["usage"]["used"] == 1500
+    assert response.json()["usage"]["remaining"] == 8500
+    assert response.headers["x-ratelimit-remaining"] == "8500"
+    assert mocked_pipeline["intent"] == 1
+
+
 def test_cors_exposes_rate_limit_headers_for_browser_badge_fallback(mocked_pipeline):
     app = create_app()
 
