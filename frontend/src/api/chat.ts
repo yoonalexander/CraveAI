@@ -66,6 +66,7 @@ const FALLBACK_LOCATION: LocationHint = {
 
 const API_URL =
   import.meta.env.VITE_API_URL?.toString()?.trim() ||
+  import.meta.env.VITE_API_BASE_URL?.toString()?.trim() ||
   "http://127.0.0.1:8000";
 
 /**
@@ -104,7 +105,7 @@ export async function sendChat(
     ) {
       throw new ChatQuotaError(
         "You've reached today's CraveAI demo limit. Please try again after the daily reset.",
-        quotaDetail.usage,
+        quotaDetail.usage ?? readUsageHeaders(response),
       );
     }
 
@@ -114,7 +115,38 @@ export async function sendChat(
     );
   }
 
-  return response.json();
+  const body = (await response.json()) as ChatResponse;
+  return {
+    ...body,
+    usage: body.usage ?? readUsageHeaders(response),
+  };
+}
+
+function readUsageHeaders(response: Response): UsageMetadata | null {
+  const limit = readIntegerHeader(response, "x-ratelimit-limit");
+  const remaining = readIntegerHeader(response, "x-ratelimit-remaining");
+  const resetAt = response.headers.get("x-ratelimit-reset");
+
+  if (limit === null || remaining === null || !resetAt) {
+    return null;
+  }
+
+  return {
+    limit,
+    remaining,
+    used: Math.max(limit - remaining, 0),
+    reset_at: resetAt,
+  };
+}
+
+function readIntegerHeader(response: Response, name: string): number | null {
+  const value = response.headers.get(name);
+  if (!value) {
+    return null;
+  }
+
+  const parsed = Number.parseInt(value, 10);
+  return Number.isFinite(parsed) ? parsed : null;
 }
 
 async function readErrorPayload(

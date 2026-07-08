@@ -220,6 +220,63 @@ def test_chat_endpoint_returns_mocked_response(mocked_pipeline):
     assert mocked_pipeline["rank"] == 1
 
 
+def test_chat_endpoint_returns_cumulative_usage_after_each_chat(mocked_pipeline):
+    app = create_app()
+
+    async def exercise():
+        async with AsyncClient(
+            transport=ASGITransport(app=app),
+            base_url="http://test",
+        ) as client:
+            payload = {
+                "query": "I want cozy Indian food tonight.",
+                "location": {"lat": 43.6532, "lng": -79.3832},
+            }
+            first = await client.post("/chat", json=payload)
+            second = await client.post("/chat", json={**payload, "query": "Now make it spicy."})
+            return first, second
+
+    first_response, second_response = asyncio.run(exercise())
+
+    assert first_response.status_code == 200
+    assert first_response.json()["usage"]["used"] == 1500
+    assert first_response.json()["usage"]["remaining"] == 8500
+    assert first_response.headers["x-ratelimit-remaining"] == "8500"
+
+    assert second_response.status_code == 200
+    assert second_response.json()["usage"]["used"] == 3000
+    assert second_response.json()["usage"]["remaining"] == 7000
+    assert second_response.headers["x-ratelimit-remaining"] == "7000"
+    assert mocked_pipeline["intent"] == 2
+
+
+def test_cors_exposes_rate_limit_headers_for_browser_badge_fallback(mocked_pipeline):
+    app = create_app()
+
+    async def exercise():
+        async with AsyncClient(
+            transport=ASGITransport(app=app),
+            base_url="http://test",
+        ) as client:
+            return await client.post(
+                "/chat",
+                headers={
+                    "Origin": "http://localhost:5173",
+                },
+                json={
+                    "query": "I want cozy Indian food tonight.",
+                    "location": {"lat": 43.6532, "lng": -79.3832},
+                },
+            )
+
+    response = asyncio.run(exercise())
+
+    exposed_headers = response.headers["access-control-expose-headers"].lower()
+    assert "x-ratelimit-limit" in exposed_headers
+    assert "x-ratelimit-remaining" in exposed_headers
+    assert "x-ratelimit-reset" in exposed_headers
+
+
 def test_chat_endpoint_returns_429_before_pipeline_when_quota_exhausted(
     monkeypatch,
     mocked_pipeline,
