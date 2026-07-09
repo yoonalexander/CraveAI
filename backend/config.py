@@ -57,6 +57,9 @@ class Config:
     CHAT_DEVELOPER_MODE: bool = field(
         default_factory=lambda: _env_bool("CHAT_DEVELOPER_MODE", False)
     )
+    CHAT_DEV_BYPASS_SECRET: str = field(
+        default_factory=lambda: os.getenv("CHAT_DEV_BYPASS_SECRET", "")
+    )
     GLOBAL_DAILY_TOKEN_LIMIT: int = field(
         default_factory=lambda: _env_int("GLOBAL_DAILY_TOKEN_LIMIT", 100000)
     )
@@ -91,6 +94,15 @@ class Config:
 
         if self.ENVIRONMENT.lower() == "production" and self.CHAT_DEVELOPER_MODE:
             message = "CHAT_DEVELOPER_MODE cannot be enabled in production"
+            logger.error(message)
+            raise RuntimeError(message)
+
+        if (
+            self.ENVIRONMENT.lower() == "production"
+            and self.CHAT_DEV_BYPASS_SECRET
+            and len(self.CHAT_DEV_BYPASS_SECRET) < 32
+        ):
+            message = "CHAT_DEV_BYPASS_SECRET must contain at least 32 characters in production"
             logger.error(message)
             raise RuntimeError(message)
 

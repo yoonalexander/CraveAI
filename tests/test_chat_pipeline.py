@@ -113,6 +113,7 @@ from backend.services.usage_limits import (
 )
 
 ANONYMOUS_TOKEN_HEADER = "X-CraveAI-Anonymous-Token"
+DEV_BYPASS_HEADER = "X-CraveAI-Dev-Bypass"
 
 
 @pytest.fixture(autouse=True)
@@ -127,6 +128,7 @@ def configure_test_settings(monkeypatch, tmp_path):
     monkeypatch.setenv("DAILY_TOKEN_LIMIT", "10000")
     monkeypatch.setenv("DAILY_CHAT_MESSAGE_LIMIT", "3")
     monkeypatch.setenv("CHAT_DEVELOPER_MODE", "false")
+    monkeypatch.delenv("CHAT_DEV_BYPASS_SECRET", raising=False)
     monkeypatch.setenv("GLOBAL_DAILY_TOKEN_LIMIT", "100000")
     monkeypatch.setenv("PLACES_REQUEST_TOKEN_COST", "500")
     monkeypatch.setenv("IDENTITY_SIGNING_SECRET", "test-identity-signing-secret")
@@ -428,6 +430,45 @@ def test_chat_developer_mode_allows_unlimited_messages(monkeypatch, mocked_pipel
     assert mocked_pipeline["intent"] == 5
 
 
+def test_chat_status_reports_developer_mode_without_pipeline_call(
+    monkeypatch,
+    mocked_pipeline,
+):
+    monkeypatch.setenv("CHAT_DEVELOPER_MODE", "true")
+    get_settings.cache_clear()
+    app = create_app()
+
+    async def exercise():
+        async with AsyncClient(
+            transport=ASGITransport(app=app),
+            base_url="http://test",
+        ) as client:
+            return await client.get("/chat/status")
+
+    response = asyncio.run(exercise())
+
+    assert response.status_code == 200
+    assert response.json()["usage"]["unlimited"] is True
+    assert mocked_pipeline["intent"] == 0
+
+
+def test_chat_status_does_not_report_unlimited_in_standard_mode(mocked_pipeline):
+    app = create_app()
+
+    async def exercise():
+        async with AsyncClient(
+            transport=ASGITransport(app=app),
+            base_url="http://test",
+        ) as client:
+            return await client.get("/chat/status")
+
+    response = asyncio.run(exercise())
+
+    assert response.status_code == 200
+    assert response.json() == {}
+    assert mocked_pipeline["intent"] == 0
+
+
 def test_chat_developer_mode_is_rejected_in_production(monkeypatch):
     monkeypatch.setenv("APP_ENV", "production")
     monkeypatch.setenv("CHAT_DEVELOPER_MODE", "true")
@@ -435,6 +476,107 @@ def test_chat_developer_mode_is_rejected_in_production(monkeypatch):
     get_settings.cache_clear()
 
     with pytest.raises(RuntimeError, match="CHAT_DEVELOPER_MODE cannot be enabled"):
+        create_app()
+
+
+def test_chat_dev_bypass_header_allows_unlimited_messages_in_production(
+    monkeypatch,
+    mocked_pipeline,
+):
+    bypass_secret = "production-test-bypass-secret-32-chars"
+    monkeypatch.setenv("APP_ENV", "production")
+    monkeypatch.setenv("IDENTITY_SIGNING_SECRET", "x" * 32)
+    monkeypatch.setenv("CHAT_DEV_BYPASS_SECRET", bypass_secret)
+    get_settings.cache_clear()
+    app = create_app()
+
+    async def exercise():
+        async with AsyncClient(
+            transport=ASGITransport(app=app),
+            base_url="http://test",
+        ) as client:
+            payload = {
+                "query": "I want a cozy bowl of ramen tonight.",
+                "location": {"lat": 43.6532, "lng": -79.3832},
+            }
+            return [
+                await client.post(
+                    "/chat",
+                    headers={DEV_BYPASS_HEADER: bypass_secret},
+                    json={**payload, "query": f"{payload['query']} ({index})"},
+                )
+                for index in range(5)
+            ]
+
+    responses = asyncio.run(exercise())
+
+    assert all(response.status_code == 200 for response in responses)
+    assert all(response.json()["usage"]["unlimited"] is True for response in responses)
+    assert all("x-ratelimit-limit" not in response.headers for response in responses)
+    assert mocked_pipeline["intent"] == 5
+
+
+def test_chat_dev_bypass_header_with_wrong_secret_still_enforces_quota(
+    monkeypatch,
+    mocked_pipeline,
+):
+    monkeypatch.setenv("CHAT_DEV_BYPASS_SECRET", "test-bypass-secret")
+    get_settings.cache_clear()
+    app = create_app()
+
+    async def exercise():
+        async with AsyncClient(
+            transport=ASGITransport(app=app),
+            base_url="http://test",
+        ) as client:
+            payload = {
+                "query": "I want a cozy bowl of ramen tonight.",
+                "location": {"lat": 43.6532, "lng": -79.3832},
+            }
+            first = await client.post(
+                "/chat",
+                headers={DEV_BYPASS_HEADER: "wrong-secret"},
+                json=payload,
+            )
+            token = first.headers[ANONYMOUS_TOKEN_HEADER]
+            headers = {
+                ANONYMOUS_TOKEN_HEADER: token,
+                DEV_BYPASS_HEADER: "wrong-secret",
+            }
+            second = await client.post(
+                "/chat",
+                headers=headers,
+                json={**payload, "query": "Make it spicy."},
+            )
+            third = await client.post(
+                "/chat",
+                headers=headers,
+                json={**payload, "query": "Any late-night spots?"},
+            )
+            fourth = await client.post(
+                "/chat",
+                headers=headers,
+                json={**payload, "query": "One more idea?"},
+            )
+            return first, second, third, fourth
+
+    first_response, second_response, third_response, fourth_response = asyncio.run(exercise())
+
+    assert first_response.status_code == 200
+    assert second_response.status_code == 200
+    assert third_response.status_code == 200
+    assert fourth_response.status_code == 429
+    assert fourth_response.json()["detail"]["usage"]["used"] == 3
+    assert mocked_pipeline["intent"] == 3
+
+
+def test_chat_dev_bypass_secret_must_be_strong_in_production(monkeypatch):
+    monkeypatch.setenv("APP_ENV", "production")
+    monkeypatch.setenv("IDENTITY_SIGNING_SECRET", "x" * 32)
+    monkeypatch.setenv("CHAT_DEV_BYPASS_SECRET", "too-short")
+    get_settings.cache_clear()
+
+    with pytest.raises(RuntimeError, match="CHAT_DEV_BYPASS_SECRET must contain"):
         create_app()
 
 

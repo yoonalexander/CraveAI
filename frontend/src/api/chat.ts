@@ -40,6 +40,10 @@ export type ChatResponse = {
   usage?: UsageMetadata | null;
 };
 
+export type ChatStatusResponse = {
+  usage?: UsageMetadata | null;
+};
+
 type ApiErrorPayload = {
   detail?: {
     code?: string;
@@ -72,6 +76,8 @@ const API_URL =
 
 const ANONYMOUS_TOKEN_HEADER = "X-CraveAI-Anonymous-Token";
 const ANONYMOUS_TOKEN_STORAGE_KEY = "craveai-anonymous-token";
+const DEV_BYPASS_HEADER = "X-CraveAI-Dev-Bypass";
+const DEV_BYPASS_STORAGE_KEY = "craveai-dev-bypass-secret";
 
 /**
  * Send a chat query to the backend chat endpoint.
@@ -92,13 +98,9 @@ export async function sendChat(
     location: locationPayload,
   };
 
-  const headers: Record<string, string> = {
+  const headers: Record<string, string> = buildChatHeaders({
     "Content-Type": "application/json",
-  };
-  const anonymousToken = readStoredAnonymousToken();
-  if (anonymousToken) {
-    headers[ANONYMOUS_TOKEN_HEADER] = anonymousToken;
-  }
+  });
 
   const response = await fetch(`${API_URL}/chat`, {
     method: "POST",
@@ -132,6 +134,19 @@ export async function sendChat(
     ...body,
     usage: body.usage ?? readUsageHeaders(response),
   };
+}
+
+export async function fetchChatStatus(): Promise<ChatStatusResponse> {
+  const response = await fetch(`${API_URL}/chat/status`, {
+    method: "GET",
+    headers: buildChatHeaders(),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Chat status request failed with status ${response.status}.`);
+  }
+
+  return (await response.json()) as ChatStatusResponse;
 }
 
 function readUsageHeaders(response: Response): UsageMetadata | null {
@@ -170,6 +185,21 @@ function readStoredAnonymousToken(): string | null {
   return token?.trim() || null;
 }
 
+function buildChatHeaders(
+  baseHeaders: Record<string, string> = {},
+): Record<string, string> {
+  const headers = { ...baseHeaders };
+  const anonymousToken = readStoredAnonymousToken();
+  if (anonymousToken) {
+    headers[ANONYMOUS_TOKEN_HEADER] = anonymousToken;
+  }
+  const devBypassSecret = readStoredDevBypassSecret();
+  if (devBypassSecret) {
+    headers[DEV_BYPASS_HEADER] = devBypassSecret;
+  }
+  return headers;
+}
+
 function persistAnonymousToken(response: Response): void {
   const token = response.headers.get(ANONYMOUS_TOKEN_HEADER)?.trim();
   if (!token || !canUseLocalStorage()) {
@@ -177,6 +207,15 @@ function persistAnonymousToken(response: Response): void {
   }
 
   window.localStorage.setItem(ANONYMOUS_TOKEN_STORAGE_KEY, token);
+}
+
+function readStoredDevBypassSecret(): string | null {
+  if (!canUseLocalStorage()) {
+    return null;
+  }
+
+  const secret = window.localStorage.getItem(DEV_BYPASS_STORAGE_KEY);
+  return secret?.trim() || null;
 }
 
 function canUseLocalStorage(): boolean {

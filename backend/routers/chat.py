@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hmac
 from datetime import datetime, time, timedelta, timezone
 from typing import List, Optional
 
@@ -23,6 +24,7 @@ from backend.services.usage_limits import (
 router = APIRouter(prefix="/chat", tags=["chat"])
 MAX_CHAT_MESSAGE_CHARS = 2000
 ANONYMOUS_TOKEN_HEADER = "X-CraveAI-Anonymous-Token"
+DEV_BYPASS_HEADER = "X-CraveAI-Dev-Bypass"
 
 
 class LocationPayload(BaseModel):
@@ -129,6 +131,24 @@ class ChatResponse(BaseModel):
     )
 
 
+class ChatStatusResponse(BaseModel):
+    """Non-counting chat status used by the UI for mode indicators."""
+
+    usage: Optional[UsageMetadata] = None
+
+
+@router.get("/status", response_model=ChatStatusResponse, response_model_exclude_defaults=True)
+async def get_chat_status(request: Request) -> ChatStatusResponse:
+    settings = get_settings()
+    bypass_quota = settings.CHAT_DEVELOPER_MODE or _is_dev_bypass_authorized(
+        request.headers.get(DEV_BYPASS_HEADER),
+        settings.CHAT_DEV_BYPASS_SECRET,
+    )
+    if bypass_quota:
+        return ChatStatusResponse(usage=_unlimited_usage_metadata())
+    return ChatStatusResponse()
+
+
 @router.post("", response_model=ChatResponse, response_model_exclude_defaults=True)
 async def generate_chat_response(
     payload: ChatRequest,
@@ -148,7 +168,11 @@ async def generate_chat_response(
         client_host,
         settings.IDENTITY_SIGNING_SECRET,
     )
-    if settings.CHAT_DEVELOPER_MODE:
+    bypass_quota = settings.CHAT_DEVELOPER_MODE or _is_dev_bypass_authorized(
+        request.headers.get(DEV_BYPASS_HEADER),
+        settings.CHAT_DEV_BYPASS_SECRET,
+    )
+    if bypass_quota:
         usage_metadata = _unlimited_usage_metadata()
         if anonymous_token:
             response.headers[ANONYMOUS_TOKEN_HEADER] = anonymous_token
@@ -254,6 +278,15 @@ def _resolve_chat_usage_identity(
 
     anonymous_subject, issued_token = issue_anonymous_identity_token(signing_secret)
     return f"chat:{anonymous_subject}", issued_token
+
+
+def _is_dev_bypass_authorized(
+    provided_secret: str | None,
+    configured_secret: str,
+) -> bool:
+    if not provided_secret or not configured_secret:
+        return False
+    return hmac.compare_digest(provided_secret.strip(), configured_secret)
 
 
 def _chat_response_headers(

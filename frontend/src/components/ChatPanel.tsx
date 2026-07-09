@@ -1,6 +1,7 @@
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import {
   ChatQuotaError,
+  fetchChatStatus,
   sendChat,
   ChatRecommendation,
   LocationHint,
@@ -58,6 +59,26 @@ export function ChatPanel({
   const [usage, setUsage] = useState<UsageMetadata | null>(() =>
     readCachedUsage(),
   );
+
+  useEffect(() => {
+    let isMounted = true;
+
+    fetchChatStatus()
+      .then((status) => {
+        if (!isMounted || !status.usage?.unlimited) {
+          return;
+        }
+        setUsage(status.usage);
+        writeCachedUsage(status.usage);
+      })
+      .catch(() => {
+        // Status is only used for the visual mode indicator.
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
