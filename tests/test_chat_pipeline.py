@@ -103,6 +103,7 @@ if "langchain_community" not in sys.modules:
 from backend.config import get_settings
 from backend.main import create_app
 from backend.routers import places as places_router
+from backend.services import places as places_service
 from backend.services import rag_pipeline
 from backend.services.identity import issue_identity_token, verify_identity_token
 from backend.services.storage import init_storage
@@ -511,6 +512,65 @@ def test_places_endpoint_reserves_quota_before_provider_call(monkeypatch):
     assert first_response.headers["x-ratelimit-remaining"] == "400"
     assert second_response.status_code == 429
     assert calls == 1
+
+
+def test_top_rated_places_filter_rejects_incidental_food_venues():
+    class FakeResponse:
+        def raise_for_status(self):
+            return None
+
+        def json(self):
+            return {
+                "status": "OK",
+                "results": [
+                    {
+                        "name": "Streetsville Bowl 5 pin bowling the Canadian game",
+                        "rating": 4.4,
+                        "user_ratings_total": 1046,
+                        "vicinity": "128 Queen Street South #9, Mississauga",
+                        "types": [
+                            "bowling_alley",
+                            "meal_takeaway",
+                            "restaurant",
+                            "food",
+                            "point_of_interest",
+                            "establishment",
+                        ],
+                        "place_id": "bowling-alley",
+                    },
+                    {
+                        "name": "Sushi In Sushi",
+                        "rating": 4.5,
+                        "user_ratings_total": 1149,
+                        "vicinity": "2310 Battleford Road, Mississauga",
+                        "types": [
+                            "restaurant",
+                            "meal_takeaway",
+                            "food",
+                            "point_of_interest",
+                            "establishment",
+                        ],
+                        "place_id": "sushi-spot",
+                    },
+                ],
+            }
+
+    class FakeClient:
+        async def get(self, *_args, **_kwargs):
+            return FakeResponse()
+
+    results = asyncio.run(
+        places_service._fetch_and_filter(
+            FakeClient(),
+            lat=43.65,
+            lng=-79.38,
+            radius=5000,
+            min_rating=4.0,
+        )
+    )
+
+    assert [place["name"] for place in results] == ["Sushi In Sushi"]
+    assert "Bowling Alley" not in results[0]["tags"]
 
 
 def test_favorites_require_signed_owner_identity():

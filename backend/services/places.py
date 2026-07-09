@@ -16,6 +16,67 @@ GOOGLE_PLACES_API_KEY = settings.GOOGLE_API_KEY
 DEFAULT_SEARCH_RADIUS_METERS = int(os.getenv("GOOGLE_SEARCH_RADIUS", "5000"))
 MAX_PLACES_PER_CUISINE = 5
 
+FOOD_PLACE_TYPES = {
+    "restaurant",
+    "meal_takeaway",
+    "meal_delivery",
+    "cafe",
+    "bakery",
+    "bar",
+}
+
+NON_RESTAURANT_PLACE_TYPES = {
+    "amusement_center",
+    "amusement_park",
+    "aquarium",
+    "art_gallery",
+    "bowling_alley",
+    "casino",
+    "clothing_store",
+    "convenience_store",
+    "department_store",
+    "electronics_store",
+    "gym",
+    "lodging",
+    "movie_theater",
+    "museum",
+    "night_club",
+    "park",
+    "shopping_mall",
+    "spa",
+    "stadium",
+    "store",
+    "tourist_attraction",
+}
+
+FOOD_NAME_HINTS = {
+    "bagel",
+    "bakery",
+    "barbecue",
+    "bbq",
+    "bistro",
+    "burger",
+    "burrito",
+    "cafe",
+    "coffee",
+    "deli",
+    "grill",
+    "izakaya",
+    "kebab",
+    "noodle",
+    "pasta",
+    "pizza",
+    "ramen",
+    "restaurant",
+    "ristorante",
+    "shawarma",
+    "steak",
+    "sushi",
+    "taco",
+    "taqueria",
+    "trattoria",
+}
+
 
 async def search_nearby_places(
     cuisines: List[str],
@@ -135,7 +196,7 @@ async def _fetch_and_filter(
     candidates: List[Dict[str, Any]] = []
     for item in results:
         rating = item.get("rating")
-        if rating and rating >= min_rating:
+        if rating and rating >= min_rating and _is_restaurant_candidate(item):
             candidates.append(_parse_place_item(item))
     return candidates
 
@@ -164,8 +225,21 @@ async def _query_places_api(
     payload = response.json()
     candidates: List[Dict[str, Any]] = []
     for item in payload.get("results", [])[:MAX_PLACES_PER_CUISINE]:
-        candidates.append(_parse_place_item(item, f"Matches cuisine query '{cuisine}'"))
+        if _is_restaurant_candidate(item):
+            candidates.append(_parse_place_item(item, f"Matches cuisine query '{cuisine}'"))
     return candidates
+
+
+def _is_restaurant_candidate(item: Dict[str, Any]) -> bool:
+    """Reject venues where food is incidental to another business category."""
+    raw_types = set(item.get("types", []) or [])
+    if raw_types & NON_RESTAURANT_PLACE_TYPES:
+        return False
+    if raw_types & FOOD_PLACE_TYPES:
+        return True
+
+    name_lower = (item.get("name") or "").lower()
+    return any(hint in name_lower for hint in FOOD_NAME_HINTS)
 
 
 def _parse_place_item(item: Dict[str, Any], reason_hint: Optional[str] = None) -> Dict[str, Any]:
@@ -201,117 +275,16 @@ def _parse_place_item(item: Dict[str, Any], reason_hint: Optional[str] = None) -
     }
 
 
-def _clean_tags(raw_types: List[str], name_str: str) -> List[str]:
-    """Filter and humanize Google Places types."""
-    blacklist = {"point_of_interest", "establishment", "food", "restaurant"}
-
-    cuisine_map = {
-        "italian": "Italian",
-        "mexican": "Mexican",
-        "chinese": "Chinese",
-        "japanese": "Japanese",
-        "korean": "Korean",
-        "thai": "Thai",
-        "vietnamese": "Vietnamese",
-        "indian": "Indian",
-        "greek": "Greek",
-        "mediterranean": "Mediterranean",
-        "middle_eastern": "Middle Eastern",
-        "pizza": "Pizza",
-        "sushi": "Sushi",
-        "seafood": "Seafood",
-        "steakhouse": "Steakhouse",
-        "barbecue": "BBQ",
-        "bbq": "BBQ",
-        "burger": "Burgers",
-        "sandwich": "Sandwiches",
-        "cafe": "Cafe",
-        "bakery": "Bakery",
-        "dessert": "Dessert",
-        "ice_cream": "Ice Cream",
-        "vegan": "Vegan",
-        "vegetarian": "Vegetarian",
-        "tapas": "Tapas",
-        "spanish": "Spanish",
-        "french": "French",
-        "latin": "Latin",
-        "caribbean": "Caribbean",
-        "halal": "Halal",
-        "kosher": "Kosher",
-    }
-
-    general_map = {
-        "bar": "Bar",
-        "meal_takeaway": "Takeout",
-        "meal_delivery": "Delivery",
-        "night_club": "Nightlife",
-        "brewery": "Brewery",
-        "pub": "Pub",
-    }
-
-    tags: List[str] = []
-
-    name_lower = (name_str or "").lower()
-    name_hints = {
-        "pizza": "Pizza",
-        "pizzeria": "Pizza",
-        "trattoria": "Italian",
-        "ristorante": "Italian",
-                "taqueria": "Mexican",
-        "taco": "Mexican",
-        "sushi": "Sushi",
-        "ramen": "Japanese",
-        "izakaya": "Japanese",
-        "noodle": "Noodles",
-        "kebab": "Middle Eastern",
-        "shawarma": "Middle Eastern",
-        "bbq": "BBQ",
-        "barbecue": "BBQ",
-        "steak": "Steakhouse",
-        "burger": "Burgers",
-        "burrito": "Mexican",
-        "deli": "Deli",
-        "bagel": "Bakery",
-        "bakery": "Bakery",
-        "cafe": "Cafe",
-        "coffee": "Cafe",
-        "brew": "Brewery",
-        "tapas": "Tapas",
-    }
-
-    def add_tag(label: str) -> None:
-        if label not in tags and len(tags) < 3:
-            tags.append(label)
-
-    for t in raw_types:
-        if t in blacklist:
-            continue
-        if t in cuisine_map:
-            add_tag(cuisine_map[t])
-
-    for t in raw_types:
-        if t in blacklist or len(tags) >= 3:
-            continue
-        if t in general_map:
-            add_tag(general_map[t])
-        else:
-            # Generic title-cased fallback for anything unhandled.
-            add_tag(t.replace("_", " ").title())
-
-    if len(tags) < 3 and name_lower:
-        for needle, label in name_hints.items():
-            if needle in name_lower:
-                add_tag(label)
-                if len(tags) >= 3:
-                    break
-
-    return tags
-
-
 # Refined override: prefer explicit cuisine types, avoid mislabeling ("Cantina" etc.),
 # and only use name-based hints when Google types lack a cuisine.
 def _clean_tags(raw_types: List[str], name_str: str) -> List[str]:
-    blacklist = {"point_of_interest", "establishment", "food", "restaurant"}
+    blacklist = {
+        "point_of_interest",
+        "establishment",
+        "food",
+        "restaurant",
+        *NON_RESTAURANT_PLACE_TYPES,
+    }
 
     cuisine_map = {
         "italian": "Italian",
