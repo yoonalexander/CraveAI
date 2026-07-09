@@ -108,7 +108,6 @@ from backend.services.identity import issue_identity_token, verify_identity_toke
 from backend.services.storage import init_storage
 from backend.services.usage_limits import (
     DailyQuotaExceeded,
-    estimate_chat_token_cost,
     reserve_daily_quota,
 )
 
@@ -123,9 +122,8 @@ def configure_test_settings(monkeypatch, tmp_path):
     monkeypatch.setenv("SQLITE_DB_PATH", str(tmp_path / "craveai-test.db"))
     monkeypatch.setenv("USAGE_LIMITS_ENABLED", "true")
     monkeypatch.setenv("DAILY_TOKEN_LIMIT", "10000")
+    monkeypatch.setenv("DAILY_CHAT_MESSAGE_LIMIT", "3")
     monkeypatch.setenv("GLOBAL_DAILY_TOKEN_LIMIT", "100000")
-    monkeypatch.setenv("CHAT_REQUEST_TOKEN_COST", "1500")
-    monkeypatch.setenv("CHAT_PIPELINE_TOKEN_OVERHEAD", "0")
     monkeypatch.setenv("PLACES_REQUEST_TOKEN_COST", "500")
     monkeypatch.setenv("IDENTITY_SIGNING_SECRET", "test-identity-signing-secret")
     get_settings.cache_clear()
@@ -206,13 +204,13 @@ def test_chat_endpoint_returns_mocked_response(mocked_pipeline):
     assert isinstance(body["recommendations"], list)
     assert body["recommendations"][0]["name"] == "Mock Ramen House"
     assert body["usage"] == {
-        "limit": 10000,
-        "used": 1500,
-        "remaining": 8500,
+        "limit": 3,
+        "used": 1,
+        "remaining": 2,
         "reset_at": body["usage"]["reset_at"],
     }
-    assert response.headers["x-ratelimit-limit"] == "10000"
-    assert response.headers["x-ratelimit-remaining"] == "8500"
+    assert response.headers["x-ratelimit-limit"] == "3"
+    assert response.headers["x-ratelimit-remaining"] == "2"
 
     # Ensure the mocked RAG functions executed.
     assert mocked_pipeline["intent"] == 1
@@ -239,14 +237,14 @@ def test_chat_endpoint_returns_cumulative_usage_after_each_chat(mocked_pipeline)
     first_response, second_response = asyncio.run(exercise())
 
     assert first_response.status_code == 200
-    assert first_response.json()["usage"]["used"] == 1500
-    assert first_response.json()["usage"]["remaining"] == 8500
-    assert first_response.headers["x-ratelimit-remaining"] == "8500"
+    assert first_response.json()["usage"]["used"] == 1
+    assert first_response.json()["usage"]["remaining"] == 2
+    assert first_response.headers["x-ratelimit-remaining"] == "2"
 
     assert second_response.status_code == 200
-    assert second_response.json()["usage"]["used"] == 3000
-    assert second_response.json()["usage"]["remaining"] == 7000
-    assert second_response.headers["x-ratelimit-remaining"] == "7000"
+    assert second_response.json()["usage"]["used"] == 2
+    assert second_response.json()["usage"]["remaining"] == 1
+    assert second_response.headers["x-ratelimit-remaining"] == "1"
     assert mocked_pipeline["intent"] == 2
 
 
@@ -274,9 +272,9 @@ def test_chat_endpoint_enforces_quota_even_if_disable_flag_is_false(
     response = asyncio.run(exercise())
 
     assert response.status_code == 200
-    assert response.json()["usage"]["used"] == 1500
-    assert response.json()["usage"]["remaining"] == 8500
-    assert response.headers["x-ratelimit-remaining"] == "8500"
+    assert response.json()["usage"]["used"] == 1
+    assert response.json()["usage"]["remaining"] == 2
+    assert response.headers["x-ratelimit-remaining"] == "2"
     assert mocked_pipeline["intent"] == 1
 
 
@@ -311,7 +309,7 @@ def test_chat_endpoint_returns_429_before_pipeline_when_quota_exhausted(
     monkeypatch,
     mocked_pipeline,
 ):
-    monkeypatch.setenv("DAILY_TOKEN_LIMIT", "1000")
+    monkeypatch.setenv("DAILY_CHAT_MESSAGE_LIMIT", "0")
     get_settings.cache_clear()
     app = create_app()
 
@@ -330,16 +328,48 @@ def test_chat_endpoint_returns_429_before_pipeline_when_quota_exhausted(
     assert response.status_code == 429
     body = response.json()
 
-    assert body["detail"]["code"] == "daily_token_quota_exceeded"
-    assert body["detail"]["usage"]["limit"] == 1000
+    assert body["detail"]["code"] == "daily_chat_message_quota_exceeded"
+    assert body["detail"]["usage"]["limit"] == 0
     assert body["detail"]["usage"]["used"] == 0
-    assert response.headers["x-ratelimit-limit"] == "1000"
-    assert response.headers["x-ratelimit-remaining"] == "1000"
+    assert response.headers["x-ratelimit-limit"] == "0"
+    assert response.headers["x-ratelimit-remaining"] == "0"
     assert "retry-after" in response.headers
 
     assert mocked_pipeline["intent"] == 0
     assert mocked_pipeline["places"] == 0
     assert mocked_pipeline["rank"] == 0
+
+
+def test_chat_endpoint_allows_three_messages_then_blocks_fourth(mocked_pipeline):
+    app = create_app()
+
+    async def exercise():
+        async with AsyncClient(
+            transport=ASGITransport(app=app),
+            base_url="http://test",
+        ) as client:
+            payload = {
+                "query": "I want a cozy bowl of ramen tonight.",
+                "location": {"lat": 43.6532, "lng": -79.3832},
+            }
+            first = await client.post("/chat", json=payload)
+            second = await client.post("/chat", json={**payload, "query": "Make it spicy."})
+            third = await client.post("/chat", json={**payload, "query": "Any late-night spots?"})
+            fourth = await client.post("/chat", json={**payload, "query": "One more idea?"})
+            return first, second, third, fourth
+
+    first_response, second_response, third_response, fourth_response = asyncio.run(exercise())
+
+    assert first_response.status_code == 200
+    assert second_response.status_code == 200
+    assert third_response.status_code == 200
+    assert third_response.json()["usage"]["used"] == 3
+    assert third_response.json()["usage"]["remaining"] == 0
+
+    assert fourth_response.status_code == 429
+    assert fourth_response.json()["detail"]["usage"]["used"] == 3
+    assert fourth_response.headers["x-ratelimit-remaining"] == "0"
+    assert mocked_pipeline["intent"] == 3
 
 
 def test_usage_quota_resets_on_new_utc_date():
@@ -402,17 +432,8 @@ def test_chat_endpoint_rejects_caller_selected_quota_identity(mocked_pipeline):
     assert first_response.status_code == 200
     assert second_response.status_code == 422
 
-    assert first_response.json()["usage"]["used"] == 1500
+    assert first_response.json()["usage"]["used"] == 1
     assert mocked_pipeline["intent"] == 1
-
-
-def test_chat_cost_estimate_scales_with_bounded_input():
-    short = estimate_chat_token_cost("ramen", minimum_cost=100, pipeline_overhead=1000)
-    long = estimate_chat_token_cost("x" * 2000, minimum_cost=100, pipeline_overhead=1000)
-
-    assert short == 1004
-    assert long == 2000
-    assert long > short
 
 
 def test_chat_rejects_oversized_input_before_pipeline(mocked_pipeline):

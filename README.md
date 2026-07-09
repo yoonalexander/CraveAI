@@ -49,8 +49,8 @@ docs/ (PRD.md, TECHNICAL_DESIGN.md)
 | `CHROMA_PATH` | `.env` | Points to the persisted Chroma vector store. |
 | `REDIS_URL` | `.env` | Reserved for future caching. |
 | `MODEL_NAME` | `.env` | Chat completion model identifier. |
-| `GLOBAL_DAILY_TOKEN_LIMIT` | `.env` | Service-wide hard ceiling shared by chat and Places requests. |
-| `CHAT_PIPELINE_TOKEN_OVERHEAD` | `.env` | Conservative fixed cost reserved for the multi-stage chat pipeline. |
+| `DAILY_CHAT_MESSAGE_LIMIT` | `.env` | Number of chat messages each user can send per UTC day. |
+| `GLOBAL_DAILY_TOKEN_LIMIT` | `.env` | Service-wide hard ceiling shared by quota reservations. |
 | `PLACES_REQUEST_TOKEN_COST` | `.env` | Quota cost reserved before each public Places lookup. |
 | `IDENTITY_SIGNING_SECRET` | `.env` | HMAC secret used by the trusted auth issuer for favorites bearer tokens. Required in production. |
 | `VITE_API_BASE_URL` | `frontend/.env` | Base URL for the FastAPI backend during local dev. |

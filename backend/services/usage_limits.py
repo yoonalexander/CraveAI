@@ -3,7 +3,6 @@ from __future__ import annotations
 import asyncio
 from dataclasses import dataclass
 from datetime import datetime, time, timedelta, timezone
-from math import ceil
 
 from backend.services.storage import _get_connection
 
@@ -32,17 +31,6 @@ class DailyQuotaExceeded(Exception):
 def resolve_usage_user_id(client_host: str | None) -> str:
     """Return a server-derived quota identity that clients cannot rename."""
     return f"ip:{client_host or 'unknown'}"
-
-
-def estimate_chat_token_cost(
-    user_text: str,
-    minimum_cost: int,
-    pipeline_overhead: int,
-) -> int:
-    """Conservatively estimate the bounded multi-stage chat pipeline cost."""
-    estimated_input_tokens = max(1, ceil(len(user_text.encode("utf-8")) / 4))
-    estimated_pipeline_cost = max(pipeline_overhead, 0) + (estimated_input_tokens * 2)
-    return max(minimum_cost, estimated_pipeline_cost, 0)
 
 
 async def reserve_daily_quota(

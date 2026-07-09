@@ -101,10 +101,11 @@ export async function sendChat(
     const quotaDetail = errorPayload.json?.detail;
     if (
       response.status === 429 &&
-      quotaDetail?.code === "daily_token_quota_exceeded"
+      (quotaDetail?.code === "daily_chat_message_quota_exceeded" ||
+        quotaDetail?.code === "daily_token_quota_exceeded")
     ) {
       throw new ChatQuotaError(
-        "You've reached today's CraveAI demo limit. Please try again after the daily reset.",
+        "You've reached today's CraveAI chat limit. Please try again after the daily reset.",
         quotaDetail.usage ?? readUsageHeaders(response),
       );
     }

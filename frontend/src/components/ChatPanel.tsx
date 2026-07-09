@@ -17,8 +17,8 @@ type Message = {
 const createMessageId = (prefix: string): string =>
   `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
-const DEFAULT_DAILY_TOKEN_LIMIT = 10000;
-const FALLBACK_CHAT_TOKEN_COST = 1500;
+const DEFAULT_DAILY_CHAT_LIMIT = 3;
+const FALLBACK_CHAT_MESSAGE_COST = 1;
 
 const seededMessages: Message[] = [
   {
@@ -155,7 +155,7 @@ export function ChatPanel({
     (location
       ? "Using your current location for nearby matches."
       : "Share your location in the browser to dial in the map.");
-  const displayedLimit = usage?.limit ?? DEFAULT_DAILY_TOKEN_LIMIT;
+  const displayedLimit = usage?.limit ?? DEFAULT_DAILY_CHAT_LIMIT;
   const displayedUsed = usage?.used ?? 0;
   const displayedRemaining = usage?.remaining ?? displayedLimit;
   const remainingPercent =
@@ -186,11 +186,14 @@ export function ChatPanel({
           </span>
           <div
             className="w-44 rounded-2xl border border-border bg-background/70 px-3 py-2 text-right shadow-sm"
-            aria-label={`Daily quota: ${displayedRemaining} tokens left`}
+            aria-label={`Daily chat limit: ${displayedRemaining} messages left`}
           >
             <div className="flex items-center justify-between gap-2 text-[11px] font-semibold text-foreground">
-              <span>Daily quota</span>
-              <span>{displayedRemaining.toLocaleString()} tokens left</span>
+              <span>Daily chats</span>
+              <span>
+                {displayedRemaining.toLocaleString()}{" "}
+                {displayedRemaining === 1 ? "message" : "messages"} left
+              </span>
             </div>
             <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-secondary">
               <div
@@ -199,7 +202,7 @@ export function ChatPanel({
               />
             </div>
             <p className="mt-1 text-[10px] text-muted-foreground">
-              {displayedUsed.toLocaleString()} / {displayedLimit.toLocaleString()} tokens
+              {displayedUsed.toLocaleString()} / {displayedLimit.toLocaleString()} sent
               {resetTime ? ` - resets ${resetTime}` : " - updates after chat"}
             </p>
           </div>
@@ -292,10 +295,10 @@ export function ChatPanel({
 }
 
 function estimateNextUsage(currentUsage: UsageMetadata | null): UsageMetadata {
-  const limit = currentUsage?.limit ?? DEFAULT_DAILY_TOKEN_LIMIT;
+  const limit = currentUsage?.limit ?? DEFAULT_DAILY_CHAT_LIMIT;
   const used = Math.min(
     limit,
-    (currentUsage?.used ?? 0) + FALLBACK_CHAT_TOKEN_COST,
+    (currentUsage?.used ?? 0) + FALLBACK_CHAT_MESSAGE_COST,
   );
 
   return {

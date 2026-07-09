@@ -18,9 +18,11 @@ export async function fetchSuggestions(
     lat: number,
     lng: number,
     radius: number = 5000,
+    signal?: AbortSignal,
 ): Promise<Suggestion[]> {
     const response = await fetch(
         `${API_URL}/places/suggestions?lat=${lat}&lng=${lng}&radius=${radius}`,
+        { signal },
     );
     if (!response.ok) {
         throw new Error("Failed to fetch suggestions");

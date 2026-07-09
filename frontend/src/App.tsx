@@ -8,7 +8,8 @@ import { ThemeProvider } from "./context/ThemeContext";
 import { ThemeToggle } from "./components/ThemeToggle";
 import { fetchSuggestions, Suggestion } from "./api/places";
 
-const SUGGESTION_TIMEOUT_MS = 30000;
+const SUGGESTION_RETRY_MS = 30000;
+const SUGGESTION_TIMEOUT_MS = 28000;
 
 const HAMILTON_FALLBACK = {
   lat: 43.2557,
@@ -78,51 +79,56 @@ function App(): JSX.Element {
     if (!locationReady) return;
 
     const fetchNearby = async () => {
-      let timeoutId: number | undefined;
-      let timedOut = false;
+      const controller = new AbortController();
 
-      setSuggestions([]);
       setIsLoadingSuggestions(true);
       setSuggestionError(null);
 
-      timeoutId = window.setTimeout(() => {
-        timedOut = true;
+      const timeoutId = window.setTimeout(() => {
+        controller.abort();
         setSuggestionError(
-          "We couldn't load suggestions in time. Check location permissions and your Google Places API key.",
+          "We couldn't load suggestions in time. Retrying every 30 seconds.",
         );
         setIsLoadingSuggestions(false);
       }, SUGGESTION_TIMEOUT_MS);
 
       try {
         const loc = userLocation || HAMILTON_FALLBACK;
-        const data = await fetchSuggestions(loc.lat, loc.lng);
-        if (!timedOut) {
-          setSuggestions(data);
-          if (data.length === 0) {
-            setSuggestionError(
-              "No nearby restaurants found. Try widening your location radius.",
-            );
-          }
-        }
-      } catch (error) {
-        console.error("Failed to fetch suggestions:", error);
-        if (!timedOut) {
-          setSuggestions([]);
+        const data = await fetchSuggestions(
+          loc.lat,
+          loc.lng,
+          HAMILTON_FALLBACK.radius,
+          controller.signal,
+        );
+        setSuggestions(data);
+        setSuggestionIndex(0);
+        if (data.length === 0) {
           setSuggestionError(
-            "Failed to load suggestions. Verify location access and your Google Places API setup.",
+            "No nearby restaurants found. Retrying every 30 seconds.",
           );
         }
+      } catch (error) {
+        if (controller.signal.aborted) return;
+
+        console.error("Failed to fetch suggestions:", error);
+        setSuggestionError(
+          "Failed to load suggestions. Retrying every 30 seconds.",
+        );
       } finally {
-        if (timeoutId) {
-          clearTimeout(timeoutId);
-        }
-        if (!timedOut) {
+        clearTimeout(timeoutId);
+        if (!controller.signal.aborted) {
           setIsLoadingSuggestions(false);
         }
       }
     };
 
     fetchNearby();
+
+    const retryInterval = window.setInterval(fetchNearby, SUGGESTION_RETRY_MS);
+
+    return () => {
+      clearInterval(retryInterval);
+    };
   }, [userLocation, locationReady]);
 
   useEffect(() => {
@@ -217,7 +223,7 @@ function App(): JSX.Element {
               <p className="mt-1 text-sm text-muted-foreground">
                 Top rated spots near you. Cycling every 30 seconds.
               </p>
-              {isLoadingSuggestions && !suggestionError && (
+              {isLoadingSuggestions && (
                 <div className="mt-4 flex items-center gap-4 rounded-2xl bg-secondary/70 p-3 shadow-inner">
                   <div className="relative h-10 w-10">
                     <div className="absolute inset-0 rounded-full border-2 border-primary/25" />
@@ -225,7 +231,9 @@ function App(): JSX.Element {
                   </div>
                   <div className="text-sm">
                     <p className="font-medium text-foreground">
-                      Finding nearby restaurants...
+                      {suggestionError
+                        ? "Trying again..."
+                        : "Finding nearby restaurants..."}
                     </p>
                     <p className="text-muted-foreground">
                       Using your location and Google Places.
@@ -233,7 +241,7 @@ function App(): JSX.Element {
                   </div>
                 </div>
               )}
-              {suggestionError && (
+              {suggestionError && !isLoadingSuggestions && (
                 <div className="mt-4 rounded-2xl border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive">
                   {suggestionError}
                 </div>

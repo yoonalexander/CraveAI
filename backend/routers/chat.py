@@ -10,7 +10,6 @@ from backend.services.rag_pipeline import generate_recommendations
 from backend.services.usage_limits import (
     DailyQuotaExceeded,
     UsageReservation,
-    estimate_chat_token_cost,
     rate_limit_headers,
     reserve_daily_quota,
     resolve_usage_user_id,
@@ -119,7 +118,7 @@ class ChatResponse(BaseModel):
     )
     usage: Optional[UsageMetadata] = Field(
         default=None,
-        description="Daily demo token quota state for the resolved user.",
+        description="Daily demo chat message quota state for the resolved user.",
     )
 
 
@@ -137,25 +136,20 @@ async def generate_chat_response(
     settings = get_settings()
     user_text = payload.query or payload.message or ""
     client_host = request.client.host if request.client else None
-    usage_user_id = resolve_usage_user_id(client_host)
-    token_cost = estimate_chat_token_cost(
-        user_text,
-        settings.CHAT_REQUEST_TOKEN_COST,
-        settings.CHAT_PIPELINE_TOKEN_OVERHEAD,
-    )
+    usage_user_id = f"chat:{resolve_usage_user_id(client_host)}"
     try:
         usage = await reserve_daily_quota(
             user_id=usage_user_id,
-            token_cost=token_cost,
-            daily_limit=settings.DAILY_TOKEN_LIMIT,
+            token_cost=1,
+            daily_limit=settings.DAILY_CHAT_MESSAGE_LIMIT,
             global_daily_limit=settings.GLOBAL_DAILY_TOKEN_LIMIT,
         )
     except DailyQuotaExceeded as exc:
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
             detail={
-                "code": "daily_token_quota_exceeded",
-                "message": "Daily demo token quota exceeded.",
+                "code": "daily_chat_message_quota_exceeded",
+                "message": "Daily demo chat message quota exceeded.",
                 "usage": _usage_metadata(exc.usage).model_dump(),
             },
             headers=rate_limit_headers(exc.usage, include_retry_after=True),

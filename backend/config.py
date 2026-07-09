@@ -51,14 +51,11 @@ class Config:
         default_factory=lambda: _env_bool("USAGE_LIMITS_ENABLED", True)
     )
     DAILY_TOKEN_LIMIT: int = field(default_factory=lambda: _env_int("DAILY_TOKEN_LIMIT", 10000))
+    DAILY_CHAT_MESSAGE_LIMIT: int = field(
+        default_factory=lambda: _env_int("DAILY_CHAT_MESSAGE_LIMIT", 3)
+    )
     GLOBAL_DAILY_TOKEN_LIMIT: int = field(
         default_factory=lambda: _env_int("GLOBAL_DAILY_TOKEN_LIMIT", 100000)
-    )
-    CHAT_REQUEST_TOKEN_COST: int = field(
-        default_factory=lambda: _env_int("CHAT_REQUEST_TOKEN_COST", 1500)
-    )
-    CHAT_PIPELINE_TOKEN_OVERHEAD: int = field(
-        default_factory=lambda: _env_int("CHAT_PIPELINE_TOKEN_OVERHEAD", 4000)
     )
     PLACES_REQUEST_TOKEN_COST: int = field(
         default_factory=lambda: _env_int("PLACES_REQUEST_TOKEN_COST", 500)
