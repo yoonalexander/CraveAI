@@ -112,6 +112,8 @@ from backend.services.usage_limits import (
     reserve_daily_quota,
 )
 
+ANONYMOUS_TOKEN_HEADER = "X-CraveAI-Anonymous-Token"
+
 
 @pytest.fixture(autouse=True)
 def configure_test_settings(monkeypatch, tmp_path):
@@ -124,6 +126,7 @@ def configure_test_settings(monkeypatch, tmp_path):
     monkeypatch.setenv("USAGE_LIMITS_ENABLED", "true")
     monkeypatch.setenv("DAILY_TOKEN_LIMIT", "10000")
     monkeypatch.setenv("DAILY_CHAT_MESSAGE_LIMIT", "3")
+    monkeypatch.setenv("CHAT_DEVELOPER_MODE", "false")
     monkeypatch.setenv("GLOBAL_DAILY_TOKEN_LIMIT", "100000")
     monkeypatch.setenv("PLACES_REQUEST_TOKEN_COST", "500")
     monkeypatch.setenv("IDENTITY_SIGNING_SECRET", "test-identity-signing-secret")
@@ -212,6 +215,7 @@ def test_chat_endpoint_returns_mocked_response(mocked_pipeline):
     }
     assert response.headers["x-ratelimit-limit"] == "3"
     assert response.headers["x-ratelimit-remaining"] == "2"
+    assert response.headers["x-craveai-anonymous-token"]
 
     # Ensure the mocked RAG functions executed.
     assert mocked_pipeline["intent"] == 1
@@ -232,7 +236,12 @@ def test_chat_endpoint_returns_cumulative_usage_after_each_chat(mocked_pipeline)
                 "location": {"lat": 43.6532, "lng": -79.3832},
             }
             first = await client.post("/chat", json=payload)
-            second = await client.post("/chat", json={**payload, "query": "Now make it spicy."})
+            token = first.headers[ANONYMOUS_TOKEN_HEADER]
+            second = await client.post(
+                "/chat",
+                headers={ANONYMOUS_TOKEN_HEADER: token},
+                json={**payload, "query": "Now make it spicy."},
+            )
             return first, second
 
     first_response, second_response = asyncio.run(exercise())
@@ -304,6 +313,7 @@ def test_cors_exposes_rate_limit_headers_for_browser_badge_fallback(mocked_pipel
     assert "x-ratelimit-limit" in exposed_headers
     assert "x-ratelimit-remaining" in exposed_headers
     assert "x-ratelimit-reset" in exposed_headers
+    assert "x-craveai-anonymous-token" in exposed_headers
 
 
 def test_chat_endpoint_returns_429_before_pipeline_when_quota_exhausted(
@@ -334,6 +344,7 @@ def test_chat_endpoint_returns_429_before_pipeline_when_quota_exhausted(
     assert body["detail"]["usage"]["used"] == 0
     assert response.headers["x-ratelimit-limit"] == "0"
     assert response.headers["x-ratelimit-remaining"] == "0"
+    assert response.headers["x-craveai-anonymous-token"]
     assert "retry-after" in response.headers
 
     assert mocked_pipeline["intent"] == 0
@@ -354,9 +365,23 @@ def test_chat_endpoint_allows_three_messages_then_blocks_fourth(mocked_pipeline)
                 "location": {"lat": 43.6532, "lng": -79.3832},
             }
             first = await client.post("/chat", json=payload)
-            second = await client.post("/chat", json={**payload, "query": "Make it spicy."})
-            third = await client.post("/chat", json={**payload, "query": "Any late-night spots?"})
-            fourth = await client.post("/chat", json={**payload, "query": "One more idea?"})
+            token = first.headers[ANONYMOUS_TOKEN_HEADER]
+            headers = {ANONYMOUS_TOKEN_HEADER: token}
+            second = await client.post(
+                "/chat",
+                headers=headers,
+                json={**payload, "query": "Make it spicy."},
+            )
+            third = await client.post(
+                "/chat",
+                headers=headers,
+                json={**payload, "query": "Any late-night spots?"},
+            )
+            fourth = await client.post(
+                "/chat",
+                headers=headers,
+                json={**payload, "query": "One more idea?"},
+            )
             return first, second, third, fourth
 
     first_response, second_response, third_response, fourth_response = asyncio.run(exercise())
@@ -371,6 +396,128 @@ def test_chat_endpoint_allows_three_messages_then_blocks_fourth(mocked_pipeline)
     assert fourth_response.json()["detail"]["usage"]["used"] == 3
     assert fourth_response.headers["x-ratelimit-remaining"] == "0"
     assert mocked_pipeline["intent"] == 3
+
+
+def test_chat_developer_mode_allows_unlimited_messages(monkeypatch, mocked_pipeline):
+    monkeypatch.setenv("CHAT_DEVELOPER_MODE", "true")
+    get_settings.cache_clear()
+    app = create_app()
+
+    async def exercise():
+        async with AsyncClient(
+            transport=ASGITransport(app=app),
+            base_url="http://test",
+        ) as client:
+            payload = {
+                "query": "I want a cozy bowl of ramen tonight.",
+                "location": {"lat": 43.6532, "lng": -79.3832},
+            }
+            return [
+                await client.post(
+                    "/chat",
+                    json={**payload, "query": f"{payload['query']} ({index})"},
+                )
+                for index in range(5)
+            ]
+
+    responses = asyncio.run(exercise())
+
+    assert all(response.status_code == 200 for response in responses)
+    assert all(response.json()["usage"]["unlimited"] is True for response in responses)
+    assert all("x-ratelimit-limit" not in response.headers for response in responses)
+    assert mocked_pipeline["intent"] == 5
+
+
+def test_chat_developer_mode_is_rejected_in_production(monkeypatch):
+    monkeypatch.setenv("APP_ENV", "production")
+    monkeypatch.setenv("CHAT_DEVELOPER_MODE", "true")
+    monkeypatch.setenv("IDENTITY_SIGNING_SECRET", "x" * 32)
+    get_settings.cache_clear()
+
+    with pytest.raises(RuntimeError, match="CHAT_DEVELOPER_MODE cannot be enabled"):
+        create_app()
+
+
+def test_chat_quota_survives_new_client_when_anonymous_token_is_reused(mocked_pipeline):
+    app = create_app()
+
+    async def exercise():
+        payload = {
+            "query": "I want a cozy bowl of ramen tonight.",
+            "location": {"lat": 43.6532, "lng": -79.3832},
+        }
+        async with AsyncClient(
+            transport=ASGITransport(app=app),
+            base_url="http://test",
+        ) as first_client:
+            first = await first_client.post("/chat", json=payload)
+            token = first.headers[ANONYMOUS_TOKEN_HEADER]
+
+        async with AsyncClient(
+            transport=ASGITransport(app=app),
+            base_url="http://test",
+        ) as second_client:
+            headers = {ANONYMOUS_TOKEN_HEADER: token}
+            second = await second_client.post(
+                "/chat",
+                headers=headers,
+                json={**payload, "query": "Make it spicy."},
+            )
+            third = await second_client.post(
+                "/chat",
+                headers=headers,
+                json={**payload, "query": "Any late-night spots?"},
+            )
+            fourth = await second_client.post(
+                "/chat",
+                headers=headers,
+                json={**payload, "query": "One more idea?"},
+            )
+            return first, second, third, fourth
+
+    first_response, second_response, third_response, fourth_response = asyncio.run(exercise())
+
+    assert first_response.status_code == 200
+    assert second_response.json()["usage"]["used"] == 2
+    assert third_response.json()["usage"]["used"] == 3
+    assert fourth_response.status_code == 429
+    assert fourth_response.json()["detail"]["usage"]["used"] == 3
+    assert mocked_pipeline["intent"] == 3
+
+
+def test_chat_replaces_forged_anonymous_token_without_trusting_it(mocked_pipeline):
+    app = create_app()
+
+    async def exercise():
+        async with AsyncClient(
+            transport=ASGITransport(app=app),
+            base_url="http://test",
+        ) as client:
+            payload = {
+                "query": "I want a cozy bowl of ramen tonight.",
+                "location": {"lat": 43.6532, "lng": -79.3832},
+            }
+            forged = "anon:attacker.invalid-signature"
+            first = await client.post(
+                "/chat",
+                headers={ANONYMOUS_TOKEN_HEADER: forged},
+                json=payload,
+            )
+            issued_token = first.headers[ANONYMOUS_TOKEN_HEADER]
+            second = await client.post(
+                "/chat",
+                headers={ANONYMOUS_TOKEN_HEADER: issued_token},
+                json={**payload, "query": "Make it spicy."},
+            )
+            return forged, first, issued_token, second
+
+    forged, first_response, issued_token, second_response = asyncio.run(exercise())
+
+    assert first_response.status_code == 200
+    assert first_response.json()["usage"]["used"] == 1
+    assert issued_token != forged
+    assert second_response.json()["usage"]["used"] == 2
+    assert mocked_pipeline["intent"] == 2
 
 
 def test_usage_quota_resets_on_new_utc_date():

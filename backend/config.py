@@ -54,6 +54,9 @@ class Config:
     DAILY_CHAT_MESSAGE_LIMIT: int = field(
         default_factory=lambda: _env_int("DAILY_CHAT_MESSAGE_LIMIT", 3)
     )
+    CHAT_DEVELOPER_MODE: bool = field(
+        default_factory=lambda: _env_bool("CHAT_DEVELOPER_MODE", False)
+    )
     GLOBAL_DAILY_TOKEN_LIMIT: int = field(
         default_factory=lambda: _env_int("GLOBAL_DAILY_TOKEN_LIMIT", 100000)
     )
@@ -83,6 +86,11 @@ class Config:
             message = (
                 "IDENTITY_SIGNING_SECRET must contain at least 32 characters in production"
             )
+            logger.error(message)
+            raise RuntimeError(message)
+
+        if self.ENVIRONMENT.lower() == "production" and self.CHAT_DEVELOPER_MODE:
+            message = "CHAT_DEVELOPER_MODE cannot be enabled in production"
             logger.error(message)
             raise RuntimeError(message)
 

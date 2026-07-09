@@ -30,6 +30,7 @@ export type UsageMetadata = {
   used: number;
   remaining: number;
   reset_at: string;
+  unlimited?: boolean;
 };
 
 export type ChatResponse = {
@@ -69,6 +70,9 @@ const API_URL =
   import.meta.env.VITE_API_BASE_URL?.toString()?.trim() ||
   "http://127.0.0.1:8000";
 
+const ANONYMOUS_TOKEN_HEADER = "X-CraveAI-Anonymous-Token";
+const ANONYMOUS_TOKEN_STORAGE_KEY = "craveai-anonymous-token";
+
 /**
  * Send a chat query to the backend chat endpoint.
  */
@@ -88,13 +92,20 @@ export async function sendChat(
     location: locationPayload,
   };
 
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  const anonymousToken = readStoredAnonymousToken();
+  if (anonymousToken) {
+    headers[ANONYMOUS_TOKEN_HEADER] = anonymousToken;
+  }
+
   const response = await fetch(`${API_URL}/chat`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers,
     body: JSON.stringify(payload),
   });
+  persistAnonymousToken(response);
 
   if (!response.ok) {
     const errorPayload = await readErrorPayload(response);
@@ -148,6 +159,32 @@ function readIntegerHeader(response: Response, name: string): number | null {
 
   const parsed = Number.parseInt(value, 10);
   return Number.isFinite(parsed) ? parsed : null;
+}
+
+function readStoredAnonymousToken(): string | null {
+  if (!canUseLocalStorage()) {
+    return null;
+  }
+
+  const token = window.localStorage.getItem(ANONYMOUS_TOKEN_STORAGE_KEY);
+  return token?.trim() || null;
+}
+
+function persistAnonymousToken(response: Response): void {
+  const token = response.headers.get(ANONYMOUS_TOKEN_HEADER)?.trim();
+  if (!token || !canUseLocalStorage()) {
+    return;
+  }
+
+  window.localStorage.setItem(ANONYMOUS_TOKEN_STORAGE_KEY, token);
+}
+
+function canUseLocalStorage(): boolean {
+  try {
+    return typeof window !== "undefined" && Boolean(window.localStorage);
+  } catch {
+    return false;
+  }
 }
 
 async function readErrorPayload(

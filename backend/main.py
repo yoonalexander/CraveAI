@@ -34,6 +34,7 @@ def create_app() -> FastAPI:
             "X-RateLimit-Limit",
             "X-RateLimit-Remaining",
             "X-RateLimit-Reset",
+            "X-CraveAI-Anonymous-Token",
             "Retry-After",
         ],
     )

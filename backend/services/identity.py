@@ -4,12 +4,15 @@ import base64
 import hashlib
 import hmac
 import time
+import uuid
 
 from fastapi import Header, HTTPException, status
 
 from backend.config import get_settings
 
 MAX_USER_ID_LENGTH = 128
+ANONYMOUS_USER_PREFIX = "anon:"
+ANONYMOUS_TOKEN_TTL_SECONDS = 60 * 60 * 24 * 180
 
 
 def issue_identity_token(
@@ -74,6 +77,35 @@ def verify_identity_token(token: str, secret: str, *, now: int | None = None) ->
     if expires_at <= (now if now is not None else int(time.time())):
         raise ValueError("Identity token has expired.")
     return _normalize_user_id(user_id)
+
+
+def issue_anonymous_identity_token(
+    secret: str,
+    *,
+    now: int | None = None,
+) -> tuple[str, str]:
+    """Issue a long-lived signed token for an anonymous browser identity."""
+    subject = f"{ANONYMOUS_USER_PREFIX}{uuid.uuid4()}"
+    token = issue_identity_token(
+        subject,
+        secret,
+        ttl_seconds=ANONYMOUS_TOKEN_TTL_SECONDS,
+        now=now,
+    )
+    return subject, token
+
+
+def verify_anonymous_identity_token(
+    token: str,
+    secret: str,
+    *,
+    now: int | None = None,
+) -> str:
+    """Verify an anonymous browser identity token and return its subject."""
+    subject = verify_identity_token(token, secret, now=now)
+    if not subject.startswith(ANONYMOUS_USER_PREFIX):
+        raise ValueError("Identity token is not anonymous.")
+    return subject
 
 
 async def require_user_identity(authorization: str | None = Header(default=None)) -> str:

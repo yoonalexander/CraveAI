@@ -19,6 +19,7 @@ const createMessageId = (prefix: string): string =>
 
 const DEFAULT_DAILY_CHAT_LIMIT = 3;
 const FALLBACK_CHAT_MESSAGE_COST = 1;
+const CHAT_USAGE_STORAGE_KEY = "craveai-chat-usage";
 
 const seededMessages: Message[] = [
   {
@@ -54,7 +55,9 @@ export function ChatPanel({
   const [draft, setDraft] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [usage, setUsage] = useState<UsageMetadata | null>(null);
+  const [usage, setUsage] = useState<UsageMetadata | null>(() =>
+    readCachedUsage(),
+  );
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -82,9 +85,11 @@ export function ChatPanel({
       const response = await sendChat(trimmed, {
         location: location ?? undefined,
       });
-      setUsage((currentUsage) =>
-        response.usage ?? estimateNextUsage(currentUsage),
-      );
+      setUsage((currentUsage) => {
+        const nextUsage = response.usage ?? estimateNextUsage(currentUsage);
+        writeCachedUsage(nextUsage);
+        return nextUsage;
+      });
       const recommendations =
         response.recommendations.length > 0
           ? response.recommendations
@@ -116,7 +121,11 @@ export function ChatPanel({
       setMessages((prev) => [...prev, ...assistantMessages]);
     } catch (err) {
       if (err instanceof ChatQuotaError) {
-        setUsage((currentUsage) => err.usage ?? currentUsage);
+        setUsage((currentUsage) => {
+          const nextUsage = err.usage ?? currentUsage;
+          writeCachedUsage(nextUsage);
+          return nextUsage;
+        });
         setError(err.message);
         onRecommendations?.([]);
         setMessages((prev) => [
@@ -158,6 +167,7 @@ export function ChatPanel({
   const displayedLimit = usage?.limit ?? DEFAULT_DAILY_CHAT_LIMIT;
   const displayedUsed = usage?.used ?? 0;
   const displayedRemaining = usage?.remaining ?? displayedLimit;
+  const isUnlimited = usage?.unlimited === true;
   const remainingPercent =
     displayedLimit > 0
       ? Math.min(100, Math.max(0, (displayedRemaining / displayedLimit) * 100))
@@ -186,24 +196,26 @@ export function ChatPanel({
           </span>
           <div
             className="w-44 rounded-2xl border border-border bg-background/70 px-3 py-2 text-right shadow-sm"
-            aria-label={`Daily chat limit: ${displayedRemaining} messages left`}
+            aria-label={
+              isUnlimited
+                ? "Developer mode: unlimited chats"
+                : `Daily chat limit: ${displayedRemaining} messages left`
+            }
           >
             <div className="flex items-center justify-between gap-2 text-[11px] font-semibold text-foreground">
               <span>Daily chats</span>
-              <span>
-                {displayedRemaining.toLocaleString()}{" "}
-                {displayedRemaining === 1 ? "message" : "messages"} left
-              </span>
+              <span>{isUnlimited ? "Unlimited" : `${displayedRemaining.toLocaleString()} ${displayedRemaining === 1 ? "message" : "messages"} left`}</span>
             </div>
             <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-secondary">
               <div
                 className="h-full rounded-full bg-primary transition-all"
-                style={{ width: `${remainingPercent}%` }}
+                style={{ width: `${isUnlimited ? 100 : remainingPercent}%` }}
               />
             </div>
             <p className="mt-1 text-[10px] text-muted-foreground">
-              {displayedUsed.toLocaleString()} / {displayedLimit.toLocaleString()} sent
-              {resetTime ? ` - resets ${resetTime}` : " - updates after chat"}
+              {isUnlimited
+                ? "Developer mode"
+                : `${displayedUsed.toLocaleString()} / ${displayedLimit.toLocaleString()} sent${resetTime ? ` - resets ${resetTime}` : " - updates after chat"}`}
             </p>
           </div>
         </div>
@@ -318,4 +330,63 @@ function nextUtcResetAt(): string {
       now.getUTCDate() + 1,
     ),
   ).toISOString();
+}
+
+function readCachedUsage(): UsageMetadata | null {
+  if (!canUseLocalStorage()) {
+    return null;
+  }
+
+  const rawUsage = window.localStorage.getItem(CHAT_USAGE_STORAGE_KEY);
+  if (!rawUsage) {
+    return null;
+  }
+
+  try {
+    const usage = JSON.parse(rawUsage) as Partial<UsageMetadata>;
+    if (!isUsageMetadata(usage) || !isActiveUsage(usage)) {
+      window.localStorage.removeItem(CHAT_USAGE_STORAGE_KEY);
+      return null;
+    }
+    return usage;
+  } catch {
+    window.localStorage.removeItem(CHAT_USAGE_STORAGE_KEY);
+    return null;
+  }
+}
+
+function writeCachedUsage(usage: UsageMetadata | null): void {
+  if (!canUseLocalStorage()) {
+    return;
+  }
+
+  if (!usage || usage.unlimited || !isActiveUsage(usage)) {
+    window.localStorage.removeItem(CHAT_USAGE_STORAGE_KEY);
+    return;
+  }
+
+  window.localStorage.setItem(CHAT_USAGE_STORAGE_KEY, JSON.stringify(usage));
+}
+
+function isUsageMetadata(usage: Partial<UsageMetadata>): usage is UsageMetadata {
+  return (
+    typeof usage.limit === "number" &&
+    typeof usage.used === "number" &&
+    typeof usage.remaining === "number" &&
+    typeof usage.reset_at === "string" &&
+    (usage.unlimited === undefined || typeof usage.unlimited === "boolean")
+  );
+}
+
+function isActiveUsage(usage: UsageMetadata): boolean {
+  const resetTime = new Date(usage.reset_at).getTime();
+  return Number.isFinite(resetTime) && resetTime > Date.now();
+}
+
+function canUseLocalStorage(): boolean {
+  try {
+    return typeof window !== "undefined" && Boolean(window.localStorage);
+  } catch {
+    return false;
+  }
 }

@@ -1,11 +1,16 @@
 from __future__ import annotations
 
+from datetime import datetime, time, timedelta, timezone
 from typing import List, Optional
 
 from fastapi import APIRouter, HTTPException, Request, Response, status
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from backend.config import get_settings
+from backend.services.identity import (
+    issue_anonymous_identity_token,
+    verify_anonymous_identity_token,
+)
 from backend.services.rag_pipeline import generate_recommendations
 from backend.services.usage_limits import (
     DailyQuotaExceeded,
@@ -17,6 +22,7 @@ from backend.services.usage_limits import (
 
 router = APIRouter(prefix="/chat", tags=["chat"])
 MAX_CHAT_MESSAGE_CHARS = 2000
+ANONYMOUS_TOKEN_HEADER = "X-CraveAI-Anonymous-Token"
 
 
 class LocationPayload(BaseModel):
@@ -99,6 +105,7 @@ class UsageMetadata(BaseModel):
     used: int
     remaining: int
     reset_at: str
+    unlimited: bool = False
 
 
 class ChatResponse(BaseModel):
@@ -122,7 +129,7 @@ class ChatResponse(BaseModel):
     )
 
 
-@router.post("", response_model=ChatResponse)
+@router.post("", response_model=ChatResponse, response_model_exclude_defaults=True)
 async def generate_chat_response(
     payload: ChatRequest,
     request: Request,
@@ -136,27 +143,44 @@ async def generate_chat_response(
     settings = get_settings()
     user_text = payload.query or payload.message or ""
     client_host = request.client.host if request.client else None
-    usage_user_id = f"chat:{resolve_usage_user_id(client_host)}"
-    try:
-        usage = await reserve_daily_quota(
-            user_id=usage_user_id,
-            token_cost=1,
-            daily_limit=settings.DAILY_CHAT_MESSAGE_LIMIT,
-            global_daily_limit=settings.GLOBAL_DAILY_TOKEN_LIMIT,
-        )
-    except DailyQuotaExceeded as exc:
-        raise HTTPException(
-            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            detail={
-                "code": "daily_chat_message_quota_exceeded",
-                "message": "Daily demo chat message quota exceeded.",
-                "usage": _usage_metadata(exc.usage).model_dump(),
-            },
-            headers=rate_limit_headers(exc.usage, include_retry_after=True),
-        ) from exc
+    usage_user_id, anonymous_token = _resolve_chat_usage_identity(
+        request.headers.get(ANONYMOUS_TOKEN_HEADER),
+        client_host,
+        settings.IDENTITY_SIGNING_SECRET,
+    )
+    if settings.CHAT_DEVELOPER_MODE:
+        usage_metadata = _unlimited_usage_metadata()
+        if anonymous_token:
+            response.headers[ANONYMOUS_TOKEN_HEADER] = anonymous_token
+    else:
+        try:
+            usage = await reserve_daily_quota(
+                user_id=usage_user_id,
+                token_cost=1,
+                daily_limit=settings.DAILY_CHAT_MESSAGE_LIMIT,
+                global_daily_limit=settings.GLOBAL_DAILY_TOKEN_LIMIT,
+            )
+        except DailyQuotaExceeded as exc:
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail={
+                    "code": "daily_chat_message_quota_exceeded",
+                    "message": "Daily demo chat message quota exceeded.",
+                    "usage": _usage_metadata(exc.usage).model_dump(),
+                },
+                headers=_chat_response_headers(
+                    exc.usage,
+                    anonymous_token=anonymous_token,
+                    include_retry_after=True,
+                ),
+            ) from exc
 
-    for header, value in rate_limit_headers(usage).items():
-        response.headers[header] = value
+        for header, value in _chat_response_headers(
+            usage,
+            anonymous_token=anonymous_token,
+        ).items():
+            response.headers[header] = value
+        usage_metadata = _usage_metadata(usage)
 
     location_payload = payload.location.model_dump() if payload.location else {}
     rag_result = await generate_recommendations(
@@ -181,7 +205,7 @@ async def generate_chat_response(
         reply=rag_result.get("reply", ""),
         messages=[assistant_message],
         recommendations=recommendations,
-        usage=_usage_metadata(usage),
+        usage=usage_metadata,
     )
 
 
@@ -192,3 +216,53 @@ def _usage_metadata(usage: UsageReservation) -> UsageMetadata:
         remaining=usage.remaining,
         reset_at=usage.reset_at,
     )
+
+
+def _unlimited_usage_metadata() -> UsageMetadata:
+    now = datetime.now(timezone.utc)
+    reset_at = datetime.combine(
+        now.date() + timedelta(days=1),
+        time.min,
+        tzinfo=timezone.utc,
+    ).isoformat().replace("+00:00", "Z")
+    return UsageMetadata(
+        limit=0,
+        used=0,
+        remaining=0,
+        reset_at=reset_at,
+        unlimited=True,
+    )
+
+
+def _resolve_chat_usage_identity(
+    anonymous_token: str | None,
+    client_host: str | None,
+    signing_secret: str,
+) -> tuple[str, str | None]:
+    if not signing_secret:
+        return f"chat:{resolve_usage_user_id(client_host)}", None
+
+    if anonymous_token:
+        try:
+            anonymous_subject = verify_anonymous_identity_token(
+                anonymous_token.strip(),
+                signing_secret,
+            )
+            return f"chat:{anonymous_subject}", anonymous_token.strip()
+        except ValueError:
+            pass
+
+    anonymous_subject, issued_token = issue_anonymous_identity_token(signing_secret)
+    return f"chat:{anonymous_subject}", issued_token
+
+
+def _chat_response_headers(
+    usage: UsageReservation,
+    *,
+    anonymous_token: str | None,
+    include_retry_after: bool = False,
+) -> dict[str, str]:
+    headers = rate_limit_headers(usage, include_retry_after=include_retry_after)
+    if anonymous_token:
+        headers[ANONYMOUS_TOKEN_HEADER] = anonymous_token
+    return headers
