@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import hmac
 from datetime import datetime, time, timedelta, timezone
-from typing import List, Optional
+from typing import Annotated, List, Optional
 
 from fastapi import APIRouter, HTTPException, Request, Response, status
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -55,6 +55,24 @@ class LocationPayload(BaseModel):
     )
 
 
+class CandidatePlacePayload(BaseModel):
+    """A bounded, session-scoped restaurant candidate supplied by the UI."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    place_id: str = Field(..., min_length=1, max_length=500)
+    name: str = Field(..., min_length=1, max_length=200)
+    rating: Optional[float] = Field(default=None, ge=0, le=5)
+    user_ratings_total: Optional[int] = Field(default=None, ge=0)
+    address: Optional[str] = Field(default=None, max_length=500)
+    lat: Optional[float] = Field(default=None, ge=-90, le=90)
+    lng: Optional[float] = Field(default=None, ge=-180, le=180)
+    tags: List[Annotated[str, Field(min_length=1, max_length=60)]] = Field(
+        default_factory=list,
+        max_length=3,
+    )
+
+
 class ChatRequest(BaseModel):
     """Incoming chat request from the frontend."""
 
@@ -71,6 +89,11 @@ class ChatRequest(BaseModel):
         description="Alternate chat message field accepted by deployed clients.",
     )
     location: Optional[LocationPayload] = Field(default=None, description="Structured location data.")
+    candidate_places: List[CandidatePlacePayload] = Field(
+        default_factory=list,
+        max_length=20,
+        description="Ephemeral restaurant candidates from the active browser session.",
+    )
 
     @model_validator(mode="after")
     def require_chat_text(self) -> "ChatRequest":
@@ -90,6 +113,7 @@ class Recommendation(BaseModel):
     """Recommendation payload returned by the RAG pipeline."""
 
     name: str
+    place_id: Optional[str] = None
     rating: Optional[float] = None
     address: Optional[str] = None
     reason: Optional[str] = Field(
@@ -210,12 +234,14 @@ async def generate_chat_response(
     rag_result = await generate_recommendations(
         user_query=user_text,
         location=location_payload,
+        candidate_places=[item.model_dump() for item in payload.candidate_places],
     )
 
     assistant_message = ChatMessage(role="assistant", content=rag_result.get("reply", ""))
     recommendations = [
         Recommendation(
             name=item.get("name", "Unknown"),
+            place_id=item.get("place_id"),
             rating=item.get("rating"),
             address=item.get("address"),
             reason=item.get("reason"),

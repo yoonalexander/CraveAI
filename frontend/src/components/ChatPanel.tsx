@@ -8,6 +8,7 @@ import {
   LocationHint,
   UsageMetadata,
 } from "../api/chat";
+import type { Suggestion } from "../api/places";
 
 type Message = {
   id: string;
@@ -46,12 +47,14 @@ type ChatPanelProps = {
   location?: LocationHint | null;
   locationStatus?: string;
   onRecommendations?: (recommendations: ChatRecommendation[]) => void;
+  candidatePlaces?: Suggestion[];
 };
 
 export function ChatPanel({
   location,
   locationStatus,
   onRecommendations,
+  candidatePlaces = [],
 }: ChatPanelProps): JSX.Element {
   const [messages, setMessages] = useState<Message[]>(seededMessages);
   const [draft, setDraft] = useState("");
@@ -106,6 +109,7 @@ export function ChatPanel({
     try {
       const response = await sendChat(trimmed, {
         location: location ?? undefined,
+        candidatePlaces,
       });
       setUsage((currentUsage) => {
         const nextUsage = response.usage ?? estimateNextUsage(currentUsage);

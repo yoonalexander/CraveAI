@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 
 import { ChatPanel } from "./components/ChatPanel";
 import { SuggestionCard } from "./components/SuggestionCard";
@@ -7,8 +7,14 @@ import { ChatRecommendation } from "./api/chat";
 import { ThemeProvider } from "./context/ThemeContext";
 import { ThemeToggle } from "./components/ThemeToggle";
 import { fetchSuggestions, Suggestion } from "./api/places";
+import {
+  calculateDistanceKm,
+  getNextSuggestionIndex,
+  getVisibleSuggestions,
+  MATERIAL_LOCATION_CHANGE_KM,
+} from "./utils/suggestionPool";
 
-const SUGGESTION_RETRY_MS = 30000;
+const SUGGESTION_ROTATION_MS = 30000;
 const SUGGESTION_TIMEOUT_MS = 28000;
 
 const HAMILTON_FALLBACK = {
@@ -36,6 +42,9 @@ function App(): JSX.Element {
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const [suggestionError, setSuggestionError] = useState<string | null>(null);
   const [suggestionIndex, setSuggestionIndex] = useState(0);
+  const [suggestionRetryVersion, setSuggestionRetryVersion] = useState(0);
+  const lastSuggestionLocation = useRef<Coordinates | null>(null);
+  const lastRetryVersion = useRef(-1);
 
   useEffect(() => {
     if (!("geolocation" in navigator)) {
@@ -78,22 +87,36 @@ function App(): JSX.Element {
   useEffect(() => {
     if (!locationReady) return;
 
-    const fetchNearby = async () => {
-      const controller = new AbortController();
+    const loc = userLocation || HAMILTON_FALLBACK;
+    const isManualRetry = suggestionRetryVersion !== lastRetryVersion.current;
+    const previousLocation = lastSuggestionLocation.current;
+    if (
+      !isManualRetry &&
+      previousLocation &&
+      calculateDistanceKm(
+        previousLocation.lat,
+        previousLocation.lng,
+        loc.lat,
+        loc.lng,
+      ) < MATERIAL_LOCATION_CHANGE_KM
+    ) {
+      return;
+    }
 
+    const controller = new AbortController();
+    const fetchNearby = async () => {
       setIsLoadingSuggestions(true);
       setSuggestionError(null);
+      setSuggestions([]);
+      setSuggestionIndex(0);
 
       const timeoutId = window.setTimeout(() => {
         controller.abort();
-        setSuggestionError(
-          "We couldn't load suggestions in time. Retrying every 30 seconds.",
-        );
+        setSuggestionError("We couldn't load suggestions in time.");
         setIsLoadingSuggestions(false);
       }, SUGGESTION_TIMEOUT_MS);
 
       try {
-        const loc = userLocation || HAMILTON_FALLBACK;
         const data = await fetchSuggestions(
           loc.lat,
           loc.lng,
@@ -102,18 +125,16 @@ function App(): JSX.Element {
         );
         setSuggestions(data);
         setSuggestionIndex(0);
+        lastSuggestionLocation.current = { lat: loc.lat, lng: loc.lng };
+        lastRetryVersion.current = suggestionRetryVersion;
         if (data.length === 0) {
-          setSuggestionError(
-            "No nearby restaurants found. Retrying every 30 seconds.",
-          );
+          setSuggestionError("No nearby restaurants were found.");
         }
       } catch (error) {
         if (controller.signal.aborted) return;
 
         console.error("Failed to fetch suggestions:", error);
-        setSuggestionError(
-          "Failed to load suggestions. Retrying every 30 seconds.",
-        );
+        setSuggestionError("Failed to load suggestions.");
       } finally {
         clearTimeout(timeoutId);
         if (!controller.signal.aborted) {
@@ -124,28 +145,23 @@ function App(): JSX.Element {
 
     fetchNearby();
 
-    const retryInterval = window.setInterval(fetchNearby, SUGGESTION_RETRY_MS);
-
     return () => {
-      clearInterval(retryInterval);
+      controller.abort();
     };
-  }, [userLocation, locationReady]);
+  }, [userLocation, locationReady, suggestionRetryVersion]);
 
   useEffect(() => {
     if (suggestions.length === 0) return;
     const interval = setInterval(() => {
-      setSuggestionIndex((prev) => (prev + 1) % suggestions.length);
-    }, 30000);
+      setSuggestionIndex((prev) =>
+        getNextSuggestionIndex(prev, suggestions.length),
+      );
+    }, SUGGESTION_ROTATION_MS);
     return () => clearInterval(interval);
   }, [suggestions]);
 
   const visibleSuggestions = useMemo(() => {
-    if (suggestions.length === 0) return [];
-    const result = [];
-    for (let i = 0; i < Math.min(3, suggestions.length); i++) {
-      result.push(suggestions[(suggestionIndex + i) % suggestions.length]);
-    }
-    return result;
+    return getVisibleSuggestions(suggestions, suggestionIndex);
   }, [suggestions, suggestionIndex]);
 
   const chatLocation = useMemo(() => {
@@ -206,6 +222,7 @@ function App(): JSX.Element {
               location={chatLocation}
               locationStatus={locationStatus}
               onRecommendations={setMapRecommendations}
+              candidatePlaces={suggestions}
             />
           </section>
           <aside className="flex flex-col gap-4">
@@ -221,7 +238,8 @@ function App(): JSX.Element {
                 Today&apos;s Suggested Spots
               </h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                Top rated spots near you. Cycling every 30 seconds.
+                Rotating through up to 20 top-rated spots near you, three at a
+                time.
               </p>
               {isLoadingSuggestions && (
                 <div className="mt-4 flex items-center gap-4 rounded-2xl bg-secondary/70 p-3 shadow-inner">
@@ -243,8 +261,20 @@ function App(): JSX.Element {
               )}
               {suggestionError && !isLoadingSuggestions && (
                 <div className="mt-4 rounded-2xl border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive">
-                  {suggestionError}
+                  <p>{suggestionError}</p>
+                  <button
+                    type="button"
+                    className="mt-3 rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground"
+                    onClick={() => setSuggestionRetryVersion((version) => version + 1)}
+                  >
+                    Try again
+                  </button>
                 </div>
+              )}
+              {suggestions.length > 0 && (
+                <p className="mt-3 text-right text-[10px] text-muted-foreground">
+                  Powered by Google
+                </p>
               )}
             </div>
             <div className="grid gap-4">
@@ -267,11 +297,11 @@ function App(): JSX.Element {
                     distance={
                       userLocation
                         ? `${calculateDistance(
-                          userLocation.lat,
-                      userLocation.lng,
-                      suggestion.lat,
-                      suggestion.lng,
-                    ).toFixed(1)} km`
+                            userLocation.lat,
+                            userLocation.lng,
+                          suggestion.lat,
+                          suggestion.lng,
+                        ).toFixed(1)} km`
                         : ""
                     }
                     rating={suggestion.rating}
@@ -300,22 +330,7 @@ function calculateDistance(
   lat2: number,
   lon2: number,
 ) {
-  const R = 6371; // Radius of the earth in km
-  const dLat = deg2rad(lat2 - lat1);
-  const dLon = deg2rad(lon2 - lon1);
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(deg2rad(lat1)) *
-    Math.cos(deg2rad(lat2)) *
-    Math.sin(dLon / 2) *
-    Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  const d = R * c; // Distance in km
-  return d;
-}
-
-function deg2rad(deg: number) {
-  return deg * (Math.PI / 180);
+  return calculateDistanceKm(lat1, lon1, lat2, lon2);
 }
 
 export default App;

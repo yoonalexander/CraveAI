@@ -1,3 +1,5 @@
+import type { Suggestion } from "./places";
+
 export type LocationHint = {
   lat: number;
   lng: number;
@@ -9,7 +11,20 @@ type ChatRequestPayload = {
   query: string;
   message: string;
   location: LocationHint;
+  candidate_places: CandidatePlacePayload[];
 };
+
+type CandidatePlacePayload = Pick<
+  Suggestion,
+  | "place_id"
+  | "name"
+  | "rating"
+  | "user_ratings_total"
+  | "address"
+  | "lat"
+  | "lng"
+  | "tags"
+>;
 
 export type ChatMessage = {
   role: string;
@@ -18,6 +33,7 @@ export type ChatMessage = {
 
 export type ChatRecommendation = {
   name: string;
+  place_id?: string | null;
   rating?: number | null;
   address?: string | null;
   reason?: string | null;
@@ -92,9 +108,9 @@ const CHAT_REQUEST_TIMEOUT_MS = 25000;
  */
 export async function sendChat(
   query: string,
-  options: { location?: LocationHint } = {},
+  options: { location?: LocationHint; candidatePlaces?: Suggestion[] } = {},
 ): Promise<ChatResponse> {
-  const { location } = options;
+  const { location, candidatePlaces = [] } = options;
 
   const locationPayload: LocationHint = location
     ? { ...FALLBACK_LOCATION, ...location }
@@ -104,6 +120,16 @@ export async function sendChat(
     query,
     message: query,
     location: locationPayload,
+    candidate_places: candidatePlaces.slice(0, 20).map((place) => ({
+      place_id: place.place_id,
+      name: place.name,
+      rating: place.rating,
+      user_ratings_total: place.user_ratings_total,
+      address: place.address,
+      lat: place.lat,
+      lng: place.lng,
+      tags: place.tags ?? [],
+    })),
   };
 
   const headers: Record<string, string> = buildChatHeaders({

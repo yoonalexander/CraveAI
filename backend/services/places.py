@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import logging
 import os
 from typing import Any, Dict, List, Optional
@@ -15,6 +16,10 @@ settings = get_settings()
 GOOGLE_PLACES_API_KEY = settings.GOOGLE_API_KEY
 DEFAULT_SEARCH_RADIUS_METERS = int(os.getenv("GOOGLE_SEARCH_RADIUS", "5000"))
 MAX_PLACES_PER_CUISINE = 5
+SUGGESTION_POOL_LIMIT = 20
+MIN_SUGGESTION_POOL_SIZE = 6
+QUALITY_PRIOR_RATING = 4.0
+QUALITY_PRIOR_REVIEWS = 100
 
 FOOD_PLACE_TYPES = {
     "restaurant",
@@ -117,7 +122,7 @@ async def get_top_rated_nearby(
     lat: float,
     lng: float,
     radius: int = 5000,
-    limit: int = 10,
+    limit: int = SUGGESTION_POOL_LIMIT,
 ) -> List[Dict[str, Any]]:
     """
     Fetch high-rated restaurants near the given location.
@@ -135,27 +140,31 @@ async def get_top_rated_nearby(
                 radius=radius,
                 min_rating=4.0,
             )
-            if not candidates:
-                # Retry with a wider net and slightly lower rating threshold.
+            if len(candidates) < min(limit, MIN_SUGGESTION_POOL_SIZE):
+                # Fill a sparse first page from a wider area without weakening
+                # the quality threshold or discarding the original results.
                 wider_radius = min(int(radius * 2), 20000)
-                print(
-                    f"DEBUG: No candidates in first pass. Retrying with radius={wider_radius} and min_rating=3.5"
-                )
-                candidates = await _fetch_and_filter(
-                    client,
-                    lat=lat,
-                    lng=lng,
-                    radius=wider_radius,
-                    min_rating=3.5,
-                )
+                if wider_radius > radius:
+                    print(
+                        f"DEBUG: Sparse first pass. Retrying with radius={wider_radius} and min_rating=4.0"
+                    )
+                    wider_candidates = await _fetch_and_filter(
+                        client,
+                        lat=lat,
+                        lng=lng,
+                        radius=wider_radius,
+                        min_rating=4.0,
+                    )
+                    candidates = _deduplicate_places([*candidates, *wider_candidates])
 
             if not candidates:
                 return _placeholder_places(
                     ["Local Favorite", "Trending", "Chef's Pick"], lat, lng
                 )[:limit]
 
-            candidates.sort(key=lambda x: x.get("rating", 0), reverse=True)
-            return candidates[:limit]
+            candidates = _deduplicate_places(candidates)
+            candidates.sort(key=_quality_sort_key, reverse=True)
+            return candidates[: min(limit, SUGGESTION_POOL_LIMIT)]
 
         except Exception as e:
             print(f"DEBUG: Failed to fetch top rated places: {e}")
@@ -232,6 +241,19 @@ async def _query_places_api(
 
 def _is_restaurant_candidate(item: Dict[str, Any]) -> bool:
     """Reject venues where food is incidental to another business category."""
+    if not item.get("place_id") or not str(item.get("name", "")).strip():
+        return False
+    if item.get("business_status") in {"CLOSED_TEMPORARILY", "CLOSED_PERMANENTLY"}:
+        return False
+    geometry = item.get("geometry")
+    coordinates = geometry.get("location") if isinstance(geometry, dict) else None
+    if not isinstance(coordinates, dict):
+        return False
+    if not _valid_coordinate(coordinates.get("lat"), -90, 90):
+        return False
+    if not _valid_coordinate(coordinates.get("lng"), -180, 180):
+        return False
+
     raw_types = set(item.get("types", []) or [])
     if raw_types & NON_RESTAURANT_PLACE_TYPES:
         return False
@@ -391,16 +413,53 @@ def _clean_tags(raw_types: List[str], name_str: str) -> List[str]:
     return tags
 
 
+def _valid_coordinate(value: Any, minimum: float, maximum: float) -> bool:
+    try:
+        parsed = float(value)
+    except (TypeError, ValueError):
+        return False
+    return minimum <= parsed <= maximum
+
+
+def _deduplicate_places(places: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    unique: Dict[str, Dict[str, Any]] = {}
+    for place in places:
+        place_id = str(place.get("place_id") or "").strip()
+        if place_id and place_id not in unique:
+            unique[place_id] = place
+    return list(unique.values())
+
+
+def _quality_sort_key(place: Dict[str, Any]) -> tuple[float, float, float]:
+    rating = _number(place.get("rating"))
+    reviews = max(_number(place.get("user_ratings_total")), 0)
+    weighted_rating = (
+        rating * reviews + QUALITY_PRIOR_RATING * QUALITY_PRIOR_REVIEWS
+    ) / (reviews + QUALITY_PRIOR_REVIEWS)
+    return weighted_rating, reviews, rating
+
+
+def _number(value: Any) -> float:
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return 0.0
+
+
 def _placeholder_places(cuisines: List[str], lat: Optional[float], lng: Optional[float]) -> List[Dict[str, Any]]:
     """Fallback data used when the external API is not reachable."""
     placeholders: List[Dict[str, Any]] = []
     for i, cuisine in enumerate(cuisines):
+        placeholder_key = hashlib.sha256(
+            f"{cuisine}|{lat}|{lng}|{i}".encode("utf-8")
+        ).hexdigest()[:20]
         placeholders.append(
             {
                 "name": f"Placeholder {cuisine.title()} Spot",
                 "rating": 4.5 + (i % 5) * 0.1,
                 "address": f"{cuisine.title()} District, Sample City",
                 "reason": f"Sample recommendation for {cuisine}",
+                "place_id": f"placeholder-{placeholder_key}",
                 "lat": lat or 43.2557,
                 "lng": lng or -79.8711,
                 "tags": [cuisine, "Local"],

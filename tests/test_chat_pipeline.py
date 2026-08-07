@@ -160,6 +160,7 @@ def mocked_pipeline(monkeypatch):
         call_tracker["places"] += 1
         return [
             {
+                "place_id": "mock-ramen",
                 "name": "Mock Ramen House",
                 "rating": 4.8,
                 "address": "123 Test Street",
@@ -222,9 +223,9 @@ def test_chat_model_disables_retries_and_sets_deadline(monkeypatch):
 
 def test_deterministic_fallback_sorts_by_rating_then_review_count():
     places = [
-        {"name": "Lower", "rating": 4.7, "user_ratings_total": 900},
-        {"name": "Few Reviews", "rating": 4.8, "user_ratings_total": 20},
-        {"name": "Many Reviews", "rating": 4.8, "user_ratings_total": 500},
+        {"place_id": "lower", "name": "Lower", "rating": 4.7, "user_ratings_total": 900},
+        {"place_id": "few", "name": "Few Reviews", "rating": 4.8, "user_ratings_total": 20},
+        {"place_id": "many", "name": "Many Reviews", "rating": 4.8, "user_ratings_total": 500},
     ]
 
     result = rag_pipeline._deterministic_response(places, reason="test")
@@ -238,8 +239,8 @@ def test_deterministic_fallback_sorts_by_rating_then_review_count():
 
 def test_pipeline_ranking_timeout_returns_fast_deterministic_fallback(monkeypatch):
     places = [
-        {"name": "A", "rating": 4.5, "user_ratings_total": 100},
-        {"name": "B", "rating": 4.8, "user_ratings_total": 50},
+        {"place_id": "a", "name": "A", "rating": 4.5, "user_ratings_total": 100},
+        {"place_id": "b", "name": "B", "rating": 4.8, "user_ratings_total": 50},
     ]
 
     async def fake_fetch(search_terms, location):
@@ -269,6 +270,7 @@ def test_pipeline_ranking_timeout_returns_fast_deterministic_fallback(monkeypatc
 def test_pipeline_malformed_ranking_falls_back_with_coordinates(monkeypatch):
     places = [
         {
+            "place_id": "mapped-pizza",
             "name": "Mapped Pizza",
             "rating": 4.9,
             "user_ratings_total": 200,
@@ -331,6 +333,99 @@ def test_pipeline_total_deadline_returns_without_waiting(monkeypatch):
 
     assert result["reply"]
     assert result["recommendations"] == []
+
+
+def test_session_pool_skips_live_search_when_three_explicit_matches(monkeypatch):
+    pool = [
+        {
+            "place_id": f"ramen-{index}",
+            "name": f"Ramen {index}",
+            "tags": ["Japanese"],
+            "rating": 4.5,
+        }
+        for index in range(3)
+    ]
+    calls = {"live": 0}
+
+    async def fail_if_live(*_args, **_kwargs):
+        calls["live"] += 1
+        return []
+
+    async def echo_rank(_query, candidates):
+        return {"reply": "Pool matches", "recommendations": candidates[:3]}
+
+    monkeypatch.setattr(rag_pipeline, "_fetch_candidate_places", fail_if_live)
+    monkeypatch.setattr(rag_pipeline, "_rank_candidates", echo_rank)
+
+    result = asyncio.run(
+        rag_pipeline.generate_recommendations(
+            "ramen tonight",
+            {"lat": 43.6, "lng": -79.4},
+            pool,
+        )
+    )
+
+    assert calls["live"] == 0
+    assert [item["place_id"] for item in result["recommendations"]] == [
+        "ramen-0",
+        "ramen-1",
+        "ramen-2",
+    ]
+
+
+def test_sparse_explicit_pool_uses_live_search_and_deduplicates(monkeypatch):
+    pool = [
+        {"place_id": "shared", "name": "Shared Pizza", "tags": ["Pizza"]},
+        {"place_id": "pool-only", "name": "Pool Pizza", "tags": ["Pizza"]},
+    ]
+    captured: Dict[str, Any] = {}
+
+    async def fake_live(*_args, **_kwargs):
+        return [
+            {"place_id": "shared", "name": "Duplicate Shared Pizza"},
+            {"place_id": "live-only", "name": "Live Pizza"},
+        ]
+
+    async def capture_rank(_query, candidates):
+        captured["ids"] = [item["place_id"] for item in candidates]
+        return {"reply": "Merged", "recommendations": candidates[:3]}
+
+    monkeypatch.setattr(rag_pipeline, "_fetch_candidate_places", fake_live)
+    monkeypatch.setattr(rag_pipeline, "_rank_candidates", capture_rank)
+
+    asyncio.run(
+        rag_pipeline.generate_recommendations(
+            "pizza",
+            {"lat": 43.6, "lng": -79.4},
+            pool,
+        )
+    )
+
+    assert captured["ids"] == ["shared", "pool-only", "live-only"]
+
+
+def test_ranked_recommendations_only_accept_known_place_ids():
+    source = [
+        {"place_id": "known", "name": "Known Place", "rating": 4.8},
+    ]
+    ranked = [
+        {"place_id": "invented", "reason": "Not allowed"},
+        {"place_id": "known", "reason": "Allowed"},
+    ]
+
+    merged = rag_pipeline._merge_ranked_recommendations(ranked, source)
+
+    assert merged == [
+        {
+            "place_id": "known",
+            "name": "Known Place",
+            "rating": 4.8,
+            "address": None,
+            "reason": "Allowed",
+            "lat": None,
+            "lng": None,
+        }
+    ]
 
 
 def test_chat_endpoint_returns_mocked_response(mocked_pipeline):
@@ -892,6 +987,78 @@ def test_chat_rejects_oversized_input_before_pipeline(mocked_pipeline):
     assert mocked_pipeline == {"extract": 0, "places": 0, "rank": 0}
 
 
+def test_chat_rejects_more_than_twenty_session_candidates(mocked_pipeline):
+    app = create_app()
+    candidates = [
+        {
+            "place_id": f"place-{index}",
+            "name": f"Place {index}",
+            "rating": 4.5,
+            "lat": 43.65,
+            "lng": -79.38,
+        }
+        for index in range(21)
+    ]
+
+    async def exercise():
+        async with AsyncClient(
+            transport=ASGITransport(app=app),
+            base_url="http://test",
+        ) as client:
+            return await client.post(
+                "/chat",
+                json={
+                    "query": "dinner",
+                    "location": {"lat": 43.65, "lng": -79.38},
+                    "candidate_places": candidates,
+                },
+            )
+
+    response = asyncio.run(exercise())
+    assert response.status_code == 422
+    assert mocked_pipeline == {"extract": 0, "places": 0, "rank": 0}
+
+
+@pytest.mark.parametrize(
+    "candidate",
+    [
+        {"place_id": "long-name", "name": "x" * 201},
+        {"place_id": "bad-location", "name": "Bad Location", "lat": 91},
+        {
+            "place_id": "extra-field",
+            "name": "Extra Field",
+            "reason": "Candidate reasons are not accepted from the browser.",
+        },
+    ],
+)
+def test_chat_rejects_invalid_session_candidate_fields(
+    monkeypatch,
+    mocked_pipeline,
+    candidate,
+):
+    monkeypatch.setenv("DAILY_CHAT_MESSAGE_LIMIT", "10")
+    get_settings.cache_clear()
+    app = create_app()
+
+    async def exercise():
+        async with AsyncClient(
+            transport=ASGITransport(app=app),
+            base_url="http://test",
+        ) as client:
+            return await client.post(
+                "/chat",
+                json={
+                    "query": "dinner",
+                    "location": {"lat": 43.65, "lng": -79.38},
+                    "candidate_places": [candidate],
+                },
+            )
+
+    response = asyncio.run(exercise())
+    assert response.status_code == 422
+    assert mocked_pipeline == {"extract": 0, "places": 0, "rank": 0}
+
+
 def test_global_quota_cannot_be_bypassed_with_multiple_actor_ids():
     init_storage()
 
@@ -971,6 +1138,7 @@ def test_top_rated_places_filter_rejects_incidental_food_venues():
                             "establishment",
                         ],
                         "place_id": "bowling-alley",
+                        "geometry": {"location": {"lat": 43.58, "lng": -79.72}},
                     },
                     {
                         "name": "Sushi In Sushi",
@@ -985,6 +1153,7 @@ def test_top_rated_places_filter_rejects_incidental_food_venues():
                             "establishment",
                         ],
                         "place_id": "sushi-spot",
+                        "geometry": {"location": {"lat": 43.59, "lng": -79.73}},
                     },
                 ],
             }
@@ -1005,6 +1174,61 @@ def test_top_rated_places_filter_rejects_incidental_food_venues():
 
     assert [place["name"] for place in results] == ["Sushi In Sushi"]
     assert "Bowling Alley" not in results[0]["tags"]
+
+
+def test_suggestion_quality_balances_rating_and_review_confidence():
+    high_confidence = {
+        "rating": 4.7,
+        "user_ratings_total": 1000,
+    }
+    low_confidence = {
+        "rating": 4.8,
+        "user_ratings_total": 5,
+    }
+
+    assert places_service._quality_sort_key(
+        high_confidence
+    ) > places_service._quality_sort_key(low_confidence)
+
+
+def test_top_rated_suggestions_are_deduplicated_and_capped(monkeypatch):
+    candidates = [
+        {
+            "place_id": f"place-{index}",
+            "name": f"Place {index}",
+            "rating": 4.5,
+            "user_ratings_total": 100 + index,
+        }
+        for index in range(25)
+    ]
+    candidates.append({**candidates[0], "name": "Duplicate"})
+
+    async def fake_fetch(*_args, **_kwargs):
+        return candidates
+
+    monkeypatch.setattr(places_service, "_fetch_and_filter", fake_fetch)
+
+    results = asyncio.run(places_service.get_top_rated_nearby(43.65, -79.38))
+
+    assert len(results) == 20
+    assert len({item["place_id"] for item in results}) == 20
+
+
+def test_restaurant_filter_rejects_closed_and_malformed_places():
+    valid = {
+        "place_id": "valid",
+        "name": "Valid Cafe",
+        "types": ["cafe"],
+        "geometry": {"location": {"lat": 43.6, "lng": -79.4}},
+    }
+
+    assert places_service._is_restaurant_candidate(valid)
+    assert not places_service._is_restaurant_candidate(
+        {**valid, "business_status": "CLOSED_PERMANENTLY"}
+    )
+    assert not places_service._is_restaurant_candidate(
+        {key: value for key, value in valid.items() if key != "place_id"}
+    )
 
 
 def test_favorites_require_signed_owner_identity():
