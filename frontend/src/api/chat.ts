@@ -1,4 +1,8 @@
 import type { Suggestion } from "./places";
+import {
+  buildAnonymousHeaders,
+  persistAnonymousToken,
+} from "./anonymousIdentity";
 
 export type LocationHint = {
   lat: number;
@@ -97,8 +101,6 @@ const API_URL =
   import.meta.env.VITE_API_BASE_URL?.toString()?.trim() ||
   "https://craveai-d8gh.onrender.com";
 
-const ANONYMOUS_TOKEN_HEADER = "X-CraveAI-Anonymous-Token";
-const ANONYMOUS_TOKEN_STORAGE_KEY = "craveai-anonymous-token";
 const DEV_BYPASS_HEADER = "X-CraveAI-Dev-Bypass";
 const DEV_BYPASS_STORAGE_KEY = "craveai-dev-bypass-secret";
 const CHAT_REQUEST_TIMEOUT_MS = 25000;
@@ -226,37 +228,15 @@ function readIntegerHeader(response: Response, name: string): number | null {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
-function readStoredAnonymousToken(): string | null {
-  if (!canUseLocalStorage()) {
-    return null;
-  }
-
-  const token = window.localStorage.getItem(ANONYMOUS_TOKEN_STORAGE_KEY);
-  return token?.trim() || null;
-}
-
 function buildChatHeaders(
   baseHeaders: Record<string, string> = {},
 ): Record<string, string> {
-  const headers = { ...baseHeaders };
-  const anonymousToken = readStoredAnonymousToken();
-  if (anonymousToken) {
-    headers[ANONYMOUS_TOKEN_HEADER] = anonymousToken;
-  }
+  const headers = buildAnonymousHeaders(baseHeaders);
   const devBypassSecret = readStoredDevBypassSecret();
   if (devBypassSecret) {
     headers[DEV_BYPASS_HEADER] = devBypassSecret;
   }
   return headers;
-}
-
-function persistAnonymousToken(response: Response): void {
-  const token = response.headers.get(ANONYMOUS_TOKEN_HEADER)?.trim();
-  if (!token || !canUseLocalStorage()) {
-    return;
-  }
-
-  window.localStorage.setItem(ANONYMOUS_TOKEN_STORAGE_KEY, token);
 }
 
 function readStoredDevBypassSecret(): string | null {

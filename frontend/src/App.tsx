@@ -6,7 +6,11 @@ import { MapView } from "./components/MapView";
 import { ChatRecommendation } from "./api/chat";
 import { ThemeProvider } from "./context/ThemeContext";
 import { ThemeToggle } from "./components/ThemeToggle";
-import { fetchSuggestions, Suggestion } from "./api/places";
+import {
+  fetchSuggestions,
+  PlacesQuotaError,
+  Suggestion,
+} from "./api/places";
 import {
   calculateDistanceKm,
   getNextSuggestionIndex,
@@ -41,6 +45,9 @@ function App(): JSX.Element {
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const [suggestionError, setSuggestionError] = useState<string | null>(null);
+  const [suggestionQuotaResetAt, setSuggestionQuotaResetAt] = useState<
+    string | null
+  >(null);
   const [suggestionIndex, setSuggestionIndex] = useState(0);
   const [suggestionRetryVersion, setSuggestionRetryVersion] = useState(0);
   const lastSuggestionLocation = useRef<Coordinates | null>(null);
@@ -107,6 +114,7 @@ function App(): JSX.Element {
     const fetchNearby = async () => {
       setIsLoadingSuggestions(true);
       setSuggestionError(null);
+      setSuggestionQuotaResetAt(null);
       setSuggestions([]);
       setSuggestionIndex(0);
 
@@ -134,7 +142,12 @@ function App(): JSX.Element {
         if (controller.signal.aborted) return;
 
         console.error("Failed to fetch suggestions:", error);
-        setSuggestionError("Failed to load suggestions.");
+        if (error instanceof PlacesQuotaError) {
+          setSuggestionQuotaResetAt(error.resetAt);
+          setSuggestionError(formatPlacesQuotaError(error.resetAt));
+        } else {
+          setSuggestionError("Failed to load suggestions.");
+        }
       } finally {
         clearTimeout(timeoutId);
         if (!controller.signal.aborted) {
@@ -262,13 +275,17 @@ function App(): JSX.Element {
               {suggestionError && !isLoadingSuggestions && (
                 <div className="mt-4 rounded-2xl border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive">
                   <p>{suggestionError}</p>
-                  <button
-                    type="button"
-                    className="mt-3 rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground"
-                    onClick={() => setSuggestionRetryVersion((version) => version + 1)}
-                  >
-                    Try again
-                  </button>
+                  {!suggestionQuotaResetAt && (
+                    <button
+                      type="button"
+                      className="mt-3 rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground"
+                      onClick={() =>
+                        setSuggestionRetryVersion((version) => version + 1)
+                      }
+                    >
+                      Try again
+                    </button>
+                  )}
                 </div>
               )}
               {suggestions.length > 0 && (
@@ -331,6 +348,21 @@ function calculateDistance(
   lon2: number,
 ) {
   return calculateDistanceKm(lat1, lon1, lat2, lon2);
+}
+
+function formatPlacesQuotaError(resetAt: string | null): string {
+  if (!resetAt) {
+    return "Today's nearby discovery limit has been reached. Please try again tomorrow.";
+  }
+  const resetDate = new Date(resetAt);
+  if (!Number.isFinite(resetDate.getTime())) {
+    return "Today's nearby discovery limit has been reached. Please try again tomorrow.";
+  }
+  const formattedReset = new Intl.DateTimeFormat(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(resetDate);
+  return `Today's nearby discovery limit has been reached. It resets ${formattedReset}.`;
 }
 
 export default App;

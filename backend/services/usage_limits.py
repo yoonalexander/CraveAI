@@ -7,6 +7,7 @@ from datetime import datetime, time, timedelta, timezone
 from backend.services.storage import _get_connection
 
 GLOBAL_USAGE_USER_ID = "__global__"
+PLACES_GLOBAL_USAGE_USER_ID = "__global_places__"
 
 
 @dataclass(frozen=True)
@@ -38,6 +39,7 @@ async def reserve_daily_quota(
     token_cost: int,
     daily_limit: int,
     global_daily_limit: int | None = None,
+    global_user_id: str = GLOBAL_USAGE_USER_ID,
     now: datetime | None = None,
 ) -> UsageReservation:
     """Atomically reserve per-actor and optional service-wide daily quota."""
@@ -79,7 +81,7 @@ async def reserve_daily_quota(
             global_used = 0
             global_count = 0
             if effective_global_limit is not None:
-                global_row = _load_usage_row(connection, GLOBAL_USAGE_USER_ID, usage_date)
+                global_row = _load_usage_row(connection, global_user_id, usage_date)
                 global_used, global_count = _usage_values(global_row)
                 if global_used + token_cost > effective_global_limit:
                     connection.rollback()
@@ -108,7 +110,7 @@ async def reserve_daily_quota(
                 _write_usage_row(
                     connection,
                     existing=global_row is not None,
-                    user_id=GLOBAL_USAGE_USER_ID,
+                    user_id=global_user_id,
                     usage_date=usage_date,
                     tokens_used=global_used + token_cost,
                     request_count=global_count + 1,

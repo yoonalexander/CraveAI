@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { Suggestion } from "./api/places";
 import App from "./App";
-import { fetchSuggestions } from "./api/places";
+import { fetchSuggestions, PlacesQuotaError } from "./api/places";
 
 vi.mock("./api/places", async () => {
   const actual = await vi.importActual<typeof import("./api/places")>("./api/places");
@@ -107,6 +107,21 @@ describe("App suggestion pool", () => {
 
     expect(mockedFetchSuggestions).toHaveBeenCalledTimes(2);
     expect(screen.getByText("Place 0")).toBeInTheDocument();
+  });
+
+  it("shows the Places reset time and hides retry for quota errors", async () => {
+    mockedFetchSuggestions.mockRejectedValue(
+      new PlacesQuotaError("2026-08-08T00:00:00Z"),
+    );
+    render(<App />);
+    await flushEffects();
+
+    expect(
+      screen.getByText(/nearby discovery limit has been reached/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Try again" }),
+    ).not.toBeInTheDocument();
   });
 
   it("refetches only after a material location change", async () => {

@@ -68,8 +68,11 @@ class Config:
     GLOBAL_DAILY_TOKEN_LIMIT: int = field(
         default_factory=lambda: _env_int("GLOBAL_DAILY_TOKEN_LIMIT", 100000)
     )
-    PLACES_REQUEST_TOKEN_COST: int = field(
-        default_factory=lambda: _env_int("PLACES_REQUEST_TOKEN_COST", 500)
+    DAILY_PLACES_REQUEST_LIMIT: int = field(
+        default_factory=lambda: _env_int("DAILY_PLACES_REQUEST_LIMIT", 20)
+    )
+    GLOBAL_DAILY_PLACES_REQUEST_LIMIT: int = field(
+        default_factory=lambda: _env_int("GLOBAL_DAILY_PLACES_REQUEST_LIMIT", 1000)
     )
     IDENTITY_SIGNING_SECRET: str = field(
         default_factory=lambda: os.getenv("IDENTITY_SIGNING_SECRET", "")

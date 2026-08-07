@@ -110,6 +110,7 @@ from backend.services.identity import issue_identity_token, verify_identity_toke
 from backend.services.storage import init_storage
 from backend.services.usage_limits import (
     DailyQuotaExceeded,
+    PLACES_GLOBAL_USAGE_USER_ID,
     reserve_daily_quota,
 )
 
@@ -131,7 +132,8 @@ def configure_test_settings(monkeypatch, tmp_path):
     monkeypatch.setenv("CHAT_DEVELOPER_MODE", "false")
     monkeypatch.delenv("CHAT_DEV_BYPASS_SECRET", raising=False)
     monkeypatch.setenv("GLOBAL_DAILY_TOKEN_LIMIT", "100000")
-    monkeypatch.setenv("PLACES_REQUEST_TOKEN_COST", "500")
+    monkeypatch.setenv("DAILY_PLACES_REQUEST_LIMIT", "20")
+    monkeypatch.setenv("GLOBAL_DAILY_PLACES_REQUEST_LIMIT", "1000")
     monkeypatch.setenv("IDENTITY_SIGNING_SECRET", "test-identity-signing-secret")
     get_settings.cache_clear()
 
@@ -1085,9 +1087,34 @@ def test_global_quota_cannot_be_bypassed_with_multiple_actor_ids():
     assert exc_info.value.usage.used == 600
 
 
+def test_places_global_quota_is_isolated_from_chat_global_quota():
+    init_storage()
+
+    asyncio.run(
+        reserve_daily_quota(
+            user_id="chat:user",
+            token_cost=1000,
+            daily_limit=1000,
+            global_daily_limit=1000,
+        )
+    )
+    places_usage = asyncio.run(
+        reserve_daily_quota(
+            user_id="places:user",
+            token_cost=1,
+            daily_limit=20,
+            global_daily_limit=1000,
+            global_user_id=PLACES_GLOBAL_USAGE_USER_ID,
+        )
+    )
+
+    assert places_usage.used == 1
+    assert places_usage.remaining == 19
+
+
 def test_places_endpoint_reserves_quota_before_provider_call(monkeypatch):
-    monkeypatch.setenv("DAILY_TOKEN_LIMIT", "1000")
-    monkeypatch.setenv("PLACES_REQUEST_TOKEN_COST", "600")
+    monkeypatch.setenv("DAILY_PLACES_REQUEST_LIMIT", "1")
+    monkeypatch.setenv("GLOBAL_DAILY_PLACES_REQUEST_LIMIT", "10")
     get_settings.cache_clear()
     calls = 0
 
@@ -1105,14 +1132,54 @@ def test_places_endpoint_reserves_quota_before_provider_call(monkeypatch):
             base_url="http://test",
         ) as client:
             first = await client.get("/places/suggestions?lat=43.65&lng=-79.38")
-            second = await client.get("/places/suggestions?lat=43.65&lng=-79.38")
+            anonymous_token = first.headers[ANONYMOUS_TOKEN_HEADER]
+            second = await client.get(
+                "/places/suggestions?lat=43.65&lng=-79.38",
+                headers={ANONYMOUS_TOKEN_HEADER: anonymous_token},
+            )
             return first, second
 
     first_response, second_response = asyncio.run(exercise())
     assert first_response.status_code == 200
-    assert first_response.headers["x-ratelimit-remaining"] == "400"
+    assert first_response.headers["x-ratelimit-remaining"] == "0"
     assert second_response.status_code == 429
+    assert second_response.json()["detail"]["code"] == "daily_places_request_quota_exceeded"
     assert calls == 1
+
+
+def test_places_replaces_forged_anonymous_token(monkeypatch):
+    monkeypatch.setenv("DAILY_PLACES_REQUEST_LIMIT", "2")
+    get_settings.cache_clear()
+
+    async def fake_places(*_args, **_kwargs):
+        return []
+
+    monkeypatch.setattr(places_router, "get_top_rated_nearby", fake_places)
+    app = create_app()
+
+    async def exercise():
+        async with AsyncClient(
+            transport=ASGITransport(app=app),
+            base_url="http://test",
+        ) as client:
+            first = await client.get(
+                "/places/suggestions?lat=43.65&lng=-79.38",
+                headers={ANONYMOUS_TOKEN_HEADER: "forged-token"},
+            )
+            issued_token = first.headers[ANONYMOUS_TOKEN_HEADER]
+            second = await client.get(
+                "/places/suggestions?lat=43.65&lng=-79.38",
+                headers={ANONYMOUS_TOKEN_HEADER: issued_token},
+            )
+            return first, issued_token, second
+
+    first, issued_token, second = asyncio.run(exercise())
+
+    assert first.status_code == 200
+    assert issued_token != "forged-token"
+    assert first.headers["x-ratelimit-remaining"] == "1"
+    assert second.status_code == 200
+    assert second.headers["x-ratelimit-remaining"] == "0"
 
 
 def test_top_rated_places_filter_rejects_incidental_food_venues():

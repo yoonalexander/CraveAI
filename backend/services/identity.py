@@ -108,6 +108,30 @@ def verify_anonymous_identity_token(
     return subject
 
 
+def resolve_anonymous_usage_identity(
+    namespace: str,
+    anonymous_token: str | None,
+    client_host: str | None,
+    signing_secret: str,
+) -> tuple[str, str | None]:
+    """Resolve a stable signed browser identity for an isolated quota namespace."""
+    if not signing_secret:
+        return f"{namespace}:ip:{client_host or 'unknown'}", None
+
+    if anonymous_token:
+        try:
+            anonymous_subject = verify_anonymous_identity_token(
+                anonymous_token.strip(),
+                signing_secret,
+            )
+            return f"{namespace}:{anonymous_subject}", anonymous_token.strip()
+        except ValueError:
+            pass
+
+    anonymous_subject, issued_token = issue_anonymous_identity_token(signing_secret)
+    return f"{namespace}:{anonymous_subject}", issued_token
+
+
 async def require_user_identity(authorization: str | None = Header(default=None)) -> str:
     """Require a trusted issuer's signed bearer token."""
     secret = get_settings().IDENTITY_SIGNING_SECRET

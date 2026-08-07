@@ -1,3 +1,8 @@
+import {
+    buildAnonymousHeaders,
+    persistAnonymousToken,
+} from "./anonymousIdentity";
+
 const API_URL =
     import.meta.env.VITE_API_URL?.toString()?.trim() ||
     "https://craveai-d8gh.onrender.com";
@@ -14,6 +19,16 @@ export interface Suggestion {
     user_ratings_total?: number;
 }
 
+export class PlacesQuotaError extends Error {
+    resetAt: string | null;
+
+    constructor(resetAt: string | null) {
+        super("Today's nearby discovery limit has been reached.");
+        this.name = "PlacesQuotaError";
+        this.resetAt = resetAt;
+    }
+}
+
 export async function fetchSuggestions(
     lat: number,
     lng: number,
@@ -22,10 +37,14 @@ export async function fetchSuggestions(
 ): Promise<Suggestion[]> {
     const response = await fetch(
         `${API_URL}/places/suggestions?lat=${lat}&lng=${lng}&radius=${radius}`,
-        { signal },
+        { signal, headers: buildAnonymousHeaders() },
     );
+    persistAnonymousToken(response);
     if (!response.ok) {
-        throw new Error("Failed to fetch suggestions");
+        if (response.status === 429) {
+            throw new PlacesQuotaError(response.headers.get("x-ratelimit-reset"));
+        }
+        throw new Error(`Failed to fetch suggestions (${response.status})`);
     }
     return response.json();
 }

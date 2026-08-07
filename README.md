@@ -51,8 +51,9 @@ docs/ (PRD.md, TECHNICAL_DESIGN.md)
 | `CHAT_PIPELINE_TIMEOUT_SECONDS` | `.env` | Hard deadline for the full recommendation pipeline. |
 | `CHAT_RANKING_TIMEOUT_SECONDS` | `.env` | Deadline for the single model ranking call. |
 | `DAILY_CHAT_MESSAGE_LIMIT` | `.env` | Number of chat messages each user can send per UTC day. |
-| `GLOBAL_DAILY_TOKEN_LIMIT` | `.env` | Service-wide hard ceiling shared by quota reservations. |
-| `PLACES_REQUEST_TOKEN_COST` | `.env` | Quota cost reserved before each public Places lookup. |
+| `GLOBAL_DAILY_TOKEN_LIMIT` | `.env` | Service-wide hard ceiling for chat quota reservations. |
+| `DAILY_PLACES_REQUEST_LIMIT` | `.env` | Number of suggestion-pool requests each anonymous browser can make per UTC day. |
+| `GLOBAL_DAILY_PLACES_REQUEST_LIMIT` | `.env` | Service-wide ceiling for suggestion-pool requests per UTC day. |
 | `IDENTITY_SIGNING_SECRET` | `.env` | HMAC secret used by the trusted auth issuer for favorites bearer tokens. Required in production. |
 | `VITE_API_BASE_URL` | `frontend/.env` | Base URL for the FastAPI backend during local dev. |
 | `VITE_GOOGLE_MAPS_API_KEY` | `frontend/.env` | Powers the in-app Google Maps view and geolocation overlays. |

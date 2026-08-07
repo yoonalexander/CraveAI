@@ -8,17 +8,13 @@ from fastapi import APIRouter, HTTPException, Request, Response, status
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from backend.config import get_settings
-from backend.services.identity import (
-    issue_anonymous_identity_token,
-    verify_anonymous_identity_token,
-)
+from backend.services.identity import resolve_anonymous_usage_identity
 from backend.services.rag_pipeline import generate_recommendations
 from backend.services.usage_limits import (
     DailyQuotaExceeded,
     UsageReservation,
     rate_limit_headers,
     reserve_daily_quota,
-    resolve_usage_user_id,
 )
 
 router = APIRouter(prefix="/chat", tags=["chat"])
@@ -289,21 +285,12 @@ def _resolve_chat_usage_identity(
     client_host: str | None,
     signing_secret: str,
 ) -> tuple[str, str | None]:
-    if not signing_secret:
-        return f"chat:{resolve_usage_user_id(client_host)}", None
-
-    if anonymous_token:
-        try:
-            anonymous_subject = verify_anonymous_identity_token(
-                anonymous_token.strip(),
-                signing_secret,
-            )
-            return f"chat:{anonymous_subject}", anonymous_token.strip()
-        except ValueError:
-            pass
-
-    anonymous_subject, issued_token = issue_anonymous_identity_token(signing_secret)
-    return f"chat:{anonymous_subject}", issued_token
+    return resolve_anonymous_usage_identity(
+        "chat",
+        anonymous_token,
+        client_host,
+        signing_secret,
+    )
 
 
 def _is_dev_bypass_authorized(
