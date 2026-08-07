@@ -62,8 +62,8 @@ export async function resetPassword(password: string): Promise<void> {
   clearCsrfToken();
 }
 
-export function startGoogleLogin(): void {
-  window.location.assign(`${API_BASE}/auth/google/start`);
+export function googleLoginUrl(): string {
+  return `${API_BASE}/auth/google/start`;
 }
 
 export async function listIdentities(): Promise<Identity[]> {

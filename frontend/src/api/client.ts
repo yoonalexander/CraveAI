@@ -1,5 +1,6 @@
-export const API_BASE =
-  import.meta.env.VITE_API_URL?.toString()?.trim().replace(/\/$/, "") || "/api";
+// Authentication relies on first-party cookies, so browser requests must stay
+// on the frontend origin and pass through the Vite/Vercel /api proxy.
+export const API_BASE = "/api";
 
 let csrfToken: string | null = null;
 

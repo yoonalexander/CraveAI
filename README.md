@@ -59,7 +59,9 @@ external URLs to the Supabase redirect allowlist:
 - `${PUBLIC_API_URL}/auth/google/callback`
 
 See [security operations](docs/security_operations.md) for production setup,
-rotation, retention, and incident procedures.
+rotation, retention, and incident procedures. For the exact Google Cloud and
+Supabase callback configuration, see
+[Google sign-in setup](docs/google_oauth_setup.md).
 
 ## API
 
