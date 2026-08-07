@@ -15,7 +15,12 @@ from backend.config import get_settings
 from backend.services.places import _placeholder_places, search_nearby_places
 
 logger = logging.getLogger(__name__)
+if not logger.handlers:
+    _log_handler = logging.StreamHandler()
+    _log_handler.setFormatter(logging.Formatter("%(levelname)s: %(message)s"))
+    logger.addHandler(_log_handler)
 logger.setLevel(logging.INFO)
+logger.propagate = False
 
 settings = get_settings()
 
