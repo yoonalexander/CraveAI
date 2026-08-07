@@ -15,6 +15,7 @@ from backend.config import get_settings
 from backend.services.places import _placeholder_places, search_nearby_places
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 settings = get_settings()
 
