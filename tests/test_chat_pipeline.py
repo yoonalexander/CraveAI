@@ -212,7 +212,12 @@ def test_chat_model_disables_retries_and_sets_deadline(monkeypatch):
     assert captured["model"] == rag_pipeline.OPENAI_CHAT_MODEL
     assert captured["timeout"] == rag_pipeline.RANKING_TIMEOUT_SECONDS
     assert captured["max_retries"] == 0
-    assert captured["max_tokens"] == 300
+    assert captured["max_completion_tokens"] == 500
+    assert captured["reasoning_effort"] == "minimal"
+    assert captured["verbosity"] == "low"
+    assert captured["model_kwargs"] == {
+        "response_format": {"type": "json_object"}
+    }
 
 
 def test_deterministic_fallback_sorts_by_rating_then_review_count():

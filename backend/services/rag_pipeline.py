@@ -202,7 +202,10 @@ def _build_chat_model() -> ChatOpenAI:
     """Build the single bounded model client used for final ranking."""
     return ChatOpenAI(
         model=OPENAI_CHAT_MODEL,
-        max_tokens=300,
+        max_completion_tokens=500,
+        reasoning_effort="minimal",
+        verbosity="low",
+        model_kwargs={"response_format": {"type": "json_object"}},
         timeout=RANKING_TIMEOUT_SECONDS,
         max_retries=0,
         api_key=OPENAI_API_KEY or None,
