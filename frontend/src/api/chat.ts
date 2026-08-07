@@ -1,8 +1,5 @@
 import type { Suggestion } from "./places";
-import {
-  buildAnonymousHeaders,
-  persistAnonymousToken,
-} from "./anonymousIdentity";
+import { apiFetch } from "./client";
 
 export type LocationHint = {
   lat: number;
@@ -96,13 +93,6 @@ const FALLBACK_LOCATION: LocationHint = {
   radius: 5000,
 };
 
-const API_URL =
-  import.meta.env.VITE_API_URL?.toString()?.trim() ||
-  import.meta.env.VITE_API_BASE_URL?.toString()?.trim() ||
-  "https://craveai-d8gh.onrender.com";
-
-const DEV_BYPASS_HEADER = "X-CraveAI-Dev-Bypass";
-const DEV_BYPASS_STORAGE_KEY = "craveai-dev-bypass-secret";
 const CHAT_REQUEST_TIMEOUT_MS = 25000;
 
 /**
@@ -134,9 +124,9 @@ export async function sendChat(
     })),
   };
 
-  const headers: Record<string, string> = buildChatHeaders({
+  const headers: Record<string, string> = {
     "Content-Type": "application/json",
-  });
+  };
 
   const controller = new AbortController();
   const timeoutId = window.setTimeout(
@@ -145,12 +135,16 @@ export async function sendChat(
   );
   let response: Response;
   try {
-    response = await fetch(`${API_URL}/chat`, {
-      method: "POST",
-      headers,
-      body: JSON.stringify(payload),
-      signal: controller.signal,
-    });
+    response = await apiFetch(
+      "/chat",
+      {
+        method: "POST",
+        headers,
+        body: JSON.stringify(payload),
+        signal: controller.signal,
+      },
+      { csrf: false },
+    );
   } catch (error) {
     if (controller.signal.aborted) {
       throw new ChatTimeoutError();
@@ -159,8 +153,6 @@ export async function sendChat(
   } finally {
     window.clearTimeout(timeoutId);
   }
-  persistAnonymousToken(response);
-
   if (!response.ok) {
     const errorPayload = await readErrorPayload(response);
     const quotaDetail = errorPayload.json?.detail;
@@ -189,10 +181,7 @@ export async function sendChat(
 }
 
 export async function fetchChatStatus(): Promise<ChatStatusResponse> {
-  const response = await fetch(`${API_URL}/chat/status`, {
-    method: "GET",
-    headers: buildChatHeaders(),
-  });
+  const response = await apiFetch("/chat/status", {}, { csrf: false });
 
   if (!response.ok) {
     throw new Error(`Chat status request failed with status ${response.status}.`);
@@ -226,34 +215,6 @@ function readIntegerHeader(response: Response, name: string): number | null {
 
   const parsed = Number.parseInt(value, 10);
   return Number.isFinite(parsed) ? parsed : null;
-}
-
-function buildChatHeaders(
-  baseHeaders: Record<string, string> = {},
-): Record<string, string> {
-  const headers = buildAnonymousHeaders(baseHeaders);
-  const devBypassSecret = readStoredDevBypassSecret();
-  if (devBypassSecret) {
-    headers[DEV_BYPASS_HEADER] = devBypassSecret;
-  }
-  return headers;
-}
-
-function readStoredDevBypassSecret(): string | null {
-  if (!canUseLocalStorage()) {
-    return null;
-  }
-
-  const secret = window.localStorage.getItem(DEV_BYPASS_STORAGE_KEY);
-  return secret?.trim() || null;
-}
-
-function canUseLocalStorage(): boolean {
-  try {
-    return typeof window !== "undefined" && Boolean(window.localStorage);
-  } catch {
-    return false;
-  }
 }
 
 async function readErrorPayload(

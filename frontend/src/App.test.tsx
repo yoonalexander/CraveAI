@@ -21,6 +21,9 @@ vi.mock("./components/MapView", () => ({
 vi.mock("./components/ThemeToggle", () => ({
   ThemeToggle: () => <button type="button">Theme</button>,
 }));
+vi.mock("./components/AccountMenu", () => ({
+  AccountMenu: () => <a href="/login">Sign in</a>,
+}));
 vi.mock("./components/SuggestionCard", () => ({
   SuggestionCard: ({ title }: { title: string }) => <div>{title}</div>,
 }));

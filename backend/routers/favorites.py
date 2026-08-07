@@ -1,14 +1,12 @@
 from __future__ import annotations
 
-import secrets
-from typing import List
+from fastapi import APIRouter, Depends, HTTPException, Request, status
+from pydantic import BaseModel, ConfigDict, Field
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import BaseModel, Field
-
-from backend.services.identity import require_user_identity
+from backend.services.sessions import SessionContext, require_csrf, require_verified_session
 from backend.services.storage import (
     add_favorite as store_favorite,
+    delete_favorite as remove_favorite,
     get_favorites as fetch_favorites,
     serialize_favorites,
 )
@@ -17,57 +15,53 @@ router = APIRouter(prefix="/favorites", tags=["favorites"])
 
 
 class FavoriteEntry(BaseModel):
-    """Represents a single saved restaurant for a user."""
+    model_config = ConfigDict(extra="forbid")
 
-    restaurant: str = Field(..., description="Display name for the restaurant.")
-    note: str | None = Field(
-        default=None,
-        description="Optional user-provided context about why it was saved.",
-    )
+    id: str
+    restaurant: str
+    note: str | None = None
+    created_at: str
 
 
 class FavoritesResponse(BaseModel):
-    """Collection of a user's saved places."""
-
-    user_id: str
-    favorites: List[FavoriteEntry] = Field(default_factory=list)
+    favorites: list[FavoriteEntry] = Field(default_factory=list)
 
 
 class FavoriteCreateRequest(BaseModel):
-    """Payload for adding a new favorite restaurant."""
+    model_config = ConfigDict(extra="forbid")
 
-    user_id: str = Field(..., min_length=1, max_length=128)
-    restaurant: str = Field(..., min_length=1, max_length=200)
+    restaurant: str = Field(min_length=1, max_length=200)
     note: str | None = Field(default=None, max_length=1000)
 
 
-@router.get("/{user_id}", response_model=FavoritesResponse)
+@router.get("", response_model=FavoritesResponse)
 async def list_favorites(
-    user_id: str,
-    authenticated_user_id: str = Depends(require_user_identity),
+    session: SessionContext = Depends(require_verified_session),
 ) -> FavoritesResponse:
-    """Retrieve saved favorites for a given user."""
-    _require_owner(authenticated_user_id, user_id)
-    stored_records = await fetch_favorites(user_id)
-    favorites = [FavoriteEntry(**record_dict) for record_dict in serialize_favorites(stored_records)]
-    return FavoritesResponse(user_id=user_id, favorites=favorites)
+    records = await fetch_favorites(session.user_id)
+    return FavoritesResponse(
+        favorites=[FavoriteEntry(**item) for item in serialize_favorites(records)]
+    )
 
 
 @router.post("", response_model=FavoriteEntry, status_code=status.HTTP_201_CREATED)
 async def add_favorite(
     payload: FavoriteCreateRequest,
-    authenticated_user_id: str = Depends(require_user_identity),
+    session: SessionContext = Depends(require_csrf),
 ) -> FavoriteEntry:
-    """Store a new favorite restaurant for a user."""
-    _require_owner(authenticated_user_id, payload.user_id)
-    record = await store_favorite(payload.user_id, payload.restaurant, payload.note)
-    record_dict = serialize_favorites([record])[0]
-    return FavoriteEntry(**record_dict)
+    record = await store_favorite(
+        session.user_id, payload.restaurant.strip(), payload.note
+    )
+    return FavoriteEntry(**serialize_favorites([record])[0])
 
 
-def _require_owner(authenticated_user_id: str, requested_user_id: str) -> None:
-    if not secrets.compare_digest(authenticated_user_id, requested_user_id.strip()):
+@router.delete("/{favorite_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_favorite(
+    favorite_id: str,
+    session: SessionContext = Depends(require_csrf),
+) -> None:
+    if not await remove_favorite(session.user_id, favorite_id):
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail={"code": "favorites_owner_mismatch"},
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"code": "favorite_not_found"},
         )

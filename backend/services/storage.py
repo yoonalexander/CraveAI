@@ -1,133 +1,294 @@
 from __future__ import annotations
 
 import asyncio
-import sqlite3
+import json
+import uuid
 from dataclasses import asdict, dataclass
-from pathlib import Path
-from typing import Any, Dict, List
+from datetime import datetime, timezone
+from typing import Any
 
-from backend.config import get_settings
+from sqlalchemy import delete, select
+
+from backend.database import Base, get_engine, get_session_factory
+from backend.models import (
+    AccountIdentity,
+    Favorite,
+    Feedback,
+    Profile,
+    SecurityAuditEvent,
+)
 
 
 @dataclass
 class FavoriteRecord:
+    id: str
     restaurant: str
-    note: str | None = None
-
-
-def _get_db_path() -> Path:
-    db_path = Path(get_settings().SQLITE_DB_PATH).resolve()
-    db_path.parent.mkdir(parents=True, exist_ok=True)
-    return db_path
-
-
-def _get_connection() -> sqlite3.Connection:
-    connection = sqlite3.connect(_get_db_path(), check_same_thread=False)
-    connection.row_factory = sqlite3.Row
-    return connection
+    note: str | None
+    created_at: str
 
 
 def init_storage() -> None:
-    """Create required SQLite tables if they are missing."""
-    connection = _get_connection()
-    try:
-        with connection:
-            connection.execute(
-                """
-                CREATE TABLE IF NOT EXISTS favorites (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    user_id TEXT NOT NULL,
-                    restaurant TEXT NOT NULL,
-                    note TEXT,
-                    created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    """Create tables only for local/test environments; production uses Alembic."""
+    Base.metadata.create_all(get_engine())
+
+
+async def upsert_profile(user_id: str, email: str, email_verified: bool) -> None:
+    def _write() -> None:
+        now = datetime.now(timezone.utc)
+        with get_session_factory()() as db:
+            profile = db.get(Profile, user_id)
+            if profile is None:
+                profile = Profile(
+                    user_id=user_id,
+                    email=email.lower(),
+                    email_verified=email_verified,
+                    created_at=now,
+                    updated_at=now,
                 )
-                """
+                db.add(profile)
+            else:
+                profile.email = email.lower()
+                profile.email_verified = email_verified
+                profile.updated_at = now
+            db.commit()
+
+    await asyncio.to_thread(_write)
+
+
+async def find_profile_by_email(email: str) -> dict[str, Any] | None:
+    def _read() -> dict[str, Any] | None:
+        with get_session_factory()() as db:
+            profile = db.scalar(
+                select(Profile).where(Profile.email == email.strip().lower())
             )
-            connection.execute(
-                """
-                CREATE TABLE IF NOT EXISTS feedback (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    user_id TEXT NOT NULL,
-                    restaurant TEXT NOT NULL,
-                    liked INTEGER NOT NULL,
-                    notes TEXT,
-                    created_at TEXT DEFAULT CURRENT_TIMESTAMP
+            if profile is None:
+                return None
+            return {
+                "user_id": profile.user_id,
+                "email": profile.email,
+                "email_verified": profile.email_verified,
+            }
+
+    return await asyncio.to_thread(_read)
+
+
+async def has_account_identity(user_id: str, provider: str) -> bool:
+    def _read() -> bool:
+        with get_session_factory()() as db:
+            return (
+                db.scalar(
+                    select(AccountIdentity).where(
+                        AccountIdentity.user_id == user_id,
+                        AccountIdentity.provider == provider,
+                    )
                 )
-                """
+                is not None
             )
-            connection.execute(
-                """
-                CREATE TABLE IF NOT EXISTS usage_limits (
-                    user_id TEXT NOT NULL,
-                    usage_date TEXT NOT NULL,
-                    tokens_used INTEGER NOT NULL DEFAULT 0,
-                    request_count INTEGER NOT NULL DEFAULT 0,
-                    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-                    updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
-                    PRIMARY KEY (user_id, usage_date)
+
+    return await asyncio.to_thread(_read)
+
+
+async def sync_account_identities(
+    user_id: str, identities: tuple[dict[str, Any], ...] | list[dict[str, Any]]
+) -> None:
+    def _write() -> None:
+        now = datetime.now(timezone.utc)
+        with get_session_factory()() as db:
+            for item in identities:
+                provider = str(item.get("provider") or "")[:32]
+                identity_id = str(item.get("id") or "")[:128]
+                if not provider or not identity_id:
+                    continue
+                existing = db.scalar(
+                    select(AccountIdentity).where(
+                        AccountIdentity.user_id == user_id,
+                        AccountIdentity.provider == provider,
+                    )
                 )
-                """
+                if existing:
+                    existing.provider_identity_id = identity_id
+                else:
+                    db.add(
+                        AccountIdentity(
+                            id=str(uuid.uuid4()),
+                            user_id=user_id,
+                            provider=provider,
+                            provider_identity_id=identity_id,
+                            created_at=now,
+                        )
+                    )
+            db.commit()
+
+    await asyncio.to_thread(_write)
+
+
+async def remove_account_identity(user_id: str, provider: str) -> None:
+    def _delete() -> None:
+        with get_session_factory()() as db:
+            db.execute(
+                delete(AccountIdentity).where(
+                    AccountIdentity.user_id == user_id,
+                    AccountIdentity.provider == provider,
+                )
             )
-    finally:
-        connection.close()
+            db.commit()
+
+    await asyncio.to_thread(_delete)
 
 
 async def add_favorite(user_id: str, restaurant: str, note: str | None) -> FavoriteRecord:
-    """Persist a favorite entry for the given user."""
-
     def _insert() -> FavoriteRecord:
-        connection = _get_connection()
-        try:
-            with connection:
-                connection.execute(
-                    "INSERT INTO favorites (user_id, restaurant, note) VALUES (?, ?, ?)",
-                    (user_id, restaurant, note),
-                )
-            return FavoriteRecord(restaurant=restaurant, note=note)
-        finally:
-            connection.close()
+        now = datetime.now(timezone.utc)
+        record = Favorite(
+            id=str(uuid.uuid4()),
+            user_id=user_id,
+            restaurant=restaurant,
+            note=note,
+            created_at=now,
+        )
+        with get_session_factory()() as db:
+            db.add(record)
+            db.commit()
+        return _favorite_record(record)
 
     return await asyncio.to_thread(_insert)
 
 
-async def get_favorites(user_id: str) -> List[FavoriteRecord]:
-    """Fetch all favorites associated with a user."""
-
-    def _query() -> List[FavoriteRecord]:
-        connection = _get_connection()
-        try:
-            cursor = connection.execute(
-                "SELECT restaurant, note FROM favorites WHERE user_id = ? ORDER BY created_at DESC",
-                (user_id,),
-            )
-            rows = cursor.fetchall()
-            return [FavoriteRecord(restaurant=row["restaurant"], note=row["note"]) for row in rows]
-        finally:
-            connection.close()
+async def get_favorites(user_id: str) -> list[FavoriteRecord]:
+    def _query() -> list[FavoriteRecord]:
+        with get_session_factory()() as db:
+            rows = db.scalars(
+                select(Favorite)
+                .where(Favorite.user_id == user_id)
+                .order_by(Favorite.created_at.desc())
+            ).all()
+            return [_favorite_record(row) for row in rows]
 
     return await asyncio.to_thread(_query)
 
 
-async def record_feedback(user_id: str, restaurant: str, liked: bool, notes: str | None) -> None:
-    """Store thumbs up/down reactions for later analysis."""
-
-    def _insert() -> None:
-        connection = _get_connection()
-        try:
-            with connection:
-                connection.execute(
-                    """
-                    INSERT INTO feedback (user_id, restaurant, liked, notes)
-                    VALUES (?, ?, ?, ?)
-                    """,
-                    (user_id, restaurant, 1 if liked else 0, notes),
+async def delete_favorite(user_id: str, favorite_id: str) -> bool:
+    def _delete() -> bool:
+        with get_session_factory()() as db:
+            result = db.execute(
+                delete(Favorite).where(
+                    Favorite.id == favorite_id,
+                    Favorite.user_id == user_id,
                 )
-        finally:
-            connection.close()
+            )
+            db.commit()
+            return bool(result.rowcount)
+
+    return await asyncio.to_thread(_delete)
+
+
+async def record_feedback(
+    user_id: str, restaurant: str, liked: bool, notes: str | None
+) -> None:
+    def _insert() -> None:
+        with get_session_factory()() as db:
+            db.add(
+                Feedback(
+                    id=str(uuid.uuid4()),
+                    user_id=user_id,
+                    restaurant=restaurant,
+                    liked=liked,
+                    notes=notes,
+                    created_at=datetime.now(timezone.utc),
+                )
+            )
+            db.commit()
 
     await asyncio.to_thread(_insert)
 
 
-def serialize_favorites(records: List[FavoriteRecord]) -> List[Dict[str, Any]]:
-    """Convert favorite dataclasses to JSON-compatible dictionaries."""
+async def export_user_data(user_id: str) -> dict[str, Any]:
+    def _read() -> dict[str, Any]:
+        with get_session_factory()() as db:
+            profile = db.get(Profile, user_id)
+            favorites = db.scalars(
+                select(Favorite).where(Favorite.user_id == user_id)
+            ).all()
+            feedback = db.scalars(
+                select(Feedback).where(Feedback.user_id == user_id)
+            ).all()
+            return {
+                "profile": (
+                    {
+                        "user_id": profile.user_id,
+                        "email": profile.email,
+                        "email_verified": profile.email_verified,
+                        "created_at": _iso(profile.created_at),
+                    }
+                    if profile
+                    else None
+                ),
+                "favorites": [
+                    {
+                        "id": item.id,
+                        "restaurant": item.restaurant,
+                        "note": item.note,
+                        "created_at": _iso(item.created_at),
+                    }
+                    for item in favorites
+                ],
+                "feedback": [
+                    {
+                        "restaurant": item.restaurant,
+                        "liked": item.liked,
+                        "notes": item.notes,
+                        "created_at": _iso(item.created_at),
+                    }
+                    for item in feedback
+                ],
+                "chat_history": [],
+            }
+
+    return await asyncio.to_thread(_read)
+
+
+async def audit_event(
+    event_type: str,
+    *,
+    user_id: str | None = None,
+    session_id: str | None = None,
+    request_id: str | None = None,
+    metadata: dict[str, str | int | bool] | None = None,
+) -> None:
+    safe_metadata = metadata or {}
+
+    def _insert() -> None:
+        with get_session_factory()() as db:
+            db.add(
+                SecurityAuditEvent(
+                    id=str(uuid.uuid4()),
+                    event_type=event_type[:80],
+                    user_id=user_id,
+                    session_id=session_id,
+                    request_id=request_id,
+                    metadata_json=json.dumps(safe_metadata, separators=(",", ":")),
+                    created_at=datetime.now(timezone.utc),
+                )
+            )
+            db.commit()
+
+    await asyncio.to_thread(_insert)
+
+
+def serialize_favorites(records: list[FavoriteRecord]) -> list[dict[str, Any]]:
     return [asdict(record) for record in records]
+
+
+def _favorite_record(record: Favorite) -> FavoriteRecord:
+    return FavoriteRecord(
+        id=record.id,
+        restaurant=record.restaurant,
+        note=record.note,
+        created_at=_iso(record.created_at),
+    )
+
+
+def _iso(value: datetime) -> str:
+    if value.tzinfo is None:
+        value = value.replace(tzinfo=timezone.utc)
+    return value.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")

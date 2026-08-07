@@ -7,31 +7,21 @@ afterEach(() => {
 });
 
 describe("fetchSuggestions", () => {
-    it("persists and reuses the signed anonymous identity", async () => {
-        const fetchMock = vi
-            .spyOn(globalThis, "fetch")
-            .mockResolvedValueOnce(
-                new Response("[]", {
-                    status: 200,
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-CraveAI-Anonymous-Token": "signed-browser-token",
-                    },
-                }),
-            )
-            .mockResolvedValueOnce(
-                new Response("[]", {
-                    status: 200,
-                    headers: { "Content-Type": "application/json" },
-                }),
-            );
+    it("uses the same-origin API and includes opaque cookies", async () => {
+        const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+            new Response("[]", {
+                status: 200,
+                headers: { "Content-Type": "application/json" },
+            }),
+        );
 
         await fetchSuggestions(43.65, -79.38);
-        await fetchSuggestions(43.65, -79.38);
 
-        const secondRequest = fetchMock.mock.calls[1][1] as RequestInit;
-        expect(secondRequest.headers).toMatchObject({
-            "X-CraveAI-Anonymous-Token": "signed-browser-token",
+        expect(fetchMock.mock.calls[0][0]).toBe(
+            "/api/places/suggestions?lat=43.65&lng=-79.38&radius=5000",
+        );
+        expect(fetchMock.mock.calls[0][1]).toMatchObject({
+            credentials: "include",
         });
     });
 

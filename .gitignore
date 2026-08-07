@@ -18,6 +18,7 @@ venv/
 # Testing & tooling caches
 .pytest_cache/
 .test-tmp*/
+.test-*-tmp/
 .mypy_cache/
 .coverage*
 coverage.xml
@@ -31,6 +32,7 @@ frontend/dist/
 
 # Local databases
 data/*.db
+data/*.db-*
 
 # Editors & OS
 .vscode/

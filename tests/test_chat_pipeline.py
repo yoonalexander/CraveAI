@@ -108,11 +108,13 @@ from backend.services import places as places_service
 from backend.services import rag_pipeline
 from backend.services.identity import issue_identity_token, verify_identity_token
 from backend.services.storage import init_storage
+from backend.database import reset_database_cache
 from backend.services.usage_limits import (
     DailyQuotaExceeded,
     PLACES_GLOBAL_USAGE_USER_ID,
     reserve_daily_quota,
 )
+from backend.services.rate_limit import burst_limiter
 
 ANONYMOUS_TOKEN_HEADER = "X-CraveAI-Anonymous-Token"
 DEV_BYPASS_HEADER = "X-CraveAI-Dev-Bypass"
@@ -125,7 +127,11 @@ def configure_test_settings(monkeypatch, tmp_path):
     monkeypatch.setenv("GOOGLE_API_KEY", "test-google")
     monkeypatch.setenv("MODEL_NAME", "test-model")
     monkeypatch.setenv("APP_ENV", "test")
-    monkeypatch.setenv("SQLITE_DB_PATH", str(tmp_path / "craveai-test.db"))
+    monkeypatch.setenv(
+        "DATABASE_URL",
+        f"sqlite+pysqlite:///{(tmp_path / 'craveai-test.db').as_posix()}",
+    )
+    monkeypatch.setenv("AUTO_CREATE_SCHEMA", "true")
     monkeypatch.setenv("USAGE_LIMITS_ENABLED", "true")
     monkeypatch.setenv("DAILY_TOKEN_LIMIT", "10000")
     monkeypatch.setenv("DAILY_CHAT_MESSAGE_LIMIT", "3")
@@ -136,6 +142,8 @@ def configure_test_settings(monkeypatch, tmp_path):
     monkeypatch.setenv("GLOBAL_DAILY_PLACES_REQUEST_LIMIT", "1000")
     monkeypatch.setenv("IDENTITY_SIGNING_SECRET", "test-identity-signing-secret")
     get_settings.cache_clear()
+    reset_database_cache()
+    burst_limiter.reset()
 
     settings = get_settings()
     # Refresh module-level settings to keep test values in sync.
@@ -508,6 +516,7 @@ def test_chat_endpoint_enforces_quota_even_if_disable_flag_is_false(
 ):
     monkeypatch.setenv("USAGE_LIMITS_ENABLED", "false")
     get_settings.cache_clear()
+    reset_database_cache()
     app = create_app()
 
     async def exercise():
@@ -588,7 +597,6 @@ def test_chat_endpoint_returns_429_before_pipeline_when_quota_exhausted(
     assert body["detail"]["usage"]["used"] == 0
     assert response.headers["x-ratelimit-limit"] == "0"
     assert response.headers["x-ratelimit-remaining"] == "0"
-    assert response.headers["x-craveai-anonymous-token"]
     assert "retry-after" in response.headers
 
     assert mocked_pipeline["extract"] == 0
@@ -642,58 +650,6 @@ def test_chat_endpoint_allows_three_messages_then_blocks_fourth(mocked_pipeline)
     assert mocked_pipeline["extract"] == 3
 
 
-def test_chat_developer_mode_allows_unlimited_messages(monkeypatch, mocked_pipeline):
-    monkeypatch.setenv("CHAT_DEVELOPER_MODE", "true")
-    get_settings.cache_clear()
-    app = create_app()
-
-    async def exercise():
-        async with AsyncClient(
-            transport=ASGITransport(app=app),
-            base_url="http://test",
-        ) as client:
-            payload = {
-                "query": "I want a cozy bowl of ramen tonight.",
-                "location": {"lat": 43.6532, "lng": -79.3832},
-            }
-            return [
-                await client.post(
-                    "/chat",
-                    json={**payload, "query": f"{payload['query']} ({index})"},
-                )
-                for index in range(5)
-            ]
-
-    responses = asyncio.run(exercise())
-
-    assert all(response.status_code == 200 for response in responses)
-    assert all(response.json()["usage"]["unlimited"] is True for response in responses)
-    assert all("x-ratelimit-limit" not in response.headers for response in responses)
-    assert mocked_pipeline["extract"] == 5
-
-
-def test_chat_status_reports_developer_mode_without_pipeline_call(
-    monkeypatch,
-    mocked_pipeline,
-):
-    monkeypatch.setenv("CHAT_DEVELOPER_MODE", "true")
-    get_settings.cache_clear()
-    app = create_app()
-
-    async def exercise():
-        async with AsyncClient(
-            transport=ASGITransport(app=app),
-            base_url="http://test",
-        ) as client:
-            return await client.get("/chat/status")
-
-    response = asyncio.run(exercise())
-
-    assert response.status_code == 200
-    assert response.json()["usage"]["unlimited"] is True
-    assert mocked_pipeline["extract"] == 0
-
-
 def test_chat_status_does_not_report_unlimited_in_standard_mode(mocked_pipeline):
     app = create_app()
 
@@ -711,24 +667,11 @@ def test_chat_status_does_not_report_unlimited_in_standard_mode(mocked_pipeline)
     assert mocked_pipeline["extract"] == 0
 
 
-def test_chat_developer_mode_is_rejected_in_production(monkeypatch):
-    monkeypatch.setenv("APP_ENV", "production")
-    monkeypatch.setenv("CHAT_DEVELOPER_MODE", "true")
-    monkeypatch.setenv("IDENTITY_SIGNING_SECRET", "x" * 32)
-    get_settings.cache_clear()
-
-    with pytest.raises(RuntimeError, match="CHAT_DEVELOPER_MODE cannot be enabled"):
-        create_app()
-
-
-def test_chat_dev_bypass_header_allows_unlimited_messages_in_production(
+def test_chat_dev_bypass_header_cannot_bypass_quota(
     monkeypatch,
     mocked_pipeline,
 ):
-    bypass_secret = "production-test-bypass-secret-32-chars"
-    monkeypatch.setenv("APP_ENV", "production")
-    monkeypatch.setenv("IDENTITY_SIGNING_SECRET", "x" * 32)
-    monkeypatch.setenv("CHAT_DEV_BYPASS_SECRET", bypass_secret)
+    bypass_secret = "removed-browser-bypass-secret"
     get_settings.cache_clear()
     app = create_app()
 
@@ -752,74 +695,9 @@ def test_chat_dev_bypass_header_allows_unlimited_messages_in_production(
 
     responses = asyncio.run(exercise())
 
-    assert all(response.status_code == 200 for response in responses)
-    assert all(response.json()["usage"]["unlimited"] is True for response in responses)
-    assert all("x-ratelimit-limit" not in response.headers for response in responses)
-    assert mocked_pipeline["extract"] == 5
-
-
-def test_chat_dev_bypass_header_with_wrong_secret_still_enforces_quota(
-    monkeypatch,
-    mocked_pipeline,
-):
-    monkeypatch.setenv("CHAT_DEV_BYPASS_SECRET", "test-bypass-secret")
-    get_settings.cache_clear()
-    app = create_app()
-
-    async def exercise():
-        async with AsyncClient(
-            transport=ASGITransport(app=app),
-            base_url="http://test",
-        ) as client:
-            payload = {
-                "query": "I want a cozy bowl of ramen tonight.",
-                "location": {"lat": 43.6532, "lng": -79.3832},
-            }
-            first = await client.post(
-                "/chat",
-                headers={DEV_BYPASS_HEADER: "wrong-secret"},
-                json=payload,
-            )
-            token = first.headers[ANONYMOUS_TOKEN_HEADER]
-            headers = {
-                ANONYMOUS_TOKEN_HEADER: token,
-                DEV_BYPASS_HEADER: "wrong-secret",
-            }
-            second = await client.post(
-                "/chat",
-                headers=headers,
-                json={**payload, "query": "Make it spicy."},
-            )
-            third = await client.post(
-                "/chat",
-                headers=headers,
-                json={**payload, "query": "Any late-night spots?"},
-            )
-            fourth = await client.post(
-                "/chat",
-                headers=headers,
-                json={**payload, "query": "One more idea?"},
-            )
-            return first, second, third, fourth
-
-    first_response, second_response, third_response, fourth_response = asyncio.run(exercise())
-
-    assert first_response.status_code == 200
-    assert second_response.status_code == 200
-    assert third_response.status_code == 200
-    assert fourth_response.status_code == 429
-    assert fourth_response.json()["detail"]["usage"]["used"] == 3
+    assert [response.status_code for response in responses] == [200, 200, 200, 429, 429]
+    assert responses[3].json()["detail"]["usage"]["used"] == 3
     assert mocked_pipeline["extract"] == 3
-
-
-def test_chat_dev_bypass_secret_must_be_strong_in_production(monkeypatch):
-    monkeypatch.setenv("APP_ENV", "production")
-    monkeypatch.setenv("IDENTITY_SIGNING_SECRET", "x" * 32)
-    monkeypatch.setenv("CHAT_DEV_BYPASS_SECRET", "too-short")
-    get_settings.cache_clear()
-
-    with pytest.raises(RuntimeError, match="CHAT_DEV_BYPASS_SECRET must contain"):
-        create_app()
 
 
 def test_chat_quota_survives_new_client_when_anonymous_token_is_reused(mocked_pipeline):
@@ -1298,10 +1176,7 @@ def test_restaurant_filter_rejects_closed_and_malformed_places():
     )
 
 
-def test_favorites_require_signed_owner_identity():
-    settings = get_settings()
-    alice_token = issue_identity_token("alice", settings.IDENTITY_SIGNING_SECRET)
-    headers = {"Authorization": f"Bearer {alice_token}"}
+def test_legacy_favorites_identity_routes_are_removed():
     app = create_app()
 
     async def exercise():
@@ -1309,35 +1184,18 @@ def test_favorites_require_signed_owner_identity():
             transport=ASGITransport(app=app),
             base_url="http://test",
         ) as client:
-            own_create = await client.post(
-                "/favorites",
-                headers=headers,
-                json={"user_id": "alice", "restaurant": "Safe Ramen", "note": "Mine"},
+            legacy = await client.get("/favorites/alice")
+            missing_session = await client.get("/api/favorites")
+            caller_selected = await client.post(
+                "/api/favorites",
+                json={"user_id": "alice", "restaurant": "Injected"},
             )
-            own_read = await client.get("/favorites/alice", headers=headers)
-            cross_read = await client.get("/favorites/bob", headers=headers)
-            cross_write = await client.post(
-                "/favorites",
-                headers=headers,
-                json={"user_id": "bob", "restaurant": "Injected"},
-            )
-            missing_token = await client.get("/favorites/alice")
-            forged_token = await client.get(
-                "/favorites/alice",
-                headers={"Authorization": "Bearer YWxpY2U.invalid"},
-            )
-            return own_create, own_read, cross_read, cross_write, missing_token, forged_token
+            return legacy, missing_session, caller_selected
 
-    own_create, own_read, cross_read, cross_write, missing_token, forged_token = asyncio.run(
-        exercise()
-    )
-    assert own_create.status_code == 201
-    assert own_read.status_code == 200
-    assert own_read.json()["favorites"][0]["restaurant"] == "Safe Ramen"
-    assert cross_read.status_code == 403
-    assert cross_write.status_code == 403
-    assert missing_token.status_code == 401
-    assert forged_token.status_code == 401
+    legacy, missing_session, caller_selected = asyncio.run(exercise())
+    assert legacy.status_code == 404
+    assert missing_session.status_code == 401
+    assert caller_selected.status_code == 401
 
 
 def test_identity_tokens_expire():

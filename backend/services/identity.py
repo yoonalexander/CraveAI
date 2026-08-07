@@ -6,9 +6,10 @@ import hmac
 import time
 import uuid
 
-from fastapi import Header, HTTPException, status
+from fastapi import Header, HTTPException, Request, Response, status
 
 from backend.config import get_settings
+from backend.services.security import actor_ip_hash
 
 MAX_USER_ID_LENGTH = 128
 ANONYMOUS_USER_PREFIX = "anon:"
@@ -129,7 +130,48 @@ def resolve_anonymous_usage_identity(
             pass
 
     anonymous_subject, issued_token = issue_anonymous_identity_token(signing_secret)
-    return f"{namespace}:{anonymous_subject}", issued_token
+    ip_actor = hashlib.sha256((client_host or "unknown").encode()).hexdigest()
+    return f"{namespace}:guest-ip:{ip_actor}", issued_token
+
+
+def resolve_request_usage_identity(
+    namespace: str,
+    request: Request,
+    response: Response,
+    user_id: str | None,
+) -> str:
+    """Resolve quotas to an account or a server-derived network actor.
+
+    The guest cookie improves continuity but is deliberately not the daily quota
+    authority, so deleting browser storage cannot reset the allowance.
+    """
+    if user_id:
+        return f"account:{user_id}"
+    settings = get_settings()
+    raw = request.cookies.get(settings.guest_cookie_name)
+    valid = False
+    if raw and settings.IDENTITY_SIGNING_SECRET:
+        try:
+            verify_anonymous_identity_token(raw, settings.IDENTITY_SIGNING_SECRET)
+            valid = True
+        except ValueError:
+            pass
+    if not valid and settings.IDENTITY_SIGNING_SECRET:
+        _, raw = issue_anonymous_identity_token(settings.IDENTITY_SIGNING_SECRET)
+        response.set_cookie(
+            settings.guest_cookie_name,
+            raw,
+            max_age=ANONYMOUS_TOKEN_TTL_SECONDS,
+            secure=settings.is_production,
+            httponly=True,
+            samesite="lax",
+            path="/",
+        )
+    if raw:
+        # Compatibility only; the frontend no longer stores this value and the
+        # durable quota key is server-derived from the network prefix.
+        response.headers["X-CraveAI-Anonymous-Token"] = raw
+    return f"guest-ip:{actor_ip_hash(request)}"
 
 
 async def require_user_identity(authorization: str | None = Header(default=None)) -> str:

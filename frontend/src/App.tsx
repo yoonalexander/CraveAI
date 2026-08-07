@@ -6,6 +6,7 @@ import { MapView } from "./components/MapView";
 import { ChatRecommendation } from "./api/chat";
 import { ThemeProvider } from "./context/ThemeContext";
 import { ThemeToggle } from "./components/ThemeToggle";
+import { AccountMenu } from "./components/AccountMenu";
 import {
   fetchSuggestions,
   PlacesQuotaError,
@@ -218,6 +219,7 @@ function App(): JSX.Element {
           </div>
           <div className="flex items-center gap-4">
             <ThemeToggle />
+            <AccountMenu />
             <div className="rounded-3xl border border-border bg-secondary/50 px-5 py-4 text-sm text-muted-foreground shadow-lg backdrop-blur-sm">
               <p className="font-semibold text-foreground">Build Status</p>
               <ul className="mt-2 list-disc space-y-1 pl-5 text-xs">

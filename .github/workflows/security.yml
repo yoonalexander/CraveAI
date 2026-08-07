@@ -1,0 +1,64 @@
+name: Security and tests
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "17 8 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    env:
+      OPENAI_API_KEY: test-openai
+      GOOGLE_API_KEY: test-google
+      DATABASE_URL: sqlite+pysqlite:///./data/ci.db
+      AUTO_CREATE_SCHEMA: "true"
+      APP_ENV: test
+      IDENTITY_SIGNING_SECRET: test-identity-signing-secret
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r backend/requirements.txt pip-audit
+      - run: python -m compileall -q backend scripts
+      - run: python -m pytest -q
+      - run: pip-audit -r backend/requirements.txt
+      - name: Render migration SQL
+        env:
+          DATABASE_URL: postgresql+psycopg://user:pass@localhost:5432/craveai
+        run: alembic upgrade head --sql > migration.sql
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - run: npm run lint
+      - run: npm run build
+      - run: npm audit --audit-level=high
+
+  secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
