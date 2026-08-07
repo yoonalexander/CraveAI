@@ -7,7 +7,6 @@ import { ChatRecommendation } from "./api/chat";
 import { ThemeProvider } from "./context/ThemeContext";
 import { ThemeToggle } from "./components/ThemeToggle";
 import { AccountMenu } from "./components/AccountMenu";
-import { BrandLogo } from "./components/BrandLogo";
 import {
   fetchSuggestions,
   PlacesQuotaError,
@@ -206,7 +205,9 @@ function App(): JSX.Element {
       <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
         <header className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-6 pb-10 pt-14 md:flex-row md:items-center md:justify-between">
           <div>
-            <BrandLogo className="h-14 w-14 md:h-16 md:w-16" />
+            <p className="text-sm uppercase tracking-[0.32em] text-primary font-bold">
+              craveai
+            </p>
             <h1 className="mt-2 text-4xl font-semibold md:text-5xl text-foreground">
               Find your next bite.
             </h1>

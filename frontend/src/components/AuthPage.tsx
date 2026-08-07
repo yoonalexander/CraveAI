@@ -14,7 +14,6 @@ import {
 } from "../api/auth";
 import { useAuth } from "../context/AuthContext";
 import { ThemeProvider } from "../context/ThemeContext";
-import { BrandLogo } from "./BrandLogo";
 import { ThemeToggle } from "./ThemeToggle";
 
 type PageMode =
@@ -30,8 +29,8 @@ export function AuthPage({ mode }: { mode: PageMode }): JSX.Element {
     <ThemeProvider defaultTheme="light" storageKey="craveai-theme">
       <div className="min-h-screen bg-background px-6 py-10 text-foreground">
         <div className="mx-auto flex max-w-4xl items-center justify-between">
-          <a href="/" aria-label="AY home">
-            <BrandLogo className="h-12 w-12" />
+          <a href="/" className="text-sm font-bold uppercase tracking-[0.32em] text-primary">
+            craveai
           </a>
           <ThemeToggle />
         </div>
