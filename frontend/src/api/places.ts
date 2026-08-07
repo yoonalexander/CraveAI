@@ -1,6 +1,6 @@
 const API_URL =
     import.meta.env.VITE_API_URL?.toString()?.trim() ||
-    "http://127.0.0.1:8000";
+    "https://craveai-d8gh.onrender.com";
 
 export interface Suggestion {
     name: string;
