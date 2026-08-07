@@ -16,7 +16,7 @@ import time
 from pathlib import Path
 from types import ModuleType
 
-from httpx import AsyncClient
+from httpx import ASGITransport, AsyncClient
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
@@ -103,6 +103,7 @@ def _install_langchain_stubs() -> None:
 _install_langchain_stubs()
 
 from backend.main import create_app
+from backend.routers import chat
 from backend.services import rag_pipeline
 
 
@@ -127,9 +128,13 @@ async def _fake_generate_recommendations(*_args, **_kwargs):
 async def run_benchmark(iterations: int) -> list[float]:
     """Execute the /chat endpoint multiple times and capture durations in ms."""
     rag_pipeline.generate_recommendations = _fake_generate_recommendations  # type: ignore[assignment]
+    chat.generate_recommendations = _fake_generate_recommendations  # type: ignore[assignment]
     app = create_app()
     timings: list[float] = []
-    async with AsyncClient(app=app, base_url="http://testserver") as client:
+    async with AsyncClient(
+        transport=ASGITransport(app=app),
+        base_url="http://testserver",
+    ) as client:
         payload = {
             "query": "Need something warm nearby.",
             "location": {"lat": 43.6532, "lng": -79.3832},

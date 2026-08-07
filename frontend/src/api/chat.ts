@@ -62,6 +62,13 @@ export class ChatQuotaError extends Error {
   }
 }
 
+export class ChatTimeoutError extends Error {
+  constructor() {
+    super("The recommendation took too long. Please try again in a moment.");
+    this.name = "ChatTimeoutError";
+  }
+}
+
 const FALLBACK_LOCATION: LocationHint = {
   lat: 43.2557,
   lng: -79.8711,
@@ -78,6 +85,7 @@ const ANONYMOUS_TOKEN_HEADER = "X-CraveAI-Anonymous-Token";
 const ANONYMOUS_TOKEN_STORAGE_KEY = "craveai-anonymous-token";
 const DEV_BYPASS_HEADER = "X-CraveAI-Dev-Bypass";
 const DEV_BYPASS_STORAGE_KEY = "craveai-dev-bypass-secret";
+const CHAT_REQUEST_TIMEOUT_MS = 25000;
 
 /**
  * Send a chat query to the backend chat endpoint.
@@ -102,11 +110,27 @@ export async function sendChat(
     "Content-Type": "application/json",
   });
 
-  const response = await fetch(`${API_URL}/chat`, {
-    method: "POST",
-    headers,
-    body: JSON.stringify(payload),
-  });
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(
+    () => controller.abort(),
+    CHAT_REQUEST_TIMEOUT_MS,
+  );
+  let response: Response;
+  try {
+    response = await fetch(`${API_URL}/chat`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(payload),
+      signal: controller.signal,
+    });
+  } catch (error) {
+    if (controller.signal.aborted) {
+      throw new ChatTimeoutError();
+    }
+    throw error;
+  } finally {
+    window.clearTimeout(timeoutId);
+  }
   persistAnonymousToken(response);
 
   if (!response.ok) {

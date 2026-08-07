@@ -3,8 +3,6 @@ uvicorn[standard]
 httpx
 python-dotenv
 langchain-openai
-langchain-community
-chromadb
 openai
 pytest
 pytest-asyncio

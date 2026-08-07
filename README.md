@@ -1,12 +1,12 @@
 # CraveAI – AI-Powered Food Recommender Chatbot
 
-> An intelligent, conversational chatbot that helps users discover nearby restaurants based on their cravings, mood, and dietary preferences — powered by Retrieval-Augmented Generation (RAG), GPT-4, and real-time location data.
+> An intelligent, conversational chatbot that helps users discover nearby restaurants based on their cravings, mood, and dietary preferences — powered by a bounded OpenAI ranking call and real-time Google Places data.
 
 ---
 
 ## Overview
-**CraveAI** combines **LangChain**, **GPT-4**, **Google Places API**, and **ChromaDB** to generate context-aware restaurant recommendations.  
-Users simply chat (“I want something spicy but light”) and CraveAI interprets intent, retrieves relevant cuisines, fetches nearby options, and explains its reasoning.
+**CraveAI** combines **LangChain**, **OpenAI**, and the **Google Places API** to generate context-aware restaurant recommendations.
+Users simply chat (“I want something spicy but light”) and CraveAI extracts search terms locally, fetches nearby options, and uses one bounded model call to rank and explain them.
 
 ---
 
@@ -26,14 +26,14 @@ backend/
  │    └── ranking.py
  ├── config.py
  └── requirements.txt
-data/ (Chroma vector store, sample cuisines)
+data/ (local application storage)
 docs/ (PRD.md, TECHNICAL_DESIGN.md)
 ```
 
 **Core Stack**
 
 * **Frontend:** React, TailwindCSS, Mapbox
-* **Backend:** FastAPI, LangChain, OpenAI GPT-4, ChromaDB
+* **Backend:** FastAPI, LangChain, OpenAI
 * **APIs:** Google Places (or Yelp Fusion)
 * **Storage:** Redis (cache), SQLite/MongoDB (favorites)
 * **Deployment:** Docker, Render/Vercel
@@ -43,12 +43,13 @@ docs/ (PRD.md, TECHNICAL_DESIGN.md)
 
 | Variable | Location | Purpose |
 | -------- | -------- | ------- |
-| `OPENAI_API_KEY` | `.env` | Enables GPT-powered intent/ranking. |
+| `OPENAI_API_KEY` | `.env` | Enables the bounded GPT ranking call. |
 | `GOOGLE_API_KEY` | `.env` | Unlocks Google Places lookups for live recommendations. |
 | `SQLITE_DB_PATH` | `.env` | File path for the local favorites/feedback store (`./data/craveai.db` by default). |
-| `CHROMA_PATH` | `.env` | Points to the persisted Chroma vector store. |
 | `REDIS_URL` | `.env` | Reserved for future caching. |
 | `MODEL_NAME` | `.env` | Chat completion model identifier. |
+| `CHAT_PIPELINE_TIMEOUT_SECONDS` | `.env` | Hard deadline for the full recommendation pipeline. |
+| `CHAT_RANKING_TIMEOUT_SECONDS` | `.env` | Deadline for the single model ranking call. |
 | `DAILY_CHAT_MESSAGE_LIMIT` | `.env` | Number of chat messages each user can send per UTC day. |
 | `GLOBAL_DAILY_TOKEN_LIMIT` | `.env` | Service-wide hard ceiling shared by quota reservations. |
 | `PLACES_REQUEST_TOKEN_COST` | `.env` | Quota cost reserved before each public Places lookup. |

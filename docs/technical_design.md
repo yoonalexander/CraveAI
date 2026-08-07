@@ -255,7 +255,6 @@ Rank the top 3 and explain why they fit best.
 ```
 OPENAI_API_KEY=sk-xxxx
 GOOGLE_API_KEY=AIza....
-CHROMA_PATH=./data/chroma_db
 REDIS_URL=redis://localhost:6379
 ```
 
@@ -265,7 +264,7 @@ REDIS_URL=redis://localhost:6379
 
 * **Async I/O** for all API calls (`httpx`, `asyncio`)
 * **Caching**: Cache previous Places API responses in Redis
-* **Batch embedding retrieval** to reduce latency
+* **Deterministic query extraction** to avoid extra model and embedding calls
 * **LLM call optimization**: Context window limited to 1k tokens
 
 ---

@@ -43,9 +43,14 @@ class Config:
     OPENAI_API_KEY: str = field(default_factory=lambda: os.getenv("OPENAI_API_KEY", ""))
     GOOGLE_API_KEY: str = field(default_factory=lambda: os.getenv("GOOGLE_API_KEY", ""))
     SQLITE_DB_PATH: str = field(default_factory=lambda: os.getenv("SQLITE_DB_PATH", "./data/craveai.db"))
-    CHROMA_PATH: str = field(default_factory=lambda: os.getenv("CHROMA_PATH", "./data/chroma_db"))
     REDIS_URL: str = field(default_factory=lambda: os.getenv("REDIS_URL", "redis://localhost:6379"))
-    MODEL_NAME: str = field(default_factory=lambda: os.getenv("MODEL_NAME", "gpt-4-turbo"))
+    MODEL_NAME: str = field(default_factory=lambda: os.getenv("MODEL_NAME", "gpt-5-nano"))
+    CHAT_PIPELINE_TIMEOUT_SECONDS: int = field(
+        default_factory=lambda: _env_int("CHAT_PIPELINE_TIMEOUT_SECONDS", 20)
+    )
+    CHAT_RANKING_TIMEOUT_SECONDS: int = field(
+        default_factory=lambda: _env_int("CHAT_RANKING_TIMEOUT_SECONDS", 12)
+    )
     ENVIRONMENT: str = field(default_factory=lambda: os.getenv("APP_ENV", "development"))
     USAGE_LIMITS_ENABLED: bool = field(
         default_factory=lambda: _env_bool("USAGE_LIMITS_ENABLED", True)

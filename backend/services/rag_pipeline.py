@@ -3,21 +3,16 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
-import os
-from typing import Any, Dict, Iterable, List, Optional, Sequence
+import re
+import time
+from typing import Any, Dict, List, Sequence
 
-import httpx
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_openai import ChatOpenAI, OpenAIEmbeddings
-
-try:
-    from langchain_community.vectorstores import Chroma
-except ImportError:  # pragma: no cover - optional dependency during scaffolding
-    Chroma = None  # type: ignore
+from langchain_openai import ChatOpenAI
 
 from backend.config import get_settings
-from backend.services.places import search_nearby_places
+from backend.services.places import _placeholder_places, search_nearby_places
 
 logger = logging.getLogger(__name__)
 
@@ -25,50 +20,58 @@ settings = get_settings()
 
 OPENAI_API_KEY = settings.OPENAI_API_KEY
 OPENAI_CHAT_MODEL = settings.MODEL_NAME
-OPENAI_EMBEDDING_MODEL = os.getenv("OPENAI_EMBEDDING_MODEL", "text-embedding-3-small")
 GOOGLE_PLACES_API_KEY = settings.GOOGLE_API_KEY
-CHROMA_PATH = settings.CHROMA_PATH
-DEFAULT_SEARCH_RADIUS_METERS = int(os.getenv("GOOGLE_SEARCH_RADIUS", "5000"))
-MAX_CUISINES = 5
-MAX_PLACES_PER_CUISINE = 5
+PIPELINE_TIMEOUT_SECONDS = settings.CHAT_PIPELINE_TIMEOUT_SECONDS
+RANKING_TIMEOUT_SECONDS = settings.CHAT_RANKING_TIMEOUT_SECONDS
+MAX_SEARCH_TERMS = 3
+MAX_RECOMMENDATIONS = 3
 
-INTENT_PROMPT = ChatPromptTemplate.from_messages(
-    [
-        (
-            "system",
-            (
-                "You are an intent parser for a food recommendation assistant. "
-                "Extract core craving details and respond with compact JSON following this schema:\n"
-                '{{"mood": ["<mood>"], "cravings": ["<craving>"], "diet": ["<restriction>"]}}. '
-                "Use empty arrays if a field is not present. Keep the response valid JSON with double quotes."
-            ),
-        ),
-        (
-            "human",
-            "User query: {user_query}\n"
-            "Return only the JSON object.",
-        ),
-    ]
-)
+CUISINE_ALIASES = {
+    "pizza": ("pizza", "pizzeria"),
+    "ramen": ("ramen",),
+    "indian": ("indian", "curry"),
+    "italian": ("italian", "pasta", "trattoria", "ristorante"),
+    "chinese": ("chinese", "dim sum"),
+    "japanese": ("japanese", "izakaya"),
+    "korean": ("korean",),
+    "thai": ("thai",),
+    "vietnamese": ("vietnamese", "pho"),
+    "mexican": ("mexican", "taco", "tacos", "taqueria", "burrito"),
+    "greek": ("greek",),
+    "mediterranean": ("mediterranean",),
+    "middle eastern": ("middle eastern", "shawarma", "kebab"),
+    "sushi": ("sushi",),
+    "seafood": ("seafood", "fish"),
+    "barbecue": ("barbecue", "bbq"),
+    "burgers": ("burger", "burgers"),
+    "cafe": ("cafe", "coffee"),
+    "bakery": ("bakery", "pastry", "pastries"),
+}
+
+DIET_ALIASES = {
+    "vegan": ("vegan",),
+    "vegetarian": ("vegetarian", "meatless"),
+    "halal": ("halal",),
+    "kosher": ("kosher",),
+    "gluten-free": ("gluten-free", "gluten free"),
+    "keto": ("keto", "low carb", "low-carb"),
+}
 
 RANKING_PROMPT = ChatPromptTemplate.from_messages(
     [
         (
             "system",
             (
-                "You are a culinary recommendation expert. Given the user craving and candidate restaurants, "
-                "select the three best matches, craft a conversational summary, and output JSON with:\n"
-                '{{"reply": "<assistant summary>", "recommendations": ['
-                '{{"name": "...", "rating": <float or null>, "address": "...", "reason": "..."}}'
-                "]}}. Keep the tone warm and concise."
+                "Rank the supplied restaurants for the user's craving. Select at most "
+                "three candidates and return compact JSON with this exact shape: "
+                '{{"reply": "<brief friendly summary>", "recommendations": ['
+                '{{"name": "...", "reason": "<specific short reason>"}}]}}. '
+                "Only select restaurants present in the candidate list."
             ),
         ),
         (
             "human",
-            "User craving: {user_query}\n"
-            "Candidates (JSON):\n"
-            "{candidates}\n"
-            "Respond with the specified JSON schema only.",
+            "User craving: {user_query}\nCandidates:\n{candidates}\nReturn JSON only.",
         ),
     ]
 )
@@ -76,140 +79,156 @@ RANKING_PROMPT = ChatPromptTemplate.from_messages(
 _json_parser = StrOutputParser()
 
 
-async def generate_recommendations(user_query: str, location: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Orchestrate the RAG pipeline for restaurant recommendations.
+async def generate_recommendations(
+    user_query: str,
+    location: Dict[str, Any],
+) -> Dict[str, Any]:
+    """Run the bounded hybrid recommendation pipeline."""
+    total_started = time.perf_counter()
+    places: List[Dict[str, Any]] = []
+    outcome = "success"
 
-    Args:
-        user_query: Natural language craving, mood, and dietary request.
-        location: Dictionary containing at least 'lat' and 'lng' values.
+    try:
+        async with asyncio.timeout(PIPELINE_TIMEOUT_SECONDS):
+            extraction_started = time.perf_counter()
+            search_terms = extract_search_terms(user_query)
+            _log_stage(
+                "extract",
+                extraction_started,
+                outcome="success",
+                search_terms=len(search_terms),
+            )
 
-    Returns:
-        Dict containing a reply string and ranked recommendations.
-    """
-    llm = _build_chat_model()
-    intent = await _parse_intent(llm, user_query)
-    cuisines = await _retrieve_similar_cuisines(intent)
-    places = await _fetch_candidate_places(cuisines, location)
-    ranking = await _rank_candidates(llm, user_query, places)
-    return ranking
+            places_started = time.perf_counter()
+            try:
+                places = await _fetch_candidate_places(search_terms, location)
+                _log_stage(
+                    "places",
+                    places_started,
+                    outcome="success",
+                    candidates=len(places),
+                )
+            except Exception as exc:
+                outcome = "places_error"
+                logger.warning("chat_pipeline stage=places outcome=error error=%r", exc)
+                _log_stage("places", places_started, outcome="error", candidates=0)
+                return _deterministic_response([], reason=outcome)
+
+            if not places:
+                outcome = "no_candidates"
+                return _deterministic_response([], reason=outcome)
+
+            ranking_started = time.perf_counter()
+            try:
+                async with asyncio.timeout(RANKING_TIMEOUT_SECONDS):
+                    result = await _rank_candidates(user_query, places)
+                _log_stage(
+                    "ranking",
+                    ranking_started,
+                    outcome="success",
+                    candidates=len(places),
+                )
+                return result
+            except TimeoutError:
+                outcome = "ranking_timeout"
+                _log_stage(
+                    "ranking",
+                    ranking_started,
+                    outcome="timeout",
+                    candidates=len(places),
+                )
+                return _deterministic_response(places, reason=outcome)
+            except Exception as exc:
+                outcome = "ranking_error"
+                logger.warning("chat_pipeline stage=ranking outcome=error error=%r", exc)
+                _log_stage(
+                    "ranking",
+                    ranking_started,
+                    outcome="error",
+                    candidates=len(places),
+                )
+                return _deterministic_response(places, reason=outcome)
+    except TimeoutError:
+        outcome = "pipeline_timeout"
+        return _deterministic_response(places, reason=outcome)
+    finally:
+        _log_stage(
+            "total",
+            total_started,
+            outcome=outcome,
+            candidates=len(places),
+        )
+
+
+def extract_search_terms(user_query: str) -> List[str]:
+    """Extract up to three useful Google Places keyword searches locally."""
+    normalized = _normalize_query(user_query)
+    cuisines = _match_aliases(normalized, CUISINE_ALIASES)
+    diets = _match_aliases(normalized, DIET_ALIASES)
+
+    if cuisines:
+        diet_prefix = diets[0] if diets else ""
+        return [
+            " ".join(part for part in (diet_prefix, cuisine) if part)
+            for cuisine in cuisines[:MAX_SEARCH_TERMS]
+        ]
+
+    fallback = normalized[:80].strip()
+    if fallback:
+        return [fallback]
+    return ["restaurants"]
+
+
+def _normalize_query(user_query: str) -> str:
+    normalized = re.sub(r"[^\w\s-]", " ", user_query.lower(), flags=re.UNICODE)
+    return re.sub(r"\s+", " ", normalized).strip()
+
+
+def _match_aliases(
+    normalized_query: str,
+    aliases_by_label: Dict[str, Sequence[str]],
+) -> List[str]:
+    matches: List[str] = []
+    for label, aliases in aliases_by_label.items():
+        if any(
+            re.search(rf"(?<!\w){re.escape(alias)}(?!\w)", normalized_query)
+            for alias in aliases
+        ):
+            matches.append(label)
+    return matches
 
 
 def _build_chat_model() -> ChatOpenAI:
-    """Instantiate the OpenAI chat model used across the pipeline."""
-    # TODO: Configure API key management via environment or secret manager.
+    """Build the single bounded model client used for final ranking."""
     return ChatOpenAI(
         model=OPENAI_CHAT_MODEL,
-        temperature=0.2,
-        max_tokens=500,
+        max_tokens=300,
+        timeout=RANKING_TIMEOUT_SECONDS,
+        max_retries=0,
         api_key=OPENAI_API_KEY or None,
     )
 
 
-async def _parse_intent(llm: ChatOpenAI, user_query: str) -> Dict[str, List[str]]:
-    """Call the LLM to extract structured intent from the user's craving."""
-    chain = INTENT_PROMPT | llm | _json_parser
-    try:
-        raw_response = await chain.ainvoke({"user_query": user_query})
-        parsed = json.loads(raw_response)
-    except Exception as exc:  # pragma: no cover - defensive fallback
-        logger.warning("Intent parsing failed (%s); falling back to heuristic extraction.", exc)
-        parsed = _heuristic_intent(user_query)
-    return {
-        "mood": _normalize_list(parsed.get("mood")),
-        "cravings": _normalize_list(parsed.get("cravings")),
-        "diet": _normalize_list(parsed.get("diet")),
-    }
-
-
-def _normalize_list(value: Optional[Iterable[str]]) -> List[str]:
-    """Ensure the field is a list of unique lowercase strings."""
-    if not value:
-        return []
-    seen: set[str] = set()
-    normalized: List[str] = []
-    for item in value:
-        if not item:
-            continue
-        token = str(item).strip()
-        if not token:
-            continue
-        lowered = token.lower()
-        if lowered not in seen:
-            seen.add(lowered)
-            normalized.append(lowered)
-    return normalized
-
-
-def _heuristic_intent(user_query: str) -> Dict[str, List[str]]:
-    """Lightweight fallback intent extraction using keyword matching."""
-    tokens = user_query.lower().split()
-    moods = [word for word in tokens if word in {"spicy", "cozy", "light", "hearty", "romantic"}]
-    diets = [word for word in tokens if word in {"vegan", "vegetarian", "keto", "halal", "gluten-free"}]
-    cravings = [word for word in tokens if word.endswith(("ian", "ese", "ish", "an")) or word in {"ramen", "pho", "tacos"}]
-    return {"mood": moods, "cravings": cravings, "diet": diets}
-
-
-async def _retrieve_similar_cuisines(intent: Dict[str, List[str]]) -> List[str]:
-    """Use the cuisine embedding store to surface related cuisines."""
-    query_terms = intent.get("cravings") or intent.get("mood") or []
-    if not query_terms:
-        return []
-
-    if Chroma is None:
-        logger.info("Chroma is not installed; returning intent terms as fallback cuisines.")
-        return query_terms[:MAX_CUISINES]
-
-    try:
-        embeddings = OpenAIEmbeddings(
-            model=OPENAI_EMBEDDING_MODEL,
-            api_key=OPENAI_API_KEY or None,
-        )
-        vector_store = await asyncio.to_thread(
-            Chroma,
-            persist_directory=CHROMA_PATH,
-            embedding_function=embeddings,
-        )
-        combined_query = " ".join(query_terms)
-        docs = await asyncio.to_thread(
-            vector_store.similarity_search,
-            combined_query,
-            MAX_CUISINES,
-        )
-        cuisines: List[str] = []
-        for doc in docs:
-            cuisine = doc.metadata.get("cuisine") if isinstance(doc.metadata, dict) else None
-            cuisine = cuisine or doc.page_content
-            if cuisine and cuisine not in cuisines:
-                cuisines.append(cuisine)
-        if not cuisines:
-            cuisines = query_terms[:MAX_CUISINES]
-        return cuisines[:MAX_CUISINES]
-    except Exception as exc:  # pragma: no cover - defensive fallback
-        logger.warning("Cuisine retrieval failed (%s); using intent terms instead.", exc)
-        return query_terms[:MAX_CUISINES]
-
-
 async def _fetch_candidate_places(
-    cuisines: Sequence[str], location: Dict[str, Any]
+    search_terms: Sequence[str],
+    location: Dict[str, Any],
 ) -> List[Dict[str, Any]]:
-    """Query the Google Places API for each cuisine candidate."""
-    if not cuisines:
-        logger.info("No cuisines identified; skipping Places API lookup.")
+    """Query Google Places for the locally extracted search terms."""
+    if not search_terms:
         return []
-
-    if not GOOGLE_PLACES_API_KEY:
-        logger.info("Google Places API key not configured; returning placeholder venues.")
-        return _placeholder_places(cuisines, location)
 
     lat = location.get("lat")
     lng = location.get("lng")
     if lat is None or lng is None:
-        logger.warning("Location payload missing 'lat'/'lng'; cannot query Places API.")
+        logger.warning("chat_pipeline stage=places outcome=missing_location")
         return []
 
+    if not GOOGLE_PLACES_API_KEY:
+        logger.info("chat_pipeline stage=places outcome=placeholder")
+        return _placeholder_places(list(search_terms), lat, lng)
+
     return await search_nearby_places(
-        cuisines,
+        list(search_terms),
         lat=lat,
         lng=lng,
         radius=location.get("radius"),
@@ -217,56 +236,137 @@ async def _fetch_candidate_places(
 
 
 async def _rank_candidates(
-    llm: ChatOpenAI, user_query: str, places: Sequence[Dict[str, Any]]
+    user_query: str,
+    places: Sequence[Dict[str, Any]],
 ) -> Dict[str, Any]:
-    """Use GPT to rank results and craft the assistant-facing summary."""
-    if not places:
-        reply = (
-            "I'm still training my taste buds and couldn't find matching spots yet. "
-            "Try refining your craving or share a location to explore together!"
-        )
-        return {"reply": reply, "recommendations": []}
-
+    """Use one model call to rank candidates and write the short response."""
     candidates_json = json.dumps(list(places), ensure_ascii=False)
-    chain = RANKING_PROMPT | llm | _json_parser
-    try:
-        raw = await chain.ainvoke(
-            {
-                "user_query": user_query,
-                "candidates": candidates_json,
-            }
-        )
-        parsed = json.loads(raw)
-        parsed["recommendations"] = _sanitize_recommendations(parsed.get("recommendations", []))
-        parsed["reply"] = parsed.get("reply") or (
-            "Here are a few places that seem to fit - let me know what you think!"
-        )
-        return parsed
-    except Exception as exc:  # pragma: no cover - defensive fallback
-        logger.warning("Ranking prompt failed (%s); returning top candidates as-is.", exc)
+    chain = RANKING_PROMPT | _build_chat_model() | _json_parser
+    raw = await chain.ainvoke(
+        {
+            "user_query": user_query,
+            "candidates": candidates_json,
+        }
+    )
+    parsed = json.loads(raw)
+    raw_recommendations = parsed.get("recommendations")
+    if not isinstance(raw_recommendations, list):
+        raise ValueError("Ranking response did not include a recommendations list.")
+
+    recommendations = _merge_ranked_recommendations(raw_recommendations, places)
+    if not recommendations:
+        raise ValueError("Ranking response did not select known candidates.")
+
+    reply = parsed.get("reply")
+    if not isinstance(reply, str) or not reply.strip():
+        reply = "Here are the nearby spots that best match what you're craving."
+    return {
+        "reply": reply.strip(),
+        "recommendations": recommendations,
+    }
+
+
+def _merge_ranked_recommendations(
+    ranked_items: Sequence[Dict[str, Any]],
+    source_places: Sequence[Dict[str, Any]],
+) -> List[Dict[str, Any]]:
+    sources_by_name = {
+        str(place.get("name", "")).strip().casefold(): place
+        for place in source_places
+        if place.get("name")
+    }
+    merged: List[Dict[str, Any]] = []
+    seen: set[str] = set()
+
+    for ranked in ranked_items:
+        name_key = str(ranked.get("name", "")).strip().casefold()
+        source = sources_by_name.get(name_key)
+        if not source or name_key in seen:
+            continue
+        seen.add(name_key)
+        combined = dict(source)
+        if ranked.get("reason"):
+            combined["reason"] = ranked["reason"]
+        merged.append(_sanitize_recommendation(combined))
+        if len(merged) >= MAX_RECOMMENDATIONS:
+            break
+    return merged
+
+
+def _deterministic_response(
+    places: Sequence[Dict[str, Any]],
+    *,
+    reason: str,
+) -> Dict[str, Any]:
+    if not places:
         return {
             "reply": (
-                "Here are some nearby spots that match what you're craving. "
-                "I'll refine the reasoning once the ranking model is ready."
+                "I couldn't find matching nearby restaurants in time. "
+                "Try a more specific cuisine or search again in a moment."
             ),
-            "recommendations": _sanitize_recommendations(places[:3]),
+            "recommendations": [],
         }
 
+    ranked = sorted(
+        places,
+        key=lambda place: (
+            _number(place.get("rating")),
+            _number(place.get("user_ratings_total")),
+        ),
+        reverse=True,
+    )
+    logger.info(
+        "chat_pipeline stage=fallback outcome=%s candidates=%d",
+        reason,
+        len(places),
+    )
+    return {
+        "reply": (
+            "Here are the strongest nearby matches I found. "
+            "I ranked them using their ratings and review counts."
+        ),
+        "recommendations": [
+            _sanitize_recommendation(place)
+            for place in ranked[:MAX_RECOMMENDATIONS]
+        ],
+    }
 
-def _sanitize_recommendations(raw_items: Sequence[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    """Normalize recommendation entries to the expected output schema."""
-    cleaned: List[Dict[str, Any]] = []
-    for item in raw_items:
-        cleaned.append(
-            {
-                "name": item.get("name"),
-                "rating": item.get("rating"),
-                "address": item.get("address"),
-                "reason": item.get("reason") or "",
-                "lat": item.get("lat"),
-                "lng": item.get("lng"),
-            }
-        )
-    return cleaned
+
+def _sanitize_recommendation(item: Dict[str, Any]) -> Dict[str, Any]:
+    return {
+        "name": item.get("name"),
+        "rating": item.get("rating"),
+        "address": item.get("address"),
+        "reason": item.get("reason") or "",
+        "lat": item.get("lat"),
+        "lng": item.get("lng"),
+    }
 
 
+def _number(value: Any) -> float:
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return 0.0
+
+
+def _log_stage(
+    stage: str,
+    started: float,
+    *,
+    outcome: str,
+    candidates: int = 0,
+    search_terms: int = 0,
+) -> None:
+    duration_ms = (time.perf_counter() - started) * 1000
+    logger.info(
+        (
+            "chat_pipeline stage=%s duration_ms=%.1f outcome=%s "
+            "candidates=%d search_terms=%d"
+        ),
+        stage,
+        duration_ms,
+        outcome,
+        candidates,
+        search_terms,
+    )

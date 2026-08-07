@@ -1,6 +1,7 @@
 import asyncio
 import os
 import sys
+import time
 from pathlib import Path
 from typing import Any, Dict, List
 from types import ModuleType
@@ -149,16 +150,10 @@ def configure_test_settings(monkeypatch, tmp_path):
 @pytest.fixture
 def mocked_pipeline(monkeypatch):
     """Stub external calls used by the RAG pipeline."""
-    call_tracker: Dict[str, int] = {"intent": 0, "places": 0, "rank": 0}
+    call_tracker: Dict[str, int] = {"extract": 0, "places": 0, "rank": 0}
 
-    async def fake_build_chat_model() -> Any:
-        return object()
-
-    async def fake_parse_intent(llm: Any, user_query: str) -> Dict[str, Any]:
-        call_tracker["intent"] += 1
-        return {"mood": ["cozy"], "cravings": ["ramen"], "diet": []}
-
-    async def fake_retrieve_cuisines(intent: Dict[str, Any]) -> List[str]:
+    def fake_extract_search_terms(user_query: str) -> List[str]:
+        call_tracker["extract"] += 1
         return ["ramen"]
 
     async def fake_fetch_places(cuisines, location):
@@ -172,20 +167,165 @@ def mocked_pipeline(monkeypatch):
             }
         ]
 
-    async def fake_rank_candidates(llm: Any, user_query: str, places):
+    async def fake_rank_candidates(user_query: str, places):
         call_tracker["rank"] += 1
         return {
             "reply": "I'd try Mock Ramen House - sounds perfect for cozy ramen vibes.",
             "recommendations": places,
         }
 
-    monkeypatch.setattr(rag_pipeline, "_build_chat_model", lambda: None, raising=False)
-    monkeypatch.setattr(rag_pipeline, "_parse_intent", fake_parse_intent, raising=False)
-    monkeypatch.setattr(rag_pipeline, "_retrieve_similar_cuisines", fake_retrieve_cuisines, raising=False)
+    monkeypatch.setattr(
+        rag_pipeline,
+        "extract_search_terms",
+        fake_extract_search_terms,
+        raising=False,
+    )
     monkeypatch.setattr(rag_pipeline, "_fetch_candidate_places", fake_fetch_places, raising=False)
     monkeypatch.setattr(rag_pipeline, "_rank_candidates", fake_rank_candidates, raising=False)
 
     return call_tracker
+
+
+def test_extract_search_terms_recognizes_common_cuisines():
+    assert rag_pipeline.extract_search_terms("I want some pizza") == ["pizza"]
+    assert rag_pipeline.extract_search_terms("Cozy ramen please") == ["ramen"]
+    assert rag_pipeline.extract_search_terms("Find spicy Indian food") == ["indian"]
+
+
+def test_extract_search_terms_combines_diet_and_uses_ambiguous_fallback():
+    assert rag_pipeline.extract_search_terms("vegan pizza nearby") == ["vegan pizza"]
+    assert rag_pipeline.extract_search_terms("Something cozy and spicy") == [
+        "something cozy and spicy"
+    ]
+
+
+def test_chat_model_disables_retries_and_sets_deadline(monkeypatch):
+    captured: Dict[str, Any] = {}
+
+    class CapturingChatModel:
+        def __init__(self, **kwargs):
+            captured.update(kwargs)
+
+    monkeypatch.setattr(rag_pipeline, "ChatOpenAI", CapturingChatModel)
+    rag_pipeline._build_chat_model()
+
+    assert captured["model"] == rag_pipeline.OPENAI_CHAT_MODEL
+    assert captured["timeout"] == rag_pipeline.RANKING_TIMEOUT_SECONDS
+    assert captured["max_retries"] == 0
+    assert captured["max_tokens"] == 300
+
+
+def test_deterministic_fallback_sorts_by_rating_then_review_count():
+    places = [
+        {"name": "Lower", "rating": 4.7, "user_ratings_total": 900},
+        {"name": "Few Reviews", "rating": 4.8, "user_ratings_total": 20},
+        {"name": "Many Reviews", "rating": 4.8, "user_ratings_total": 500},
+    ]
+
+    result = rag_pipeline._deterministic_response(places, reason="test")
+
+    assert [item["name"] for item in result["recommendations"]] == [
+        "Many Reviews",
+        "Few Reviews",
+        "Lower",
+    ]
+
+
+def test_pipeline_ranking_timeout_returns_fast_deterministic_fallback(monkeypatch):
+    places = [
+        {"name": "A", "rating": 4.5, "user_ratings_total": 100},
+        {"name": "B", "rating": 4.8, "user_ratings_total": 50},
+    ]
+
+    async def fake_fetch(search_terms, location):
+        return places
+
+    async def slow_rank(user_query, candidates):
+        await asyncio.sleep(0.1)
+        return {"reply": "too late", "recommendations": []}
+
+    monkeypatch.setattr(rag_pipeline, "_fetch_candidate_places", fake_fetch)
+    monkeypatch.setattr(rag_pipeline, "_rank_candidates", slow_rank)
+    monkeypatch.setattr(rag_pipeline, "RANKING_TIMEOUT_SECONDS", 0.01)
+
+    started = time.perf_counter()
+    result = asyncio.run(
+        rag_pipeline.generate_recommendations(
+            "pizza",
+            {"lat": 43.6, "lng": -79.4},
+        )
+    )
+    elapsed = time.perf_counter() - started
+
+    assert elapsed < 0.2
+    assert [item["name"] for item in result["recommendations"]] == ["B", "A"]
+
+
+def test_pipeline_malformed_ranking_falls_back_with_coordinates(monkeypatch):
+    places = [
+        {
+            "name": "Mapped Pizza",
+            "rating": 4.9,
+            "user_ratings_total": 200,
+            "lat": 43.61,
+            "lng": -79.41,
+        }
+    ]
+
+    async def fake_fetch(search_terms, location):
+        return places
+
+    async def malformed_rank(user_query, candidates):
+        raise ValueError("malformed JSON")
+
+    monkeypatch.setattr(rag_pipeline, "_fetch_candidate_places", fake_fetch)
+    monkeypatch.setattr(rag_pipeline, "_rank_candidates", malformed_rank)
+
+    result = asyncio.run(
+        rag_pipeline.generate_recommendations(
+            "pizza",
+            {"lat": 43.6, "lng": -79.4},
+        )
+    )
+
+    assert result["recommendations"][0]["lat"] == 43.61
+    assert result["recommendations"][0]["lng"] == -79.41
+
+
+def test_pipeline_empty_results_returns_valid_response(monkeypatch):
+    async def fake_fetch(search_terms, location):
+        return []
+
+    monkeypatch.setattr(rag_pipeline, "_fetch_candidate_places", fake_fetch)
+
+    result = asyncio.run(
+        rag_pipeline.generate_recommendations(
+            "pizza",
+            {"lat": 43.6, "lng": -79.4},
+        )
+    )
+
+    assert result["reply"]
+    assert result["recommendations"] == []
+
+
+def test_pipeline_total_deadline_returns_without_waiting(monkeypatch):
+    async def slow_fetch(search_terms, location):
+        await asyncio.sleep(0.1)
+        return []
+
+    monkeypatch.setattr(rag_pipeline, "_fetch_candidate_places", slow_fetch)
+    monkeypatch.setattr(rag_pipeline, "PIPELINE_TIMEOUT_SECONDS", 0.01)
+
+    result = asyncio.run(
+        rag_pipeline.generate_recommendations(
+            "pizza",
+            {"lat": 43.6, "lng": -79.4},
+        )
+    )
+
+    assert result["reply"]
+    assert result["recommendations"] == []
 
 
 def test_chat_endpoint_returns_mocked_response(mocked_pipeline):
@@ -220,7 +360,7 @@ def test_chat_endpoint_returns_mocked_response(mocked_pipeline):
     assert response.headers["x-craveai-anonymous-token"]
 
     # Ensure the mocked RAG functions executed.
-    assert mocked_pipeline["intent"] == 1
+    assert mocked_pipeline["extract"] == 1
     assert mocked_pipeline["places"] == 1
     assert mocked_pipeline["rank"] == 1
 
@@ -257,7 +397,7 @@ def test_chat_endpoint_returns_cumulative_usage_after_each_chat(mocked_pipeline)
     assert second_response.json()["usage"]["used"] == 2
     assert second_response.json()["usage"]["remaining"] == 1
     assert second_response.headers["x-ratelimit-remaining"] == "1"
-    assert mocked_pipeline["intent"] == 2
+    assert mocked_pipeline["extract"] == 2
 
 
 def test_chat_endpoint_enforces_quota_even_if_disable_flag_is_false(
@@ -287,7 +427,7 @@ def test_chat_endpoint_enforces_quota_even_if_disable_flag_is_false(
     assert response.json()["usage"]["used"] == 1
     assert response.json()["usage"]["remaining"] == 2
     assert response.headers["x-ratelimit-remaining"] == "2"
-    assert mocked_pipeline["intent"] == 1
+    assert mocked_pipeline["extract"] == 1
 
 
 def test_cors_exposes_rate_limit_headers_for_browser_badge_fallback(mocked_pipeline):
@@ -349,7 +489,7 @@ def test_chat_endpoint_returns_429_before_pipeline_when_quota_exhausted(
     assert response.headers["x-craveai-anonymous-token"]
     assert "retry-after" in response.headers
 
-    assert mocked_pipeline["intent"] == 0
+    assert mocked_pipeline["extract"] == 0
     assert mocked_pipeline["places"] == 0
     assert mocked_pipeline["rank"] == 0
 
@@ -397,7 +537,7 @@ def test_chat_endpoint_allows_three_messages_then_blocks_fourth(mocked_pipeline)
     assert fourth_response.status_code == 429
     assert fourth_response.json()["detail"]["usage"]["used"] == 3
     assert fourth_response.headers["x-ratelimit-remaining"] == "0"
-    assert mocked_pipeline["intent"] == 3
+    assert mocked_pipeline["extract"] == 3
 
 
 def test_chat_developer_mode_allows_unlimited_messages(monkeypatch, mocked_pipeline):
@@ -427,7 +567,7 @@ def test_chat_developer_mode_allows_unlimited_messages(monkeypatch, mocked_pipel
     assert all(response.status_code == 200 for response in responses)
     assert all(response.json()["usage"]["unlimited"] is True for response in responses)
     assert all("x-ratelimit-limit" not in response.headers for response in responses)
-    assert mocked_pipeline["intent"] == 5
+    assert mocked_pipeline["extract"] == 5
 
 
 def test_chat_status_reports_developer_mode_without_pipeline_call(
@@ -449,7 +589,7 @@ def test_chat_status_reports_developer_mode_without_pipeline_call(
 
     assert response.status_code == 200
     assert response.json()["usage"]["unlimited"] is True
-    assert mocked_pipeline["intent"] == 0
+    assert mocked_pipeline["extract"] == 0
 
 
 def test_chat_status_does_not_report_unlimited_in_standard_mode(mocked_pipeline):
@@ -466,7 +606,7 @@ def test_chat_status_does_not_report_unlimited_in_standard_mode(mocked_pipeline)
 
     assert response.status_code == 200
     assert response.json() == {}
-    assert mocked_pipeline["intent"] == 0
+    assert mocked_pipeline["extract"] == 0
 
 
 def test_chat_developer_mode_is_rejected_in_production(monkeypatch):
@@ -513,7 +653,7 @@ def test_chat_dev_bypass_header_allows_unlimited_messages_in_production(
     assert all(response.status_code == 200 for response in responses)
     assert all(response.json()["usage"]["unlimited"] is True for response in responses)
     assert all("x-ratelimit-limit" not in response.headers for response in responses)
-    assert mocked_pipeline["intent"] == 5
+    assert mocked_pipeline["extract"] == 5
 
 
 def test_chat_dev_bypass_header_with_wrong_secret_still_enforces_quota(
@@ -567,7 +707,7 @@ def test_chat_dev_bypass_header_with_wrong_secret_still_enforces_quota(
     assert third_response.status_code == 200
     assert fourth_response.status_code == 429
     assert fourth_response.json()["detail"]["usage"]["used"] == 3
-    assert mocked_pipeline["intent"] == 3
+    assert mocked_pipeline["extract"] == 3
 
 
 def test_chat_dev_bypass_secret_must_be_strong_in_production(monkeypatch):
@@ -624,7 +764,7 @@ def test_chat_quota_survives_new_client_when_anonymous_token_is_reused(mocked_pi
     assert third_response.json()["usage"]["used"] == 3
     assert fourth_response.status_code == 429
     assert fourth_response.json()["detail"]["usage"]["used"] == 3
-    assert mocked_pipeline["intent"] == 3
+    assert mocked_pipeline["extract"] == 3
 
 
 def test_chat_replaces_forged_anonymous_token_without_trusting_it(mocked_pipeline):
@@ -659,7 +799,7 @@ def test_chat_replaces_forged_anonymous_token_without_trusting_it(mocked_pipelin
     assert first_response.json()["usage"]["used"] == 1
     assert issued_token != forged
     assert second_response.json()["usage"]["used"] == 2
-    assert mocked_pipeline["intent"] == 2
+    assert mocked_pipeline["extract"] == 2
 
 
 def test_usage_quota_resets_on_new_utc_date():
@@ -723,7 +863,7 @@ def test_chat_endpoint_rejects_caller_selected_quota_identity(mocked_pipeline):
     assert second_response.status_code == 422
 
     assert first_response.json()["usage"]["used"] == 1
-    assert mocked_pipeline["intent"] == 1
+    assert mocked_pipeline["extract"] == 1
 
 
 def test_chat_rejects_oversized_input_before_pipeline(mocked_pipeline):
@@ -744,7 +884,7 @@ def test_chat_rejects_oversized_input_before_pipeline(mocked_pipeline):
 
     response = asyncio.run(exercise())
     assert response.status_code == 422
-    assert mocked_pipeline == {"intent": 0, "places": 0, "rank": 0}
+    assert mocked_pipeline == {"extract": 0, "places": 0, "rank": 0}
 
 
 def test_global_quota_cannot_be_bypassed_with_multiple_actor_ids():

@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import {
   ChatQuotaError,
+  ChatTimeoutError,
   fetchChatStatus,
   sendChat,
   ChatRecommendation,
@@ -147,6 +148,20 @@ export function ChatPanel({
           writeCachedUsage(nextUsage);
           return nextUsage;
         });
+        setError(err.message);
+        onRecommendations?.([]);
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: createMessageId("assistant"),
+            role: "assistant",
+            content: err.message,
+          },
+        ]);
+        return;
+      }
+
+      if (err instanceof ChatTimeoutError) {
         setError(err.message);
         onRecommendations?.([]);
         setMessages((prev) => [
