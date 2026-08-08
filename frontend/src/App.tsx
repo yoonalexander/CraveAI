@@ -220,14 +220,6 @@ function App(): JSX.Element {
           <div className="flex items-center gap-4">
             <ThemeToggle />
             <AccountMenu />
-            <div className="rounded-3xl border border-border bg-secondary/50 px-5 py-4 text-sm text-muted-foreground shadow-lg backdrop-blur-sm">
-              <p className="font-semibold text-foreground">Build Status</p>
-              <ul className="mt-2 list-disc space-y-1 pl-5 text-xs">
-                <li>Chat UI scaffolded with placeholder flow.</li>
-                <li>Favorites & map views queued for upcoming sprints.</li>
-                <li>Backend RAG pipeline mocked until API keys are ready.</li>
-              </ul>
-            </div>
           </div>
         </header>
 
