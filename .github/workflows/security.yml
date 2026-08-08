@@ -28,6 +28,7 @@ jobs:
           cache: pip
       - run: pip install -r backend/requirements.txt pip-audit
       - run: python -m compileall -q backend scripts
+      - run: mkdir -p data
       - run: python -m pytest -q
       - run: pip-audit -r backend/requirements.txt
       - name: Render migration SQL
