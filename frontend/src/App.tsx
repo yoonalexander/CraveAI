@@ -20,7 +20,10 @@ import {
 } from "./utils/suggestionPool";
 
 const SUGGESTION_ROTATION_MS = 30000;
-const SUGGESTION_TIMEOUT_MS = 28000;
+// Render's free web services can take about a minute to wake after being idle.
+// Keep this above that cold-start window so the browser does not abort a
+// healthy suggestions request just before the backend becomes available.
+const SUGGESTION_TIMEOUT_MS = 90000;
 
 const HAMILTON_FALLBACK = {
   lat: 43.2557,
@@ -261,7 +264,8 @@ function App(): JSX.Element {
                         : "Finding nearby restaurants..."}
                     </p>
                     <p className="text-muted-foreground">
-                      Using your location and Google Places.
+                      Using your location and Google Places. The first load may
+                      take about a minute.
                     </p>
                   </div>
                 </div>

@@ -112,6 +112,33 @@ describe("App suggestion pool", () => {
     expect(screen.getByText("Place 0")).toBeInTheDocument();
   });
 
+  it("waits through a backend cold start instead of aborting after 28 seconds", async () => {
+    mockedFetchSuggestions.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          setTimeout(() => resolve(makeSuggestions(4)), 60_000);
+        }),
+    );
+    render(<App />);
+    await flushEffects();
+
+    act(() => vi.advanceTimersByTime(28_000));
+    expect(
+      screen.queryByText(/couldn't load suggestions in time/i),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByText(/first load may take about a minute/i),
+    ).toBeInTheDocument();
+
+    act(() => vi.advanceTimersByTime(32_000));
+    await flushEffects();
+
+    expect(screen.getByText("Place 0")).toBeInTheDocument();
+    expect(
+      screen.queryByText(/couldn't load suggestions in time/i),
+    ).not.toBeInTheDocument();
+  });
+
   it("shows the Places reset time and hides retry for quota errors", async () => {
     mockedFetchSuggestions.mockRejectedValue(
       new PlacesQuotaError("2026-08-08T00:00:00Z"),
