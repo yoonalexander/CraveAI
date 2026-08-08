@@ -253,7 +253,7 @@ function App(): JSX.Element {
               </p>
               {isLoadingSuggestions && (
                 <div className="mt-4 flex items-center gap-4 rounded-2xl bg-secondary/70 p-3 shadow-inner">
-                  <div className="relative h-10 w-10">
+                  <div className="relative h-10 w-10 shrink-0">
                     <div className="absolute inset-0 rounded-full border-2 border-primary/25" />
                     <div className="absolute inset-0 rounded-full border-2 border-primary border-t-transparent animate-spin" />
                   </div>
