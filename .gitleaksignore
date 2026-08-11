@@ -1,0 +1,2 @@
+# Synthetic provider token used by the authentication security test.
+b0ddb4d55e69ebaef5d1b89e7611839baf0f7f05:tests/test_security_auth.py:generic-api-key:41
