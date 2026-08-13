@@ -364,25 +364,25 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .chat-message { display: flex; flex-direction: column; margin: 0 0 22px; animation: message-enter 280ms ease both; }
 @keyframes message-enter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 .chat-message.is-user { align-items: flex-end; }
-.chat-message-content { max-width: 86%; color: #292a27; font-size: 13px; line-height: 1.62; }
+.chat-message-content { max-width: 86%; color: #292a27; font-size: 16px; line-height: 1.6; }
 .chat-message-content > p { margin: 0; white-space: pre-wrap; }
-.chat-message.is-user .chat-message-content { max-width: 78%; padding: 10px 14px; border-radius: 15px; color: #294028; background: #a9ca9b; }
+.chat-message.is-user .chat-message-content { max-width: 78%; padding: 12px 16px; border-radius: 17px; color: #294028; background: #a9ca9b; }
 .chat-message-action { display: inline-flex; width: 27px; height: 27px; align-items: center; justify-content: center; margin-top: 5px; border: 0; border-radius: 7px; color: #71736f; background: transparent; cursor: pointer; }
 .chat-message-action:hover { background: #f0f1ee; }
 .chat-message-action svg { width: 15px; }
-.chat-recommendations { display: grid; gap: 8px; margin-top: 13px; }
-.chat-recommendations > div { padding: 10px 12px; border: 1px solid #e1e2de; border-radius: 12px; background: #fafbf9; }
-.chat-recommendations strong { display: block; font-size: 12px; }
-.chat-recommendations span { display: block; margin-top: 2px; color: #686b65; font-size: 10px; }
-.chat-recommendations p { margin: 5px 0 0; color: #565953; font-size: 11px; }
-.chat-recommendations .recommendation-confidence { margin-top: 7px; color: #8a6415; font-size: 10px; font-weight: 800; text-transform: uppercase; }
+.chat-recommendations { display: grid; gap: 10px; margin-top: 15px; }
+.chat-recommendations > div { padding: 13px 15px; border: 1px solid #e1e2de; border-radius: 13px; background: #fafbf9; }
+.chat-recommendations strong { display: block; font-size: 15px; line-height: 1.4; }
+.chat-recommendations span { display: block; margin-top: 3px; color: #686b65; font-size: 13px; line-height: 1.45; }
+.chat-recommendations p { margin: 7px 0 0; color: #565953; font-size: 14px; line-height: 1.55; }
+.chat-recommendations .recommendation-confidence { margin-top: 8px; color: #8a6415; font-size: 11px; font-weight: 800; text-transform: uppercase; }
 .chat-recommendations .recommendation-confidence.is-high { color: #3d713b; }
 .chat-recommendations .recommendation-preferences { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px; }
-.chat-recommendations .recommendation-preferences span { display: inline-flex; margin: 0; padding: 3px 7px; border-radius: 999px; color: #3d713b; background: #edf4ea; font-size: 9px; font-weight: 700; }
-.recommendation-dishes { margin: 8px 0 0; padding-left: 18px; color: #343733; font-size: 11px; }
+.chat-recommendations .recommendation-preferences span { display: inline-flex; margin: 0; padding: 4px 8px; border-radius: 999px; color: #3d713b; background: #edf4ea; font-size: 11px; font-weight: 700; }
+.recommendation-dishes { margin: 9px 0 0; padding-left: 20px; color: #343733; font-size: 14px; line-height: 1.5; }
 .recommendation-dishes li + li { margin-top: 3px; }
 .recommendation-sources { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 7px; }
-.chat-recommendations .recommendation-sources a { color: #477b45; font-size: 10px; font-weight: 700; text-decoration: underline; text-underline-offset: 2px; }
+.chat-recommendations .recommendation-sources a { color: #477b45; font-size: 12px; font-weight: 700; text-decoration: underline; text-underline-offset: 2px; }
 .chat-thinking { display: flex; gap: 5px; width: 45px; padding: 11px 7px; }
 .chat-thinking span { width: 6px; height: 6px; border-radius: 50%; background: #7e9e75; animation: thinking 1.1s ease-in-out infinite; }
 .chat-thinking span:nth-child(2) { animation-delay: 120ms; }
@@ -402,13 +402,13 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .chat-panel.has-conversation .chat-composer { bottom: 24px; transform: translateY(0); }
 .chat-composer-field { display: flex; align-items: flex-end; gap: 7px; min-height: 48px; padding: 6px 7px 6px 16px; border: 1px solid #dcddd9; border-radius: 27px; background: #fff; box-shadow: 0 5px 20px rgba(35,41,33,.1); transition: border-color 160ms ease,box-shadow 160ms ease; }
 .chat-composer-field:focus-within { border-color: #9ebd96; box-shadow: 0 5px 22px rgba(66,105,61,.14); }
-.chat-composer textarea { flex: 1; min-width: 0; min-height: 34px; max-height: 132px; padding: 7px 0 6px; resize: none; overflow-y: auto; border: 0; outline: 0; color: #2c2d2a; background: transparent; font-size: 14px; line-height: 1.45; }
+.chat-composer textarea { flex: 1; min-width: 0; min-height: 36px; max-height: 144px; padding: 7px 0 6px; resize: none; overflow-y: auto; border: 0; outline: 0; color: #2c2d2a; background: transparent; font-size: 16px; line-height: 1.5; }
 .chat-composer textarea::placeholder { color: #9b9d98; }
 .composer-mic, .composer-send { display: inline-flex; flex: 0 0 auto; align-items: center; justify-content: center; border: 0; cursor: pointer; }
 .composer-mic { width: 35px; height: 35px; border-radius: 50%; color: #4f514d; background: transparent; }
 .composer-mic:hover { background: #f1f2ef; }
 .composer-mic svg { width: 17px; }
-.composer-send { gap: 5px; min-width: 68px; height: 37px; padding: 0 14px; border-radius: 999px; color: #fff; background: #5f8f55; font-size: 13px; font-weight: 700; }
+.composer-send { gap: 5px; min-width: 70px; height: 39px; padding: 0 15px; border-radius: 999px; color: #fff; background: #5f8f55; font-size: 14px; font-weight: 700; }
 .composer-send svg { display: none; width: 16px; }
 .composer-send:disabled { cursor: not-allowed; opacity: .45; }
 .chat-composer-meta { display: flex; justify-content: center; min-height: 20px; padding: 5px 12px 0; color: #777a74; font-size: 12px; }

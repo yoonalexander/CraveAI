@@ -12,6 +12,7 @@ from backend.services.recommendation_models import (
     IntentConstraint,
     SearchQuerySpec,
 )
+from backend.services.venue_constraints import normalize_venue_constraint
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +33,10 @@ Strength rules are strict:
 
 Use polarity=exclude for "not", "no", "without", "except", and similar exclusions.
 Separate taste, texture, temperature, cuisine, dish type, ingredients, diet, health,
-price, and meal context. Do not turn filler words or location words into food constraints.
+price, meal context, and venue type. Use dimension=venue for an establishment category
+such as pub, bar, cafe, bakery, food truck, or diner. For example, "pub food" includes a
+venue=pub constraint; it is not merely a generic food-style hint. Do not turn filler words
+or location words into food constraints.
 Every constraint must be explicitly stated by the user or be a direct normalization of
 their words. Do not add traits merely implied by a possible dish (for example, do not add
 "brothy" just because the user said "soup").
@@ -91,11 +95,16 @@ def normalize_intent(intent: CravingIntent, user_query: str) -> CravingIntent:
         value = _clean_text(raw.value, 80)
         if not value:
             continue
+        dimension = raw.dimension
+        canonical_venue = normalize_venue_constraint(value)
+        if canonical_venue:
+            dimension = "venue"
+            value = canonical_venue
         if raw.strength in {"preferred", "weak"} and not _constraint_grounded(
             value, user_query
         ):
             continue
-        key = (raw.dimension, value.lower(), raw.polarity)
+        key = (dimension, value.lower(), raw.polarity)
         if key in seen:
             continue
         seen.add(key)
@@ -105,7 +114,7 @@ def normalize_intent(intent: CravingIntent, user_query: str) -> CravingIntent:
         constraints.append(
             IntentConstraint(
                 id=constraint_id,
-                dimension=raw.dimension,
+                dimension=dimension,
                 value=value,
                 polarity=raw.polarity,
                 strength=_correct_contextual_strength(raw, user_query),
@@ -199,6 +208,15 @@ def fallback_intent(user_query: str) -> CravingIntent:
         "diet": ("vegan", "vegetarian", "halal", "kosher", "gluten free", "keto"),
         "health": ("healthy", "high protein", "low carb"),
         "price": ("cheap", "affordable", "budget"),
+        "venue": (
+            "pub",
+            "gastropub",
+            "bar",
+            "cafe",
+            "bakery",
+            "food truck",
+            "diner",
+        ),
     }
     soft_markers = ("maybe", "preferably", "ideally", "kind of", "something like")
     hard_markers = ("must", "need", "only", "have to", "has to")

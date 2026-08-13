@@ -16,6 +16,7 @@ from backend.services.recommendation_models import (
     EvidenceLink,
 )
 from backend.services.restaurant_retrieval import _merge_query_results
+from backend.services.venue_constraints import candidate_matches_venue_constraints
 
 
 def spicy_soup_intent(*, spicy_strength: str = "strong") -> CravingIntent:
@@ -143,6 +144,79 @@ def test_fallback_intent_distinguishes_hard_soft_and_excluded_constraints():
     assert by_value["soup"].strength == "required"
     assert by_value["spicy"].strength == "preferred"
     assert by_value["pork"].polarity == "exclude"
+
+
+def test_fallback_intent_treats_pub_as_a_strong_venue_constraint():
+    intent = fallback_intent("I want some nice pub food")
+
+    assert [
+        (item.dimension, item.value, item.strength) for item in intent.constraints
+    ] == [("venue", "pub", "strong")]
+
+
+def test_normalize_intent_repairs_pub_food_to_a_venue_constraint():
+    raw = CravingIntent.model_validate(
+        {
+            "summary": "Pub food",
+            "constraints": [
+                {
+                    "id": "pub-food",
+                    "dimension": "meal",
+                    "value": "pub food",
+                    "polarity": "include",
+                    "strength": "strong",
+                }
+            ],
+            "candidate_dishes": [],
+            "search_queries": [
+                {"text": "pub food", "constraint_ids": ["pub-food"]}
+            ],
+        }
+    )
+
+    normalized = normalize_intent(raw, "I want some nice pub food")
+
+    assert normalized.constraints[0].dimension == "venue"
+    assert normalized.constraints[0].value == "pub"
+    assert normalized.search_queries[0].constraint_ids == ["c1"]
+
+
+def test_pub_constraint_rejects_non_pubs_and_accepts_explicit_pub_metadata():
+    intent = fallback_intent("I want some nice pub food")
+
+    assert not candidate_matches_venue_constraints(
+        intent,
+        {"name": "Axia Restaurant", "tags": ["Chinese Restaurant"]},
+    )
+    assert not candidate_matches_venue_constraints(
+        intent,
+        {"name": "WingsUp! Mississauga", "tags": ["Chicken Restaurant"]},
+    )
+    assert candidate_matches_venue_constraints(
+        intent,
+        {"name": "Cuchulainn's Irish Pub", "tags": ["Bar"]},
+    )
+
+
+def test_final_scorer_rejects_non_pub_returned_by_pub_text_search():
+    intent = fallback_intent("I want some nice pub food")
+    place = candidate(
+        "axia",
+        "Axia Restaurant",
+        [
+            evidence(
+                "axia:e1",
+                "pub",
+                kind="provider_query",
+                quality=0.55,
+                declared=["c1"],
+                rank=1,
+            )
+        ],
+    )
+    place["tags"] = ["Chinese Restaurant"]
+
+    assert score_candidate(intent, place, assessment("axia")) is None
 
 
 def test_menu_parser_extracts_structured_menu_items_without_inventing_text():

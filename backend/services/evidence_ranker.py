@@ -18,6 +18,7 @@ from backend.services.recommendation_models import (
     EvidenceLink,
     IntentConstraint,
 )
+from backend.services.venue_constraints import candidate_matches_venue_constraints
 
 logger = logging.getLogger(__name__)
 
@@ -59,7 +60,7 @@ Evidence rules:
 - official_website is weaker visible text from an official site.
 - provider_query means Google Places returned the restaurant for that exact query. It is
   retrieval evidence, not proof that a named dish is currently on the menu.
-- restaurant_tag supports only the explicit cuisine/dish/diet tag it states.
+- restaurant_tag supports only the explicit venue/cuisine/dish/diet metadata it states.
 - A restaurant name, rating, address, cuisine stereotype, or popularity is never dish
   evidence.
 - Different dishes may support different preferences, but only link each evidence item to
@@ -172,6 +173,8 @@ def score_candidate(
     candidate: dict[str, Any],
     assessment: CandidateAssessment,
 ) -> dict[str, Any] | None:
+    if not candidate_matches_venue_constraints(intent, candidate):
+        return None
     evidence_by_id = {
         item["id"]: EvidenceItem.model_validate(item)
         for item in candidate.get("evidence") or []

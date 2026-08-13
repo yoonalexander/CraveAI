@@ -10,6 +10,11 @@ import httpx
 from backend.config import get_settings
 from backend.services.places import search_nearby_places
 from backend.services.recommendation_models import CravingIntent, EvidenceItem
+from backend.services.venue_constraints import (
+    candidate_matches_venue_constraints,
+    matching_venue_constraint_ids,
+    venue_metadata_label,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -100,7 +105,11 @@ async def retrieve_candidate_restaurants(
         merged = await _legacy_provider_fallback(intent, location)
 
     _merge_relevant_session_pool(merged, session_pool, intent)
-    candidates = list(merged.values())
+    candidates = [
+        candidate
+        for candidate in merged.values()
+        if candidate_matches_venue_constraints(intent, candidate)
+    ]
     candidates.sort(
         key=lambda place: (
             _number(place.get("retrieval_score")),
@@ -111,6 +120,7 @@ async def retrieve_candidate_restaurants(
     )
     candidates = candidates[:MAX_RETRIEVAL_CANDIDATES]
     for candidate in candidates:
+        _attach_venue_metadata_evidence(candidate, intent)
         _assign_evidence_ids(candidate)
     return candidates
 
@@ -246,7 +256,7 @@ def _merge_relevant_session_pool(
         matched = [
             item.id
             for item in constraints.values()
-            if item.dimension in {"cuisine", "dish_type", "diet"}
+            if item.dimension in {"cuisine", "dish_type", "diet", "venue"}
             and item.polarity == "include"
             and all(token in text for token in item.value.lower().split())
         ]
@@ -271,6 +281,25 @@ def _assign_evidence_ids(candidate: dict[str, Any]) -> None:
     place_id = candidate.get("place_id") or "place"
     for index, evidence in enumerate(candidate.get("evidence") or [], start=1):
         evidence["id"] = f"{place_id}:e{index}"
+
+
+def _attach_venue_metadata_evidence(
+    candidate: dict[str, Any],
+    intent: CravingIntent,
+) -> None:
+    constraint_ids = matching_venue_constraint_ids(intent, candidate)
+    if not constraint_ids:
+        return
+    candidate.setdefault("evidence", []).append(
+        EvidenceItem(
+            id="pending",
+            kind="restaurant_tag",
+            label=venue_metadata_label(candidate),
+            detail="Explicit venue category from Google Places type or name metadata.",
+            quality=0.75,
+            declared_constraint_ids=constraint_ids,
+        ).model_dump()
+    )
 
 
 def _bounding_box(

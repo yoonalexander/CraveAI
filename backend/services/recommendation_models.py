@@ -16,6 +16,7 @@ ConstraintDimension = Literal[
     "health",
     "price",
     "meal",
+    "venue",
     "other",
 ]
 ConstraintStrength = Literal["required", "strong", "preferred", "weak"]
@@ -83,4 +84,3 @@ class CandidateAssessment(BaseModel):
 
 class AssessmentBatch(BaseModel):
     candidates: list[CandidateAssessment]
-
