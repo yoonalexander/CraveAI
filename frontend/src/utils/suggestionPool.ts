@@ -2,6 +2,23 @@ import { Suggestion } from "../api/places";
 
 export const SUGGESTIONS_PER_ROTATION = 3;
 export const MATERIAL_LOCATION_CHANGE_KM = 1;
+export type SuggestionFilter = "budget" | "open";
+
+export function filterSuggestions(
+  suggestions: Suggestion[],
+  filters: Set<SuggestionFilter>,
+): Suggestion[] {
+  return suggestions.filter((suggestion) => {
+    if (
+      filters.has("budget") &&
+      (typeof suggestion.price_level !== "number" || suggestion.price_level > 1)
+    ) {
+      return false;
+    }
+    if (filters.has("open") && suggestion.open_now !== true) return false;
+    return true;
+  });
+}
 
 export function getVisibleSuggestions(
   suggestions: Suggestion[],

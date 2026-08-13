@@ -1,4 +1,12 @@
+import { useEffect, useState } from "react";
+
+import { addFavorite } from "../api/favorites";
+import { useAuth } from "../context/AuthContext";
+import { useGoogleMaps } from "../context/GoogleMapsContext";
+import { BookmarkIcon, PinIcon } from "./Icons";
+
 type SuggestionCardProps = {
+  placeId: string;
   title: string;
   description: string;
   tags?: string[];
@@ -6,7 +14,17 @@ type SuggestionCardProps = {
   rating?: number;
 };
 
+type PhotoData = {
+  uri: string;
+  sourceUri?: string;
+  attribution?: {
+    name: string;
+    uri?: string;
+  };
+};
+
 export function SuggestionCard({
+  placeId,
   title,
   description,
   tags = [],
@@ -14,8 +32,55 @@ export function SuggestionCard({
   rating,
 }: SuggestionCardProps): JSX.Element {
   const { user } = useAuth();
+  const { isLoaded } = useGoogleMaps();
   const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [photo, setPhoto] = useState<PhotoData | null>(null);
+  const [photoUnavailable, setPhotoUnavailable] = useState(false);
+
+  useEffect(() => {
+    if (!isLoaded || !placeId || placeId.startsWith("placeholder-")) {
+      setPhotoUnavailable(true);
+      return;
+    }
+    let active = true;
+    setPhoto(null);
+    setPhotoUnavailable(false);
+
+    const loadPhoto = async () => {
+      try {
+        const { Place } = (await google.maps.importLibrary(
+          "places",
+        )) as google.maps.PlacesLibrary;
+        const place = new Place({ id: placeId });
+        await place.fetchFields({ fields: ["photos"] });
+        const firstPhoto = place.photos?.[0];
+        if (!firstPhoto) {
+          if (active) setPhotoUnavailable(true);
+          return;
+        }
+        const firstAttribution = firstPhoto.authorAttributions?.[0];
+        if (active) {
+          setPhoto({
+            uri: firstPhoto.getURI({ maxHeight: 280, maxWidth: 320 }),
+            sourceUri: firstPhoto.googleMapsURI || undefined,
+            attribution: firstAttribution
+              ? {
+                  name: firstAttribution.displayName,
+                  uri: firstAttribution.uri || undefined,
+                }
+              : undefined,
+          });
+        }
+      } catch {
+        if (active) setPhotoUnavailable(true);
+      }
+    };
+    void loadPhoto();
+    return () => {
+      active = false;
+    };
+  }, [isLoaded, placeId]);
 
   async function save(): Promise<void> {
     try {
@@ -28,50 +93,86 @@ export function SuggestionCard({
   }
 
   return (
-    <article className="flex flex-col gap-3 rounded-3xl border border-border bg-secondary/40 p-5 text-sm text-foreground shadow-md backdrop-blur">
-      <div className="flex items-center justify-between">
-        <h3 className="text-base font-semibold text-foreground">{title}</h3>
-        {rating && (
-          <span className="rounded-full bg-highlight/20 px-2 py-1 text-xs font-medium text-highlight-foreground">
-            ★ {rating.toFixed(1)}
-          </span>
-        )}
-      </div>
-      <p className="text-muted-foreground">{description}</p>
-      <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
-        {tags.map((tag) => (
-          <span
-            key={tag}
-            className="rounded-full border border-border px-3 py-1"
+    <article className="suggestion-card">
+      <div className="suggestion-photo">
+        {photo ? (
+          <img
+            alt={`Google Maps photo of ${title}`}
+            loading="lazy"
+            onError={() => {
+              setPhoto(null);
+              setPhotoUnavailable(true);
+            }}
+            src={photo.uri}
+          />
+        ) : (
+          <div
+            aria-label={photoUnavailable ? `No photo available for ${title}` : `Loading photo for ${title}`}
+            className="suggestion-photo-fallback"
+            role="img"
           >
-            {tag}
-          </span>
-        ))}
-        {distance && (
-          <span className="rounded-full border border-border px-3 py-1">
-            {distance}
-          </span>
+            <img alt="" src="/craveai-pin.svg" />
+          </div>
         )}
+        {photo?.attribution ? (
+          <a
+            className="photo-attribution"
+            href={photo.attribution.uri || photo.sourceUri}
+            rel="noreferrer"
+            target="_blank"
+          >
+            Photo: {photo.attribution.name}
+          </a>
+        ) : photo?.sourceUri ? (
+          <a
+            className="photo-attribution"
+            href={photo.sourceUri}
+            rel="noreferrer"
+            target="_blank"
+          >
+            Google Maps photo
+          </a>
+        ) : null}
       </div>
-      {user ? (
-        <button
-          type="button"
-          disabled={saved}
-          className="self-start rounded-full border border-border px-3 py-1 text-xs disabled:opacity-60"
-          onClick={() => void save()}
-        >
-          {saved ? "Saved" : "Save favorite"}
-        </button>
-      ) : (
-        <a className="self-start text-xs text-primary underline" href="/login">
-          Sign in to save
-        </a>
-      )}
-      {saveError && <p className="text-xs text-red-600">{saveError}</p>}
+
+      <div className="suggestion-card-body">
+        <div className="suggestion-card-heading">
+          <h3>{title}</h3>
+          {typeof rating === "number" ? (
+            <span aria-label={`${rating.toFixed(1)} out of 5 stars`}>
+              ★ {rating.toFixed(1)}
+            </span>
+          ) : null}
+        </div>
+        <p className="suggestion-address">{description}</p>
+        <div className="suggestion-card-footer">
+          <div className="suggestion-meta">
+            {tags.slice(0, 1).map((tag) => <span key={tag}>{tag}</span>)}
+            {distance ? <span><PinIcon /> {distance}</span> : null}
+          </div>
+
+          <div className="suggestion-save-row">
+            {user ? (
+              <button disabled={saved} onClick={() => void save()} type="button">
+                {saved ? "Saved" : "Save"}
+              </button>
+            ) : (
+              <a href="/login">Sign in to save</a>
+            )}
+            <button
+              aria-label={saved ? `${title} saved` : `Save ${title}`}
+              className="bookmark-button"
+              disabled={!user || saved}
+              onClick={() => void save()}
+              title={user ? "Save restaurant" : "Sign in to save"}
+              type="button"
+            >
+              <BookmarkIcon />
+            </button>
+          </div>
+        </div>
+        {saveError ? <p className="suggestion-save-error" role="alert">{saveError}</p> : null}
+      </div>
     </article>
   );
 }
-import { useState } from "react";
-
-import { addFavorite } from "../api/favorites";
-import { useAuth } from "../context/AuthContext";

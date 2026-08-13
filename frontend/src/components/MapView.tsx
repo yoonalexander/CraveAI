@@ -1,151 +1,243 @@
-import { useMemo } from "react";
-import { GoogleMap, Marker, useJsApiLoader } from "@react-google-maps/api";
+import { useMemo, useState } from "react";
+import { GoogleMap, Marker } from "@react-google-maps/api";
 
-import { ChatRecommendation } from "../api/chat";
+import type { ChatRecommendation } from "../api/chat";
+import type { Suggestion } from "../api/places";
+import { useGoogleMaps } from "../context/GoogleMapsContext";
+import type { SuggestionFilter } from "../utils/suggestionPool";
+import {
+  ClockIcon,
+  DollarIcon,
+  PinIcon,
+  SlidersIcon,
+} from "./Icons";
+
+export type PlaceFilter = SuggestionFilter;
 
 type MapViewProps = {
   userLocation: { lat: number; lng: number } | null;
+  locationLabel: string;
+  suggestions: Suggestion[];
   recommendations: ChatRecommendation[];
+  activeFilters: Set<PlaceFilter>;
   hasLiveLocation: boolean;
   isLocating: boolean;
   statusMessage: string;
+  radiusKm: number;
+  onChangeLocation: () => void;
+  onToggleFilter: (filter: PlaceFilter) => void;
+  onClearFilters: () => void;
 };
 
-const emptyStateClass =
-  "flex h-full items-center justify-center px-6 text-center text-sm text-slate-400";
-
-const locationLoadingContent = (
-  <div className="flex h-full flex-col items-center justify-center gap-4 px-6 text-center">
-    <div className="relative h-16 w-16">
-      <div className="absolute inset-0 rounded-full border border-primary/20" />
-      <div className="absolute inset-2 rounded-full border border-primary/30" />
-      <div className="absolute inset-0 animate-ping rounded-full border border-primary/30" />
-      <div className="absolute left-1/2 top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary shadow-lg shadow-primary/40" />
-    </div>
-    <div>
-      <p className="text-sm font-semibold text-foreground">
-        Finding your location
-      </p>
-      <p className="mt-1 max-w-xs text-xs text-muted-foreground">
-        The map will appear as soon as your browser shares a position.
-      </p>
-    </div>
-  </div>
-);
+const mapOptions: google.maps.MapOptions = {
+  clickableIcons: false,
+  disableDefaultUI: true,
+  fullscreenControl: false,
+  gestureHandling: "cooperative",
+  styles: [
+    { featureType: "poi.business", stylers: [{ visibility: "off" }] },
+    { featureType: "transit", stylers: [{ visibility: "off" }] },
+  ],
+};
 
 export function MapView({
   userLocation,
+  locationLabel,
+  suggestions,
   recommendations,
+  activeFilters,
   hasLiveLocation,
   isLocating,
   statusMessage,
+  radiusKm,
+  onChangeLocation,
+  onToggleFilter,
+  onClearFilters,
 }: MapViewProps): JSX.Element {
-  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY?.toString()?.trim();
-  const markers = useMemo(
-    () =>
-      recommendations.filter(
-        (place) =>
-          typeof place.lat === "number" && typeof place.lng === "number",
-      ),
-    [recommendations],
-  );
+  const { isLoaded, loadError, hasApiKey } = useGoogleMaps();
+  const [showFilterNotice, setShowFilterNotice] = useState(false);
 
-  const subtitle = isLocating
-    ? "Waiting for your browser location."
-    : hasLiveLocation
-      ? "Locked on to your current location."
-      : "Using Hamilton, ON fallback.";
+  const recommendationKeys = useMemo(() => {
+    const keys = new Set<string>();
+    recommendations.forEach((place) => {
+      if (place.place_id) keys.add(`id:${place.place_id}`);
+      keys.add(`name:${place.name.toLowerCase()}`);
+    });
+    return keys;
+  }, [recommendations]);
 
-  if (!apiKey) {
-    return (
-      <div className="rounded-3xl border border-border bg-secondary/40">
-        <div className="border-b border-border px-5 py-4">
-          <h3 className="text-base font-semibold text-foreground">Nearby Map</h3>
-          <p className="text-sm text-muted-foreground">
-            Add <code className="text-primary">VITE_GOOGLE_MAPS_API_KEY</code>{" "}
-            to enable the map.
-          </p>
-        </div>
-        <div className="h-[320px] overflow-hidden rounded-b-3xl">
-          {isLocating ? (
-            locationLoadingContent
-          ) : (
-            <div className={emptyStateClass}>
-              Map rendering is disabled until a Google Maps key is provided.
-            </div>
-          )}
-        </div>
-      </div>
+  const recommendationNumber = (suggestion: Suggestion): number | null => {
+    const index = recommendations.findIndex(
+      (place) =>
+        (place.place_id && place.place_id === suggestion.place_id) ||
+        place.name.toLowerCase() === suggestion.name.toLowerCase(),
     );
-  }
-
-  const { isLoaded, loadError } = useJsApiLoader({
-    id: "craveai-map",
-    googleMapsApiKey: apiKey,
-  });
-
-  const mapCenter = userLocation;
-  const mapZoom = hasLiveLocation ? 13 : 12;
+    return index >= 0 ? index + 1 : null;
+  };
 
   let mapContent: JSX.Element;
-  if (isLocating || !mapCenter) {
-    mapContent = locationLoadingContent;
-  } else if (loadError) {
+  if (isLocating || !userLocation) {
+    mapContent = <MapLoading />;
+  } else if (!hasApiKey) {
     mapContent = (
-      <div className={emptyStateClass}>
-        Failed to load Google Maps ({loadError.message}). Check your quota and
-        try again.
-      </div>
+      <MapEmpty>
+        Add <code>VITE_GOOGLE_MAPS_API_KEY</code> to display the live map.
+      </MapEmpty>
     );
+  } else if (loadError) {
+    mapContent = <MapEmpty>Google Maps could not load. Your search and chat still work.</MapEmpty>;
   } else if (!isLoaded) {
-    mapContent = <div className={emptyStateClass}>Loading live map...</div>;
+    mapContent = <MapLoading />;
   } else {
     mapContent = (
       <GoogleMap
+        center={userLocation}
         mapContainerStyle={{ width: "100%", height: "100%" }}
-        center={mapCenter}
-        zoom={mapZoom}
-        options={{
-          disableDefaultUI: true,
-        }}
+        options={mapOptions}
+        zoom={hasLiveLocation ? 13 : 12}
       >
         <Marker
-          position={mapCenter}
-          title={hasLiveLocation ? "You are here" : "Fallback location"}
-          label="ME"
+          label={{ text: "ME", color: "#ffffff", fontSize: "10px", fontWeight: "700" }}
+          position={userLocation}
+          title={hasLiveLocation ? "You are here" : locationLabel}
         />
-        {markers.map((place, index) =>
-          place.lat && place.lng ? (
+        {suggestions.map((place) => {
+          if (typeof place.lat !== "number" || typeof place.lng !== "number") return null;
+          const highlighted =
+            recommendationKeys.has(`id:${place.place_id}`) ||
+            recommendationKeys.has(`name:${place.name.toLowerCase()}`);
+          const number = recommendationNumber(place);
+          return (
             <Marker
-              key={`${place.name}-${place.lat}-${place.lng}-${index}`}
+              icon={
+                highlighted
+                  ? undefined
+                  : {
+                      path: google.maps.SymbolPath.CIRCLE,
+                      fillColor: "#5f8f55",
+                      fillOpacity: 0.95,
+                      scale: 6,
+                      strokeColor: "#ffffff",
+                      strokeWeight: 2,
+                    }
+              }
+              key={place.place_id}
+              label={highlighted && number ? { text: String(number), color: "#ffffff", fontWeight: "700" } : undefined}
               position={{ lat: place.lat, lng: place.lng }}
-              label={`${index + 1}`}
               title={place.name}
             />
-          ) : null,
-        )}
+          );
+        })}
+        {recommendations
+          .filter(
+            (place) =>
+              typeof place.lat === "number" &&
+              typeof place.lng === "number" &&
+              !suggestions.some(
+                (suggestion) =>
+                  (place.place_id && suggestion.place_id === place.place_id) ||
+                  suggestion.name.toLowerCase() === place.name.toLowerCase(),
+              ),
+          )
+          .map((place, index) => (
+            <Marker
+              key={`chat-${place.place_id || place.name}-${index}`}
+              label={{ text: String(index + 1), color: "#ffffff", fontWeight: "700" }}
+              position={{ lat: place.lat as number, lng: place.lng as number }}
+              title={place.name}
+            />
+          ))}
       </GoogleMap>
     );
   }
 
   return (
-    <div className="rounded-3xl border border-border bg-secondary/40">
-      <div className="border-b border-border px-5 py-4">
-        <p className="text-sm uppercase tracking-[0.25em] text-primary">
-          Live Map
-        </p>
-        <h3 className="text-base font-semibold text-foreground">
-          Restaurants Near You
-        </h3>
-        <p className="text-xs text-muted-foreground">
-          {subtitle}{" "}
-          {markers.length
-            ? `Plotting ${markers.length} matches.`
-            : "Waiting for a conversation to begin."}
-        </p>
-        <p className="mt-1 text-xs text-muted-foreground">{statusMessage}</p>
-      </div>
-      <div className="h-[320px] overflow-hidden rounded-b-3xl">{mapContent}</div>
+    <section className="map-card" aria-labelledby="map-title">
+      <header className="map-card-header">
+        <p className="eyebrow">Live map</p>
+        <h2 id="map-title">Restaurants Near You</h2>
+        <div className="map-location-line">
+          <PinIcon />
+          <div>
+            <strong>{locationLabel}</strong>
+            <span>{statusMessage}</span>
+          </div>
+        </div>
+        <div className="map-filter-row" aria-label="Restaurant filters">
+          <button
+            aria-pressed={activeFilters.size === 0}
+            className={activeFilters.size === 0 ? "is-active" : ""}
+            onClick={onClearFilters}
+            type="button"
+          >
+            <SlidersIcon /> All
+          </button>
+          <button
+            aria-describedby="budget-filter-note"
+            aria-pressed={activeFilters.has("budget")}
+            className={activeFilters.has("budget") ? "is-active" : ""}
+            onClick={() => onToggleFilter("budget")}
+            title="Estimated from Google's lowest price levels"
+            type="button"
+          >
+            <DollarIcon /> Under $20
+          </button>
+          <button
+            aria-pressed={activeFilters.has("open")}
+            className={activeFilters.has("open") ? "is-active" : ""}
+            onClick={() => onToggleFilter("open")}
+            type="button"
+          >
+            <ClockIcon /> Open Now
+          </button>
+          <div className="advanced-filter-wrap">
+            <button
+              aria-expanded={showFilterNotice}
+              onClick={() => setShowFilterNotice((visible) => !visible)}
+              type="button"
+            >
+              <SlidersIcon /> Filters
+            </button>
+            {showFilterNotice ? (
+              <div className="filter-coming-soon" role="status">
+                More filters are coming soon.
+              </div>
+            ) : null}
+          </div>
+        </div>
+        <span className="sr-only" id="budget-filter-note">
+          Under $20 is an estimate based on Google price levels zero and one.
+        </span>
+      </header>
+
+      <div className="map-canvas">{mapContent}</div>
+
+      <footer className="map-card-footer">
+        <div className="map-footer-pin"><PinIcon /></div>
+        <div>
+          <strong>{isLocating ? "Finding nearby spots" : `You're near ${locationLabel}`}</strong>
+          <span>
+            {suggestions.length
+              ? `${suggestions.length} spot${suggestions.length === 1 ? "" : "s"} within ${radiusKm} km`
+              : "No spots match the current filters"}
+          </span>
+        </div>
+        <button onClick={onChangeLocation} type="button">Change location</button>
+      </footer>
+    </section>
+  );
+}
+
+function MapLoading(): JSX.Element {
+  return (
+    <div className="map-state">
+      <div className="map-location-pulse"><span /></div>
+      <strong>Finding your location</strong>
+      <p>The map will appear when your location is ready.</p>
     </div>
   );
+}
+
+function MapEmpty({ children }: { children: React.ReactNode }): JSX.Element {
+  return <div className="map-state"><PinIcon /><p>{children}</p></div>;
 }

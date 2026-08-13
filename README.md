@@ -22,6 +22,10 @@ Chat prompts and responses are not stored.
 ## Local development
 
 1. Copy `.env.example` to `.env` and fill in the required development values.
+   Use separate Google keys: `GOOGLE_API_KEY` is the backend Places key, while
+   `VITE_GOOGLE_MAPS_API_KEY` is a public browser key restricted by website
+   referrer with Maps JavaScript, Places, and Geocoding enabled. Never reuse an
+   unrestricted server key in the frontend.
 2. Create the database schema:
 
    ```powershell

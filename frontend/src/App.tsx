@@ -1,373 +1,496 @@
-import { useMemo, useState, useEffect, useRef } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
-import { ChatPanel } from "./components/ChatPanel";
-import { SuggestionCard } from "./components/SuggestionCard";
-import { MapView } from "./components/MapView";
-import { ChatRecommendation } from "./api/chat";
-import { ThemeProvider } from "./context/ThemeContext";
-import { ThemeToggle } from "./components/ThemeToggle";
-import { AccountMenu } from "./components/AccountMenu";
+import type { ChatRecommendation } from "./api/chat";
 import {
   fetchSuggestions,
   PlacesQuotaError,
   Suggestion,
 } from "./api/places";
+import { fetchCurrentWeather, CurrentWeather } from "./api/weather";
+import { AccountMenu } from "./components/AccountMenu";
+import { ChatPanel } from "./components/ChatPanel";
+import { ChevronDownIcon, MenuIcon } from "./components/Icons";
+import {
+  LocationDialog,
+  SelectedLocation,
+} from "./components/LocationDialog";
+import { MapView, PlaceFilter } from "./components/MapView";
+import { Sidebar } from "./components/Sidebar";
+import { SuggestionsPanel } from "./components/SuggestionsPanel";
+import { GoogleMapsProvider, useGoogleMaps } from "./context/GoogleMapsContext";
 import {
   calculateDistanceKm,
+  filterSuggestions,
   getNextSuggestionIndex,
   getVisibleSuggestions,
   MATERIAL_LOCATION_CHANGE_KM,
 } from "./utils/suggestionPool";
 
 const SUGGESTION_ROTATION_MS = 30000;
-// Render's free web services can take about a minute to wake after being idle.
-// Keep this above that cold-start window so the browser does not abort a
-// healthy suggestions request just before the backend becomes available.
 const SUGGESTION_TIMEOUT_MS = 90000;
+const SEARCH_RADIUS_METERS = 5000;
+const SIDEBAR_STORAGE_KEY = "craveai-sidebar-collapsed";
 
 const HAMILTON_FALLBACK = {
   lat: 43.2557,
   lng: -79.8711,
-  city: "Hamilton",
-  radius: 5000,
+  city: "Hamilton, ON",
+  radius: SEARCH_RADIUS_METERS,
 };
 
-type Coordinates = {
-  lat: number;
-  lng: number;
+type Coordinates = { lat: number; lng: number };
+type LocationSource = "device" | "manual" | "fallback";
+
+const placeholderPages: Record<string, { eyebrow: string; title: string; copy: string }> = {
+  "/discovery": {
+    eyebrow: "Discovery",
+    title: "A better way to browse is coming.",
+    copy: "Soon you’ll be able to explore neighbourhood guides, cuisines, and curated collections here.",
+  },
+  "/likes": {
+    eyebrow: "Likes",
+    title: "Your favourite spots will live here.",
+    copy: "We’re designing a simple place to revisit and organize restaurants you’ve saved.",
+  },
+  "/history": {
+    eyebrow: "History",
+    title: "Conversation history is coming soon.",
+    copy: "Chats are not stored today. When history arrives, it will be introduced with clear privacy controls.",
+  },
+  "/pricing": {
+    eyebrow: "Plans and pricing",
+    title: "More ways to use CraveAI are on the menu.",
+    copy: "Plan details and higher recommendation limits will appear here when they’re ready.",
+  },
+  "/settings": {
+    eyebrow: "Settings",
+    title: "Personal controls are being prepared.",
+    copy: "Preference, accessibility, and notification settings will be available in a future update.",
+  },
+  "/help": {
+    eyebrow: "Help",
+    title: "A CraveAI help centre is coming.",
+    copy: "For now, return to New chat and describe the food, mood, budget, or area you have in mind.",
+  },
 };
 
-function App(): JSX.Element {
-  const [userLocation, setUserLocation] = useState<Coordinates | null>(null);
-  const [locationStatus, setLocationStatus] = useState(
-    "Calibrating your location\u2026",
+export default function App(): JSX.Element {
+  return (
+    <GoogleMapsProvider>
+      <CraveApplication />
+    </GoogleMapsProvider>
   );
+}
+
+function CraveApplication(): JSX.Element {
+  const { isLoaded: mapsLoaded } = useGoogleMaps();
+  const [currentPath, setCurrentPath] = useState(() => normalizePath(window.location.pathname));
+  const [chatSession, setChatSession] = useState(0);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(readSidebarPreference);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [locationDialogOpen, setLocationDialogOpen] = useState(false);
+  const [mapMobileOpen, setMapMobileOpen] = useState(false);
+  const [spotsMobileOpen, setSpotsMobileOpen] = useState(true);
+
+  const [userLocation, setUserLocation] = useState<Coordinates | null>(null);
+  const [locationSource, setLocationSource] = useState<LocationSource>("fallback");
+  const [locationLabel, setLocationLabel] = useState("Finding your location…");
+  const [locationStatus, setLocationStatus] = useState("Calibrating your location…");
   const [locationReady, setLocationReady] = useState(false);
-  const [mapRecommendations, setMapRecommendations] = useState<
-    ChatRecommendation[]
-  >([]);
+  const [locationRefreshVersion, setLocationRefreshVersion] = useState(0);
+
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const [suggestionError, setSuggestionError] = useState<string | null>(null);
-  const [suggestionQuotaResetAt, setSuggestionQuotaResetAt] = useState<
-    string | null
-  >(null);
+  const [suggestionQuotaResetAt, setSuggestionQuotaResetAt] = useState<string | null>(null);
   const [suggestionIndex, setSuggestionIndex] = useState(0);
-  const [suggestionRetryVersion, setSuggestionRetryVersion] = useState(0);
+  const [rotationVersion, setRotationVersion] = useState(0);
+  const [activeFilters, setActiveFilters] = useState<Set<PlaceFilter>>(new Set());
+  const [mapRecommendations, setMapRecommendations] = useState<ChatRecommendation[]>([]);
+  const [weather, setWeather] = useState<CurrentWeather | null>(null);
+  const [weatherLoading, setWeatherLoading] = useState(false);
+
   const lastSuggestionLocation = useRef<Coordinates | null>(null);
-  const lastRetryVersion = useRef(-1);
+  const lastRefreshVersion = useRef(-1);
+
+  useEffect(() => {
+    const handlePopState = () => setCurrentPath(normalizePath(window.location.pathname));
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
 
   useEffect(() => {
     if (!("geolocation" in navigator)) {
-      setLocationStatus(
-        "Geolocation not supported; using Hamilton, ON as a fallback.",
-      );
-      setLocationReady(true);
+      useFallbackLocation("Geolocation is not supported; using Hamilton, ON.");
       return;
     }
-
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        setUserLocation({
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-        });
+        setUserLocation({ lat: position.coords.latitude, lng: position.coords.longitude });
+        setLocationSource("device");
+        setLocationLabel("Current location");
         setLocationStatus("Live location locked. Refining searches nearby.");
         setLocationReady(true);
       },
       (error) => {
-        if (error.code === error.PERMISSION_DENIED) {
-          setLocationStatus(
-            "Location permission denied; relying on Hamilton, ON for now.",
-          );
-        } else {
-          setLocationStatus(
-            "Unable to read device location; using Hamilton, ON fallback.",
-          );
-        }
-        setLocationReady(true);
+        useFallbackLocation(
+          error.code === error.PERMISSION_DENIED
+            ? "Location permission denied; using Hamilton, ON."
+            : "Unable to read your location; using Hamilton, ON.",
+        );
       },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 0,
-      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
     );
   }, []);
 
-  useEffect(() => {
-    if (!locationReady) return;
+  const useFallbackLocation = (status: string) => {
+    setUserLocation({ lat: HAMILTON_FALLBACK.lat, lng: HAMILTON_FALLBACK.lng });
+    setLocationSource("fallback");
+    setLocationLabel(HAMILTON_FALLBACK.city);
+    setLocationStatus(status);
+    setLocationReady(true);
+  };
 
-    const loc = userLocation || HAMILTON_FALLBACK;
-    const isManualRetry = suggestionRetryVersion !== lastRetryVersion.current;
-    const previousLocation = lastSuggestionLocation.current;
+  useEffect(() => {
+    if (!mapsLoaded || !userLocation) return;
+    let active = true;
+    const geocoder = new google.maps.Geocoder();
+    geocoder.geocode({ location: userLocation }, (results, status) => {
+      if (!active || status !== "OK" || !results?.length) return;
+      const components = results[0].address_components;
+      const city = findAddressComponent(components, "locality") ||
+        findAddressComponent(components, "postal_town") ||
+        findAddressComponent(components, "administrative_area_level_2");
+      const province = findAddressComponent(components, "administrative_area_level_1", true);
+      if (city) setLocationLabel(province && city !== province ? `${city}, ${province}` : city);
+    });
+    return () => {
+      active = false;
+    };
+  }, [mapsLoaded, userLocation]);
+
+  useEffect(() => {
+    if (!locationReady || !userLocation) return;
+    const isManualRefresh = locationRefreshVersion !== lastRefreshVersion.current;
+    const previous = lastSuggestionLocation.current;
     if (
-      !isManualRetry &&
-      previousLocation &&
-      calculateDistanceKm(
-        previousLocation.lat,
-        previousLocation.lng,
-        loc.lat,
-        loc.lng,
-      ) < MATERIAL_LOCATION_CHANGE_KM
+      !isManualRefresh &&
+      previous &&
+      calculateDistanceKm(previous.lat, previous.lng, userLocation.lat, userLocation.lng) <
+        MATERIAL_LOCATION_CHANGE_KM
     ) {
       return;
     }
 
     const controller = new AbortController();
+    let active = true;
+    let timedOut = false;
     const fetchNearby = async () => {
       setIsLoadingSuggestions(true);
       setSuggestionError(null);
       setSuggestionQuotaResetAt(null);
       setSuggestions([]);
       setSuggestionIndex(0);
-
-      const timeoutId = window.setTimeout(() => {
+      const timeout = window.setTimeout(() => {
+        timedOut = true;
         controller.abort();
-        setSuggestionError("We couldn't load suggestions in time.");
-        setIsLoadingSuggestions(false);
       }, SUGGESTION_TIMEOUT_MS);
-
       try {
         const data = await fetchSuggestions(
-          loc.lat,
-          loc.lng,
-          HAMILTON_FALLBACK.radius,
+          userLocation.lat,
+          userLocation.lng,
+          SEARCH_RADIUS_METERS,
           controller.signal,
         );
         setSuggestions(data);
-        setSuggestionIndex(0);
-        lastSuggestionLocation.current = { lat: loc.lat, lng: loc.lng };
-        lastRetryVersion.current = suggestionRetryVersion;
-        if (data.length === 0) {
-          setSuggestionError("No nearby restaurants were found.");
-        }
-      } catch (error) {
-        if (controller.signal.aborted) return;
-
-        console.error("Failed to fetch suggestions:", error);
-        if (error instanceof PlacesQuotaError) {
-          setSuggestionQuotaResetAt(error.resetAt);
-          setSuggestionError(formatPlacesQuotaError(error.resetAt));
+        lastSuggestionLocation.current = userLocation;
+        lastRefreshVersion.current = locationRefreshVersion;
+        if (!data.length) setSuggestionError("No nearby restaurants were found.");
+      } catch (reason) {
+        if (!active) return;
+        if (controller.signal.aborted && timedOut) {
+          setSuggestionError("We couldn't load suggestions in time.");
+        } else if (reason instanceof PlacesQuotaError) {
+          setSuggestionQuotaResetAt(reason.resetAt);
+          setSuggestionError(formatPlacesQuotaError(reason.resetAt));
         } else {
-          setSuggestionError("Failed to load suggestions.");
+          setSuggestionError("We couldn't load nearby spots. Please try again.");
         }
       } finally {
-        clearTimeout(timeoutId);
-        if (!controller.signal.aborted) {
-          setIsLoadingSuggestions(false);
-        }
+        window.clearTimeout(timeout);
+        if (active) setIsLoadingSuggestions(false);
       }
     };
-
-    fetchNearby();
-
+    void fetchNearby();
     return () => {
+      active = false;
       controller.abort();
     };
-  }, [userLocation, locationReady, suggestionRetryVersion]);
+  }, [locationReady, locationRefreshVersion, userLocation]);
 
   useEffect(() => {
-    if (suggestions.length === 0) return;
-    const interval = setInterval(() => {
-      setSuggestionIndex((prev) =>
-        getNextSuggestionIndex(prev, suggestions.length),
-      );
-    }, SUGGESTION_ROTATION_MS);
-    return () => clearInterval(interval);
-  }, [suggestions]);
+    if (!userLocation) return;
+    const controller = new AbortController();
+    setWeatherLoading(true);
+    setWeather(null);
+    fetchCurrentWeather(userLocation.lat, userLocation.lng, controller.signal)
+      .then(setWeather)
+      .catch((reason) => {
+        if (!(reason instanceof DOMException && reason.name === "AbortError")) setWeather(null);
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setWeatherLoading(false);
+      });
+    return () => controller.abort();
+  }, [userLocation]);
 
-  const visibleSuggestions = useMemo(() => {
-    return getVisibleSuggestions(suggestions, suggestionIndex);
-  }, [suggestions, suggestionIndex]);
+  const filteredSuggestions = useMemo(() => {
+    return filterSuggestions(suggestions, activeFilters);
+  }, [activeFilters, suggestions]);
 
-  const chatLocation = useMemo(() => {
-    if (userLocation) {
-      return {
-        ...userLocation,
-        radius: 5000,
-      };
+  useEffect(() => {
+    setSuggestionIndex(0);
+    setRotationVersion((value) => value + 1);
+  }, [activeFilters]);
+
+  const advanceSuggestions = useCallback(() => {
+    setSuggestionIndex((current) => getNextSuggestionIndex(current, filteredSuggestions.length));
+  }, [filteredSuggestions.length]);
+
+  useEffect(() => {
+    if (filteredSuggestions.length <= 3) return;
+    const interval = window.setInterval(advanceSuggestions, SUGGESTION_ROTATION_MS);
+    return () => window.clearInterval(interval);
+  }, [advanceSuggestions, filteredSuggestions.length, rotationVersion]);
+
+  const visibleSuggestions = useMemo(
+    () => getVisibleSuggestions(filteredSuggestions, suggestionIndex),
+    [filteredSuggestions, suggestionIndex],
+  );
+
+  const navigate = useCallback((path: string, resetChat = false) => {
+    const normalized = normalizePath(path);
+    if (normalized !== normalizePath(window.location.pathname)) {
+      window.history.pushState({}, "", normalized);
     }
-    return locationReady ? HAMILTON_FALLBACK : null;
-  }, [userLocation, locationReady]);
+    setCurrentPath(normalized);
+    setMobileMenuOpen(false);
+    if (resetChat) {
+      setChatSession((session) => session + 1);
+      setMapRecommendations([]);
+    }
+  }, []);
 
-  const mapLocation = userLocation
-    ? {
-        lat: userLocation.lat,
-        lng: userLocation.lng,
-      }
-    : locationReady
-      ? {
-          lat: HAMILTON_FALLBACK.lat,
-          lng: HAMILTON_FALLBACK.lng,
-        }
-      : null;
+  const selectLocation = (selection: SelectedLocation) => {
+    setUserLocation({ lat: selection.lat, lng: selection.lng });
+    setLocationSource(selection.source);
+    setLocationLabel(selection.label);
+    setLocationStatus(
+      selection.source === "device"
+        ? "Live location locked. Refining searches nearby."
+        : "Using your selected location for nearby searches.",
+    );
+    setLocationReady(true);
+    setLocationRefreshVersion((version) => version + 1);
+    setLocationDialogOpen(false);
+    setMapRecommendations([]);
+  };
+
+  const toggleSidebar = () => {
+    setSidebarCollapsed((collapsed) => {
+      const next = !collapsed;
+      window.localStorage.setItem(SIDEBAR_STORAGE_KEY, String(next));
+      return next;
+    });
+  };
+
+  const toggleFilter = (filter: PlaceFilter) => {
+    setActiveFilters((current) => {
+      const next = new Set(current);
+      if (next.has(filter)) next.delete(filter);
+      else next.add(filter);
+      return next;
+    });
+  };
+
+  const homeVisible = currentPath === "/";
+  const placeholder = placeholderPages[currentPath];
+  const chatLocation = userLocation
+    ? { ...userLocation, city: locationLabel, radius: SEARCH_RADIUS_METERS }
+    : null;
 
   return (
-    <ThemeProvider defaultTheme="light" storageKey="craveai-theme">
-      <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
-        <header className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-6 pb-10 pt-14 md:flex-row md:items-center md:justify-between">
-          <div>
-            <div className="flex items-center gap-3">
-              <img
-                src="/craveai-pin.svg"
-                alt=""
-                className="h-10 w-10 object-contain"
-              />
-              <p className="text-sm font-bold uppercase tracking-[0.32em] text-primary">
-                craveai
-              </p>
-            </div>
-            <h1 className="mt-2 text-4xl font-semibold md:text-5xl text-foreground">
-              Find your next bite.
-            </h1>
-            <p className="mt-4 max-w-xl text-muted-foreground">
-              A conversational guide that pairs your cravings, mood, and dietary
-              needs with the best local spots. The chat experience is ready for
-              wiring to the backend RAG pipeline next.
-            </p>
-          </div>
-          <div className="flex items-center gap-4">
-            <ThemeToggle />
-            <AccountMenu />
-          </div>
+    <div className={`crave-app${sidebarCollapsed ? " sidebar-collapsed" : ""}`}>
+      <Sidebar
+        collapsed={sidebarCollapsed}
+        currentPath={currentPath}
+        mobileOpen={mobileMenuOpen}
+        onCloseMobile={() => setMobileMenuOpen(false)}
+        onNavigate={navigate}
+        onToggle={toggleSidebar}
+        weather={weather}
+        weatherLoading={weatherLoading}
+      />
+
+      <div className="crave-main">
+        <header className="crave-topbar">
+          <button
+            aria-label="Open navigation"
+            className="mobile-menu-button"
+            onClick={() => setMobileMenuOpen(true)}
+            type="button"
+          >
+            <MenuIcon />
+          </button>
+          <a className="crave-wordmark" href="/" onClick={(event) => {
+            event.preventDefault();
+            navigate("/");
+          }}>
+            CRAVEAI
+          </a>
+          <AccountMenu />
         </header>
 
-        <main className="mx-auto grid w-full max-w-6xl gap-6 px-6 pb-16 md:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
-          <section className="h-[600px] md:h-[720px]">
-            <ChatPanel
-              location={chatLocation}
-              locationStatus={locationStatus}
-              onRecommendations={setMapRecommendations}
-              candidatePlaces={suggestions}
+        <main className="crave-content">
+          <div className={`crave-workspace${homeVisible ? "" : " is-route-hidden"}`}>
+            <section className="workspace-chat">
+              <ChatPanel
+                candidatePlaces={filteredSuggestions}
+                key={chatSession}
+                location={chatLocation}
+                onRecommendations={setMapRecommendations}
+              />
+            </section>
+
+            <section className={`workspace-map mobile-collapsible${mapMobileOpen ? " is-open" : ""}`}>
+              <button
+                aria-expanded={mapMobileOpen}
+                className="mobile-section-toggle"
+                onClick={() => setMapMobileOpen((open) => !open)}
+                type="button"
+              >
+                Live map <ChevronDownIcon />
+              </button>
+              <div className="mobile-section-content">
+                <MapView
+                  activeFilters={activeFilters}
+                  hasLiveLocation={locationSource === "device"}
+                  isLocating={!locationReady}
+                  locationLabel={locationLabel}
+                  onChangeLocation={() => setLocationDialogOpen(true)}
+                  onClearFilters={() => setActiveFilters(new Set())}
+                  onToggleFilter={toggleFilter}
+                  radiusKm={SEARCH_RADIUS_METERS / 1000}
+                  recommendations={mapRecommendations}
+                  statusMessage={locationStatus}
+                  suggestions={filteredSuggestions}
+                  userLocation={userLocation}
+                />
+              </div>
+            </section>
+
+            <aside className={`workspace-spots mobile-collapsible${spotsMobileOpen ? " is-open" : ""}`}>
+              <button
+                aria-expanded={spotsMobileOpen}
+                className="mobile-section-toggle"
+                onClick={() => setSpotsMobileOpen((open) => !open)}
+                type="button"
+              >
+                Suggested spots <ChevronDownIcon />
+              </button>
+              <div className="mobile-section-content">
+                <SuggestionsPanel
+                  canRetry={!suggestionQuotaResetAt}
+                  error={suggestionError}
+                  isLoading={isLoadingSuggestions}
+                  onRetry={() => setLocationRefreshVersion((version) => version + 1)}
+                  onViewMore={() => {
+                    advanceSuggestions();
+                    setRotationVersion((version) => version + 1);
+                  }}
+                  suggestions={visibleSuggestions}
+                  totalCount={filteredSuggestions.length}
+                  userLocation={userLocation}
+                />
+              </div>
+            </aside>
+          </div>
+
+          {!homeVisible ? (
+            <PlaceholderPage
+              content={placeholder}
+              onBack={() => navigate("/")}
             />
-          </section>
-          <aside className="flex flex-col gap-4">
-            <MapView
-              userLocation={mapLocation}
-              recommendations={mapRecommendations}
-              hasLiveLocation={Boolean(userLocation)}
-              isLocating={!locationReady}
-              statusMessage={locationStatus}
-            />
-            <div className="rounded-3xl border border-border bg-secondary/40 p-5 text-foreground">
-              <h2 className="text-lg font-semibold">
-                Today&apos;s Suggested Spots
-              </h2>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Rotating through up to 20 top-rated spots near you, three at a
-                time.
-              </p>
-              {isLoadingSuggestions && (
-                <div className="mt-4 flex items-center gap-4 rounded-2xl bg-secondary/70 p-3 shadow-inner">
-                  <div className="relative h-10 w-10 shrink-0">
-                    <div className="absolute inset-0 rounded-full border-2 border-primary/25" />
-                    <div className="absolute inset-0 rounded-full border-2 border-primary border-t-transparent animate-spin" />
-                  </div>
-                  <div className="text-sm">
-                    <p className="font-medium text-foreground">
-                      {suggestionError
-                        ? "Trying again..."
-                        : "Finding nearby restaurants..."}
-                    </p>
-                    <p className="text-muted-foreground">
-                      Using your location and Google Places. The first load may
-                      take about a minute.
-                    </p>
-                  </div>
-                </div>
-              )}
-              {suggestionError && !isLoadingSuggestions && (
-                <div className="mt-4 rounded-2xl border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive">
-                  <p>{suggestionError}</p>
-                  {!suggestionQuotaResetAt && (
-                    <button
-                      type="button"
-                      className="mt-3 rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground"
-                      onClick={() =>
-                        setSuggestionRetryVersion((version) => version + 1)
-                      }
-                    >
-                      Try again
-                    </button>
-                  )}
-                </div>
-              )}
-              {suggestions.length > 0 && (
-                <p className="mt-3 text-right text-[10px] text-muted-foreground">
-                  Powered by Google
-                </p>
-              )}
-            </div>
-            <div className="grid gap-4">
-              {isLoadingSuggestions ? (
-                <div className="space-y-4">
-                  {[1, 2, 3].map((i) => (
-                    <div
-                      key={i}
-                      className="h-32 animate-pulse rounded-3xl bg-secondary/50"
-                    />
-                  ))}
-                </div>
-              ) : visibleSuggestions.length > 0 ? (
-                visibleSuggestions.map((suggestion) => (
-                  <SuggestionCard
-                    key={suggestion.place_id}
-                    title={suggestion.name}
-                    description={suggestion.reason || suggestion.address}
-                    tags={suggestion.tags || []}
-                    distance={
-                      userLocation
-                        ? `${calculateDistance(
-                            userLocation.lat,
-                            userLocation.lng,
-                          suggestion.lat,
-                          suggestion.lng,
-                        ).toFixed(1)} km`
-                        : ""
-                    }
-                    rating={suggestion.rating}
-                  />
-                ))
-              ) : suggestionError ? (
-                <div className="rounded-3xl border border-border bg-secondary/40 p-4 text-sm text-foreground shadow">
-                  We&apos;re having trouble showing spots right now.
-                </div>
-              ) : (
-                <div className="rounded-3xl border border-border bg-secondary/40 p-4 text-sm text-muted-foreground shadow">
-                  No suggestions yet - try refreshing once your location is locked.
-                </div>
-              )}
-            </div>
-          </aside>
+          ) : null}
         </main>
       </div>
-    </ThemeProvider>
+
+      <LocationDialog
+        onClose={() => setLocationDialogOpen(false)}
+        onSelect={selectLocation}
+        open={locationDialogOpen}
+      />
+    </div>
   );
 }
 
-function calculateDistance(
-  lat1: number,
-  lon1: number,
-  lat2: number,
-  lon2: number,
-) {
-  return calculateDistanceKm(lat1, lon1, lat2, lon2);
+function PlaceholderPage({
+  content,
+  onBack,
+}: {
+  content: { eyebrow: string; title: string; copy: string } | undefined;
+  onBack: () => void;
+}): JSX.Element {
+  return (
+    <section className="placeholder-page">
+      <img alt="" src="/craveai-pin.svg" />
+      <p>{content?.eyebrow || "Not found"}</p>
+      <h1>{content?.title || "That page isn’t on the menu."}</h1>
+      <span>{content?.copy || "Return to CraveAI and start a new restaurant search."}</span>
+      <button onClick={onBack} type="button">Start a new chat</button>
+    </section>
+  );
+}
+
+function normalizePath(path: string): string {
+  const normalized = path.replace(/\/+$/, "");
+  return normalized || "/";
+}
+
+function readSidebarPreference(): boolean {
+  try {
+    const stored = window.localStorage.getItem(SIDEBAR_STORAGE_KEY);
+    if (stored !== null) return stored === "true";
+    return window.matchMedia("(max-width: 1120px)").matches;
+  } catch {
+    return false;
+  }
+}
+
+function findAddressComponent(
+  components: google.maps.GeocoderAddressComponent[],
+  type: string,
+  short = false,
+): string | null {
+  const component = components.find((item) => item.types.includes(type));
+  if (!component) return null;
+  return short ? component.short_name : component.long_name;
 }
 
 function formatPlacesQuotaError(resetAt: string | null): string {
-  if (!resetAt) {
-    return "Today's nearby discovery limit has been reached. Please try again tomorrow.";
-  }
+  if (!resetAt) return "Today's nearby discovery limit has been reached. Please try again tomorrow.";
   const resetDate = new Date(resetAt);
   if (!Number.isFinite(resetDate.getTime())) {
     return "Today's nearby discovery limit has been reached. Please try again tomorrow.";
   }
-  const formattedReset = new Intl.DateTimeFormat(undefined, {
+  return `Today's nearby discovery limit has been reached. It resets ${new Intl.DateTimeFormat(undefined, {
     dateStyle: "medium",
     timeStyle: "short",
-  }).format(resetDate);
-  return `Today's nearby discovery limit has been reached. It resets ${formattedReset}.`;
+  }).format(resetDate)}.`;
 }
-
-export default App;

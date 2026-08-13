@@ -18,6 +18,16 @@ vi.mock("./components/ChatPanel", () => ({
 vi.mock("./components/MapView", () => ({
   MapView: () => <div data-testid="map" />,
 }));
+vi.mock("./components/Sidebar", () => ({
+  Sidebar: () => <nav data-testid="sidebar" />,
+}));
+vi.mock("./api/weather", () => ({
+  fetchCurrentWeather: vi.fn().mockResolvedValue({
+    temperature: 20,
+    condition: "Clear",
+    isDay: true,
+  }),
+}));
 vi.mock("./components/ThemeToggle", () => ({
   ThemeToggle: () => <button type="button">Theme</button>,
 }));
@@ -52,6 +62,7 @@ async function flushEffects(): Promise<void> {
 
 beforeEach(() => {
   vi.useFakeTimers();
+  window.history.replaceState({}, "", "/");
   mockedFetchSuggestions.mockReset();
   Object.defineProperty(navigator, "geolocation", {
     configurable: true,
@@ -78,6 +89,19 @@ beforeEach(() => {
 });
 
 describe("App suggestion pool", () => {
+  it("renders an in-shell placeholder route and responds to browser history", async () => {
+    mockedFetchSuggestions.mockResolvedValue(makeSuggestions(4));
+    window.history.replaceState({}, "", "/help");
+    render(<App />);
+    expect(screen.getByRole("heading", { name: "A CraveAI help centre is coming." })).toBeInTheDocument();
+
+    act(() => {
+      window.history.pushState({}, "", "/");
+      window.dispatchEvent(new PopStateEvent("popstate"));
+    });
+    expect(screen.queryByRole("heading", { name: "A CraveAI help centre is coming." })).not.toBeInTheDocument();
+  });
+
   it("rotates three cards without making another request", async () => {
     mockedFetchSuggestions.mockResolvedValue(makeSuggestions(10));
     render(<App />);

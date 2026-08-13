@@ -26,22 +26,20 @@ export function AccountMenu(): JSX.Element {
   }
   if (!user) {
     return (
-      <a
-        href="/login"
-        className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
-      >
-        Sign in
-      </a>
+      <div className="top-auth-actions">
+        <a className="top-login-button" href="/login">Log in</a>
+        <a className="top-signup-button" href="/register">Sign up for free</a>
+      </div>
     );
   }
   return (
-    <div className="flex min-w-0 items-center gap-3">
-      <a className="truncate text-sm text-muted-foreground hover:text-foreground" href="/account">
+    <div className="top-auth-actions signed-in-actions">
+      <a className="top-account-email" href="/account">
         {user.email}
       </a>
       <button
         type="button"
-        className="shrink-0 whitespace-nowrap rounded-full border border-border px-4 py-2 text-sm"
+        className="top-signout-button shrink-0 whitespace-nowrap"
         onClick={() => {
           setSignOutError(null);
           setShowSignOutConfirm(true);

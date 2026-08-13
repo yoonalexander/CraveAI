@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import type { Suggestion } from "../api/places";
 import {
   calculateDistanceKm,
+  filterSuggestions,
   getNextSuggestionIndex,
   getVisibleSuggestions,
 } from "./suggestionPool";
@@ -60,5 +61,24 @@ describe("suggestion pool rotation", () => {
   it("distinguishes sub-kilometre movement from a material location change", () => {
     expect(calculateDistanceKm(43.65, -79.38, 43.654, -79.38)).toBeLessThan(1);
     expect(calculateDistanceKm(43.65, -79.38, 43.67, -79.38)).toBeGreaterThan(1);
+  });
+
+  it("filters budget and open places without treating missing metadata as a match", () => {
+    const suggestions = makeSuggestions(4).map((suggestion, index) => ({
+      ...suggestion,
+      price_level: index === 0 ? 1 : index === 1 ? 2 : undefined,
+      open_now: index < 2 ? true : index === 2 ? false : undefined,
+    }));
+
+    expect(filterSuggestions(suggestions, new Set(["budget"]))).toEqual([
+      suggestions[0],
+    ]);
+    expect(filterSuggestions(suggestions, new Set(["open"]))).toEqual([
+      suggestions[0],
+      suggestions[1],
+    ]);
+    expect(filterSuggestions(suggestions, new Set(["budget", "open"]))).toEqual([
+      suggestions[0],
+    ]);
   });
 });

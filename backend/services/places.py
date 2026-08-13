@@ -294,6 +294,8 @@ def _parse_place_item(item: Dict[str, Any], reason_hint: Optional[str] = None) -
         "lng": coordinates.get("lng") if isinstance(coordinates, dict) else None,
         "tags": tags,
         "user_ratings_total": total_reviews,
+        "price_level": item.get("price_level"),
+        "open_now": (item.get("opening_hours") or {}).get("open_now"),
     }
 
 

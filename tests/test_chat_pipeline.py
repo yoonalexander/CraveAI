@@ -1121,6 +1121,37 @@ def test_top_rated_places_filter_rejects_incidental_food_venues():
     assert "Bowling Alley" not in results[0]["tags"]
 
 
+def test_place_parser_exposes_optional_price_and_open_state():
+    parsed = places_service._parse_place_item(
+        {
+            "name": "Dinner Spot",
+            "rating": 4.6,
+            "user_ratings_total": 140,
+            "vicinity": "10 Main Street",
+            "types": ["restaurant"],
+            "place_id": "dinner-spot",
+            "price_level": 1,
+            "opening_hours": {"open_now": True},
+            "geometry": {"location": {"lat": 43.6, "lng": -79.4}},
+        }
+    )
+
+    assert parsed["price_level"] == 1
+    assert parsed["open_now"] is True
+
+    missing = places_service._parse_place_item(
+        {
+            "name": "Unknown Hours",
+            "rating": 4.2,
+            "types": ["restaurant"],
+            "place_id": "unknown-hours",
+            "geometry": {"location": {"lat": 43.6, "lng": -79.4}},
+        }
+    )
+    assert missing["price_level"] is None
+    assert missing["open_now"] is None
+
+
 def test_suggestion_quality_balances_rating_and_review_confidence():
     high_confidence = {
         "rating": 4.7,
