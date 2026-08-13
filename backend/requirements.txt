@@ -7,8 +7,7 @@ psycopg[binary]>=3.2,<4
 alembic>=1.14,<2
 cryptography>=50,<51
 email-validator>=2.2,<3
-langchain-openai
-openai
+openai>=2.0,<3
 pytest
 pytest-asyncio
 pytest-mock

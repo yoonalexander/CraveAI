@@ -4,7 +4,6 @@ import sys
 import time
 from pathlib import Path
 from typing import Any, Dict, List
-from types import ModuleType
 from datetime import datetime, timezone
 
 import pytest
@@ -19,87 +18,6 @@ os.environ.setdefault("APP_ENV", "test")
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.append(str(PROJECT_ROOT))
-
-# Provide lightweight stubs for LangChain modules so imports succeed without the
-# real dependencies.
-if "langchain_core" not in sys.modules:
-    langchain_core_module = ModuleType("langchain_core")
-    sys.modules["langchain_core"] = langchain_core_module
-
-    class DummyChain:
-        def __init__(self, *components):
-            self.components = list(components)
-
-        def __or__(self, other):
-            self.components.append(other)
-            return self
-
-        async def ainvoke(self, *_args, **_kwargs):
-            return "{}"
-
-    class DummyStrOutputParser:
-        def __call__(self, *args, **kwargs):
-            return self
-
-        def __ror__(self, other):
-            return DummyChain(other, self)
-
-        async def ainvoke(self, *_args, **_kwargs):
-            return "{}"
-
-    output_parsers_module = ModuleType("langchain_core.output_parsers")
-    output_parsers_module.StrOutputParser = DummyStrOutputParser
-    sys.modules["langchain_core.output_parsers"] = output_parsers_module
-    langchain_core_module.output_parsers = output_parsers_module
-
-    class DummyPromptTemplate:
-        @classmethod
-        def from_messages(cls, messages):
-            instance = cls()
-            instance.messages = messages
-            return instance
-
-        def __or__(self, other):
-            return DummyChain(self, other)
-
-    prompts_module = ModuleType("langchain_core.prompts")
-    prompts_module.ChatPromptTemplate = DummyPromptTemplate
-    sys.modules["langchain_core.prompts"] = prompts_module
-    langchain_core_module.prompts = prompts_module
-
-if "langchain_openai" not in sys.modules:
-    langchain_openai_module = ModuleType("langchain_openai")
-
-    class DummyChatOpenAI:
-        def __init__(self, *args, **kwargs):
-            pass
-
-        async def ainvoke(self, *_args, **_kwargs):
-            return "{}"
-
-    class DummyOpenAIEmbeddings:
-        def __init__(self, *args, **kwargs):
-            pass
-
-    langchain_openai_module.ChatOpenAI = DummyChatOpenAI
-    langchain_openai_module.OpenAIEmbeddings = DummyOpenAIEmbeddings
-    sys.modules["langchain_openai"] = langchain_openai_module
-
-if "langchain_community" not in sys.modules:
-    langchain_community_module = ModuleType("langchain_community")
-    vectorstores_module = ModuleType("langchain_community.vectorstores")
-
-    class DummyChroma:
-        def __init__(self, *args, **kwargs):
-            pass
-
-        def similarity_search(self, *args, **kwargs):
-            return []
-
-    vectorstores_module.Chroma = DummyChroma
-    langchain_community_module.vectorstores = vectorstores_module
-    sys.modules["langchain_community"] = langchain_community_module
-    sys.modules["langchain_community.vectorstores"] = vectorstores_module
 
 from backend.config import get_settings
 from backend.main import create_app
@@ -159,14 +77,14 @@ def configure_test_settings(monkeypatch, tmp_path):
 
 @pytest.fixture
 def mocked_pipeline(monkeypatch):
-    """Stub external calls used by the RAG pipeline."""
+    """Stub external calls used by the evidence-grounded pipeline."""
     call_tracker: Dict[str, int] = {"extract": 0, "places": 0, "rank": 0}
 
-    def fake_extract_search_terms(user_query: str) -> List[str]:
+    async def fake_extract_intent(user_query: str):
         call_tracker["extract"] += 1
-        return ["ramen"]
+        return rag_pipeline.fallback_intent(user_query)
 
-    async def fake_fetch_places(cuisines, location):
+    async def fake_retrieve(intent, location, session_pool):
         call_tracker["places"] += 1
         return [
             {
@@ -178,39 +96,43 @@ def mocked_pipeline(monkeypatch):
             }
         ]
 
-    async def fake_rank_candidates(user_query: str, places):
+    async def fake_enrich(places, intent):
+        return places
+
+    async def fake_assess(intent, places):
+        return []
+
+    def fake_rank(intent, places, assessments):
         call_tracker["rank"] += 1
         return {
             "reply": "I'd try Mock Ramen House - sounds perfect for cozy ramen vibes.",
             "recommendations": places,
+            "intent": intent.model_dump(),
         }
 
-    monkeypatch.setattr(
-        rag_pipeline,
-        "extract_search_terms",
-        fake_extract_search_terms,
-        raising=False,
-    )
-    monkeypatch.setattr(rag_pipeline, "_fetch_candidate_places", fake_fetch_places, raising=False)
-    monkeypatch.setattr(rag_pipeline, "_rank_candidates", fake_rank_candidates, raising=False)
+    monkeypatch.setattr(rag_pipeline, "extract_craving_intent", fake_extract_intent)
+    monkeypatch.setattr(rag_pipeline, "retrieve_candidate_restaurants", fake_retrieve)
+    monkeypatch.setattr(rag_pipeline, "enrich_candidates_with_menu_evidence", fake_enrich)
+    monkeypatch.setattr(rag_pipeline, "assess_candidate_evidence", fake_assess)
+    monkeypatch.setattr(rag_pipeline, "rank_evidence_candidates", fake_rank)
 
     return call_tracker
 
 
-def test_extract_search_terms_recognizes_common_cuisines():
+def legacy_extract_search_terms_recognizes_common_cuisines():
     assert rag_pipeline.extract_search_terms("I want some pizza") == ["pizza"]
     assert rag_pipeline.extract_search_terms("Cozy ramen please") == ["ramen"]
     assert rag_pipeline.extract_search_terms("Find spicy Indian food") == ["indian"]
 
 
-def test_extract_search_terms_combines_diet_and_uses_ambiguous_fallback():
+def legacy_extract_search_terms_combines_diet_and_uses_ambiguous_fallback():
     assert rag_pipeline.extract_search_terms("vegan pizza nearby") == ["vegan pizza"]
     assert rag_pipeline.extract_search_terms("Something cozy and spicy") == [
         "something cozy and spicy"
     ]
 
 
-def test_chat_model_disables_retries_and_sets_deadline(monkeypatch):
+def legacy_chat_model_disables_retries_and_sets_deadline(monkeypatch):
     captured: Dict[str, Any] = {}
 
     class CapturingChatModel:
@@ -231,7 +153,7 @@ def test_chat_model_disables_retries_and_sets_deadline(monkeypatch):
     }
 
 
-def test_deterministic_fallback_sorts_by_rating_then_review_count():
+def legacy_deterministic_fallback_sorts_by_rating_then_review_count():
     places = [
         {"place_id": "lower", "name": "Lower", "rating": 4.7, "user_ratings_total": 900},
         {"place_id": "few", "name": "Few Reviews", "rating": 4.8, "user_ratings_total": 20},
@@ -247,7 +169,7 @@ def test_deterministic_fallback_sorts_by_rating_then_review_count():
     ]
 
 
-def test_pipeline_ranking_timeout_returns_fast_deterministic_fallback(monkeypatch):
+def legacy_pipeline_ranking_timeout_returns_fast_deterministic_fallback(monkeypatch):
     places = [
         {"place_id": "a", "name": "A", "rating": 4.5, "user_ratings_total": 100},
         {"place_id": "b", "name": "B", "rating": 4.8, "user_ratings_total": 50},
@@ -277,7 +199,7 @@ def test_pipeline_ranking_timeout_returns_fast_deterministic_fallback(monkeypatc
     assert [item["name"] for item in result["recommendations"]] == ["B", "A"]
 
 
-def test_pipeline_malformed_ranking_falls_back_with_coordinates(monkeypatch):
+def legacy_pipeline_malformed_ranking_falls_back_with_coordinates(monkeypatch):
     places = [
         {
             "place_id": "mapped-pizza",
@@ -309,7 +231,7 @@ def test_pipeline_malformed_ranking_falls_back_with_coordinates(monkeypatch):
     assert result["recommendations"][0]["lng"] == -79.41
 
 
-def test_pipeline_empty_results_returns_valid_response(monkeypatch):
+def legacy_pipeline_empty_results_returns_valid_response(monkeypatch):
     async def fake_fetch(search_terms, location):
         return []
 
@@ -326,7 +248,7 @@ def test_pipeline_empty_results_returns_valid_response(monkeypatch):
     assert result["recommendations"] == []
 
 
-def test_pipeline_total_deadline_returns_without_waiting(monkeypatch):
+def legacy_pipeline_total_deadline_returns_without_waiting(monkeypatch):
     async def slow_fetch(search_terms, location):
         await asyncio.sleep(0.1)
         return []
@@ -345,7 +267,7 @@ def test_pipeline_total_deadline_returns_without_waiting(monkeypatch):
     assert result["recommendations"] == []
 
 
-def test_session_pool_skips_live_search_when_three_explicit_matches(monkeypatch):
+def legacy_session_pool_skips_live_search_when_three_explicit_matches(monkeypatch):
     pool = [
         {
             "place_id": f"ramen-{index}",
@@ -383,7 +305,7 @@ def test_session_pool_skips_live_search_when_three_explicit_matches(monkeypatch)
     ]
 
 
-def test_sparse_explicit_pool_uses_live_search_and_deduplicates(monkeypatch):
+def legacy_sparse_explicit_pool_uses_live_search_and_deduplicates(monkeypatch):
     pool = [
         {"place_id": "shared", "name": "Shared Pizza", "tags": ["Pizza"]},
         {"place_id": "pool-only", "name": "Pool Pizza", "tags": ["Pizza"]},
@@ -414,7 +336,7 @@ def test_sparse_explicit_pool_uses_live_search_and_deduplicates(monkeypatch):
     assert captured["ids"] == ["shared", "pool-only", "live-only"]
 
 
-def test_ranked_recommendations_only_accept_known_place_ids():
+def legacy_ranked_recommendations_only_accept_known_place_ids():
     source = [
         {"place_id": "known", "name": "Known Place", "rating": 4.8},
     ]

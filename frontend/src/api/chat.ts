@@ -40,6 +40,16 @@ export type ChatRecommendation = {
   reason?: string | null;
   lat?: number | null;
   lng?: number | null;
+  match_score?: number | null;
+  confidence?: "high" | "medium" | "low" | null;
+  matching_dishes?: string[];
+  matched_preferences?: string[];
+  unmatched_preferences?: string[];
+  evidence?: Array<{
+    type: string;
+    label: string;
+    source_url?: string | null;
+  }>;
 };
 
 export type UsageMetadata = {
@@ -54,6 +64,7 @@ export type ChatResponse = {
   reply: string;
   messages: ChatMessage[];
   recommendations: ChatRecommendation[];
+  intent?: Record<string, unknown> | null;
   usage?: UsageMetadata | null;
 };
 

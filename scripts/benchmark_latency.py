@@ -10,11 +10,12 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import os
 import statistics
 import sys
+import tempfile
 import time
 from pathlib import Path
-from types import ModuleType
 
 from httpx import ASGITransport, AsyncClient
 
@@ -22,89 +23,19 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.append(str(PROJECT_ROOT))
 
-
-def _install_langchain_stubs() -> None:
-    """Provide lightweight stand-ins so imports succeed without heavy deps."""
-    if "langchain_core" not in sys.modules:
-        langchain_core_module = ModuleType("langchain_core")
-        sys.modules["langchain_core"] = langchain_core_module
-
-        class DummyChain:
-            def __init__(self, *components):
-                self.components = list(components)
-
-            def __or__(self, other):
-                self.components.append(other)
-                return self
-
-            async def ainvoke(self, *_args, **_kwargs):
-                return "{}"
-
-        class DummyStrOutputParser:
-            def __ror__(self, other):
-                return DummyChain(other, self)
-
-            async def ainvoke(self, *_args, **_kwargs):
-                return "{}"
-
-        output_parsers_module = ModuleType("langchain_core.output_parsers")
-        output_parsers_module.StrOutputParser = DummyStrOutputParser
-        sys.modules["langchain_core.output_parsers"] = output_parsers_module
-
-        class DummyPromptTemplate:
-            @classmethod
-            def from_messages(cls, messages):
-                instance = cls()
-                instance.messages = messages
-                return instance
-
-            def __or__(self, other):
-                return DummyChain(self, other)
-
-        prompts_module = ModuleType("langchain_core.prompts")
-        prompts_module.ChatPromptTemplate = DummyPromptTemplate
-        sys.modules["langchain_core.prompts"] = prompts_module
-
-    if "langchain_openai" not in sys.modules:
-        langchain_openai_module = ModuleType("langchain_openai")
-
-        class DummyChatOpenAI:
-            def __init__(self, *args, **kwargs):
-                pass
-
-            async def ainvoke(self, *_args, **_kwargs):
-                return "{}"
-
-        class DummyOpenAIEmbeddings:
-            def __init__(self, *args, **kwargs):
-                pass
-
-        langchain_openai_module.ChatOpenAI = DummyChatOpenAI
-        langchain_openai_module.OpenAIEmbeddings = DummyOpenAIEmbeddings
-        sys.modules["langchain_openai"] = langchain_openai_module
-
-    if "langchain_community" not in sys.modules:
-        langchain_community_module = ModuleType("langchain_community")
-        vectorstores_module = ModuleType("langchain_community.vectorstores")
-
-        class DummyChroma:
-            def __init__(self, *args, **kwargs):
-                pass
-
-            def similarity_search(self, *_args, **_kwargs):
-                return []
-
-        vectorstores_module.Chroma = DummyChroma
-        langchain_community_module.vectorstores = vectorstores_module
-        sys.modules["langchain_community"] = langchain_community_module
-        sys.modules["langchain_community.vectorstores"] = vectorstores_module
-
-
-_install_langchain_stubs()
+# Keep this local harness independent from production secrets and services.
+os.environ["APP_ENV"] = "test"
+_BENCHMARK_TEMP_DIR = tempfile.TemporaryDirectory(prefix="craveai-benchmark-")
+_BENCHMARK_DB = Path(_BENCHMARK_TEMP_DIR.name, "benchmark.db").as_posix()
+os.environ["DATABASE_URL"] = f"sqlite:///{_BENCHMARK_DB}"
+os.environ.setdefault("OPENAI_API_KEY", "benchmark-openai")
+os.environ.setdefault("GOOGLE_API_KEY", "benchmark-google")
 
 from backend.main import create_app
+from backend.database import reset_database_cache
 from backend.routers import chat
 from backend.services import rag_pipeline
+from backend.services.storage import init_storage
 
 
 async def _fake_generate_recommendations(*_args, **_kwargs):
@@ -127,6 +58,7 @@ async def _fake_generate_recommendations(*_args, **_kwargs):
 
 async def run_benchmark(iterations: int) -> list[float]:
     """Execute the /chat endpoint multiple times and capture durations in ms."""
+    init_storage()
     rag_pipeline.generate_recommendations = _fake_generate_recommendations  # type: ignore[assignment]
     chat.generate_recommendations = _fake_generate_recommendations  # type: ignore[assignment]
     app = create_app()
@@ -158,13 +90,17 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    timings = asyncio.run(run_benchmark(args.iterations))
-    avg = statistics.mean(timings)
-    p95 = statistics.quantiles(timings, n=20)[18] if len(timings) >= 20 else max(timings)
-    print(f"Ran {len(timings)} requests.")
-    print(f"Average latency: {avg:.2f} ms")
-    print(f"Max latency: {max(timings):.2f} ms")
-    print(f"p95 latency: {p95:.2f} ms")
+    try:
+        timings = asyncio.run(run_benchmark(args.iterations))
+        avg = statistics.mean(timings)
+        p95 = statistics.quantiles(timings, n=20)[18] if len(timings) >= 20 else max(timings)
+        print(f"Ran {len(timings)} requests.")
+        print(f"Average latency: {avg:.2f} ms")
+        print(f"Max latency: {max(timings):.2f} ms")
+        print(f"p95 latency: {p95:.2f} ms")
+    finally:
+        reset_database_cache()
+        _BENCHMARK_TEMP_DIR.cleanup()
 
 
 if __name__ == "__main__":

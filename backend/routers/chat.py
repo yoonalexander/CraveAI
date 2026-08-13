@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import asyncio
 from datetime import datetime, time, timedelta, timezone
-from typing import Annotated, List, Optional
+from typing import Annotated, Any, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -106,6 +106,14 @@ class ChatMessage(BaseModel):
     content: str = Field(..., description="Message content shown to the user.")
 
 
+class RecommendationEvidence(BaseModel):
+    """Attributable evidence used to support a recommendation."""
+
+    type: str
+    label: str
+    source_url: Optional[str] = None
+
+
 class Recommendation(BaseModel):
     """Recommendation payload returned by the RAG pipeline."""
 
@@ -119,6 +127,12 @@ class Recommendation(BaseModel):
     )
     lat: Optional[float] = Field(default=None, description="Latitude for the venue, if known.")
     lng: Optional[float] = Field(default=None, description="Longitude for the venue, if known.")
+    match_score: Optional[float] = Field(default=None, ge=0, le=1)
+    confidence: Optional[str] = None
+    matching_dishes: List[str] = Field(default_factory=list)
+    matched_preferences: List[str] = Field(default_factory=list)
+    unmatched_preferences: List[str] = Field(default_factory=list)
+    evidence: List[RecommendationEvidence] = Field(default_factory=list)
 
 
 class UsageMetadata(BaseModel):
@@ -145,6 +159,10 @@ class ChatResponse(BaseModel):
     recommendations: List[Recommendation] = Field(
         default_factory=list,
         description="Ranked restaurant suggestions that match the user's craving.",
+    )
+    intent: Optional[dict[str, Any]] = Field(
+        default=None,
+        description="Structured craving interpretation used by the ranking pipeline.",
     )
     usage: Optional[UsageMetadata] = Field(
         default=None,
@@ -241,6 +259,12 @@ async def generate_chat_response(
             reason=item.get("reason"),
             lat=item.get("lat"),
             lng=item.get("lng"),
+            match_score=item.get("match_score"),
+            confidence=item.get("confidence"),
+            matching_dishes=item.get("matching_dishes") or [],
+            matched_preferences=item.get("matched_preferences") or [],
+            unmatched_preferences=item.get("unmatched_preferences") or [],
+            evidence=item.get("evidence") or [],
         )
         for item in rag_result.get("recommendations", [])
     ]
@@ -249,6 +273,7 @@ async def generate_chat_response(
         reply=rag_result.get("reply", ""),
         messages=[assistant_message],
         recommendations=recommendations,
+        intent=rag_result.get("intent"),
         usage=usage_metadata,
     )
 

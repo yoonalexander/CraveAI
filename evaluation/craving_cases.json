@@ -1,0 +1,186 @@
+[
+  {
+    "id": "spicy_soup",
+    "query": "im craving something spicy, maybe like a soup",
+    "constraints": [
+      {"dimension": "taste", "value": "spicy", "strength": "strong", "polarity": "include"},
+      {"dimension": "dish_type", "value": "soup", "strength": "preferred", "polarity": "include"}
+    ],
+    "positive_dishes": ["Hot & Sour Soup", "Szechuan Mala Spicy Noodle Soup"]
+  },
+  {
+    "id": "crispy_light",
+    "query": "something crispy but not too heavy",
+    "constraints": [
+      {"dimension": "texture", "value": "crispy", "strength": "strong", "polarity": "include"},
+      {"dimension": "health", "value": "light", "strength": "strong", "polarity": "include"}
+    ],
+    "positive_dishes": ["Crispy Rice-Paper Vegetable Rolls", "Crispy Herb Salad"]
+  },
+  {
+    "id": "creamy_spicy",
+    "query": "I want something creamy and spicy",
+    "constraints": [
+      {"dimension": "taste", "value": "creamy", "strength": "strong", "polarity": "include"},
+      {"dimension": "taste", "value": "spicy", "strength": "strong", "polarity": "include"}
+    ],
+    "positive_dishes": ["Creamy Spicy Vodka Pasta", "Spicy Coconut Curry"]
+  },
+  {
+    "id": "refreshing_healthy",
+    "query": "something refreshing and healthy",
+    "constraints": [
+      {"dimension": "taste", "value": "refreshing", "strength": "strong", "polarity": "include"},
+      {"dimension": "health", "value": "healthy", "strength": "strong", "polarity": "include"}
+    ],
+    "positive_dishes": ["Citrus Quinoa Salad", "Vietnamese Herb and Mango Salad"]
+  },
+  {
+    "id": "beef_noodles",
+    "query": "I want beef, preferably noodles",
+    "constraints": [
+      {"dimension": "ingredient", "value": "beef", "strength": "strong", "polarity": "include"},
+      {"dimension": "dish_type", "value": "noodles", "strength": "preferred", "polarity": "include"}
+    ],
+    "positive_dishes": ["Taiwanese Beef Noodle Soup", "Beef Chow Fun"]
+  },
+  {
+    "id": "cheesy_comforting",
+    "query": "something cheesy and comforting",
+    "constraints": [
+      {"dimension": "taste", "value": "cheesy", "strength": "strong", "polarity": "include"},
+      {"dimension": "other", "value": "comforting", "strength": "strong", "polarity": "include"}
+    ],
+    "positive_dishes": ["Four-Cheese Baked Macaroni", "Cheesy Potato Gratin"]
+  },
+  {
+    "id": "cold_dessert_no_ice_cream",
+    "query": "I want a cold dessert but not ice cream",
+    "constraints": [
+      {"dimension": "temperature", "value": "cold", "strength": "strong", "polarity": "include"},
+      {"dimension": "dish_type", "value": "dessert", "strength": "strong", "polarity": "include"},
+      {"dimension": "dish_type", "value": "ice cream", "strength": "required", "polarity": "exclude"}
+    ],
+    "positive_dishes": ["Chilled Mango Sago", "Cold Coconut Tapioca"]
+  },
+  {
+    "id": "super_spicy",
+    "query": "something super spicy",
+    "constraints": [
+      {"dimension": "taste", "value": "super spicy", "strength": "strong", "polarity": "include"}
+    ],
+    "positive_dishes": ["Extra-Hot Mala Dry Pot", "Volcano Chili Ramen"]
+  },
+  {
+    "id": "soup",
+    "query": "I want soup",
+    "constraints": [
+      {"dimension": "dish_type", "value": "soup", "strength": "strong", "polarity": "include"}
+    ],
+    "positive_dishes": ["Roasted Tomato Soup", "Chicken Pho"]
+  },
+  {
+    "id": "warm_sushi",
+    "query": "maybe sushi but I want something warm",
+    "constraints": [
+      {"dimension": "dish_type", "value": "sushi", "strength": "preferred", "polarity": "include"},
+      {"dimension": "temperature", "value": "warm", "strength": "strong", "polarity": "include"}
+    ],
+    "positive_dishes": ["Warm Aburi Salmon Sushi", "Freshly Torched Pressed Sushi"]
+  },
+  {
+    "id": "protein_cheap",
+    "query": "high protein and cheap",
+    "constraints": [
+      {"dimension": "health", "value": "high protein", "strength": "strong", "polarity": "include"},
+      {"dimension": "price", "value": "cheap", "strength": "strong", "polarity": "include"}
+    ],
+    "positive_dishes": ["Budget Chicken Protein Bowl", "Cheap Lentil and Egg Plate"]
+  },
+  {
+    "id": "sweet_salty",
+    "query": "something sweet and salty",
+    "constraints": [
+      {"dimension": "taste", "value": "sweet", "strength": "strong", "polarity": "include"},
+      {"dimension": "taste", "value": "salty", "strength": "strong", "polarity": "include"}
+    ],
+    "positive_dishes": ["Salted Caramel Tart", "Maple Bacon Doughnut"]
+  },
+  {
+    "id": "korean_not_fried",
+    "query": "I want Korean food but no fried food",
+    "constraints": [
+      {"dimension": "cuisine", "value": "Korean", "strength": "strong", "polarity": "include"},
+      {"dimension": "texture", "value": "fried", "strength": "required", "polarity": "exclude"}
+    ],
+    "positive_dishes": ["Korean Stone-Pot Bibimbap", "Korean Soft-Tofu Jjigae"]
+  },
+  {
+    "id": "vegan_comfort",
+    "query": "vegan comfort food",
+    "constraints": [
+      {"dimension": "diet", "value": "vegan", "strength": "required", "polarity": "include"},
+      {"dimension": "other", "value": "comforting", "strength": "strong", "polarity": "include"}
+    ],
+    "positive_dishes": ["Vegan Shepherd's Pie", "Vegan Mushroom Pot Pie"]
+  },
+  {
+    "id": "halal_grilled",
+    "query": "halal and grilled, not fried",
+    "constraints": [
+      {"dimension": "diet", "value": "halal", "strength": "required", "polarity": "include"},
+      {"dimension": "texture", "value": "grilled", "strength": "strong", "polarity": "include"},
+      {"dimension": "texture", "value": "fried", "strength": "required", "polarity": "exclude"}
+    ],
+    "positive_dishes": ["Halal Grilled Chicken Plate", "Halal Charcoal Lamb Skewers"]
+  },
+  {
+    "id": "gluten_free_pizza",
+    "query": "I need gluten-free pizza",
+    "constraints": [
+      {"dimension": "diet", "value": "gluten-free", "strength": "required", "polarity": "include"},
+      {"dimension": "dish_type", "value": "pizza", "strength": "strong", "polarity": "include"}
+    ],
+    "positive_dishes": ["Gluten-Free Margherita Pizza", "Gluten-Free Mushroom Pizza"]
+  },
+  {
+    "id": "vegetarian_savory_breakfast",
+    "query": "a savory vegetarian breakfast",
+    "constraints": [
+      {"dimension": "taste", "value": "savory", "strength": "strong", "polarity": "include"},
+      {"dimension": "diet", "value": "vegetarian", "strength": "required", "polarity": "include"},
+      {"dimension": "meal", "value": "breakfast", "strength": "strong", "polarity": "include"}
+    ],
+    "positive_dishes": ["Savory Vegetarian Breakfast Hash", "Vegetarian Masala Breakfast Dosa"]
+  },
+  {
+    "id": "citrus_seafood",
+    "query": "light seafood with citrus",
+    "constraints": [
+      {"dimension": "ingredient", "value": "seafood", "strength": "strong", "polarity": "include"},
+      {"dimension": "taste", "value": "citrus", "strength": "strong", "polarity": "include"},
+      {"dimension": "health", "value": "light", "strength": "preferred", "polarity": "include"}
+    ],
+    "positive_dishes": ["Light Citrus Shrimp Ceviche", "Lemon Seafood Crudo"]
+  },
+  {
+    "id": "crunchy_chocolate",
+    "query": "a crunchy chocolate dessert",
+    "constraints": [
+      {"dimension": "texture", "value": "crunchy", "strength": "strong", "polarity": "include"},
+      {"dimension": "ingredient", "value": "chocolate", "strength": "strong", "polarity": "include"},
+      {"dimension": "dish_type", "value": "dessert", "strength": "strong", "polarity": "include"}
+    ],
+    "positive_dishes": ["Crunchy Chocolate Praline Dessert", "Chocolate Hazelnut Crunch Tart"]
+  },
+  {
+    "id": "low_carb_mexican",
+    "query": "Mexican, high protein, low carb",
+    "constraints": [
+      {"dimension": "cuisine", "value": "Mexican", "strength": "strong", "polarity": "include"},
+      {"dimension": "health", "value": "high protein", "strength": "strong", "polarity": "include"},
+      {"dimension": "health", "value": "low carb", "strength": "strong", "polarity": "include"}
+    ],
+    "positive_dishes": ["Mexican High-Protein Low-Carb Fajita Bowl", "Low-Carb Mexican Steak Salad"]
+  }
+]

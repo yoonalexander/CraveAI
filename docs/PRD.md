@@ -1,4 +1,8 @@
 # CraveAI – AI-Powered Food Recommender Chatbot
+> Historical planning document. Its Chroma/FAISS and LangChain sections were
+> never implemented and are not the current architecture. See
+> [technical_design.md](technical_design.md) for the evidence-grounded engine.
+
 **Author:** Alex Yoon  
 **Date:** October 2025  
 **Version:** 1.0  

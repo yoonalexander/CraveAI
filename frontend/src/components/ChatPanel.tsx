@@ -215,7 +215,44 @@ export function ChatPanel({
                           {typeof recommendation.rating === "number" ? `★ ${recommendation.rating.toFixed(1)}` : ""}
                           {recommendation.address ? `${typeof recommendation.rating === "number" ? " · " : ""}${recommendation.address}` : ""}
                         </span>
+                        {recommendation.confidence ? (
+                          <div className={`recommendation-confidence is-${recommendation.confidence}`}>
+                            {recommendation.confidence === "high" ? "Strong match" : "Relevant match"}
+                            {typeof recommendation.match_score === "number"
+                              ? ` · ${Math.round(recommendation.match_score * 100)}%`
+                              : ""}
+                          </div>
+                        ) : null}
+                        {recommendation.matched_preferences?.length ? (
+                          <div className="recommendation-preferences" aria-label="Matched preferences">
+                            {recommendation.matched_preferences.map((preference) => (
+                              <span key={preference}>{preference}</span>
+                            ))}
+                          </div>
+                        ) : null}
+                        {recommendation.matching_dishes?.length ? (
+                          <ul className="recommendation-dishes">
+                            {recommendation.matching_dishes.map((dish) => <li key={dish}>{dish}</li>)}
+                          </ul>
+                        ) : null}
                         {recommendation.reason ? <p>{recommendation.reason}</p> : null}
+                        {recommendation.evidence?.some((item) => item.source_url) ? (
+                          <div className="recommendation-sources">
+                            {recommendation.evidence
+                              .filter((item) => item.source_url)
+                              .slice(0, 2)
+                              .map((item, sourceIndex) => (
+                                <a
+                                  href={item.source_url || undefined}
+                                  key={`${item.type}-${item.label}-${sourceIndex}`}
+                                  rel="noreferrer"
+                                  target="_blank"
+                                >
+                                  View source
+                                </a>
+                              ))}
+                          </div>
+                        ) : null}
                       </div>
                     ))}
                   </div>
