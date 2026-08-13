@@ -333,7 +333,7 @@ All settings are documented in `.env.example`. The main groups are:
 | Session security | `SESSION_ENCRYPTION_KEY`, `IDENTITY_SIGNING_SECRET`, session lifetime settings |
 | Origins/proxy | `APP_ENV`, `FRONTEND_ORIGIN`, `PUBLIC_API_URL`, `ALLOWED_ORIGINS`, `TRUSTED_PROXY_IPS`, `VITE_DEV_API_TARGET` |
 | Timeouts | `CHAT_PIPELINE_TIMEOUT_SECONDS`, `CHAT_RANKING_TIMEOUT_SECONDS` |
-| Quotas | Guest, account, global, feedback, and authentication limit variables |
+| Quotas | `DAILY_QUOTA_MULTIPLIER` plus guest, account, global, feedback, and authentication limit variables |
 | Request limits | `REQUEST_BODY_LIMIT_BYTES` |
 
 Generate a Fernet session encryption key with:

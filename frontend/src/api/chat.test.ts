@@ -73,7 +73,14 @@ describe("sendChat", () => {
     await sendChat("dinner");
 
     const request = fetchMock.mock.calls[0][1] as RequestInit;
-    expect(JSON.parse(String(request.body)).candidate_places).toEqual([]);
+    const body = JSON.parse(String(request.body));
+    expect(body.candidate_places).toEqual([]);
+    expect(body.location).toEqual({
+      lat: 43.6532,
+      lng: -79.3832,
+      city: "Toronto",
+      radius: 5000,
+    });
   });
 
   it("passes the confirmed viewport bounds to the recommendation pipeline", async () => {

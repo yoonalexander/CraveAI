@@ -51,6 +51,7 @@ def configure_test_settings(monkeypatch, tmp_path):
     )
     monkeypatch.setenv("AUTO_CREATE_SCHEMA", "true")
     monkeypatch.setenv("USAGE_LIMITS_ENABLED", "true")
+    monkeypatch.setenv("DAILY_QUOTA_MULTIPLIER", "1")
     monkeypatch.setenv("DAILY_TOKEN_LIMIT", "10000")
     monkeypatch.setenv("DAILY_CHAT_MESSAGE_LIMIT", "3")
     monkeypatch.setenv("CHAT_DEVELOPER_MODE", "false")
@@ -587,6 +588,20 @@ def test_chat_status_does_not_report_unlimited_in_standard_mode(mocked_pipeline)
     assert response.status_code == 200
     assert response.json() == {}
     assert mocked_pipeline["extract"] == 0
+
+
+def test_temporary_multiplier_scales_chat_and_discovery_quotas(monkeypatch):
+    monkeypatch.setenv("DAILY_QUOTA_MULTIPLIER", "1000")
+    get_settings.cache_clear()
+
+    settings = get_settings()
+
+    assert settings.scaled_daily_quota(settings.GUEST_DAILY_CHAT_LIMIT) == 3_000
+    assert settings.scaled_daily_quota(settings.ACCOUNT_DAILY_CHAT_LIMIT) == 25_000
+    assert settings.scaled_daily_quota(settings.GUEST_DAILY_PLACES_LIMIT) == 20_000
+    assert settings.scaled_daily_quota(settings.ACCOUNT_DAILY_PLACES_LIMIT) == 100_000
+    assert settings.scaled_daily_quota(settings.GLOBAL_DAILY_CHAT_LIMIT) == 100_000_000
+    assert settings.scaled_daily_quota(settings.GLOBAL_DAILY_PLACES_LIMIT) == 1_000_000
 
 
 def test_chat_dev_bypass_header_cannot_bypass_quota(

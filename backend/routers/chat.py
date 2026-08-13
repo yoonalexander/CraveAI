@@ -225,17 +225,20 @@ async def generate_chat_response(
         window_seconds=60,
         code="chat_rate_limited",
     )
-    daily_limit = (
+    configured_daily_limit = (
         settings.ACCOUNT_DAILY_CHAT_LIMIT
         if session
         else settings.GUEST_DAILY_CHAT_LIMIT
     )
+    daily_limit = settings.scaled_daily_quota(configured_daily_limit)
     try:
         usage = await reserve_daily_quota(
             user_id=usage_user_id,
             token_cost=1,
             daily_limit=daily_limit,
-            global_daily_limit=settings.GLOBAL_DAILY_CHAT_LIMIT,
+            global_daily_limit=settings.scaled_daily_quota(
+                settings.GLOBAL_DAILY_CHAT_LIMIT
+            ),
             namespace="chat",
         )
     except DailyQuotaExceeded as exc:

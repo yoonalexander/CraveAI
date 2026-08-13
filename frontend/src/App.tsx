@@ -20,10 +20,10 @@ const SUGGESTION_TIMEOUT_MS = 90_000;
 const SEARCH_RADIUS_METERS = 5_000;
 const SIDEBAR_STORAGE_KEY = "craveai-sidebar-collapsed";
 
-const HAMILTON_FALLBACK = {
-  lat: 43.2557,
-  lng: -79.8711,
-  city: "Hamilton, ON",
+const TORONTO_FALLBACK = {
+  lat: 43.6532,
+  lng: -79.3832,
+  city: "Toronto, ON",
 };
 
 type LocationSource = "device" | "manual" | "fallback";
@@ -123,10 +123,10 @@ function CraveApplication(): JSX.Element {
   useEffect(() => {
     if (!("geolocation" in navigator)) {
       confirmLocation(
-        { lat: HAMILTON_FALLBACK.lat, lng: HAMILTON_FALLBACK.lng },
-        HAMILTON_FALLBACK.city,
+        { lat: TORONTO_FALLBACK.lat, lng: TORONTO_FALLBACK.lng },
+        TORONTO_FALLBACK.city,
         "fallback",
-        "Geolocation is unavailable; using Hamilton, ON.",
+        "Geolocation is unavailable; using Toronto, ON.",
       );
       return;
     }
@@ -141,12 +141,12 @@ function CraveApplication(): JSX.Element {
       },
       (error) => {
         confirmLocation(
-          { lat: HAMILTON_FALLBACK.lat, lng: HAMILTON_FALLBACK.lng },
-          HAMILTON_FALLBACK.city,
+          { lat: TORONTO_FALLBACK.lat, lng: TORONTO_FALLBACK.lng },
+          TORONTO_FALLBACK.city,
           "fallback",
           error.code === error.PERMISSION_DENIED
-            ? "Location permission denied; using Hamilton, ON."
-            : "Unable to read your location; using Hamilton, ON.",
+            ? "Location permission denied; using Toronto, ON."
+            : "Unable to read your location; using Toronto, ON.",
         );
       },
       { enableHighAccuracy: true, timeout: 10_000, maximumAge: 0 },

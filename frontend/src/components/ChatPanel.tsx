@@ -32,8 +32,10 @@ type ChatPanelProps = {
   onConversationStart?: () => void;
 };
 
-const DEFAULT_DAILY_CHAT_LIMIT = 3;
-const CHAT_USAGE_STORAGE_KEY = "craveai-chat-usage";
+// Mirrors the temporary 1000x backend quota and uses a fresh cache key so an
+// exhausted pre-development quota does not leave a stale "0 messages" badge.
+const DEFAULT_DAILY_CHAT_LIMIT = 3_000;
+const CHAT_USAGE_STORAGE_KEY = "craveai-chat-usage-dev-1000x";
 
 const createMessageId = (prefix: string): string =>
   `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;

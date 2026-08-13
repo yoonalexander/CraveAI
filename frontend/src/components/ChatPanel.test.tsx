@@ -29,6 +29,11 @@ beforeEach(() => {
 });
 
 describe("ChatPanel", () => {
+  it("shows the temporary development chat allowance", () => {
+    render(<ChatPanel />);
+    expect(screen.getByText("3000 messages left today")).toBeInTheDocument();
+  });
+
   it("starts empty and moves into conversation mode after Enter", async () => {
     const { container } = render(<ChatPanel />);
     expect(screen.getByRole("heading", { name: "What’s your craving today?" })).toBeVisible();

@@ -100,9 +100,9 @@ export class ChatTimeoutError extends Error {
 }
 
 const FALLBACK_LOCATION: LocationHint = {
-  lat: 43.2557,
-  lng: -79.8711,
-  city: "Hamilton",
+  lat: 43.6532,
+  lng: -79.3832,
+  city: "Toronto",
   radius: 5000,
 };
 
