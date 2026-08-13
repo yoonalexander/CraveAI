@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+from types import SimpleNamespace
 
 from backend.services import rag_pipeline
 from backend.services.craving_intent import fallback_intent, normalize_intent
@@ -15,6 +16,7 @@ from backend.services.recommendation_models import (
     CravingIntent,
     EvidenceLink,
 )
+from backend.services import restaurant_retrieval
 from backend.services.restaurant_retrieval import _merge_query_results
 from backend.services.venue_constraints import candidate_matches_venue_constraints
 
@@ -45,6 +47,58 @@ def spicy_soup_intent(*, spicy_strength: str = "strong") -> CravingIntent:
             ],
         }
     )
+
+
+def test_retrieval_never_returns_candidates_outside_confirmed_bounds(monkeypatch):
+    intent = spicy_soup_intent()
+
+    async def fake_fallback(_intent, _location):
+        return {
+            "inside": {
+                "place_id": "inside",
+                "name": "Inside Soup",
+                "lat": 43.7,
+                "lng": -79.4,
+                "rating": 4.5,
+                "retrieval_score": 0.4,
+                "evidence": [],
+            },
+            "outside": {
+                "place_id": "outside",
+                "name": "Outside Soup",
+                "lat": 43.8,
+                "lng": -79.4,
+                "rating": 4.9,
+                "retrieval_score": 0.9,
+                "evidence": [],
+            },
+        }
+
+    monkeypatch.setattr(
+        restaurant_retrieval,
+        "get_settings",
+        lambda: SimpleNamespace(GOOGLE_API_KEY=""),
+    )
+    monkeypatch.setattr(restaurant_retrieval, "_legacy_provider_fallback", fake_fallback)
+
+    results = asyncio.run(
+        restaurant_retrieval.retrieve_candidate_restaurants(
+            intent,
+            {
+                "lat": 43.7,
+                "lng": -79.4,
+                "radius": 7500,
+                "bounds": {
+                    "north": 43.75,
+                    "south": 43.65,
+                    "east": -79.34,
+                    "west": -79.46,
+                },
+            },
+        )
+    )
+
+    assert [item["place_id"] for item in results] == ["inside"]
 
 
 def evidence(

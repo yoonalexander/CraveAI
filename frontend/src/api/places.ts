@@ -1,4 +1,5 @@
 import { apiFetch } from "./client";
+import type { ViewportBounds } from "../types/searchArea";
 
 export interface Suggestion {
   name: string;
@@ -29,9 +30,21 @@ export async function fetchSuggestions(
     lng: number,
     radius: number = 5000,
     signal?: AbortSignal,
+    bounds?: ViewportBounds,
 ): Promise<Suggestion[]> {
+  const search = new URLSearchParams({
+    lat: String(lat),
+    lng: String(lng),
+    radius: String(radius),
+  });
+  if (bounds) {
+    search.set("north", String(bounds.north));
+    search.set("south", String(bounds.south));
+    search.set("east", String(bounds.east));
+    search.set("west", String(bounds.west));
+  }
   const response = await apiFetch(
-    `/places/suggestions?lat=${lat}&lng=${lng}&radius=${radius}`,
+    `/places/suggestions?${search.toString()}`,
     { signal },
     { csrf: false },
   );

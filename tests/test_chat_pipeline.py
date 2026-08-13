@@ -947,6 +947,64 @@ def test_places_endpoint_reserves_quota_before_provider_call(monkeypatch):
     assert calls == 1
 
 
+def test_places_endpoint_rejects_incomplete_or_invalid_viewport_bounds(monkeypatch):
+    async def fake_places(*_args, **_kwargs):
+        raise AssertionError("Invalid bounds must be rejected before the provider call")
+
+    monkeypatch.setattr(places_router, "get_top_rated_nearby", fake_places)
+    app = create_app()
+
+    async def exercise():
+        async with AsyncClient(
+            transport=ASGITransport(app=app),
+            base_url="http://test",
+        ) as client:
+            incomplete = await client.get(
+                "/places/suggestions?lat=43.7&lng=-79.4&north=43.75"
+            )
+            invalid = await client.get(
+                "/places/suggestions?lat=43.7&lng=-79.4"
+                "&north=43.65&south=43.75&east=-79.34&west=-79.46"
+            )
+            return incomplete, invalid
+
+    incomplete, invalid = asyncio.run(exercise())
+    assert incomplete.status_code == 422
+    assert incomplete.json()["detail"]["code"] == "incomplete_viewport_bounds"
+    assert invalid.status_code == 422
+    assert invalid.json()["detail"]["code"] == "invalid_viewport_bounds"
+
+
+def test_chat_endpoint_rejects_invalid_viewport_bounds(mocked_pipeline):
+    app = create_app()
+
+    async def exercise():
+        async with AsyncClient(
+            transport=ASGITransport(app=app),
+            base_url="http://test",
+        ) as client:
+            return await client.post(
+                "/chat",
+                json={
+                    "query": "ramen",
+                    "location": {
+                        "lat": 43.7,
+                        "lng": -79.4,
+                        "bounds": {
+                            "north": 43.65,
+                            "south": 43.75,
+                            "east": -79.34,
+                            "west": -79.46,
+                        },
+                    },
+                },
+            )
+
+    response = asyncio.run(exercise())
+    assert response.status_code == 422
+    assert mocked_pipeline == {"extract": 0, "places": 0, "rank": 0}
+
+
 def test_places_replaces_forged_anonymous_token(monkeypatch):
     monkeypatch.setenv("DAILY_PLACES_REQUEST_LIMIT", "2")
     get_settings.cache_clear()
@@ -1110,6 +1168,47 @@ def test_top_rated_suggestions_are_deduplicated_and_capped(monkeypatch):
 
     assert len(results) == 20
     assert len({item["place_id"] for item in results}) == 20
+
+
+def test_top_rated_suggestions_apply_exact_viewport_bounds(monkeypatch):
+    candidates = [
+        {
+            "place_id": "inside",
+            "name": "Inside",
+            "rating": 4.7,
+            "user_ratings_total": 200,
+            "lat": 43.7,
+            "lng": -79.4,
+        },
+        {
+            "place_id": "outside",
+            "name": "Outside",
+            "rating": 4.9,
+            "user_ratings_total": 400,
+            "lat": 43.8,
+            "lng": -79.4,
+        },
+        {
+            "place_id": "missing-coordinates",
+            "name": "Missing Coordinates",
+            "rating": 4.8,
+            "user_ratings_total": 300,
+        },
+    ]
+
+    async def fake_fetch(*_args, **_kwargs):
+        return candidates
+
+    monkeypatch.setattr(places_service, "_fetch_and_filter", fake_fetch)
+    results = asyncio.run(
+        places_service.get_top_rated_nearby(
+            43.7,
+            -79.4,
+            bounds={"north": 43.75, "south": 43.65, "east": -79.34, "west": -79.46},
+        )
+    )
+
+    assert [item["place_id"] for item in results] == ["inside"]
 
 
 def test_restaurant_filter_rejects_closed_and_malformed_places():

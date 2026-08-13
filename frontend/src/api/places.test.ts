@@ -48,4 +48,24 @@ describe("fetchSuggestions", () => {
             }),
         );
     });
+
+    it("sends a complete confirmed viewport without changing radial compatibility", async () => {
+        const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+            new Response("[]", {
+                status: 200,
+                headers: { "Content-Type": "application/json" },
+            }),
+        );
+
+        await fetchSuggestions(43.7, -79.4, 7500, undefined, {
+            north: 43.75,
+            south: 43.65,
+            east: -79.34,
+            west: -79.46,
+        });
+
+        expect(fetchMock.mock.calls[0][0]).toBe(
+            "/api/places/suggestions?lat=43.7&lng=-79.4&radius=7500&north=43.75&south=43.65&east=-79.34&west=-79.46",
+        );
+    });
 });

@@ -29,6 +29,7 @@ type ChatPanelProps = {
   location?: LocationHint | null;
   onRecommendations?: (recommendations: ChatRecommendation[]) => void;
   candidatePlaces?: Suggestion[];
+  onConversationStart?: () => void;
 };
 
 const DEFAULT_DAILY_CHAT_LIMIT = 3;
@@ -41,6 +42,7 @@ export function ChatPanel({
   location,
   onRecommendations,
   candidatePlaces = [],
+  onConversationStart,
 }: ChatPanelProps): JSX.Element {
   const [messages, setMessages] = useState<Message[]>([]);
   const [draft, setDraft] = useState("");
@@ -101,6 +103,8 @@ export function ChatPanel({
     if (isLoading) return;
     const trimmed = draft.trim();
     if (!trimmed) return;
+
+    if (!hasConversation) onConversationStart?.();
 
     const userMessage: Message = {
       id: createMessageId("user"),

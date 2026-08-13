@@ -1,58 +1,34 @@
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import type { ChatRecommendation } from "./api/chat";
-import {
-  fetchSuggestions,
-  PlacesQuotaError,
-  Suggestion,
-} from "./api/places";
+import { fetchSuggestions, PlacesQuotaError, Suggestion } from "./api/places";
 import { fetchCurrentWeather, CurrentWeather } from "./api/weather";
 import { AccountMenu } from "./components/AccountMenu";
 import { ChatPanel } from "./components/ChatPanel";
-import { ChevronDownIcon, MenuIcon } from "./components/Icons";
-import {
-  LocationDialog,
-  SelectedLocation,
-} from "./components/LocationDialog";
-import { MapView, PlaceFilter } from "./components/MapView";
+import { DiscoveryPage } from "./components/DiscoveryPage";
+import { MenuIcon, PinIcon } from "./components/Icons";
+import { LocationDialog, SelectedLocation } from "./components/LocationDialog";
+import { MapView } from "./components/MapView";
+import { MobileChatSheet } from "./components/MobileChatSheet";
+import { SearchToolbar } from "./components/SearchToolbar";
 import { Sidebar } from "./components/Sidebar";
-import { SuggestionsPanel } from "./components/SuggestionsPanel";
 import { GoogleMapsProvider, useGoogleMaps } from "./context/GoogleMapsContext";
-import {
-  calculateDistanceKm,
-  filterSuggestions,
-  getNextSuggestionIndex,
-  getVisibleSuggestions,
-  MATERIAL_LOCATION_CHANGE_KM,
-} from "./utils/suggestionPool";
+import type { Coordinates, SearchArea } from "./types/searchArea";
+import { filterSuggestions, SuggestionFilter } from "./utils/suggestionPool";
 
-const SUGGESTION_ROTATION_MS = 30000;
-const SUGGESTION_TIMEOUT_MS = 90000;
-const SEARCH_RADIUS_METERS = 5000;
+const SUGGESTION_TIMEOUT_MS = 90_000;
+const SEARCH_RADIUS_METERS = 5_000;
 const SIDEBAR_STORAGE_KEY = "craveai-sidebar-collapsed";
 
 const HAMILTON_FALLBACK = {
   lat: 43.2557,
   lng: -79.8711,
   city: "Hamilton, ON",
-  radius: SEARCH_RADIUS_METERS,
 };
 
-type Coordinates = { lat: number; lng: number };
 type LocationSource = "device" | "manual" | "fallback";
 
 const placeholderPages: Record<string, { eyebrow: string; title: string; copy: string }> = {
-  "/discovery": {
-    eyebrow: "Discovery",
-    title: "A better way to browse is coming.",
-    copy: "Soon you’ll be able to explore neighbourhood guides, cuisines, and curated collections here.",
-  },
   "/likes": {
     eyebrow: "Likes",
     title: "Your favourite spots will live here.",
@@ -94,30 +70,27 @@ function CraveApplication(): JSX.Element {
   const [chatSession, setChatSession] = useState(0);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(readSidebarPreference);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileChatExpanded, setMobileChatExpanded] = useState(false);
   const [locationDialogOpen, setLocationDialogOpen] = useState(false);
-  const [mapMobileOpen, setMapMobileOpen] = useState(false);
-  const [spotsMobileOpen, setSpotsMobileOpen] = useState(true);
 
-  const [userLocation, setUserLocation] = useState<Coordinates | null>(null);
+  const [originLocation, setOriginLocation] = useState<Coordinates | null>(null);
   const [locationSource, setLocationSource] = useState<LocationSource>("fallback");
-  const [locationLabel, setLocationLabel] = useState("Finding your location…");
-  const [locationStatus, setLocationStatus] = useState("Calibrating your location…");
+  const [locationStatus, setLocationStatus] = useState("Finding your location…");
   const [locationReady, setLocationReady] = useState(false);
-  const [locationRefreshVersion, setLocationRefreshVersion] = useState(0);
+  const [searchArea, setSearchArea] = useState<SearchArea | null>(null);
+  const [requestedArea, setRequestedArea] = useState<SearchArea | null>(null);
+  const [lastFailedArea, setLastFailedArea] = useState<SearchArea | null>(null);
+  const [recenterVersion, setRecenterVersion] = useState(0);
 
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
+  const [isResolvingArea, setIsResolvingArea] = useState(false);
   const [suggestionError, setSuggestionError] = useState<string | null>(null);
   const [suggestionQuotaResetAt, setSuggestionQuotaResetAt] = useState<string | null>(null);
-  const [suggestionIndex, setSuggestionIndex] = useState(0);
-  const [rotationVersion, setRotationVersion] = useState(0);
-  const [activeFilters, setActiveFilters] = useState<Set<PlaceFilter>>(new Set());
+  const [activeFilters, setActiveFilters] = useState<Set<SuggestionFilter>>(new Set());
   const [mapRecommendations, setMapRecommendations] = useState<ChatRecommendation[]>([]);
   const [weather, setWeather] = useState<CurrentWeather | null>(null);
   const [weatherLoading, setWeatherLoading] = useState(false);
-
-  const lastSuggestionLocation = useRef<Coordinates | null>(null);
-  const lastRefreshVersion = useRef(-1);
 
   useEffect(() => {
     const handlePopState = () => setCurrentPath(normalizePath(window.location.pathname));
@@ -125,121 +98,134 @@ function CraveApplication(): JSX.Element {
     return () => window.removeEventListener("popstate", handlePopState);
   }, []);
 
+  const confirmLocation = useCallback((
+    coordinates: Coordinates,
+    label: string,
+    source: LocationSource,
+    status: string,
+  ) => {
+    const area: SearchArea = {
+      center: coordinates,
+      radius: SEARCH_RADIUS_METERS,
+      label,
+    };
+    setOriginLocation(coordinates);
+    setLocationSource(source);
+    setLocationStatus(status);
+    setLocationReady(true);
+    setSearchArea(area);
+    setRequestedArea(area);
+    setLastFailedArea(null);
+    setRecenterVersion((version) => version + 1);
+    setMapRecommendations([]);
+  }, []);
+
   useEffect(() => {
     if (!("geolocation" in navigator)) {
-      useFallbackLocation("Geolocation is not supported; using Hamilton, ON.");
+      confirmLocation(
+        { lat: HAMILTON_FALLBACK.lat, lng: HAMILTON_FALLBACK.lng },
+        HAMILTON_FALLBACK.city,
+        "fallback",
+        "Geolocation is unavailable; using Hamilton, ON.",
+      );
       return;
     }
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        setUserLocation({ lat: position.coords.latitude, lng: position.coords.longitude });
-        setLocationSource("device");
-        setLocationLabel("Current location");
-        setLocationStatus("Live location locked. Refining searches nearby.");
-        setLocationReady(true);
+        confirmLocation(
+          { lat: position.coords.latitude, lng: position.coords.longitude },
+          "Current location",
+          "device",
+          "Live location locked.",
+        );
       },
       (error) => {
-        useFallbackLocation(
+        confirmLocation(
+          { lat: HAMILTON_FALLBACK.lat, lng: HAMILTON_FALLBACK.lng },
+          HAMILTON_FALLBACK.city,
+          "fallback",
           error.code === error.PERMISSION_DENIED
             ? "Location permission denied; using Hamilton, ON."
             : "Unable to read your location; using Hamilton, ON.",
         );
       },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
+      { enableHighAccuracy: true, timeout: 10_000, maximumAge: 0 },
     );
-  }, []);
-
-  const useFallbackLocation = (status: string) => {
-    setUserLocation({ lat: HAMILTON_FALLBACK.lat, lng: HAMILTON_FALLBACK.lng });
-    setLocationSource("fallback");
-    setLocationLabel(HAMILTON_FALLBACK.city);
-    setLocationStatus(status);
-    setLocationReady(true);
-  };
+  }, [confirmLocation]);
 
   useEffect(() => {
-    if (!mapsLoaded || !userLocation) return;
+    if (!mapsLoaded || !searchArea || searchArea.bounds || searchArea.label !== "Current location") return;
     let active = true;
-    const geocoder = new google.maps.Geocoder();
-    geocoder.geocode({ location: userLocation }, (results, status) => {
-      if (!active || status !== "OK" || !results?.length) return;
-      const components = results[0].address_components;
-      const city = findAddressComponent(components, "locality") ||
-        findAddressComponent(components, "postal_town") ||
-        findAddressComponent(components, "administrative_area_level_2");
-      const province = findAddressComponent(components, "administrative_area_level_1", true);
-      if (city) setLocationLabel(province && city !== province ? `${city}, ${province}` : city);
+    reverseGeocode(searchArea.center).then((label) => {
+      if (!active || !label) return;
+      setSearchArea((area) => area && sameCoordinates(area.center, searchArea.center) ? { ...area, label } : area);
+      setRequestedArea((area) => area && sameCoordinates(area.center, searchArea.center) ? { ...area, label } : area);
     });
-    return () => {
-      active = false;
-    };
-  }, [mapsLoaded, userLocation]);
+    return () => { active = false; };
+  }, [mapsLoaded, searchArea]);
 
   useEffect(() => {
-    if (!locationReady || !userLocation) return;
-    const isManualRefresh = locationRefreshVersion !== lastRefreshVersion.current;
-    const previous = lastSuggestionLocation.current;
-    if (
-      !isManualRefresh &&
-      previous &&
-      calculateDistanceKm(previous.lat, previous.lng, userLocation.lat, userLocation.lng) <
-        MATERIAL_LOCATION_CHANGE_KM
-    ) {
-      return;
-    }
-
+    if (!requestedArea) return;
     const controller = new AbortController();
     let active = true;
     let timedOut = false;
-    const fetchNearby = async () => {
-      setIsLoadingSuggestions(true);
-      setSuggestionError(null);
-      setSuggestionQuotaResetAt(null);
-      setSuggestions([]);
-      setSuggestionIndex(0);
-      const timeout = window.setTimeout(() => {
-        timedOut = true;
-        controller.abort();
-      }, SUGGESTION_TIMEOUT_MS);
-      try {
-        const data = await fetchSuggestions(
-          userLocation.lat,
-          userLocation.lng,
-          SEARCH_RADIUS_METERS,
-          controller.signal,
-        );
-        setSuggestions(data);
-        lastSuggestionLocation.current = userLocation;
-        lastRefreshVersion.current = locationRefreshVersion;
-        if (!data.length) setSuggestionError("No nearby restaurants were found.");
-      } catch (reason) {
+    const timeout = window.setTimeout(() => {
+      timedOut = true;
+      controller.abort();
+    }, SUGGESTION_TIMEOUT_MS);
+
+    setIsLoadingSuggestions(true);
+    setSuggestionError(null);
+    setSuggestionQuotaResetAt(null);
+    fetchSuggestions(
+      requestedArea.center.lat,
+      requestedArea.center.lng,
+      requestedArea.radius,
+      controller.signal,
+      requestedArea.bounds,
+    )
+      .then((places) => {
+        if (!active) return;
+        setSuggestions(places);
+        setSearchArea(requestedArea);
+        setLastFailedArea(null);
+        setMapRecommendations([]);
+        if (!places.length) setSuggestionError("No restaurants were found in this map area.");
+      })
+      .catch((reason) => {
         if (!active) return;
         if (controller.signal.aborted && timedOut) {
-          setSuggestionError("We couldn't load suggestions in time.");
+          setLastFailedArea(requestedArea);
+          setSuggestionError("We couldn't load this area in time. Your previous results are still shown.");
         } else if (reason instanceof PlacesQuotaError) {
+          setLastFailedArea(requestedArea);
           setSuggestionQuotaResetAt(reason.resetAt);
           setSuggestionError(formatPlacesQuotaError(reason.resetAt));
-        } else {
-          setSuggestionError("We couldn't load nearby spots. Please try again.");
+        } else if (!(reason instanceof DOMException && reason.name === "AbortError")) {
+          setLastFailedArea(requestedArea);
+          setSuggestionError("We couldn't search this area. Your previous results are still shown.");
         }
-      } finally {
+      })
+      .finally(() => {
         window.clearTimeout(timeout);
-        if (active) setIsLoadingSuggestions(false);
-      }
-    };
-    void fetchNearby();
+        if (active) {
+          setIsLoadingSuggestions(false);
+          setRequestedArea(null);
+        }
+      });
+
     return () => {
       active = false;
       controller.abort();
+      window.clearTimeout(timeout);
     };
-  }, [locationReady, locationRefreshVersion, userLocation]);
+  }, [requestedArea]);
 
   useEffect(() => {
-    if (!userLocation) return;
+    if (!searchArea) return;
     const controller = new AbortController();
     setWeatherLoading(true);
-    setWeather(null);
-    fetchCurrentWeather(userLocation.lat, userLocation.lng, controller.signal)
+    fetchCurrentWeather(searchArea.center.lat, searchArea.center.lng, controller.signal)
       .then(setWeather)
       .catch((reason) => {
         if (!(reason instanceof DOMException && reason.name === "AbortError")) setWeather(null);
@@ -248,30 +234,11 @@ function CraveApplication(): JSX.Element {
         if (!controller.signal.aborted) setWeatherLoading(false);
       });
     return () => controller.abort();
-  }, [userLocation]);
+  }, [searchArea]);
 
-  const filteredSuggestions = useMemo(() => {
-    return filterSuggestions(suggestions, activeFilters);
-  }, [activeFilters, suggestions]);
-
-  useEffect(() => {
-    setSuggestionIndex(0);
-    setRotationVersion((value) => value + 1);
-  }, [activeFilters]);
-
-  const advanceSuggestions = useCallback(() => {
-    setSuggestionIndex((current) => getNextSuggestionIndex(current, filteredSuggestions.length));
-  }, [filteredSuggestions.length]);
-
-  useEffect(() => {
-    if (filteredSuggestions.length <= 3) return;
-    const interval = window.setInterval(advanceSuggestions, SUGGESTION_ROTATION_MS);
-    return () => window.clearInterval(interval);
-  }, [advanceSuggestions, filteredSuggestions.length, rotationVersion]);
-
-  const visibleSuggestions = useMemo(
-    () => getVisibleSuggestions(filteredSuggestions, suggestionIndex),
-    [filteredSuggestions, suggestionIndex],
+  const filteredSuggestions = useMemo(
+    () => filterSuggestions(suggestions, activeFilters),
+    [activeFilters, suggestions],
   );
 
   const navigate = useCallback((path: string, resetChat = false) => {
@@ -284,22 +251,29 @@ function CraveApplication(): JSX.Element {
     if (resetChat) {
       setChatSession((session) => session + 1);
       setMapRecommendations([]);
+      setMobileChatExpanded(false);
     }
   }, []);
 
   const selectLocation = (selection: SelectedLocation) => {
-    setUserLocation({ lat: selection.lat, lng: selection.lng });
-    setLocationSource(selection.source);
-    setLocationLabel(selection.label);
-    setLocationStatus(
-      selection.source === "device"
-        ? "Live location locked. Refining searches nearby."
-        : "Using your selected location for nearby searches.",
+    confirmLocation(
+      { lat: selection.lat, lng: selection.lng },
+      selection.label,
+      selection.source,
+      selection.source === "device" ? "Live location locked." : "Using your selected location.",
     );
-    setLocationReady(true);
-    setLocationRefreshVersion((version) => version + 1);
     setLocationDialogOpen(false);
-    setMapRecommendations([]);
+  };
+
+  const searchViewport = async (area: SearchArea) => {
+    if (isLoadingSuggestions || isResolvingArea) return;
+    setIsResolvingArea(true);
+    try {
+      const label = mapsLoaded ? await reverseGeocode(area.center) : null;
+      setRequestedArea({ ...area, label: label || "Selected map area" });
+    } finally {
+      setIsResolvingArea(false);
+    }
   };
 
   const toggleSidebar = () => {
@@ -310,7 +284,7 @@ function CraveApplication(): JSX.Element {
     });
   };
 
-  const toggleFilter = (filter: PlaceFilter) => {
+  const toggleFilter = (filter: SuggestionFilter) => {
     setActiveFilters((current) => {
       const next = new Set(current);
       if (next.has(filter)) next.delete(filter);
@@ -319,11 +293,38 @@ function CraveApplication(): JSX.Element {
     });
   };
 
+  const retrySearch = () => {
+    const area = lastFailedArea || searchArea;
+    if (area && !isLoadingSuggestions) setRequestedArea({ ...area });
+  };
+
   const homeVisible = currentPath === "/";
+  const discoveryVisible = currentPath === "/discovery";
+  const searchRouteVisible = homeVisible || discoveryVisible;
   const placeholder = placeholderPages[currentPath];
-  const chatLocation = userLocation
-    ? { ...userLocation, city: locationLabel, radius: SEARCH_RADIUS_METERS }
+  const chatLocation = searchArea
+    ? {
+        ...searchArea.center,
+        city: searchArea.label,
+        radius: searchArea.radius,
+        bounds: searchArea.bounds,
+      }
     : null;
+
+  const toolbar = (
+    <SearchToolbar
+      activeFilters={activeFilters}
+      area={searchArea}
+      canRetry={!suggestionQuotaResetAt}
+      count={filteredSuggestions.length}
+      error={suggestionError}
+      isLoading={isLoadingSuggestions || isResolvingArea}
+      onChangeLocation={() => setLocationDialogOpen(true)}
+      onClearFilters={() => setActiveFilters(new Set())}
+      onRetry={retrySearch}
+      onToggleFilter={toggleFilter}
+    />
+  );
 
   return (
     <div className={`crave-app${sidebarCollapsed ? " sidebar-collapsed" : ""}`}>
@@ -354,80 +355,75 @@ function CraveApplication(): JSX.Element {
           }}>
             CRAVEAI
           </a>
+          {searchRouteVisible ? (
+            <button
+              className="mobile-location-pill"
+              onClick={() => setLocationDialogOpen(true)}
+              type="button"
+            >
+              <PinIcon />
+              <span>
+                <strong>{searchArea?.label || "Finding your location…"}</strong>
+                <small>
+                  {isLoadingSuggestions || isResolvingArea
+                    ? "Updating map area…"
+                    : suggestionError
+                      ? "Search needs attention"
+                      : `${filteredSuggestions.length} restaurant${filteredSuggestions.length === 1 ? "" : "s"} in map area`}
+                </small>
+              </span>
+            </button>
+          ) : null}
           <AccountMenu />
         </header>
 
         <main className="crave-content">
-          <div className={`crave-workspace${homeVisible ? "" : " is-route-hidden"}`}>
-            <section className="workspace-chat">
-              <ChatPanel
-                candidatePlaces={filteredSuggestions}
-                key={chatSession}
-                location={chatLocation}
-                onRecommendations={setMapRecommendations}
+          {homeVisible ? (
+            <div className="search-view home-view">
+              {toolbar}
+              <div className="home-split">
+                <section className="home-chat" aria-label="Chat">
+                  <MobileChatSheet expanded={mobileChatExpanded} onExpandedChange={setMobileChatExpanded}>
+                    <ChatPanel
+                      candidatePlaces={filteredSuggestions}
+                      key={chatSession}
+                      location={chatLocation}
+                      onConversationStart={() => setMobileChatExpanded(true)}
+                      onRecommendations={setMapRecommendations}
+                    />
+                  </MobileChatSheet>
+                </section>
+                <section className="home-map">
+                  <MapView
+                    confirmedArea={searchArea}
+                    isLocating={!locationReady}
+                    isSearching={isLoadingSuggestions || isResolvingArea}
+                    locationLabel={searchArea?.label || locationStatus}
+                    onSearchArea={(area) => { void searchViewport(area); }}
+                    originIsDevice={locationSource === "device"}
+                    originLocation={originLocation}
+                    recenterVersion={recenterVersion}
+                    recommendations={mapRecommendations}
+                    suggestions={filteredSuggestions}
+                  />
+                </section>
+              </div>
+            </div>
+          ) : discoveryVisible ? (
+            <div className="search-view discovery-view">
+              {toolbar}
+              <DiscoveryPage
+                canRetry={!suggestionQuotaResetAt}
+                error={suggestionError}
+                isLoading={isLoadingSuggestions}
+                onRetry={retrySearch}
+                origin={originLocation}
+                suggestions={filteredSuggestions}
               />
-            </section>
-
-            <section className={`workspace-map mobile-collapsible${mapMobileOpen ? " is-open" : ""}`}>
-              <button
-                aria-expanded={mapMobileOpen}
-                className="mobile-section-toggle"
-                onClick={() => setMapMobileOpen((open) => !open)}
-                type="button"
-              >
-                Live map <ChevronDownIcon />
-              </button>
-              <div className="mobile-section-content">
-                <MapView
-                  activeFilters={activeFilters}
-                  hasLiveLocation={locationSource === "device"}
-                  isLocating={!locationReady}
-                  locationLabel={locationLabel}
-                  onChangeLocation={() => setLocationDialogOpen(true)}
-                  onClearFilters={() => setActiveFilters(new Set())}
-                  onToggleFilter={toggleFilter}
-                  radiusKm={SEARCH_RADIUS_METERS / 1000}
-                  recommendations={mapRecommendations}
-                  statusMessage={locationStatus}
-                  suggestions={filteredSuggestions}
-                  userLocation={userLocation}
-                />
-              </div>
-            </section>
-
-            <aside className={`workspace-spots mobile-collapsible${spotsMobileOpen ? " is-open" : ""}`}>
-              <button
-                aria-expanded={spotsMobileOpen}
-                className="mobile-section-toggle"
-                onClick={() => setSpotsMobileOpen((open) => !open)}
-                type="button"
-              >
-                Suggested spots <ChevronDownIcon />
-              </button>
-              <div className="mobile-section-content">
-                <SuggestionsPanel
-                  canRetry={!suggestionQuotaResetAt}
-                  error={suggestionError}
-                  isLoading={isLoadingSuggestions}
-                  onRetry={() => setLocationRefreshVersion((version) => version + 1)}
-                  onViewMore={() => {
-                    advanceSuggestions();
-                    setRotationVersion((version) => version + 1);
-                  }}
-                  suggestions={visibleSuggestions}
-                  totalCount={filteredSuggestions.length}
-                  userLocation={userLocation}
-                />
-              </div>
-            </aside>
-          </div>
-
-          {!homeVisible ? (
-            <PlaceholderPage
-              content={placeholder}
-              onBack={() => navigate("/")}
-            />
-          ) : null}
+            </div>
+          ) : (
+            <PlaceholderPage content={placeholder} onBack={() => navigate("/", true)} />
+          )}
         </main>
       </div>
 
@@ -456,6 +452,26 @@ function PlaceholderPage({
       <button onClick={onBack} type="button">Start a new chat</button>
     </section>
   );
+}
+
+async function reverseGeocode(coordinates: Coordinates): Promise<string | null> {
+  if (typeof google === "undefined" || !google.maps?.Geocoder) return null;
+  try {
+    const response = await new google.maps.Geocoder().geocode({ location: coordinates });
+    const result = response.results?.[0];
+    if (!result) return null;
+    const city = findAddressComponent(result.address_components, "locality") ||
+      findAddressComponent(result.address_components, "postal_town") ||
+      findAddressComponent(result.address_components, "administrative_area_level_2");
+    const province = findAddressComponent(result.address_components, "administrative_area_level_1", true);
+    return city ? (province && city !== province ? `${city}, ${province}` : city) : result.formatted_address;
+  } catch {
+    return null;
+  }
+}
+
+function sameCoordinates(first: Coordinates, second: Coordinates): boolean {
+  return first.lat === second.lat && first.lng === second.lng;
 }
 
 function normalizePath(path: string): string {

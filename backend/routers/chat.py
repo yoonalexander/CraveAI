@@ -24,6 +24,23 @@ MAX_CHAT_MESSAGE_CHARS = 2000
 _pipeline_semaphore = asyncio.Semaphore(20)
 
 
+class ViewportBoundsPayload(BaseModel):
+    """Validated Google Maps viewport rectangle."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    north: float = Field(..., ge=-90, le=90)
+    south: float = Field(..., ge=-90, le=90)
+    east: float = Field(..., ge=-180, le=180)
+    west: float = Field(..., ge=-180, le=180)
+
+    @model_validator(mode="after")
+    def validate_rectangle(self) -> "ViewportBoundsPayload":
+        if self.north <= self.south or self.east <= self.west:
+            raise ValueError("Viewport bounds must form a non-empty rectangle.")
+        return self
+
+
 class LocationPayload(BaseModel):
     """Location information supplied by the frontend."""
 
@@ -49,6 +66,10 @@ class LocationPayload(BaseModel):
         ge=100,
         le=20000,
         description="Search radius hint in meters (optional).",
+    )
+    bounds: Optional[ViewportBoundsPayload] = Field(
+        default=None,
+        description="Confirmed visible map rectangle that strictly scopes retrieval.",
     )
 
 

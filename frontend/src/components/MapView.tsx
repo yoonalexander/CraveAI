@@ -1,39 +1,37 @@
-import { useMemo, useState } from "react";
-import { GoogleMap, Marker } from "@react-google-maps/api";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { GoogleMap, Marker, OverlayView } from "@react-google-maps/api";
 
 import type { ChatRecommendation } from "../api/chat";
 import type { Suggestion } from "../api/places";
 import { useGoogleMaps } from "../context/GoogleMapsContext";
-import type { SuggestionFilter } from "../utils/suggestionPool";
-import {
-  ClockIcon,
-  DollarIcon,
-  PinIcon,
-  SlidersIcon,
-} from "./Icons";
-
-export type PlaceFilter = SuggestionFilter;
+import type { Coordinates, SearchArea, ViewportBounds } from "../types/searchArea";
+import { calculateDistanceKm } from "../utils/suggestionPool";
+import { PinIcon, SearchIcon } from "./Icons";
 
 type MapViewProps = {
-  userLocation: { lat: number; lng: number } | null;
+  originLocation: Coordinates | null;
+  originIsDevice: boolean;
   locationLabel: string;
+  confirmedArea: SearchArea | null;
   suggestions: Suggestion[];
   recommendations: ChatRecommendation[];
-  activeFilters: Set<PlaceFilter>;
-  hasLiveLocation: boolean;
   isLocating: boolean;
-  statusMessage: string;
-  radiusKm: number;
-  onChangeLocation: () => void;
-  onToggleFilter: (filter: PlaceFilter) => void;
-  onClearFilters: () => void;
+  isSearching: boolean;
+  recenterVersion: number;
+  onSearchArea: (area: SearchArea) => void;
 };
+
+const MAX_VIEWPORT_RADIUS_METERS = 20_000;
 
 const mapOptions: google.maps.MapOptions = {
   clickableIcons: false,
   disableDefaultUI: true,
   fullscreenControl: false,
-  gestureHandling: "cooperative",
+  gestureHandling: "greedy",
+  mapTypeControl: false,
+  streetViewControl: false,
+  zoomControl: true,
+  zoomControlOptions: { position: 7 },
   styles: [
     { featureType: "poi.business", stylers: [{ visibility: "off" }] },
     { featureType: "transit", stylers: [{ visibility: "off" }] },
@@ -41,203 +39,202 @@ const mapOptions: google.maps.MapOptions = {
 };
 
 export function MapView({
-  userLocation,
+  originLocation,
+  originIsDevice,
   locationLabel,
+  confirmedArea,
   suggestions,
   recommendations,
-  activeFilters,
-  hasLiveLocation,
   isLocating,
-  statusMessage,
-  radiusKm,
-  onChangeLocation,
-  onToggleFilter,
-  onClearFilters,
+  isSearching,
+  recenterVersion,
+  onSearchArea,
 }: MapViewProps): JSX.Element {
   const { isLoaded, loadError, hasApiKey } = useGoogleMaps();
-  const [showFilterNotice, setShowFilterNotice] = useState(false);
+  const mapRef = useRef<google.maps.Map | null>(null);
+  const interactionArmed = useRef(false);
+  const programmaticMove = useRef(false);
+  const lastRecenterVersion = useRef(-1);
+  const [draftArea, setDraftArea] = useState<SearchArea | null>(null);
 
-  const recommendationKeys = useMemo(() => {
-    const keys = new Set<string>();
-    recommendations.forEach((place) => {
-      if (place.place_id) keys.add(`id:${place.place_id}`);
-      keys.add(`name:${place.name.toLowerCase()}`);
+  const recommendationIndexes = useMemo(() => {
+    const indexes = new Map<string, number>();
+    recommendations.forEach((place, index) => {
+      if (place.place_id) indexes.set(`id:${place.place_id}`, index + 1);
+      indexes.set(`name:${place.name.toLowerCase()}`, index + 1);
     });
-    return keys;
+    return indexes;
   }, [recommendations]);
 
-  const recommendationNumber = (suggestion: Suggestion): number | null => {
-    const index = recommendations.findIndex(
-      (place) =>
-        (place.place_id && place.place_id === suggestion.place_id) ||
-        place.name.toLowerCase() === suggestion.name.toLowerCase(),
+  const recenter = useCallback(() => {
+    const map = mapRef.current;
+    if (!map || !confirmedArea) return;
+    programmaticMove.current = true;
+    setDraftArea(null);
+    if (confirmedArea.bounds) {
+      map.fitBounds(confirmedArea.bounds, 32);
+    } else {
+      map.setCenter(confirmedArea.center);
+      map.setZoom(13);
+    }
+    window.setTimeout(() => {
+      programmaticMove.current = false;
+      interactionArmed.current = false;
+    }, 0);
+  }, [confirmedArea]);
+
+  useEffect(() => {
+    if (recenterVersion === lastRecenterVersion.current) return;
+    lastRecenterVersion.current = recenterVersion;
+    recenter();
+  }, [recenter, recenterVersion]);
+
+  const captureViewport = () => {
+    const map = mapRef.current;
+    if (!map || programmaticMove.current || !interactionArmed.current) return;
+    const center = map.getCenter();
+    const bounds = map.getBounds();
+    if (!center || !bounds) return;
+    const northEast = bounds.getNorthEast();
+    const southWest = bounds.getSouthWest();
+    const nextBounds: ViewportBounds = {
+      north: northEast.lat(),
+      south: southWest.lat(),
+      east: northEast.lng(),
+      west: southWest.lng(),
+    };
+    const nextCenter = { lat: center.lat(), lng: center.lng() };
+    const radius = Math.ceil(
+      calculateDistanceKm(nextCenter.lat, nextCenter.lng, nextBounds.north, nextBounds.east) * 1000,
     );
-    return index >= 0 ? index + 1 : null;
+    setDraftArea({ center: nextCenter, bounds: nextBounds, radius, label: "Map area" });
   };
 
-  let mapContent: JSX.Element;
-  if (isLocating || !userLocation) {
-    mapContent = <MapLoading />;
+  let content: JSX.Element;
+  if (isLocating || !originLocation) {
+    content = <MapState title="Finding your location">The map will appear when your location is ready.</MapState>;
   } else if (!hasApiKey) {
-    mapContent = (
-      <MapEmpty>
-        Add <code>VITE_GOOGLE_MAPS_API_KEY</code> to display the live map.
-      </MapEmpty>
+    content = (
+      <MapState title="Map unavailable">
+        Add <code>VITE_GOOGLE_MAPS_API_KEY</code> to enable viewport search. Nearby chat still works.
+      </MapState>
     );
   } else if (loadError) {
-    mapContent = <MapEmpty>Google Maps could not load. Your search and chat still work.</MapEmpty>;
+    content = <MapState title="Google Maps could not load">Your current restaurant pool and chat still work.</MapState>;
   } else if (!isLoaded) {
-    mapContent = <MapLoading />;
+    content = <MapState title="Loading Google Maps">This should only take a moment.</MapState>;
   } else {
-    mapContent = (
+    content = (
       <GoogleMap
-        center={userLocation}
+        center={confirmedArea?.center || originLocation}
         mapContainerStyle={{ width: "100%", height: "100%" }}
+        onDragStart={() => { interactionArmed.current = true; }}
+        onIdle={captureViewport}
+        onLoad={(map) => {
+          mapRef.current = map;
+          window.setTimeout(recenter, 0);
+        }}
+        onUnmount={() => { mapRef.current = null; }}
+        onZoomChanged={captureViewport}
         options={mapOptions}
-        zoom={hasLiveLocation ? 13 : 12}
+        zoom={13}
       >
         <Marker
           label={{ text: "ME", color: "#ffffff", fontSize: "10px", fontWeight: "700" }}
-          position={userLocation}
-          title={hasLiveLocation ? "You are here" : locationLabel}
+          position={originLocation}
+          title={originIsDevice ? "You are here" : `Selected location: ${locationLabel}`}
+          zIndex={1000}
         />
         {suggestions.map((place) => {
-          if (typeof place.lat !== "number" || typeof place.lng !== "number") return null;
-          const highlighted =
-            recommendationKeys.has(`id:${place.place_id}`) ||
-            recommendationKeys.has(`name:${place.name.toLowerCase()}`);
-          const number = recommendationNumber(place);
+          if (!Number.isFinite(place.lat) || !Number.isFinite(place.lng)) return null;
+          const recommendationNumber = recommendationIndexes.get(`id:${place.place_id}`) ||
+            recommendationIndexes.get(`name:${place.name.toLowerCase()}`);
           return (
-            <Marker
-              icon={
-                highlighted
-                  ? undefined
-                  : {
-                      path: google.maps.SymbolPath.CIRCLE,
-                      fillColor: "#5f8f55",
-                      fillOpacity: 0.95,
-                      scale: 6,
-                      strokeColor: "#ffffff",
-                      strokeWeight: 2,
-                    }
-              }
+            <RestaurantMarker
               key={place.place_id}
-              label={highlighted && number ? { text: String(number), color: "#ffffff", fontWeight: "700" } : undefined}
-              position={{ lat: place.lat, lng: place.lng }}
-              title={place.name}
+              number={recommendationNumber}
+              place={place}
             />
           );
         })}
         {recommendations
-          .filter(
-            (place) =>
-              typeof place.lat === "number" &&
-              typeof place.lng === "number" &&
-              !suggestions.some(
-                (suggestion) =>
-                  (place.place_id && suggestion.place_id === place.place_id) ||
-                  suggestion.name.toLowerCase() === place.name.toLowerCase(),
-              ),
-          )
+          .filter((place) =>
+            typeof place.lat === "number" &&
+            typeof place.lng === "number" &&
+            !suggestions.some((suggestion) =>
+              (place.place_id && suggestion.place_id === place.place_id) ||
+              suggestion.name.toLowerCase() === place.name.toLowerCase(),
+            ))
           .map((place, index) => (
-            <Marker
+            <OverlayView
               key={`chat-${place.place_id || place.name}-${index}`}
-              label={{ text: String(index + 1), color: "#ffffff", fontWeight: "700" }}
+              mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
               position={{ lat: place.lat as number, lng: place.lng as number }}
-              title={place.name}
-            />
+            >
+              <div className="restaurant-map-marker is-recommendation is-chat-only" title={place.name}>
+                <span>{index + 1}</span>
+              </div>
+            </OverlayView>
           ))}
       </GoogleMap>
     );
   }
 
+  const tooWide = Boolean(draftArea && draftArea.radius > MAX_VIEWPORT_RADIUS_METERS);
+
   return (
-    <section className="map-card" aria-labelledby="map-title">
-      <header className="map-card-header">
-        <p className="eyebrow">Live map</p>
-        <h2 id="map-title">Restaurants Near You</h2>
-        <div className="map-location-line">
-          <PinIcon />
-          <div>
-            <strong>{locationLabel}</strong>
-            <span>{statusMessage}</span>
-          </div>
-        </div>
-        <div className="map-filter-row" aria-label="Restaurant filters">
-          <button
-            aria-pressed={activeFilters.size === 0}
-            className={activeFilters.size === 0 ? "is-active" : ""}
-            onClick={onClearFilters}
-            type="button"
-          >
-            <SlidersIcon /> All
-          </button>
-          <button
-            aria-describedby="budget-filter-note"
-            aria-pressed={activeFilters.has("budget")}
-            className={activeFilters.has("budget") ? "is-active" : ""}
-            onClick={() => onToggleFilter("budget")}
-            title="Estimated from Google's lowest price levels"
-            type="button"
-          >
-            <DollarIcon /> Under $20
-          </button>
-          <button
-            aria-pressed={activeFilters.has("open")}
-            className={activeFilters.has("open") ? "is-active" : ""}
-            onClick={() => onToggleFilter("open")}
-            type="button"
-          >
-            <ClockIcon /> Open Now
-          </button>
-          <div className="advanced-filter-wrap">
-            <button
-              aria-expanded={showFilterNotice}
-              onClick={() => setShowFilterNotice((visible) => !visible)}
-              type="button"
-            >
-              <SlidersIcon /> Filters
-            </button>
-            {showFilterNotice ? (
-              <div className="filter-coming-soon" role="status">
-                More filters are coming soon.
-              </div>
-            ) : null}
-          </div>
-        </div>
-        <span className="sr-only" id="budget-filter-note">
-          Under $20 is an estimate based on Google price levels zero and one.
-        </span>
-      </header>
-
-      <div className="map-canvas">{mapContent}</div>
-
-      <footer className="map-card-footer">
-        <div className="map-footer-pin"><PinIcon /></div>
-        <div>
-          <strong>{isLocating ? "Finding nearby spots" : `You're near ${locationLabel}`}</strong>
-          <span>
-            {suggestions.length
-              ? `${suggestions.length} spot${suggestions.length === 1 ? "" : "s"} within ${radiusKm} km`
-              : "No spots match the current filters"}
-          </span>
-        </div>
-        <button onClick={onChangeLocation} type="button">Change location</button>
-      </footer>
+    <section
+      aria-label="Interactive restaurant map"
+      className="map-surface"
+      onPointerDown={() => { interactionArmed.current = true; }}
+      onWheel={() => { interactionArmed.current = true; }}
+    >
+      <div className="map-canvas">{content}</div>
+      {draftArea ? (
+        <button
+          className={`search-this-area-button${tooWide ? " is-warning" : ""}`}
+          disabled={isSearching || tooWide}
+          onClick={() => onSearchArea(draftArea)}
+          type="button"
+        >
+          <SearchIcon />
+          {tooWide ? "Zoom in to search this area" : isSearching ? "Searching…" : "Search this area"}
+        </button>
+      ) : null}
+      {isSearching ? <div className="map-searching-badge" role="status">Updating this map area…</div> : null}
     </section>
   );
 }
 
-function MapLoading(): JSX.Element {
+function RestaurantMarker({
+  place,
+  number,
+}: {
+  place: Suggestion;
+  number?: number;
+}): JSX.Element {
   return (
-    <div className="map-state">
-      <div className="map-location-pulse"><span /></div>
-      <strong>Finding your location</strong>
-      <p>The map will appear when your location is ready.</p>
-    </div>
+    <OverlayView
+      mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
+      position={{ lat: place.lat, lng: place.lng }}
+    >
+      <div
+        className={`restaurant-map-marker${number ? " is-recommendation" : ""}`}
+        title={`${place.name}${typeof place.rating === "number" ? `, ${place.rating.toFixed(1)} stars` : ""}`}
+      >
+        {number ? <span>{number}</span> : null}
+        <strong>{typeof place.rating === "number" ? `★ ${place.rating.toFixed(1)}` : place.name}</strong>
+      </div>
+    </OverlayView>
   );
 }
 
-function MapEmpty({ children }: { children: React.ReactNode }): JSX.Element {
-  return <div className="map-state"><PinIcon /><p>{children}</p></div>;
+function MapState({ title, children }: { title: string; children: React.ReactNode }): JSX.Element {
+  return (
+    <div className="map-state">
+      <PinIcon />
+      <strong>{title}</strong>
+      <p>{children}</p>
+    </div>
+  );
 }

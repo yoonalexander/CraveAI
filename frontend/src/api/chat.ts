@@ -1,11 +1,13 @@
 import type { Suggestion } from "./places";
 import { apiFetch } from "./client";
+import type { ViewportBounds } from "../types/searchArea";
 
 export type LocationHint = {
   lat: number;
   lng: number;
   city?: string;
   radius?: number;
+  bounds?: ViewportBounds;
 };
 
 type ChatRequestPayload = {

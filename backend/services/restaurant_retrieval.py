@@ -8,7 +8,7 @@ from typing import Any, Sequence
 import httpx
 
 from backend.config import get_settings
-from backend.services.places import search_nearby_places
+from backend.services.places import is_coordinate_in_bounds, search_nearby_places
 from backend.services.recommendation_models import CravingIntent, EvidenceItem
 from backend.services.venue_constraints import (
     candidate_matches_venue_constraints,
@@ -51,6 +51,7 @@ async def retrieve_candidate_restaurants(
         return []
 
     radius = max(100, min(int(location.get("radius") or 5000), 20000))
+    bounds = _validated_bounds(location.get("bounds"))
     queries = intent.search_queries
     live_results: list[list[dict[str, Any]]] = []
 
@@ -64,6 +65,7 @@ async def retrieve_candidate_restaurants(
                     lng=lng,
                     radius=radius,
                     api_key=settings.GOOGLE_API_KEY,
+                    bounds=bounds,
                 )
                 for query in queries
             ]
@@ -105,6 +107,14 @@ async def retrieve_candidate_restaurants(
         merged = await _legacy_provider_fallback(intent, location)
 
     _merge_relevant_session_pool(merged, session_pool, intent)
+    if bounds:
+        merged = {
+            place_id: candidate
+            for place_id, candidate in merged.items()
+            if is_coordinate_in_bounds(
+                candidate.get("lat"), candidate.get("lng"), bounds
+            )
+        }
     candidates = [
         candidate
         for candidate in merged.values()
@@ -133,8 +143,15 @@ async def _search_text(
     lng: float,
     radius: int,
     api_key: str,
+    bounds: dict[str, float] | None = None,
 ) -> list[dict[str, Any]]:
-    low_lat, low_lng, high_lat, high_lng = _bounding_box(lat, lng, radius)
+    if bounds:
+        low_lat = bounds["south"]
+        low_lng = bounds["west"]
+        high_lat = bounds["north"]
+        high_lng = bounds["east"]
+    else:
+        low_lat, low_lng, high_lat, high_lng = _bounding_box(lat, lng, radius)
     payload = {
         "textQuery": query,
         "includedType": "restaurant",
@@ -158,6 +175,23 @@ async def _search_text(
     )
     response.raise_for_status()
     return response.json().get("places", [])
+
+
+def _validated_bounds(value: Any) -> dict[str, float] | None:
+    if not isinstance(value, dict):
+        return None
+    try:
+        bounds = {
+            "north": float(value["north"]),
+            "south": float(value["south"]),
+            "east": float(value["east"]),
+            "west": float(value["west"]),
+        }
+    except (KeyError, TypeError, ValueError):
+        return None
+    if bounds["north"] <= bounds["south"] or bounds["east"] <= bounds["west"]:
+        return None
+    return bounds
 
 
 def _parse_text_search_place(item: dict[str, Any]) -> dict[str, Any] | None:

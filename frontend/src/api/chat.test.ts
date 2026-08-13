@@ -75,4 +75,26 @@ describe("sendChat", () => {
     const request = fetchMock.mock.calls[0][1] as RequestInit;
     expect(JSON.parse(String(request.body)).candidate_places).toEqual([]);
   });
+
+  it("passes the confirmed viewport bounds to the recommendation pipeline", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(
+        JSON.stringify({ reply: "Inside the map.", messages: [], recommendations: [] }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      ),
+    );
+    const bounds = { north: 43.75, south: 43.65, east: -79.34, west: -79.46 };
+
+    await sendChat("ramen", {
+      location: { lat: 43.7, lng: -79.4, radius: 7500, bounds },
+    });
+
+    const request = fetchMock.mock.calls[0][1] as RequestInit;
+    expect(JSON.parse(String(request.body)).location).toMatchObject({
+      lat: 43.7,
+      lng: -79.4,
+      radius: 7500,
+      bounds,
+    });
+  });
 });

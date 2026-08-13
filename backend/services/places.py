@@ -123,12 +123,15 @@ async def get_top_rated_nearby(
     lng: float,
     radius: int = 5000,
     limit: int = SUGGESTION_POOL_LIMIT,
+    bounds: Optional[Dict[str, float]] = None,
 ) -> List[Dict[str, Any]]:
     """
     Fetch high-rated restaurants near the given location.
     """
     print(f"DEBUG: get_top_rated_nearby called with lat={lat}, lng={lng}")
     if not GOOGLE_PLACES_API_KEY:
+        if bounds:
+            return []
         return _placeholder_places(["Local Favorite", "Trending"], lat, lng)[:limit]
 
     async with httpx.AsyncClient(timeout=httpx.Timeout(10.0)) as client:
@@ -157,6 +160,18 @@ async def get_top_rated_nearby(
                     )
                     candidates = _deduplicate_places([*candidates, *wider_candidates])
 
+            if bounds:
+                candidates = [
+                    candidate
+                    for candidate in candidates
+                    if is_coordinate_in_bounds(
+                        candidate.get("lat"), candidate.get("lng"), bounds
+                    )
+                ]
+
+            if not candidates and bounds:
+                return []
+
             if not candidates:
                 return _placeholder_places(
                     ["Local Favorite", "Trending", "Chef's Pick"], lat, lng
@@ -168,7 +183,23 @@ async def get_top_rated_nearby(
 
         except Exception as e:
             print(f"DEBUG: Failed to fetch top rated places: {e}")
+            if bounds:
+                return []
             return _placeholder_places(["Local Favorite", "Trending"], lat, lng)[:limit]
+
+
+def is_coordinate_in_bounds(
+    lat: Any,
+    lng: Any,
+    bounds: Dict[str, float],
+) -> bool:
+    """Return whether a coordinate is inside a validated viewport rectangle."""
+    if not _valid_coordinate(lat, -90, 90) or not _valid_coordinate(lng, -180, 180):
+        return False
+    return (
+        bounds["south"] <= float(lat) <= bounds["north"]
+        and bounds["west"] <= float(lng) <= bounds["east"]
+    )
 
 
 async def _fetch_and_filter(

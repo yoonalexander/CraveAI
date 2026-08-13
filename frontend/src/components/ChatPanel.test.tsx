@@ -79,4 +79,19 @@ describe("ChatPanel", () => {
     fireEvent.click(screen.getByRole("button", { name: "Voice input coming soon" }));
     expect(screen.getByText("Voice input is coming soon.")).toBeInTheDocument();
   });
+
+  it("notifies the mobile sheet only when the first message starts a conversation", async () => {
+    const onConversationStart = vi.fn();
+    render(<ChatPanel onConversationStart={onConversationStart} />);
+    const composer = screen.getByRole("textbox", { name: "Ask CraveAI" });
+    fireEvent.change(composer, { target: { value: "First" } });
+    fireEvent.keyDown(composer, { key: "Enter" });
+    await waitFor(() => expect(mockedSendChat).toHaveBeenCalledOnce());
+    expect(onConversationStart).toHaveBeenCalledOnce();
+
+    fireEvent.change(composer, { target: { value: "Second" } });
+    fireEvent.keyDown(composer, { key: "Enter" });
+    await waitFor(() => expect(mockedSendChat).toHaveBeenCalledTimes(2));
+    expect(onConversationStart).toHaveBeenCalledOnce();
+  });
 });
