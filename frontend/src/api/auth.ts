@@ -4,6 +4,7 @@ export type AuthUser = {
   user_id: string;
   email: string;
   email_verified: boolean;
+  policy_required?: boolean;
 };
 
 export type Identity = {
@@ -19,8 +20,19 @@ export async function fetchCurrentUser(): Promise<AuthUser | null> {
   return ((await response.json()) as { user: AuthUser }).user;
 }
 
-export async function register(email: string, password: string): Promise<void> {
-  await authPost("/auth/register", { email, password });
+export async function register(
+  email: string,
+  password: string,
+  legal: { terms_version: string; privacy_version: string },
+): Promise<void> {
+  await authPost("/auth/register", {
+    email,
+    password,
+    ...legal,
+    accept_terms: true,
+    acknowledge_privacy: true,
+    age_confirmed: true,
+  });
 }
 
 export async function login(email: string, password: string): Promise<AuthUser> {

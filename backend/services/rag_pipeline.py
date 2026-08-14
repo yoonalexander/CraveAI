@@ -4,6 +4,7 @@ import asyncio
 import logging
 import re
 import time
+from collections.abc import Awaitable, Callable
 from typing import Any, Sequence
 
 from backend.config import get_settings
@@ -31,6 +32,7 @@ async def generate_recommendations(
     user_query: str,
     location: dict[str, Any],
     candidate_places: Sequence[dict[str, Any]] | None = None,
+    on_stage: Callable[[str, str], Awaitable[None]] | None = None,
 ) -> dict[str, Any]:
     """Run the evidence-grounded, dish-oriented recommendation pipeline."""
     total_started = time.perf_counter()
@@ -39,11 +41,13 @@ async def generate_recommendations(
     try:
         async with asyncio.timeout(PIPELINE_TIMEOUT_SECONDS):
             started = time.perf_counter()
+            await _emit_stage(on_stage, "understanding", "Understanding your craving")
             intent = await extract_craving_intent(user_query)
             _log_stage("intent", started, constraints=len(intent.constraints))
 
             stage = "retrieval"
             started = time.perf_counter()
+            await _emit_stage(on_stage, "retrieval", "Searching restaurants in the confirmed area")
             candidates = await retrieve_candidate_restaurants(
                 intent,
                 location,
@@ -56,6 +60,7 @@ async def generate_recommendations(
 
             stage = "menu_evidence"
             started = time.perf_counter()
+            await _emit_stage(on_stage, "evidence", "Checking attributable menu evidence")
             candidates = await enrich_candidates_with_menu_evidence(candidates, intent)
             menu_evidence_count = sum(
                 evidence.get("kind") in {"official_menu", "official_website"}
@@ -71,11 +76,13 @@ async def generate_recommendations(
 
             stage = "assessment"
             started = time.perf_counter()
+            await _emit_stage(on_stage, "assessment", "Comparing evidence with your constraints")
             assessments = await assess_candidate_evidence(intent, candidates)
             _log_stage("assessment", started, candidates=len(assessments))
 
             stage = "scoring"
             started = time.perf_counter()
+            await _emit_stage(on_stage, "ranking", "Ranking the verified nearby matches")
             result = rank_evidence_candidates(intent, candidates, assessments)
             _log_stage(
                 "scoring",
@@ -92,10 +99,10 @@ async def generate_recommendations(
         intent = fallback_intent(user_query)
         return _empty_response(intent.model_dump(), "the search timed out")
     except Exception as exc:
-        logger.exception(
-            "recommendation_pipeline stage=%s outcome=error error=%r",
+        logger.error(
+            "recommendation_pipeline stage=%s outcome=error error_type=%s",
             stage,
-            exc,
+            type(exc).__name__,
         )
         intent = fallback_intent(user_query)
         return _empty_response(intent.model_dump(), "the evidence search failed")
@@ -105,6 +112,15 @@ async def generate_recommendations(
             (time.perf_counter() - total_started) * 1000,
             candidate_count,
         )
+
+
+async def _emit_stage(
+    callback: Callable[[str, str], Awaitable[None]] | None,
+    stage: str,
+    message: str,
+) -> None:
+    if callback is not None:
+        await callback(stage, message)
 
 
 def extract_search_terms(user_query: str) -> list[str]:

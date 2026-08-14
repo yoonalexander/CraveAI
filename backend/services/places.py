@@ -9,6 +9,8 @@ from typing import Any, Dict, List, Optional
 import httpx
 
 from backend.config import get_settings
+from backend.services.menu_evidence import enrich_candidates_with_menu_evidence
+from backend.services.recommendation_models import CravingIntent, IntentConstraint, SearchQuerySpec
 
 logger = logging.getLogger(__name__)
 
@@ -128,7 +130,6 @@ async def get_top_rated_nearby(
     """
     Fetch high-rated restaurants near the given location.
     """
-    print(f"DEBUG: get_top_rated_nearby called with lat={lat}, lng={lng}")
     if not GOOGLE_PLACES_API_KEY:
         if bounds:
             return []
@@ -148,9 +149,7 @@ async def get_top_rated_nearby(
                 # the quality threshold or discarding the original results.
                 wider_radius = min(int(radius * 2), 20000)
                 if wider_radius > radius:
-                    print(
-                        f"DEBUG: Sparse first pass. Retrying with radius={wider_radius} and min_rating=4.0"
-                    )
+                    logger.info("Nearby Places result set was sparse; retrying a wider bounded radius.")
                     wider_candidates = await _fetch_and_filter(
                         client,
                         lat=lat,
@@ -181,11 +180,130 @@ async def get_top_rated_nearby(
             candidates.sort(key=_quality_sort_key, reverse=True)
             return candidates[: min(limit, SUGGESTION_POOL_LIMIT)]
 
-        except Exception as e:
-            print(f"DEBUG: Failed to fetch top rated places: {e}")
+        except Exception:
+            logger.warning("Nearby Places lookup failed; using the safe fallback behavior.")
             if bounds:
                 return []
             return _placeholder_places(["Local Favorite", "Trending"], lat, lng)[:limit]
+
+
+async def resolve_place_ids(place_ids: List[str]) -> List[Dict[str, Any]]:
+    """Hydrate a bounded list of Place IDs without caching provider content."""
+    unique = list(dict.fromkeys(item.strip() for item in place_ids if item.strip()))[:20]
+    if not GOOGLE_PLACES_API_KEY:
+        return [{"place_id": item, "unavailable": True} for item in unique]
+    fields = (
+        "place_id,name,rating,user_ratings_total,formatted_address,geometry,types,"
+        "price_level,opening_hours,business_status"
+    )
+    async with httpx.AsyncClient(timeout=httpx.Timeout(10.0)) as client:
+        async def _resolve(place_id: str) -> Dict[str, Any]:
+            response = await client.get(
+                "https://maps.googleapis.com/maps/api/place/details/json",
+                params={"key": GOOGLE_PLACES_API_KEY, "place_id": place_id, "fields": fields},
+            )
+            response.raise_for_status()
+            payload = response.json()
+            item = payload.get("result")
+            if payload.get("status") != "OK" or not isinstance(item, dict):
+                return {"place_id": place_id, "unavailable": True}
+            item["vicinity"] = item.get("formatted_address")
+            parsed = _parse_place_item(item)
+            parsed["google_maps_url"] = (
+                "https://www.google.com/maps/search/?api=1&query_place_id=" + place_id
+            )
+            return parsed
+
+        results = await asyncio.gather(*(_resolve(item) for item in unique), return_exceptions=True)
+    return [
+        ({"place_id": unique[index], "unavailable": True} if isinstance(item, Exception) else item)
+        for index, item in enumerate(results)
+    ]
+
+
+async def verify_dietary_place_ids(
+    place_ids: List[str], requirements: List[str]
+) -> List[Dict[str, Any]]:
+    """Ephemerally verify bounded official-menu dietary evidence for Place IDs."""
+    unique_ids = list(dict.fromkeys(item.strip() for item in place_ids if item.strip()))[:10]
+    normalized_requirements = list(dict.fromkeys(
+        _normalize_dietary(item) for item in requirements if _normalize_dietary(item)
+    ))[:5]
+    if not unique_ids or not normalized_requirements or not GOOGLE_PLACES_API_KEY:
+        return []
+    fields = "place_id,name,website"
+    async with httpx.AsyncClient(timeout=httpx.Timeout(10.0)) as client:
+        async def _resolve(place_id: str) -> Dict[str, Any] | None:
+            response = await client.get(
+                "https://maps.googleapis.com/maps/api/place/details/json",
+                params={"key": GOOGLE_PLACES_API_KEY, "place_id": place_id, "fields": fields},
+            )
+            response.raise_for_status()
+            payload = response.json()
+            item = payload.get("result")
+            if payload.get("status") != "OK" or not isinstance(item, dict) or not item.get("website"):
+                return None
+            return {
+                "place_id": place_id,
+                "name": str(item.get("name") or "Restaurant")[:200],
+                "website": str(item["website"]),
+                "evidence": [],
+            }
+
+        resolved = await asyncio.gather(*(_resolve(item) for item in unique_ids), return_exceptions=True)
+    candidates = [item for item in resolved if isinstance(item, dict)]
+    if not candidates:
+        return []
+    constraints = [
+        IntentConstraint(
+            id=f"diet-{index}", dimension="diet", value=requirement,
+            polarity="include", strength="required",
+        )
+        for index, requirement in enumerate(normalized_requirements, start=1)
+    ]
+    intent = CravingIntent(
+        summary="Official-menu dietary verification",
+        constraints=constraints,
+        candidate_dishes=[],
+        search_queries=[
+            SearchQuerySpec(
+                text=" ".join(normalized_requirements),
+                constraint_ids=[item.id for item in constraints],
+            )
+        ],
+    )
+    await enrich_candidates_with_menu_evidence(candidates, intent)
+    verified: List[Dict[str, Any]] = []
+    for candidate in candidates:
+        evidence = [
+            item for item in candidate.get("evidence") or []
+            if item.get("kind") in {"official_menu", "official_website"}
+            and item.get("source_url")
+        ]
+        combined = " ".join(
+            f"{item.get('label', '')} {item.get('detail', '')}" for item in evidence
+        ).lower().replace("-", " ")
+        matched = [
+            requirement for requirement in normalized_requirements
+            if requirement.replace("-", " ") in combined
+        ]
+        if len(matched) != len(normalized_requirements):
+            continue
+        verified.append({
+            "place_id": candidate["place_id"],
+            "dietary_matches": matched,
+            "evidence": [
+                {"type": item["kind"], "label": item["label"], "source_url": item["source_url"]}
+                for item in evidence[:8]
+            ],
+        })
+    return verified
+
+
+def _normalize_dietary(value: str) -> str:
+    normalized = " ".join(value.strip().lower().replace("_", "-").split())
+    aliases = {"gluten free": "gluten-free", "plant based": "vegan"}
+    return aliases.get(normalized, normalized) if normalized in {"vegetarian", "vegan", "halal", "gluten-free", "gluten free", "plant based"} else ""
 
 
 def is_coordinate_in_bounds(
@@ -225,12 +343,8 @@ async def _fetch_and_filter(
     payload = response.json()
     status = payload.get("status")
     results = payload.get("results", [])
-    print(
-        f"DEBUG: Places status={status}, results={len(results)}, radius={radius}, min_rating={min_rating}"
-    )
-
     if status not in ("OK", "ZERO_RESULTS"):
-        print(f"DEBUG: Places error: {status} - {payload.get('error_message')}")
+        logger.warning("Google Places returned a non-success status: %s", status)
         return []
 
     candidates: List[Dict[str, Any]] = []
@@ -327,6 +441,10 @@ def _parse_place_item(item: Dict[str, Any], reason_hint: Optional[str] = None) -
         "user_ratings_total": total_reviews,
         "price_level": item.get("price_level"),
         "open_now": (item.get("opening_hours") or {}).get("open_now"),
+        "takeout": item.get("takeout"),
+        "delivery": item.get("delivery"),
+        "reservable": item.get("reservable"),
+        "wheelchair_accessible_entrance": item.get("wheelchair_accessible_entrance"),
     }
 
 

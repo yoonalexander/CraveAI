@@ -24,6 +24,13 @@ type AuthContextValue = {
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
+const guestAuthFallback: AuthContextValue = {
+  user: null,
+  loading: false,
+  login: async () => { throw new Error("Authentication provider is unavailable."); },
+  logout: async () => undefined,
+  refresh: async () => undefined,
+};
 
 export function AuthProvider({ children }: { children: ReactNode }): JSX.Element {
   const [user, setUser] = useState<AuthUser | null>(null);
@@ -52,6 +59,7 @@ export function AuthProvider({ children }: { children: ReactNode }): JSX.Element
       },
       logout: async () => {
         await logoutRequest();
+        window.sessionStorage.removeItem("craveai-temporary-chat");
         setUser(null);
       },
       refresh,
@@ -64,6 +72,5 @@ export function AuthProvider({ children }: { children: ReactNode }): JSX.Element
 
 export function useAuth(): AuthContextValue {
   const context = useContext(AuthContext);
-  if (!context) throw new Error("useAuth must be used inside AuthProvider.");
-  return context;
+  return context || guestAuthFallback;
 }

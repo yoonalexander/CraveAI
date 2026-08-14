@@ -3,16 +3,35 @@ from __future__ import annotations
 import logging
 import time
 import uuid
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from backend.config import get_settings
-from backend.routers import account, auth, chat, feedback, favorites, places
-from backend.services.storage import init_storage
+from backend.routers import (
+    account,
+    audio,
+    auth,
+    chat,
+    conversations,
+    feedback,
+    favorites,
+    legal,
+    places,
+    plans,
+    preferences,
+)
+from backend.services.storage import init_storage, purge_expired_operational_data
 
 logger = logging.getLogger(__name__)
+
+
+@asynccontextmanager
+async def _lifespan(_: FastAPI):
+    await purge_expired_operational_data()
+    yield
 
 
 def create_app() -> FastAPI:
@@ -25,6 +44,7 @@ def create_app() -> FastAPI:
         title="CraveAI Backend",
         version="1.0.0",
         description="Secure API for the CraveAI conversational recommender.",
+        lifespan=_lifespan,
     )
     app.state.settings = settings
 
@@ -32,7 +52,7 @@ def create_app() -> FastAPI:
         CORSMiddleware,
         allow_origins=list(settings.ALLOWED_ORIGINS),
         allow_credentials=True,
-        allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
+        allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
         allow_headers=["Content-Type", "X-CSRF-Token", "X-Request-ID"],
         expose_headers=[
             "X-RateLimit-Limit",
@@ -50,9 +70,14 @@ def create_app() -> FastAPI:
         request_id = request.headers.get("x-request-id", "")[:64] or str(uuid.uuid4())
         request.state.request_id = request_id
         content_length = request.headers.get("content-length")
+        body_limit = (
+            settings.AUDIO_MAX_BYTES + 128 * 1024
+            if request.url.path.endswith("/audio/transcriptions")
+            else settings.REQUEST_BODY_LIMIT_BYTES
+        )
         if content_length:
             try:
-                too_large = int(content_length) > settings.REQUEST_BODY_LIMIT_BYTES
+                too_large = int(content_length) > body_limit
             except ValueError:
                 too_large = True
             if too_large:
@@ -63,7 +88,7 @@ def create_app() -> FastAPI:
                 )
         if request.method in {"POST", "PUT", "PATCH", "DELETE"}:
             body = await request.body()
-            if len(body) > settings.REQUEST_BODY_LIMIT_BYTES:
+            if len(body) > body_limit:
                 return JSONResponse(
                     status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
                     content={"detail": {"code": "request_body_too_large"}},
@@ -76,7 +101,7 @@ def create_app() -> FastAPI:
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
         response.headers["Permissions-Policy"] = (
-            "camera=(), microphone=(), payment=(), usb=(), geolocation=(self)"
+            "camera=(), microphone=(self), payment=(), usb=(), geolocation=(self)"
         )
         response.headers["X-Frame-Options"] = "DENY"
         response.headers["Content-Security-Policy"] = (
@@ -96,7 +121,11 @@ def create_app() -> FastAPI:
         )
         return response
 
-    api_routers = (auth.router, account.router, chat.router, places.router, favorites.router, feedback.router)
+    api_routers = (
+        auth.router, account.router, legal.router, preferences.router, audio.router,
+        conversations.router, plans.router, chat.router, places.router,
+        favorites.router, feedback.router,
+    )
     for router in api_routers:
         app.include_router(router, prefix="/api")
 

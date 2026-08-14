@@ -129,6 +129,15 @@ class Config:
     FEEDBACK_DAILY_LIMIT: int = field(
         default_factory=lambda: _env_int("FEEDBACK_DAILY_LIMIT", 20)
     )
+    GUEST_DAILY_VOICE_SECONDS: int = field(
+        default_factory=lambda: _env_int("GUEST_DAILY_VOICE_SECONDS", 180)
+    )
+    ACCOUNT_DAILY_VOICE_SECONDS: int = field(
+        default_factory=lambda: _env_int("ACCOUNT_DAILY_VOICE_SECONDS", 900)
+    )
+    AUDIO_MAX_BYTES: int = field(
+        default_factory=lambda: _env_int("AUDIO_MAX_BYTES", 10 * 1024 * 1024)
+    )
     REQUEST_BODY_LIMIT_BYTES: int = field(
         default_factory=lambda: _env_int("REQUEST_BODY_LIMIT_BYTES", 64 * 1024)
     )
@@ -144,6 +153,14 @@ class Config:
     SESSION_ROTATE_HOURS: int = field(
         default_factory=lambda: _env_int("SESSION_ROTATE_HOURS", 24)
     )
+    TERMS_VERSION: str = field(default_factory=lambda: os.getenv("TERMS_VERSION", "2026-08-13"))
+    PRIVACY_VERSION: str = field(default_factory=lambda: os.getenv("PRIVACY_VERSION", "2026-08-13"))
+    POLICY_EFFECTIVE_DATE: str = field(default_factory=lambda: os.getenv("POLICY_EFFECTIVE_DATE", "2026-08-13"))
+    OPERATOR_LEGAL_NAME: str = field(default_factory=lambda: os.getenv("OPERATOR_LEGAL_NAME", "[OPERATOR LEGAL NAME]"))
+    OPERATOR_ADDRESS: str = field(default_factory=lambda: os.getenv("OPERATOR_ADDRESS", "[OPERATOR ADDRESS]"))
+    GOVERNING_LAW: str = field(default_factory=lambda: os.getenv("GOVERNING_LAW", "[GOVERNING LAW]"))
+    SUPPORT_EMAIL: str = field(default_factory=lambda: os.getenv("SUPPORT_EMAIL", "support@example.com"))
+    PRIVACY_EMAIL: str = field(default_factory=lambda: os.getenv("PRIVACY_EMAIL", "privacy@example.com"))
 
     @property
     def is_production(self) -> bool:
@@ -199,6 +216,22 @@ class Config:
                 raise RuntimeError("SESSION_ENCRYPTION_KEY must decode to 32 bytes")
             if "*" in self.ALLOWED_ORIGINS:
                 raise RuntimeError("Wildcard CORS origins are forbidden in production")
+            launch_placeholders = {
+                "OPERATOR_LEGAL_NAME": self.OPERATOR_LEGAL_NAME,
+                "OPERATOR_ADDRESS": self.OPERATOR_ADDRESS,
+                "GOVERNING_LAW": self.GOVERNING_LAW,
+                "SUPPORT_EMAIL": self.SUPPORT_EMAIL,
+                "PRIVACY_EMAIL": self.PRIVACY_EMAIL,
+            }
+            invalid = [
+                name for name, value in launch_placeholders.items()
+                if not value or "[" in value or value.endswith("@example.com")
+            ]
+            if invalid:
+                raise RuntimeError(
+                    "Legal publication blocked until these values are configured: "
+                    + ", ".join(invalid)
+                )
 
 
 @lru_cache()

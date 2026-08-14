@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import type { Suggestion } from "../api/places";
 import {
   calculateDistanceKm,
+  DEFAULT_ADVANCED_FILTERS,
   filterSuggestions,
   getNextSuggestionIndex,
   getVisibleSuggestions,
@@ -82,6 +83,20 @@ describe("suggestion pool rotation", () => {
     expect(filterSuggestions(suggestions, new Set(["budget", "open"]))).toEqual([
       suggestions[0],
     ]);
+  });
+
+  it("requires explicit provider and dietary evidence for advanced filters", () => {
+    const suggestions = makeSuggestions(3).map((suggestion, index) => ({
+      ...suggestion,
+      takeout: index === 0 ? true : index === 1 ? false : undefined,
+      dietary_matches: index === 0 ? ["vegan", "halal"] : index === 1 ? ["vegan"] : undefined,
+    }));
+    const filtered = filterSuggestions(suggestions, new Set(), {
+      ...DEFAULT_ADVANCED_FILTERS,
+      takeout: true,
+      dietary: ["vegan", "halal"],
+    });
+    expect(filtered).toEqual([suggestions[0]]);
   });
 
   it("keeps known in-bounds restaurants when a wider Google search returns a different subset", () => {

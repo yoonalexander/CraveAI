@@ -88,26 +88,144 @@ class AuthTransaction(Base):
 
 class Favorite(Base):
     __tablename__ = "favorites"
+    __table_args__ = (UniqueConstraint("user_id", "place_id"),)
 
     id: Mapped[str] = mapped_column(Uuid(as_uuid=False), primary_key=True)
     user_id: Mapped[str] = mapped_column(
         Uuid(as_uuid=False), ForeignKey("profiles.user_id", ondelete="CASCADE"), index=True
     )
-    restaurant: Mapped[str] = mapped_column(String(200), nullable=False)
+    # `restaurant` is retained only for removable legacy saves. New saves persist
+    # a Place ID and hydrate provider-owned details at request time.
+    restaurant: Mapped[str | None] = mapped_column(String(200))
+    place_id: Mapped[str | None] = mapped_column(String(500), index=True)
     note: Mapped[str | None] = mapped_column(String(1000))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    updated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
 
 class Feedback(Base):
     __tablename__ = "feedback"
+    __table_args__ = (UniqueConstraint("user_id", "recommendation_token"),)
 
     id: Mapped[str] = mapped_column(Uuid(as_uuid=False), primary_key=True)
     user_id: Mapped[str] = mapped_column(
         Uuid(as_uuid=False), ForeignKey("profiles.user_id", ondelete="CASCADE"), index=True
     )
-    restaurant: Mapped[str] = mapped_column(String(200), nullable=False)
+    restaurant: Mapped[str | None] = mapped_column(String(200))
+    place_id: Mapped[str | None] = mapped_column(String(500))
+    recommendation_token: Mapped[str | None] = mapped_column(String(512))
+    rank: Mapped[int | None] = mapped_column(Integer)
+    score: Mapped[str | None] = mapped_column(String(32))
+    confidence: Mapped[str | None] = mapped_column(String(32))
+    report_reason: Mapped[str | None] = mapped_column(String(80))
     liked: Mapped[bool] = mapped_column(Boolean, nullable=False)
     notes: Mapped[str | None] = mapped_column(String(1000))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+class PolicyAcceptance(Base):
+    __tablename__ = "policy_acceptances"
+    __table_args__ = (
+        UniqueConstraint("user_id", "terms_version", "privacy_version"),
+    )
+
+    id: Mapped[str] = mapped_column(Uuid(as_uuid=False), primary_key=True)
+    user_id: Mapped[str] = mapped_column(
+        Uuid(as_uuid=False), ForeignKey("profiles.user_id", ondelete="CASCADE"), index=True
+    )
+    terms_version: Mapped[str] = mapped_column(String(32), nullable=False)
+    privacy_version: Mapped[str] = mapped_column(String(32), nullable=False)
+    age_confirmed: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    accepted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+class UserConsent(Base):
+    __tablename__ = "user_consents"
+    __table_args__ = (UniqueConstraint("user_id", "purpose"),)
+
+    id: Mapped[str] = mapped_column(Uuid(as_uuid=False), primary_key=True)
+    user_id: Mapped[str] = mapped_column(
+        Uuid(as_uuid=False), ForeignKey("profiles.user_id", ondelete="CASCADE"), index=True
+    )
+    purpose: Mapped[str] = mapped_column(String(40), nullable=False)
+    granted: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    version: Mapped[str] = mapped_column(String(32), nullable=False, default="1")
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+class UserPreference(Base):
+    __tablename__ = "user_preferences"
+
+    user_id: Mapped[str] = mapped_column(
+        Uuid(as_uuid=False), ForeignKey("profiles.user_id", ondelete="CASCADE"), primary_key=True
+    )
+    favorite_cuisines_json: Mapped[str] = mapped_column(Text, nullable=False, default="[]")
+    disliked_foods_json: Mapped[str] = mapped_column(Text, nullable=False, default="[]")
+    dietary_restrictions_json: Mapped[str] = mapped_column(Text, nullable=False, default="[]")
+    allergies_json: Mapped[str] = mapped_column(Text, nullable=False, default="[]")
+    default_location_json: Mapped[str | None] = mapped_column(Text)
+    default_radius_meters: Mapped[int] = mapped_column(Integer, nullable=False, default=5000)
+    recommendation_preferences_json: Mapped[str] = mapped_column(Text, nullable=False, default="{}")
+    personalization_enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    history_enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    reduced_motion: Mapped[str] = mapped_column(String(16), nullable=False, default="system")
+    notification_preferences_json: Mapped[str] = mapped_column(Text, nullable=False, default="{}")
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+class FavoriteCollection(Base):
+    __tablename__ = "favorite_collections"
+    __table_args__ = (UniqueConstraint("user_id", "name"),)
+
+    id: Mapped[str] = mapped_column(Uuid(as_uuid=False), primary_key=True)
+    user_id: Mapped[str] = mapped_column(
+        Uuid(as_uuid=False), ForeignKey("profiles.user_id", ondelete="CASCADE"), index=True
+    )
+    name: Mapped[str] = mapped_column(String(80), nullable=False)
+    is_default: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+class FavoriteCollectionItem(Base):
+    __tablename__ = "favorite_collection_items"
+    __table_args__ = (UniqueConstraint("collection_id", "favorite_id"),)
+
+    id: Mapped[str] = mapped_column(Uuid(as_uuid=False), primary_key=True)
+    collection_id: Mapped[str] = mapped_column(
+        Uuid(as_uuid=False), ForeignKey("favorite_collections.id", ondelete="CASCADE"), index=True
+    )
+    favorite_id: Mapped[str] = mapped_column(
+        Uuid(as_uuid=False), ForeignKey("favorites.id", ondelete="CASCADE"), index=True
+    )
+    note: Mapped[str | None] = mapped_column(String(1000))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+class Conversation(Base):
+    __tablename__ = "conversations"
+
+    id: Mapped[str] = mapped_column(Uuid(as_uuid=False), primary_key=True)
+    user_id: Mapped[str] = mapped_column(
+        Uuid(as_uuid=False), ForeignKey("profiles.user_id", ondelete="CASCADE"), index=True
+    )
+    title: Mapped[str] = mapped_column(String(60), nullable=False)
+    summary: Mapped[str] = mapped_column(Text, nullable=False, default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+class ConversationMessage(Base):
+    __tablename__ = "conversation_messages"
+
+    id: Mapped[str] = mapped_column(Uuid(as_uuid=False), primary_key=True)
+    conversation_id: Mapped[str] = mapped_column(
+        Uuid(as_uuid=False), ForeignKey("conversations.id", ondelete="CASCADE"), index=True
+    )
+    role: Mapped[str] = mapped_column(String(16), nullable=False)
+    content: Mapped[str] = mapped_column(Text, nullable=False)
+    place_ids_json: Mapped[str] = mapped_column(Text, nullable=False, default="[]")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
 

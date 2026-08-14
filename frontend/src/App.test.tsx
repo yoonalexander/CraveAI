@@ -60,6 +60,20 @@ vi.mock("./api/weather", () => ({
     isDay: true,
   }),
 }));
+vi.mock("./api/product", async () => {
+  const actual = await vi.importActual<typeof import("./api/product")>("./api/product");
+  return {
+    ...actual,
+    fetchLegalCurrent: vi.fn().mockResolvedValue({
+      terms: { version: "test", effective_date: "2026-08-13", path: "/terms" },
+      privacy: { version: "test", effective_date: "2026-08-13", path: "/privacy" },
+      minimum_age: 18,
+      support_email: "support@test.example",
+      privacy_email: "privacy@test.example",
+      publication_ready: false,
+    }),
+  };
+});
 vi.mock("./components/AccountMenu", () => ({
   AccountMenu: () => <a href="/login">Sign in</a>,
 }));
@@ -119,17 +133,27 @@ beforeEach(() => {
 });
 
 describe("Airbnb-style application shell", () => {
-  it("renders placeholder routes and responds to browser history", async () => {
+  it("renders Help and responds to browser history", async () => {
     mockedFetchSuggestions.mockResolvedValue(makeSuggestions(4));
     window.history.replaceState({}, "", "/help");
     render(<App />);
-    expect(screen.getByRole("heading", { name: "A CraveAI help centre is coming." })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "How can we help?" })).toBeInTheDocument();
 
     act(() => {
       window.history.pushState({}, "", "/");
       window.dispatchEvent(new PopStateEvent("popstate"));
     });
-    expect(screen.queryByRole("heading", { name: "A CraveAI help centre is coming." })).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "How can we help?" })).not.toBeInTheDocument();
+  });
+
+  it.each([
+    ["/terms", "Terms and Conditions"],
+    ["/privacy", "Privacy Policy"],
+  ])("routes %s to its in-shell legal document", (path, heading) => {
+    mockedFetchSuggestions.mockResolvedValue(makeSuggestions(4));
+    window.history.replaceState({}, "", path);
+    render(<App />);
+    expect(screen.getByRole("heading", { name: heading })).toBeInTheDocument();
   });
 
   it("keeps suggested cards off Home and shows the entire pool on Discovery", async () => {

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 from urllib.parse import urlencode
 
@@ -24,6 +24,7 @@ class ProviderSession:
     email: str
     email_verified: bool
     identities: tuple[dict[str, Any], ...]
+    user_metadata: dict[str, Any] = field(default_factory=dict)
 
 
 class SupabaseAuthClient:
@@ -33,11 +34,17 @@ class SupabaseAuthClient:
         self.anon_key = settings.SUPABASE_ANON_KEY
         self.service_key = settings.SUPABASE_SERVICE_ROLE_KEY
 
-    async def register(self, email: str, password: str, redirect_to: str) -> dict[str, Any]:
+    async def register(
+        self,
+        email: str,
+        password: str,
+        redirect_to: str,
+        metadata: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         return await self._request(
             "POST",
             "/signup",
-            json={"email": email, "password": password},
+            json={"email": email, "password": password, "data": metadata or {}},
             params={"redirect_to": redirect_to},
         )
 
@@ -232,4 +239,5 @@ def _provider_session(payload: dict[str, Any]) -> ProviderSession:
         email=email,
         email_verified=verified,
         identities=tuple(user.get("identities") or ()),
+        user_metadata=dict(user.get("user_metadata") or {}),
     )

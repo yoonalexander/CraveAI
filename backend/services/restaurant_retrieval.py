@@ -70,12 +70,11 @@ async def retrieve_candidate_restaurants(
                 for query in queries
             ]
             raw_results = await asyncio.gather(*tasks, return_exceptions=True)
-        for query, raw in zip(queries, raw_results):
+        for _query, raw in zip(queries, raw_results):
             if isinstance(raw, Exception):
                 logger.warning(
-                    "restaurant_retrieval query=%r outcome=error error=%r",
-                    query.text,
-                    raw,
+                    "restaurant_retrieval outcome=error error_type=%s",
+                    type(raw).__name__,
                 )
                 live_results.append([])
                 continue
@@ -258,7 +257,10 @@ async def _legacy_provider_fallback(
             radius=location.get("radius"),
         )
     except Exception as exc:
-        logger.warning("restaurant_retrieval legacy_fallback outcome=error error=%r", exc)
+        logger.warning(
+            "restaurant_retrieval legacy_fallback outcome=error error_type=%s",
+            type(exc).__name__,
+        )
         return {}
 
     merged: dict[str, dict[str, Any]] = {}

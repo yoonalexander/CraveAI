@@ -74,13 +74,14 @@ async def extract_craving_intent(user_query: str) -> CravingIntent:
             max_completion_tokens=900,
             reasoning_effort="minimal",
             verbosity="low",
+            store=False,
         )
         parsed = completion.choices[0].message.parsed
         if parsed is None:
             raise ValueError("Intent extraction returned no parsed content.")
         return normalize_intent(parsed, user_query)
     except Exception as exc:
-        logger.warning("intent_extraction outcome=fallback error=%r", exc)
+        logger.warning("intent_extraction outcome=fallback error_type=%s", type(exc).__name__)
         return fallback_intent(user_query)
 
 

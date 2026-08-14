@@ -15,6 +15,10 @@ type ChatRequestPayload = {
   message: string;
   location: LocationHint;
   candidate_places: CandidatePlacePayload[];
+  context_messages: Array<{ role: "user" | "assistant"; content: string; place_ids: string[] }>;
+  conversation_id?: string;
+  save_conversation: boolean;
+  age_confirmed: boolean;
 };
 
 type CandidatePlacePayload = Pick<
@@ -52,6 +56,7 @@ export type ChatRecommendation = {
     label: string;
     source_url?: string | null;
   }>;
+  recommendation_token?: string | null;
 };
 
 export type UsageMetadata = {
@@ -68,6 +73,7 @@ export type ChatResponse = {
   recommendations: ChatRecommendation[];
   intent?: Record<string, unknown> | null;
   usage?: UsageMetadata | null;
+  conversation_id?: string | null;
 };
 
 export type ChatStatusResponse = {
@@ -113,7 +119,7 @@ const CHAT_REQUEST_TIMEOUT_MS = 25000;
  */
 export async function sendChat(
   query: string,
-  options: { location?: LocationHint; candidatePlaces?: Suggestion[] } = {},
+  options: ChatOptions = {},
 ): Promise<ChatResponse> {
   const { location, candidatePlaces = [] } = options;
 
@@ -135,6 +141,10 @@ export async function sendChat(
       lng: place.lng,
       tags: place.tags ?? [],
     })),
+    context_messages: (options.contextMessages || []).slice(-12),
+    conversation_id: options.conversationId,
+    save_conversation: Boolean(options.saveConversation),
+    age_confirmed: options.ageConfirmed ?? sessionStorage.getItem("craveai-age-18") === "true",
   };
 
   const headers: Record<string, string> = {
@@ -156,7 +166,7 @@ export async function sendChat(
         body: JSON.stringify(payload),
         signal: controller.signal,
       },
-      { csrf: false },
+      { csrf: Boolean(options.authenticated) },
     );
   } catch (error) {
     if (controller.signal.aborted) {
@@ -191,6 +201,84 @@ export async function sendChat(
     ...body,
     usage: body.usage ?? readUsageHeaders(response),
   };
+}
+
+export type ChatOptions = {
+  location?: LocationHint;
+  candidatePlaces?: Suggestion[];
+  contextMessages?: Array<{ role: "user" | "assistant"; content: string; place_ids: string[] }>;
+  conversationId?: string;
+  saveConversation?: boolean;
+  ageConfirmed?: boolean;
+  authenticated?: boolean;
+};
+
+export type ChatStreamCallbacks = {
+  onStage?: (message: string) => void;
+  onRecommendation?: (recommendation: ChatRecommendation) => void;
+};
+
+export async function streamChat(
+  query: string,
+  options: ChatOptions,
+  callbacks: ChatStreamCallbacks = {},
+): Promise<ChatResponse> {
+  const locationPayload = options.location ? { ...FALLBACK_LOCATION, ...options.location } : FALLBACK_LOCATION;
+  const payload: ChatRequestPayload = {
+    query, message: query, location: locationPayload,
+    candidate_places: (options.candidatePlaces || []).slice(0, 20).map((place) => ({
+      place_id: place.place_id, name: place.name, rating: place.rating,
+      user_ratings_total: place.user_ratings_total, address: place.address,
+      lat: place.lat, lng: place.lng, tags: place.tags ?? [],
+    })),
+    context_messages: (options.contextMessages || []).slice(-12),
+    conversation_id: options.conversationId,
+    save_conversation: Boolean(options.saveConversation),
+    age_confirmed: options.ageConfirmed ?? sessionStorage.getItem("craveai-age-18") === "true",
+  };
+  let response: Response;
+  try {
+    response = await apiFetch("/chat/stream", {
+      method: "POST", headers: { "Content-Type": "application/json", Accept: "text/event-stream" },
+      body: JSON.stringify(payload),
+    }, { csrf: Boolean(options.authenticated) });
+  } catch {
+    return sendChat(query, options);
+  }
+  if (!response.ok || !response.body) return sendChat(query, options);
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  let reply = "";
+  let usage: UsageMetadata | undefined;
+  let conversationId: string | undefined;
+  const recommendations: ChatRecommendation[] = [];
+  while (true) {
+    const { done, value } = await reader.read();
+    buffer += decoder.decode(value || new Uint8Array(), { stream: !done });
+    const events = buffer.split("\n\n");
+    buffer = events.pop() || "";
+    for (const block of events) {
+      const event = block.match(/^event: (.+)$/m)?.[1];
+      const raw = block.match(/^data: (.+)$/m)?.[1];
+      if (!event || !raw) continue;
+      const data = JSON.parse(raw) as Record<string, unknown>;
+      if (event === "stage") callbacks.onStage?.(String(data.message || "Working…"));
+      if (event === "recommendation") {
+        const recommendation = data as unknown as ChatRecommendation;
+        recommendations.push(recommendation); callbacks.onRecommendation?.(recommendation);
+      }
+      if (event === "reply") { reply = String(data.reply || ""); conversationId = data.conversation_id ? String(data.conversation_id) : undefined; }
+      if (event === "usage") usage = data as unknown as UsageMetadata;
+      if (event === "error") {
+        const detail = data.detail as { code?: string; usage?: UsageMetadata } | undefined;
+        if (Number(data.status) === 429) throw new ChatQuotaError("You've reached today's CraveAI chat limit.", detail?.usage);
+        throw new Error(detail?.code?.replaceAll("_", " ") || "Chat request failed.");
+      }
+    }
+    if (done) break;
+  }
+  return { reply, messages: reply ? [{ role: "assistant", content: reply }] : [], recommendations, usage, conversation_id: conversationId };
 }
 
 export async function fetchChatStatus(): Promise<ChatStatusResponse> {

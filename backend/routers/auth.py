@@ -37,6 +37,10 @@ from backend.services.storage import (
     remove_account_identity,
     sync_account_identities,
 )
+from backend.services.product_data import (
+    has_current_policy_acceptance,
+    record_policy_acceptance,
+)
 from backend.services.supabase_auth import (
     ProviderSession,
     SupabaseAuthClient,
@@ -53,6 +57,14 @@ class EmailPasswordRequest(BaseModel):
     password: str = Field(min_length=12, max_length=128)
 
 
+class RegistrationRequest(EmailPasswordRequest):
+    terms_version: str = Field(min_length=1, max_length=32)
+    privacy_version: str = Field(min_length=1, max_length=32)
+    accept_terms: bool
+    acknowledge_privacy: bool
+    age_confirmed: bool
+
+
 class EmailRequest(BaseModel):
     email: EmailStr
 
@@ -65,6 +77,7 @@ class UserResponse(BaseModel):
     user_id: str
     email: EmailStr
     email_verified: bool
+    policy_required: bool = False
 
 
 class AuthResponse(BaseModel):
@@ -90,15 +103,27 @@ class LinkResponse(BaseModel):
 
 
 @router.post("/register", response_model=StatusResponse, status_code=status.HTTP_202_ACCEPTED)
-async def register(payload: EmailPasswordRequest, request: Request) -> StatusResponse:
+async def register(payload: RegistrationRequest, request: Request) -> StatusResponse:
     require_allowed_origin(request)
     await _auth_burst(request, "register")
     settings = get_settings()
+    if (
+        payload.terms_version != settings.TERMS_VERSION
+        or payload.privacy_version != settings.PRIVACY_VERSION
+    ):
+        raise HTTPException(status_code=409, detail={"code": "policy_version_changed"})
+    if not (payload.accept_terms and payload.acknowledge_privacy and payload.age_confirmed):
+        raise HTTPException(status_code=422, detail={"code": "policy_acceptance_required"})
     try:
         await SupabaseAuthClient().register(
             str(payload.email).lower(),
             payload.password,
             f"{settings.PUBLIC_API_URL}/auth/confirm",
+            {
+                "craveai_terms_version": payload.terms_version,
+                "craveai_privacy_version": payload.privacy_version,
+                "craveai_age_confirmed": True,
+            },
         )
     except SupabaseAuthError as exc:
         if exc.status_code >= 500:
@@ -129,6 +154,14 @@ async def confirm_email(
         )
         await create_app_session(provider, request, redirect)
         await sync_account_identities(provider.user_id, provider.identities)
+        metadata = provider.user_metadata
+        if metadata.get("craveai_age_confirmed") is True:
+            await record_policy_acceptance(
+                provider.user_id,
+                str(metadata.get("craveai_terms_version") or settings.TERMS_VERSION),
+                str(metadata.get("craveai_privacy_version") or settings.PRIVACY_VERSION),
+                True,
+            )
         await audit_event(
             "auth.email_verified", user_id=provider.user_id, request_id=_request_id(request)
         )
@@ -163,7 +196,7 @@ async def login(
         session_id=session.id,
         request_id=_request_id(request),
     )
-    return AuthResponse(user=_user_response(session))
+    return AuthResponse(user=await _user_response(session))
 
 
 @router.post("/logout", response_model=StatusResponse)
@@ -191,7 +224,7 @@ async def logout(
 
 @router.get("/me", response_model=AuthResponse)
 async def me(session: SessionContext = Depends(require_verified_session)) -> AuthResponse:
-    return AuthResponse(user=_user_response(session))
+    return AuthResponse(user=await _user_response(session))
 
 
 @router.get("/csrf", response_model=CsrfResponse)
@@ -513,11 +546,16 @@ def _identity_response(item: dict[str, Any]) -> IdentityResponse:
     )
 
 
-def _user_response(session: SessionContext) -> UserResponse:
+async def _user_response(session: SessionContext) -> UserResponse:
+    settings = get_settings()
+    accepted = await has_current_policy_acceptance(
+        session.user_id, settings.TERMS_VERSION, settings.PRIVACY_VERSION
+    )
     return UserResponse(
         user_id=session.user_id,
         email=session.email,
         email_verified=session.email_verified,
+        policy_required=not accepted,
     )
 
 

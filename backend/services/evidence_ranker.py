@@ -123,6 +123,7 @@ async def assess_candidate_evidence(
             max_completion_tokens=2400,
             reasoning_effort="minimal",
             verbosity="low",
+            store=False,
         )
         parsed = completion.choices[0].message.parsed
         if parsed is None:
@@ -131,7 +132,7 @@ async def assess_candidate_evidence(
         lexical = _lexical_assessments(intent, candidates)
         return _merge_assessment_batches(semantic, lexical)
     except Exception as exc:
-        logger.warning("evidence_assessment outcome=lexical_fallback error=%r", exc)
+        logger.warning("evidence_assessment outcome=lexical_fallback error_type=%s", type(exc).__name__)
         return _lexical_assessments(intent, candidates)
 
 

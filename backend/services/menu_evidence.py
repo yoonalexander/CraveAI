@@ -172,16 +172,15 @@ async def _enrich_one(
                     pages.append((page_url, _parse_html(page_html), True))
                 except Exception as exc:
                     logger.info(
-                        "menu_evidence place_id=%s link=%r outcome=skipped error=%r",
+                        "menu_evidence place_id=%s outcome=skipped error_type=%s",
                         candidate.get("place_id"),
-                        link,
-                        exc,
+                        type(exc).__name__,
                     )
     except Exception as exc:
         logger.info(
-            "menu_evidence place_id=%s outcome=unavailable error=%r",
+            "menu_evidence place_id=%s outcome=unavailable error_type=%s",
             candidate.get("place_id"),
-            exc,
+            type(exc).__name__,
         )
         return
 

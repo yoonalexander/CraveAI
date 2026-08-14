@@ -13,6 +13,7 @@ import {
   unlinkGoogle,
 } from "../api/auth";
 import { useAuth } from "../context/AuthContext";
+import { fetchLegalCurrent, LegalCurrent } from "../api/product";
 import { ThemeProvider } from "../context/ThemeContext";
 import { ThemeToggle } from "./ThemeToggle";
 
@@ -49,6 +50,14 @@ function AuthForm({ mode }: { mode: Exclude<PageMode, "account"> }): JSX.Element
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [legal, setLegal] = useState<LegalCurrent | null>(null);
+  const [acceptTerms, setAcceptTerms] = useState(false);
+  const [acknowledgePrivacy, setAcknowledgePrivacy] = useState(false);
+  const [ageConfirmed, setAgeConfirmed] = useState(false);
+
+  useEffect(() => {
+    if (mode === "register") void fetchLegalCurrent().then(setLegal).catch(() => setLegal(null));
+  }, [mode]);
 
   const result = useMemo(
     () => new URLSearchParams(window.location.search).get("status"),
@@ -89,7 +98,13 @@ function AuthForm({ mode }: { mode: Exclude<PageMode, "account"> }): JSX.Element
         await login(email, password);
         window.location.assign("/");
       } else if (mode === "register") {
-        await register(email, password);
+        if (!legal || !acceptTerms || !acknowledgePrivacy || !ageConfirmed) {
+          throw new Error("You must accept the current policies and confirm you are 18 or older.");
+        }
+        await register(email, password, {
+          terms_version: legal.terms.version,
+          privacy_version: legal.privacy.version,
+        });
         setMessage("Check your inbox to verify your email.");
       } else if (mode === "forgot") {
         await forgotPassword(email);
@@ -147,8 +162,25 @@ function AuthForm({ mode }: { mode: Exclude<PageMode, "account"> }): JSX.Element
             )}
           </label>
         )}
+        {mode === "register" ? (
+          <fieldset className="space-y-3 rounded-xl border border-border p-4 text-sm">
+            <legend className="px-1 font-semibold">Legal acknowledgments</legend>
+            <label className="flex gap-2">
+              <input checked={acceptTerms} onChange={(event) => setAcceptTerms(event.target.checked)} required type="checkbox" />
+              <span>I agree to the <a className="underline" href="/terms" target="_blank">Terms and Conditions</a>.</span>
+            </label>
+            <label className="flex gap-2">
+              <input checked={acknowledgePrivacy} onChange={(event) => setAcknowledgePrivacy(event.target.checked)} required type="checkbox" />
+              <span>I acknowledge the <a className="underline" href="/privacy" target="_blank">Privacy Policy</a>.</span>
+            </label>
+            <label className="flex gap-2">
+              <input checked={ageConfirmed} onChange={(event) => setAgeConfirmed(event.target.checked)} required type="checkbox" />
+              <span>I confirm that I am 18 years of age or older.</span>
+            </label>
+          </fieldset>
+        ) : null}
         <button
-          disabled={busy}
+          disabled={busy || (mode === "register" && !legal)}
           className="w-full rounded-xl bg-primary px-4 py-3 font-semibold text-primary-foreground disabled:opacity-60"
         >
           {busy ? "Working…" : title}

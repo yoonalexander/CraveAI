@@ -109,7 +109,7 @@ CraveAI/
 |-- backend/
 |   |-- main.py                         FastAPI application and security headers
 |   |-- config.py                       Environment-backed configuration
-|   |-- routers/                        Auth, chat, places, account, favorites, feedback
+|   |-- routers/                        Auth, legal, account data, chat, places, audio, feedback
 |   |-- services/
 |   |   |-- craving_intent.py           Typed craving extraction and local fallback
 |   |   |-- restaurant_retrieval.py     Dish-oriented Places retrieval and merging
@@ -308,14 +308,19 @@ recommendation list rather than a rating-based fallback.
 
 | Area | Routes | Access |
 | --- | --- | --- |
-| Chat | `GET /api/chat/status`, `POST /api/chat` | Guest or account quota |
-| Places | `GET /api/places/suggestions` | Guest or account quota |
+| Chat | `GET /api/chat/status`, `POST /api/chat`, `POST /api/chat/stream` | Guest 18+ acknowledgment or accepted account policy; daily quota |
+| Voice | `POST /api/audio/transcriptions` | Guest 18+ acknowledgment or accepted account policy; voice quota |
+| Places | `GET /api/places/suggestions`, `POST /api/places/resolve`, `POST /api/places/dietary-evidence` | Guest or account Places quota |
+| Legal | `GET /api/legal/current`, `POST /api/legal/accept` | Public read; verified account mutation |
 | Registration/session | `POST /api/auth/register`, `/login`, `/logout` | Public/session |
 | Email flows | `GET /api/auth/confirm`, `POST /api/auth/password/forgot`, `GET /api/auth/password/recovery`, `POST /api/auth/password/reset` | Public/transaction |
 | Session data | `GET /api/auth/me`, `/csrf`, `/identities` | Session as applicable |
 | Google identity | `GET /api/auth/google/start`, `/google/callback`, `POST /api/auth/identities/google/link`, `DELETE /api/auth/identities/google` | Public/session as applicable |
-| Favorites | `GET`, `POST /api/favorites`; `DELETE /api/favorites/{favorite_id}` | Verified account |
-| Feedback | `POST /api/feedback` | Verified account |
+| Favorites | `GET`, `POST /api/favorites`; `/saved`; collection CRUD; notes; delete | Verified account |
+| Preferences/consent | `GET`, `PATCH /api/account/preferences`; consent grant/withdraw; clear/reset controls | Verified account |
+| Conversations | Cursor-paginated list, create/import/read/rename/delete/clear under `/api/conversations` | Verified account |
+| Feedback | `POST /api/feedback` with a signed recommendation token | Verified account |
+| Plans | `GET /api/plans`, `GET /api/account/entitlements` | Public plans; verified entitlements |
 | Account | `GET /api/account/export`, `DELETE /api/account` | Verified account |
 
 The old `/chat` and `/places/suggestions` paths remain temporary compatibility
@@ -333,6 +338,8 @@ All settings are documented in `.env.example`. The main groups are:
 | Session security | `SESSION_ENCRYPTION_KEY`, `IDENTITY_SIGNING_SECRET`, session lifetime settings |
 | Origins/proxy | `APP_ENV`, `FRONTEND_ORIGIN`, `PUBLIC_API_URL`, `ALLOWED_ORIGINS`, `TRUSTED_PROXY_IPS`, `VITE_DEV_API_TARGET` |
 | Timeouts | `CHAT_PIPELINE_TIMEOUT_SECONDS`, `CHAT_RANKING_TIMEOUT_SECONDS` |
+| Legal publication | `TERMS_VERSION`, `PRIVACY_VERSION`, `POLICY_EFFECTIVE_DATE`, `OPERATOR_LEGAL_NAME`, `OPERATOR_ADDRESS`, `GOVERNING_LAW`, `SUPPORT_EMAIL`, `PRIVACY_EMAIL` |
+| Voice | `GUEST_DAILY_VOICE_SECONDS`, `ACCOUNT_DAILY_VOICE_SECONDS`, `AUDIO_MAX_BYTES` |
 | Quotas | `DAILY_QUOTA_MULTIPLIER` plus guest, account, global, feedback, and authentication limit variables |
 | Request limits | `REQUEST_BODY_LIMIT_BYTES` |
 
@@ -351,11 +358,25 @@ encrypts provider tokens at rest and gives the browser a random opaque
 `HttpOnly` application-session cookie. State-changing account operations also
 require a session-bound CSRF token and an allowed origin.
 
-Chat prompts and responses are processed ephemerally and are not persisted by
-CraveAI. The user prompt is sent to OpenAI for intent extraction; derived search
-queries are sent to Google Places; selected public official restaurant sites
-receive bounded HTTP requests for menu evidence. Provider retention and privacy
-policies apply independently of CraveAI.
+History is off by default. Temporary chat recovery uses tab-scoped
+`sessionStorage`; it is cleared on tab close, New Chat, logout, or explicit
+clearing. A verified user can separately opt into History or explicitly save
+one conversation. Stored recommendation snapshots contain narrative and Place
+IDs, never durable Google names, addresses, ratings, tags, photos, or photo
+references.
+
+The current prompt, bounded recent context, and confirmed map context are sent
+to OpenAI for evidence-grounded recommendation processing; derived searches go
+to Google Places, and selected public official restaurant sites may receive
+bounded menu-evidence requests. Chat Completions explicitly set `store=false`.
+OpenAI, Google, Supabase, Open-Meteo, and restaurant-site provider handling
+applies independently of CraveAI's storage. Voice files are proxied to
+`whisper-1` and held only in memory until transcription completes.
+
+Production startup is intentionally blocked until the configured operator
+identity, address, governing law, effective date, support email, and privacy
+email replace the placeholders in `.env.example`. The legal documents are a
+technical draft and require professional review before publication.
 
 See [SECURITY.md](SECURITY.md) before changing authentication, authorization,
 quota, logging, session, or data-handling boundaries. Production setup, key
@@ -399,7 +420,7 @@ Google coverage, official-site parsability, model variance, menu freshness,
 distance preference, or user satisfaction. A live adjudicated evaluation is the
 highest-priority measurement improvement.
 
-The latest verified tree passes 48 backend tests and 37 frontend tests, plus
+The latest verified tree passes 60 backend tests and 54 frontend tests, plus
 frontend lint, the production build, Python compilation, and the controlled
 evaluation.
 

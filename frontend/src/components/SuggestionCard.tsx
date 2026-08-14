@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { addFavorite } from "../api/favorites";
+import { addFavorite, listSavedPlaces } from "../api/favorites";
 import { useAuth } from "../context/AuthContext";
 import { useGoogleMaps } from "../context/GoogleMapsContext";
 import { BookmarkIcon, PinIcon } from "./Icons";
@@ -23,6 +23,18 @@ type PhotoData = {
   };
 };
 
+let savedPlaceIdsPromise: Promise<Set<string>> | null = null;
+
+function loadSavedPlaceIds(): Promise<Set<string>> {
+  if (!savedPlaceIdsPromise) {
+    savedPlaceIdsPromise = listSavedPlaces().then(
+      (items) => new Set(items.flatMap((item) => item.place_id ? [item.place_id] : [])),
+      () => new Set(),
+    );
+  }
+  return savedPlaceIdsPromise;
+}
+
 export function SuggestionCard({
   placeId,
   title,
@@ -37,6 +49,27 @@ export function SuggestionCard({
   const [saveError, setSaveError] = useState<string | null>(null);
   const [photo, setPhoto] = useState<PhotoData | null>(null);
   const [photoUnavailable, setPhotoUnavailable] = useState(false);
+
+  useEffect(() => {
+    if (!user) {
+      setSaved(false);
+      return;
+    }
+    let active = true;
+    loadSavedPlaceIds().then((ids) => {
+      if (active) setSaved(ids.has(placeId));
+    });
+    return () => { active = false; };
+  }, [placeId, user]);
+
+  useEffect(() => {
+    const refresh = () => {
+      savedPlaceIdsPromise = null;
+      if (user) void loadSavedPlaceIds().then((ids) => setSaved(ids.has(placeId)));
+    };
+    window.addEventListener("craveai-favorites-changed", refresh);
+    return () => window.removeEventListener("craveai-favorites-changed", refresh);
+  }, [placeId, user]);
 
   useEffect(() => {
     if (!isLoaded || !placeId || placeId.startsWith("placeholder-")) {
@@ -84,8 +117,13 @@ export function SuggestionCard({
 
   async function save(): Promise<void> {
     try {
-      await addFavorite(title);
+      await addFavorite(placeId);
       setSaved(true);
+      savedPlaceIdsPromise = Promise.resolve(new Set([
+        ...Array.from(await loadSavedPlaceIds()),
+        placeId,
+      ]));
+      window.dispatchEvent(new Event("craveai-favorites-changed"));
       setSaveError(null);
     } catch (reason) {
       setSaveError(reason instanceof Error ? reason.message : "Unable to save.");

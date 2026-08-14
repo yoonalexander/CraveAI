@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type { ChatRecommendation } from "./api/chat";
-import { fetchSuggestions, PlacesQuotaError, Suggestion } from "./api/places";
+import { fetchSuggestions, PlacesQuotaError, Suggestion, verifyDietaryEvidence } from "./api/places";
+import { listSavedPlaces } from "./api/favorites";
 import { fetchCurrentWeather, CurrentWeather } from "./api/weather";
+import { fetchPreferences, Preferences } from "./api/product";
 import { AccountMenu } from "./components/AccountMenu";
 import { ChatPanel } from "./components/ChatPanel";
 import { DiscoveryPage } from "./components/DiscoveryPage";
@@ -12,10 +14,22 @@ import { MapView } from "./components/MapView";
 import { MobileChatSheet } from "./components/MobileChatSheet";
 import { SearchToolbar } from "./components/SearchToolbar";
 import { Sidebar } from "./components/Sidebar";
+import {
+  HelpPage,
+  HistoryPage,
+  LegalPage,
+  LikesPage,
+  PolicyGate,
+  PricingPage,
+  SettingsPage,
+} from "./components/ProductPages";
 import { GoogleMapsProvider, useGoogleMaps } from "./context/GoogleMapsContext";
+import { useAuth } from "./context/AuthContext";
 import type { Coordinates, SearchArea } from "./types/searchArea";
 import {
   filterSuggestions,
+  DEFAULT_ADVANCED_FILTERS,
+  AdvancedFilters,
   mergeSuggestionsForBounds,
   SuggestionFilter,
 } from "./utils/suggestionPool";
@@ -32,34 +46,6 @@ const TORONTO_FALLBACK = {
 
 type LocationSource = "device" | "manual" | "fallback";
 
-const placeholderPages: Record<string, { eyebrow: string; title: string; copy: string }> = {
-  "/likes": {
-    eyebrow: "Likes",
-    title: "Your favourite spots will live here.",
-    copy: "We’re designing a simple place to revisit and organize restaurants you’ve saved.",
-  },
-  "/history": {
-    eyebrow: "History",
-    title: "Conversation history is coming soon.",
-    copy: "Chats are not stored today. When history arrives, it will be introduced with clear privacy controls.",
-  },
-  "/pricing": {
-    eyebrow: "Plans and pricing",
-    title: "More ways to use CraveAI are on the menu.",
-    copy: "Plan details and higher recommendation limits will appear here when they’re ready.",
-  },
-  "/settings": {
-    eyebrow: "Settings",
-    title: "Personal controls are being prepared.",
-    copy: "Preference, accessibility, and notification settings will be available in a future update.",
-  },
-  "/help": {
-    eyebrow: "Help",
-    title: "A CraveAI help centre is coming.",
-    copy: "For now, return to New chat and describe the food, mood, budget, or area you have in mind.",
-  },
-};
-
 export default function App(): JSX.Element {
   return (
     <GoogleMapsProvider>
@@ -70,6 +56,7 @@ export default function App(): JSX.Element {
 
 function CraveApplication(): JSX.Element {
   const { isLoaded: mapsLoaded } = useGoogleMaps();
+  const { user, loading: authLoading } = useAuth();
   const [currentPath, setCurrentPath] = useState(() => normalizePath(window.location.pathname));
   const [chatSession, setChatSession] = useState(0);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(readSidebarPreference);
@@ -93,9 +80,33 @@ function CraveApplication(): JSX.Element {
   const [suggestionError, setSuggestionError] = useState<string | null>(null);
   const [suggestionQuotaResetAt, setSuggestionQuotaResetAt] = useState<string | null>(null);
   const [activeFilters, setActiveFilters] = useState<Set<SuggestionFilter>>(new Set());
+  const [advancedFilters, setAdvancedFilters] = useState<AdvancedFilters>(DEFAULT_ADVANCED_FILTERS);
   const [mapRecommendations, setMapRecommendations] = useState<ChatRecommendation[]>([]);
   const [weather, setWeather] = useState<CurrentWeather | null>(null);
   const [weatherLoading, setWeatherLoading] = useState(false);
+  const [preferences, setPreferences] = useState<Preferences | null>(null);
+  const [preferencesLoaded, setPreferencesLoaded] = useState(false);
+  const [savedPlaceIds, setSavedPlaceIds] = useState<Set<string>>(new Set());
+  const [dietaryEvidence, setDietaryEvidence] = useState<{
+    key: string; loading: boolean; error: string | null; matches: Map<string, string[]>;
+  }>({ key: "", loading: false, error: null, matches: new Map() });
+  const [dietaryRetry, setDietaryRetry] = useState(0);
+  const locationInitialized = useRef(false);
+
+  useEffect(() => {
+    setPreferencesLoaded(false);
+    if (!user) { setPreferences(null); setSavedPlaceIds(new Set()); setPreferencesLoaded(true); return; }
+    let active = true;
+    void Promise.all([fetchPreferences(), listSavedPlaces()])
+      .then(([value, saved]) => {
+        if (!active) return;
+        setPreferences(value);
+        setSavedPlaceIds(new Set(saved.flatMap((item) => item.place_id ? [item.place_id] : [])));
+      })
+      .catch(() => undefined)
+      .finally(() => { if (active) setPreferencesLoaded(true); });
+    return () => { active = false; };
+  }, [user]);
 
   useEffect(() => {
     const handlePopState = () => setCurrentPath(normalizePath(window.location.pathname));
@@ -108,10 +119,11 @@ function CraveApplication(): JSX.Element {
     label: string,
     source: LocationSource,
     status: string,
+    radius = SEARCH_RADIUS_METERS,
   ) => {
     const area: SearchArea = {
       center: coordinates,
-      radius: SEARCH_RADIUS_METERS,
+      radius,
       label,
     };
     setOriginLocation(coordinates);
@@ -126,12 +138,25 @@ function CraveApplication(): JSX.Element {
   }, []);
 
   useEffect(() => {
+    if (authLoading || !preferencesLoaded || locationInitialized.current) return;
+    locationInitialized.current = true;
+    if (preferences?.default_location) {
+      confirmLocation(
+        { lat: preferences.default_location.lat, lng: preferences.default_location.lng },
+        preferences.default_location.label,
+        "manual",
+        "Using your saved default location.",
+        preferences.default_radius_meters,
+      );
+      return;
+    }
     if (!("geolocation" in navigator)) {
       confirmLocation(
         { lat: TORONTO_FALLBACK.lat, lng: TORONTO_FALLBACK.lng },
         TORONTO_FALLBACK.city,
         "fallback",
         "Geolocation is unavailable; using Toronto, ON.",
+        preferences?.default_radius_meters,
       );
       return;
     }
@@ -142,6 +167,7 @@ function CraveApplication(): JSX.Element {
           "Current location",
           "device",
           "Live location locked.",
+          preferences?.default_radius_meters,
         );
       },
       (error) => {
@@ -152,11 +178,12 @@ function CraveApplication(): JSX.Element {
           error.code === error.PERMISSION_DENIED
             ? "Location permission denied; using Toronto, ON."
             : "Unable to read your location; using Toronto, ON.",
+          preferences?.default_radius_meters,
         );
       },
       { enableHighAccuracy: true, timeout: 10_000, maximumAge: 0 },
     );
-  }, [confirmLocation]);
+  }, [authLoading, confirmLocation, preferences, preferencesLoaded]);
 
   useEffect(() => {
     if (!mapsLoaded || !searchArea || searchArea.bounds || searchArea.label !== "Current location") return;
@@ -247,10 +274,57 @@ function CraveApplication(): JSX.Element {
     return () => controller.abort();
   }, [searchArea]);
 
-  const filteredSuggestions = useMemo(
-    () => filterSuggestions(suggestions, activeFilters),
-    [activeFilters, suggestions],
-  );
+  const dietaryEvidenceKey = `${advancedFilters.dietary.slice().sort().join("|")}::${suggestions.map((item) => item.place_id).sort().join("|")}`;
+  useEffect(() => {
+    if (!advancedFilters.dietary.length || !suggestions.length) {
+      setDietaryEvidence({ key: dietaryEvidenceKey, loading: false, error: null, matches: new Map() });
+      return;
+    }
+    const controller = new AbortController();
+    setDietaryEvidence((current) => ({ ...current, key: dietaryEvidenceKey, loading: true, error: null }));
+    void verifyDietaryEvidence(
+      suggestions.map((item) => item.place_id), advancedFilters.dietary, controller.signal,
+    ).then((matches) => {
+      if (controller.signal.aborted) return;
+      setDietaryEvidence({
+        key: dietaryEvidenceKey,
+        loading: false,
+        error: null,
+        matches: new Map(matches.map((item) => [item.place_id, item.dietary_matches])),
+      });
+    }).catch((reason) => {
+      if (controller.signal.aborted) return;
+      const message = reason instanceof PlacesQuotaError
+        ? "The Places limit prevented menu verification. Current results remain visible."
+        : "Official-menu verification is unavailable. Current results remain visible.";
+      setDietaryEvidence((current) => ({ ...current, key: dietaryEvidenceKey, loading: false, error: message }));
+    });
+    return () => controller.abort();
+  }, [advancedFilters.dietary, dietaryEvidenceKey, dietaryRetry, suggestions]);
+
+  const filteredSuggestions = useMemo(() => {
+    const verificationReady = Boolean(advancedFilters.dietary.length) && dietaryEvidence.key === dietaryEvidenceKey && !dietaryEvidence.loading && !dietaryEvidence.error;
+    const annotated = suggestions.map((place) => ({
+      ...place,
+      dietary_matches: verificationReady ? dietaryEvidence.matches.get(place.place_id) : place.dietary_matches,
+    }));
+    const effectiveAdvanced = verificationReady || !advancedFilters.dietary.length
+      ? advancedFilters
+      : { ...advancedFilters, dietary: [] };
+    const filtered = filterSuggestions(annotated, activeFilters, effectiveAdvanced, originLocation);
+    if (!preferences?.personalization_enabled) return filtered;
+    const disliked = preferences.disliked_foods.map((value) => value.toLowerCase());
+    const favourites = preferences.favorite_cuisines.map((value) => value.toLowerCase());
+    return filtered
+      .filter((place) => !disliked.some((value) => suggestionText(place).includes(value)))
+      .map((place, index) => ({
+        place,
+        index,
+        preferenceScore: favourites.filter((value) => suggestionText(place).includes(value)).length + (savedPlaceIds.has(place.place_id) ? 2 : 0),
+      }))
+      .sort((a, b) => b.preferenceScore - a.preferenceScore || a.index - b.index)
+      .map(({ place }) => place);
+  }, [activeFilters, advancedFilters, dietaryEvidence, dietaryEvidenceKey, originLocation, preferences, savedPlaceIds, suggestions]);
 
   const navigate = useCallback((path: string, resetChat = false) => {
     const normalized = normalizePath(path);
@@ -260,6 +334,7 @@ function CraveApplication(): JSX.Element {
     setCurrentPath(normalized);
     setMobileMenuOpen(false);
     if (resetChat) {
+      window.sessionStorage.removeItem("craveai-temporary-chat");
       setChatSession((session) => session + 1);
       setMapRecommendations([]);
       setMobileChatExpanded(false);
@@ -272,6 +347,7 @@ function CraveApplication(): JSX.Element {
       selection.label,
       selection.source,
       selection.source === "device" ? "Live location locked." : "Using your selected location.",
+      preferences?.default_radius_meters,
     );
     setLocationDialogOpen(false);
   };
@@ -312,7 +388,6 @@ function CraveApplication(): JSX.Element {
   const homeVisible = currentPath === "/";
   const discoveryVisible = currentPath === "/discovery";
   const searchRouteVisible = homeVisible || discoveryVisible;
-  const placeholder = placeholderPages[currentPath];
   const chatLocation = searchArea
     ? {
         ...searchArea.center,
@@ -325,6 +400,7 @@ function CraveApplication(): JSX.Element {
   const toolbar = (
     <SearchToolbar
       activeFilters={activeFilters}
+      advancedFilters={advancedFilters}
       area={searchArea}
       canRetry={!suggestionQuotaResetAt}
       count={filteredSuggestions.length}
@@ -334,6 +410,12 @@ function CraveApplication(): JSX.Element {
       onClearFilters={() => setActiveFilters(new Set())}
       onRetry={retrySearch}
       onToggleFilter={toggleFilter}
+      onAdvancedFiltersChange={setAdvancedFilters}
+      dietaryVerification={{
+        loading: advancedFilters.dietary.length > 0 && (dietaryEvidence.key !== dietaryEvidenceKey || dietaryEvidence.loading),
+        error: dietaryEvidence.key === dietaryEvidenceKey ? dietaryEvidence.error : null,
+      }}
+      onRetryDietaryVerification={() => setDietaryRetry((value) => value + 1)}
     />
   );
 
@@ -432,9 +514,14 @@ function CraveApplication(): JSX.Element {
                 suggestions={filteredSuggestions}
               />
             </div>
-          ) : (
-            <PlaceholderPage content={placeholder} onBack={() => navigate("/", true)} />
-          )}
+          ) : currentPath === "/likes" ? <LikesPage />
+            : currentPath === "/history" ? <HistoryPage />
+              : currentPath === "/settings" ? <SettingsPage />
+                : currentPath === "/pricing" ? <PricingPage />
+                  : currentPath === "/help" || currentPath.startsWith("/help/") ? <HelpPage />
+                    : currentPath === "/terms" ? <LegalPage kind="terms" />
+                      : currentPath === "/privacy" ? <LegalPage kind="privacy" />
+                        : <PlaceholderPage content={undefined} onBack={() => navigate("/", true)} />}
         </main>
       </div>
 
@@ -443,6 +530,7 @@ function CraveApplication(): JSX.Element {
         onSelect={selectLocation}
         open={locationDialogOpen}
       />
+      {user?.policy_required && currentPath !== "/terms" && currentPath !== "/privacy" ? <PolicyGate /> : null}
     </div>
   );
 }
@@ -483,6 +571,10 @@ async function reverseGeocode(coordinates: Coordinates): Promise<string | null> 
 
 function sameCoordinates(first: Coordinates, second: Coordinates): boolean {
   return first.lat === second.lat && first.lng === second.lng;
+}
+
+function suggestionText(place: Suggestion): string {
+  return `${place.name} ${place.address || ""} ${(place.tags || []).join(" ")}`.toLowerCase();
 }
 
 function normalizePath(path: string): string {

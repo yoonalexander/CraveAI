@@ -4,25 +4,29 @@ import asyncio
 import json
 import uuid
 from dataclasses import asdict, dataclass
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from sqlalchemy import delete, select
+from sqlalchemy.exc import IntegrityError
 
 from backend.database import Base, get_engine, get_session_factory
 from backend.models import (
     AccountIdentity,
     Favorite,
     Feedback,
+    AbuseEvent,
     Profile,
     SecurityAuditEvent,
+    UsageLimit,
 )
 
 
 @dataclass
 class FavoriteRecord:
     id: str
-    restaurant: str
+    restaurant: str | None
+    place_id: str | None
     note: str | None
     created_at: str
 
@@ -30,6 +34,20 @@ class FavoriteRecord:
 def init_storage() -> None:
     """Create tables only for local/test environments; production uses Alembic."""
     Base.metadata.create_all(get_engine())
+
+
+async def purge_expired_operational_data() -> None:
+    """Apply documented rolling retention to quota, security, and feedback rows."""
+    def _delete() -> None:
+        now = datetime.now(timezone.utc)
+        with get_session_factory()() as db:
+            db.execute(delete(UsageLimit).where(UsageLimit.usage_date < (now - timedelta(days=35)).date()))
+            db.execute(delete(SecurityAuditEvent).where(SecurityAuditEvent.created_at < now - timedelta(days=90)))
+            db.execute(delete(AbuseEvent).where(AbuseEvent.occurred_at < now - timedelta(days=90)))
+            db.execute(delete(Feedback).where(Feedback.created_at < now - timedelta(days=730)))
+            db.commit()
+
+    await asyncio.to_thread(_delete)
 
 
 async def upsert_profile(user_id: str, email: str, email_verified: bool) -> None:
@@ -143,8 +161,10 @@ async def add_favorite(user_id: str, restaurant: str, note: str | None) -> Favor
             id=str(uuid.uuid4()),
             user_id=user_id,
             restaurant=restaurant,
+            place_id=None,
             note=note,
             created_at=now,
+            updated_at=now,
         )
         with get_session_factory()() as db:
             db.add(record)
@@ -183,7 +203,17 @@ async def delete_favorite(user_id: str, favorite_id: str) -> bool:
 
 
 async def record_feedback(
-    user_id: str, restaurant: str, liked: bool, notes: str | None
+    user_id: str,
+    restaurant: str | None,
+    liked: bool,
+    notes: str | None,
+    *,
+    place_id: str | None = None,
+    recommendation_token: str | None = None,
+    rank: int | None = None,
+    score: float | None = None,
+    confidence: str | None = None,
+    report_reason: str | None = None,
 ) -> None:
     def _insert() -> None:
         with get_session_factory()() as db:
@@ -192,12 +222,22 @@ async def record_feedback(
                     id=str(uuid.uuid4()),
                     user_id=user_id,
                     restaurant=restaurant,
+                    place_id=place_id,
+                    recommendation_token=recommendation_token,
+                    rank=rank,
+                    score=str(score) if score is not None else None,
+                    confidence=confidence,
+                    report_reason=report_reason,
                     liked=liked,
                     notes=notes,
                     created_at=datetime.now(timezone.utc),
                 )
             )
-            db.commit()
+            try:
+                db.commit()
+            except IntegrityError as exc:
+                db.rollback()
+                raise ValueError("duplicate feedback") from exc
 
     await asyncio.to_thread(_insert)
 
@@ -227,6 +267,7 @@ async def export_user_data(user_id: str) -> dict[str, Any]:
                     {
                         "id": item.id,
                         "restaurant": item.restaurant,
+                        "place_id": item.place_id,
                         "note": item.note,
                         "created_at": _iso(item.created_at),
                     }
@@ -235,8 +276,13 @@ async def export_user_data(user_id: str) -> dict[str, Any]:
                 "feedback": [
                     {
                         "restaurant": item.restaurant,
+                        "place_id": item.place_id,
                         "liked": item.liked,
                         "notes": item.notes,
+                        "rank": item.rank,
+                        "score": item.score,
+                        "confidence": item.confidence,
+                        "report_reason": item.report_reason,
                         "created_at": _iso(item.created_at),
                     }
                     for item in feedback
@@ -244,7 +290,12 @@ async def export_user_data(user_id: str) -> dict[str, Any]:
                 "chat_history": [],
             }
 
-    return await asyncio.to_thread(_read)
+    result = await asyncio.to_thread(_read)
+    from backend.services.product_data import export_product_data
+
+    result.update(await export_product_data(user_id))
+    result["chat_history"] = result.pop("conversations", [])
+    return result
 
 
 async def audit_event(
@@ -283,6 +334,7 @@ def _favorite_record(record: Favorite) -> FavoriteRecord:
     return FavoriteRecord(
         id=record.id,
         restaurant=record.restaurant,
+        place_id=record.place_id,
         note=record.note,
         created_at=_iso(record.created_at),
     )

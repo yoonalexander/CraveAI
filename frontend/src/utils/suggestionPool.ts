@@ -5,6 +5,31 @@ export const SUGGESTIONS_PER_ROTATION = 3;
 export const MATERIAL_LOCATION_CHANGE_KM = 1;
 export const SUGGESTION_POOL_LIMIT = 20;
 export type SuggestionFilter = "budget" | "open";
+export type AdvancedFilters = {
+  cuisine: string;
+  minimumRating: number;
+  maximumDistanceKm: number;
+  priceLevels: number[];
+  takeout: boolean;
+  delivery: boolean;
+  reservations: boolean;
+  accessibility: boolean;
+  dietary: string[];
+  sort: "relevance" | "rating" | "distance" | "price";
+};
+
+export const DEFAULT_ADVANCED_FILTERS: AdvancedFilters = {
+  cuisine: "",
+  minimumRating: 0,
+  maximumDistanceKm: 20,
+  priceLevels: [],
+  takeout: false,
+  delivery: false,
+  reservations: false,
+  accessibility: false,
+  dietary: [],
+  sort: "relevance",
+};
 
 export type SuggestionMarkerGroup = {
   key: string;
@@ -16,8 +41,10 @@ export type SuggestionMarkerGroup = {
 export function filterSuggestions(
   suggestions: Suggestion[],
   filters: Set<SuggestionFilter>,
+  advanced: AdvancedFilters = DEFAULT_ADVANCED_FILTERS,
+  origin?: { lat: number; lng: number } | null,
 ): Suggestion[] {
-  return suggestions.filter((suggestion) => {
+  const filtered = suggestions.filter((suggestion) => {
     if (
       filters.has("budget") &&
       (typeof suggestion.price_level !== "number" || suggestion.price_level > 1)
@@ -25,8 +52,21 @@ export function filterSuggestions(
       return false;
     }
     if (filters.has("open") && suggestion.open_now !== true) return false;
+    if (advanced.cuisine && !(suggestion.tags || []).some((tag) => tag.toLowerCase().includes(advanced.cuisine.toLowerCase()))) return false;
+    if (advanced.minimumRating && (typeof suggestion.rating !== "number" || suggestion.rating < advanced.minimumRating)) return false;
+    if (advanced.priceLevels.length && (typeof suggestion.price_level !== "number" || !advanced.priceLevels.includes(suggestion.price_level))) return false;
+    if (advanced.takeout && suggestion.takeout !== true) return false;
+    if (advanced.delivery && suggestion.delivery !== true) return false;
+    if (advanced.reservations && suggestion.reservable !== true) return false;
+    if (advanced.accessibility && suggestion.wheelchair_accessible_entrance !== true) return false;
+    if (advanced.dietary.length && !advanced.dietary.every((item) => suggestion.dietary_matches?.includes(item))) return false;
+    if (origin && advanced.maximumDistanceKm < 20 && calculateDistanceKm(origin.lat, origin.lng, suggestion.lat, suggestion.lng) > advanced.maximumDistanceKm) return false;
     return true;
   });
+  if (advanced.sort === "rating") filtered.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+  if (advanced.sort === "distance" && origin) filtered.sort((a, b) => calculateDistanceKm(origin.lat, origin.lng, a.lat, a.lng) - calculateDistanceKm(origin.lat, origin.lng, b.lat, b.lng));
+  if (advanced.sort === "price") filtered.sort((a, b) => (a.price_level ?? 99) - (b.price_level ?? 99));
+  return filtered;
 }
 
 export function getVisibleSuggestions(
