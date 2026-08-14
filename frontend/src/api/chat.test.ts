@@ -1,10 +1,12 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import type { Suggestion } from "./places";
-import { sendChat } from "./chat";
+import { ChatTimeoutError, sendChat, streamChat } from "./chat";
 
 afterEach(() => {
   window.localStorage.clear();
+  window.sessionStorage.clear();
+  vi.restoreAllMocks();
 });
 
 describe("sendChat", () => {
@@ -53,6 +55,42 @@ describe("sendChat", () => {
       tags: ["Pizza"],
     });
     expect(body.candidate_places[0]).not.toHaveProperty("reason");
+  });
+
+  it("uses the legacy JSON contract when the streaming route is not deployed", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(new Response('{"detail":"Not Found"}', { status: 404 }))
+      .mockResolvedValueOnce(new Response(
+        JSON.stringify({ reply: "Try the pizza place.", messages: [], recommendations: [] }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      ));
+
+    await streamChat("pizza", {
+      location: { lat: 43.65, lng: -79.38 },
+      contextMessages: [{ role: "user", content: "something cheesy", place_ids: [] }],
+      saveConversation: true,
+      ageConfirmed: true,
+    });
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(fetchMock.mock.calls[0][0]).toBe("/api/chat/stream");
+    expect(fetchMock.mock.calls[1][0]).toBe("/api/chat");
+    const legacyBody = JSON.parse(String((fetchMock.mock.calls[1][1] as RequestInit).body));
+    expect(legacyBody).toMatchObject({ query: "pizza", message: "pizza" });
+    expect(legacyBody).not.toHaveProperty("context_messages");
+    expect(legacyBody).not.toHaveProperty("save_conversation");
+    expect(legacyBody).not.toHaveProperty("age_confirmed");
+  });
+
+  it("surfaces a backend gateway timeout as a chat timeout", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(JSON.stringify({ detail: { code: "chat_pipeline_timeout" } }), {
+        status: 504,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
+
+    await expect(sendChat("pizza")).rejects.toBeInstanceOf(ChatTimeoutError);
   });
 
   it("sends an empty candidate list when the suggestion pool is unavailable", async () => {

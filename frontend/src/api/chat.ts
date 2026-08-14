@@ -113,6 +113,7 @@ const FALLBACK_LOCATION: LocationHint = {
 };
 
 const CHAT_REQUEST_TIMEOUT_MS = 25000;
+const LEGACY_CHAT_REQUEST_TIMEOUT_MS = 60000;
 
 /**
  * Send a chat query to the backend chat endpoint.
@@ -190,6 +191,10 @@ export async function sendChat(
       );
     }
 
+    if (response.status === 504) {
+      throw new ChatTimeoutError();
+    }
+
     const errorMessage = errorPayload.text || JSON.stringify(errorPayload.json);
     throw new Error(
       `Chat request failed with status ${response.status}: ${errorMessage}`,
@@ -245,6 +250,13 @@ export async function streamChat(
   } catch {
     return sendChat(query, options);
   }
+  // During a phased production rollout, the frontend can reach an older API
+  // that does not expose the SSE endpoint yet. Its strict request schema also
+  // rejects the new context/consent fields, so retry with the legacy contract
+  // instead of sending the same incompatible payload to /chat.
+  if (response.status === 404 || response.status === 405) {
+    return sendLegacyChat(query, options);
+  }
   if (!response.ok || !response.body) return sendChat(query, options);
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
@@ -279,6 +291,70 @@ export async function streamChat(
     if (done) break;
   }
   return { reply, messages: reply ? [{ role: "assistant", content: reply }] : [], recommendations, usage, conversation_id: conversationId };
+}
+
+async function sendLegacyChat(
+  query: string,
+  options: ChatOptions,
+): Promise<ChatResponse> {
+  const locationPayload = options.location
+    ? { ...FALLBACK_LOCATION, ...options.location }
+    : FALLBACK_LOCATION;
+  const payload = {
+    query,
+    message: query,
+    location: locationPayload,
+    candidate_places: (options.candidatePlaces || []).slice(0, 20).map((place) => ({
+      place_id: place.place_id,
+      name: place.name,
+      rating: place.rating,
+      user_ratings_total: place.user_ratings_total,
+      address: place.address,
+      lat: place.lat,
+      lng: place.lng,
+      tags: place.tags ?? [],
+    })),
+  };
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(
+    () => controller.abort(),
+    LEGACY_CHAT_REQUEST_TIMEOUT_MS,
+  );
+  let response: Response;
+  try {
+    response = await apiFetch(
+      "/chat",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+        signal: controller.signal,
+      },
+      { csrf: Boolean(options.authenticated) },
+    );
+  } catch (error) {
+    if (controller.signal.aborted) throw new ChatTimeoutError();
+    throw error;
+  } finally {
+    window.clearTimeout(timeoutId);
+  }
+  if (!response.ok) {
+    const errorPayload = await readErrorPayload(response);
+    const detail = errorPayload.json?.detail;
+    if (response.status === 429) {
+      throw new ChatQuotaError(
+        "You've reached today's CraveAI chat limit. Please try again after the daily reset.",
+        detail?.usage ?? readUsageHeaders(response),
+      );
+    }
+    if (response.status === 504) throw new ChatTimeoutError();
+    const errorMessage = errorPayload.text || JSON.stringify(errorPayload.json);
+    throw new Error(
+      `Legacy chat request failed with status ${response.status}: ${errorMessage}`,
+    );
+  }
+  const body = (await response.json()) as ChatResponse;
+  return { ...body, usage: body.usage ?? readUsageHeaders(response) };
 }
 
 export async function fetchChatStatus(): Promise<ChatStatusResponse> {
