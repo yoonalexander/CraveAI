@@ -18,6 +18,7 @@ venv/
 # Testing & tooling caches
 .pytest_cache/
 .pytest-tmp/
+.codex-pytest-temp/
 .test-tmp*/
 .test-*-tmp/
 .mypy_cache/
