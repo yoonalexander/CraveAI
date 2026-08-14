@@ -9,6 +9,8 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
+from backend import legal_config
+
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 DOTENV_PATH = PROJECT_ROOT / ".env"
 load_dotenv(DOTENV_PATH, override=False)
@@ -42,6 +44,10 @@ def _env_int_alias(name: str, legacy_name: str, default: int) -> int:
 
 def _env_csv(name: str, default: str = "") -> tuple[str, ...]:
     return tuple(item.strip() for item in os.getenv(name, default).split(",") if item.strip())
+
+
+def _env_multiline(name: str, default: str) -> str:
+    return os.getenv(name, default).replace("\\n", "\n")
 
 
 @dataclass(frozen=True)
@@ -93,10 +99,8 @@ class Config:
     CHAT_RANKING_TIMEOUT_SECONDS: int = field(
         default_factory=lambda: _env_int("CHAT_RANKING_TIMEOUT_SECONDS", 12)
     )
-    # Temporary development switch: set this back to 1 to restore the configured
-    # daily chat and Places quotas without touching each limit individually.
     DAILY_QUOTA_MULTIPLIER: int = field(
-        default_factory=lambda: _env_int("DAILY_QUOTA_MULTIPLIER", 1_000)
+        default_factory=lambda: _env_int("DAILY_QUOTA_MULTIPLIER", 1)
     )
     GUEST_DAILY_CHAT_LIMIT: int = field(
         default_factory=lambda: _env_int_alias(
@@ -153,22 +157,57 @@ class Config:
     SESSION_ROTATE_HOURS: int = field(
         default_factory=lambda: _env_int("SESSION_ROTATE_HOURS", 24)
     )
-    TERMS_VERSION: str = field(default_factory=lambda: os.getenv("TERMS_VERSION", "2026-08-13"))
-    PRIVACY_VERSION: str = field(default_factory=lambda: os.getenv("PRIVACY_VERSION", "2026-08-13"))
-    POLICY_EFFECTIVE_DATE: str = field(default_factory=lambda: os.getenv("POLICY_EFFECTIVE_DATE", "2026-08-13"))
-    OPERATOR_LEGAL_NAME: str = field(default_factory=lambda: os.getenv("OPERATOR_LEGAL_NAME", "[OPERATOR LEGAL NAME]"))
-    OPERATOR_ADDRESS: str = field(default_factory=lambda: os.getenv("OPERATOR_ADDRESS", "[OPERATOR ADDRESS]"))
-    GOVERNING_LAW: str = field(default_factory=lambda: os.getenv("GOVERNING_LAW", "[GOVERNING LAW]"))
-    SUPPORT_EMAIL: str = field(default_factory=lambda: os.getenv("SUPPORT_EMAIL", "support@example.com"))
-    PRIVACY_EMAIL: str = field(default_factory=lambda: os.getenv("PRIVACY_EMAIL", "privacy@example.com"))
+    TERMS_VERSION: str = field(default_factory=lambda: os.getenv("TERMS_VERSION", legal_config.TERMS_VERSION))
+    PRIVACY_VERSION: str = field(default_factory=lambda: os.getenv("PRIVACY_VERSION", legal_config.PRIVACY_VERSION))
+    POLICY_EFFECTIVE_DATE: str = field(default_factory=lambda: os.getenv("POLICY_EFFECTIVE_DATE", legal_config.POLICY_EFFECTIVE_DATE))
+    OPERATOR_LEGAL_NAME: str = field(default_factory=lambda: os.getenv("OPERATOR_LEGAL_NAME", legal_config.OPERATOR_LEGAL_NAME))
+    OPERATOR_ADDRESS: str = field(default_factory=lambda: _env_multiline("OPERATOR_ADDRESS", legal_config.OPERATOR_ADDRESS))
+    GOVERNING_LAW: str = field(default_factory=lambda: os.getenv("GOVERNING_LAW", legal_config.GOVERNING_LAW))
+    SUPPORT_EMAIL: str = field(default_factory=lambda: os.getenv("SUPPORT_EMAIL", legal_config.SUPPORT_EMAIL))
+    PRIVACY_EMAIL: str = field(default_factory=lambda: os.getenv("PRIVACY_EMAIL", legal_config.PRIVACY_EMAIL))
 
     @property
     def is_production(self) -> bool:
         return self.ENVIRONMENT.lower() == "production"
 
     def scaled_daily_quota(self, configured_limit: int) -> int:
-        """Apply the temporary development multiplier to a daily quota."""
+        """Apply the configured deployment multiplier to a daily quota."""
         return max(configured_limit, 0) * max(self.DAILY_QUOTA_MULTIPLIER, 1)
+
+    def legal_publication_issues(self) -> tuple[str, ...]:
+        """Return concrete configuration issues that block legal publication."""
+        issues: list[str] = []
+        configured = {
+            "OPERATOR_LEGAL_NAME": self.OPERATOR_LEGAL_NAME,
+            "OPERATOR_ADDRESS": self.OPERATOR_ADDRESS,
+            "GOVERNING_LAW": self.GOVERNING_LAW,
+            "SUPPORT_EMAIL": self.SUPPORT_EMAIL,
+            "PRIVACY_EMAIL": self.PRIVACY_EMAIL,
+            "TERMS_VERSION": self.TERMS_VERSION,
+            "PRIVACY_VERSION": self.PRIVACY_VERSION,
+            "POLICY_EFFECTIVE_DATE": self.POLICY_EFFECTIVE_DATE,
+        }
+        for name, value in configured.items():
+            normalized = value.strip()
+            if (
+                not normalized
+                or "[" in normalized
+                or "]" in normalized
+                or "example.com" in normalized.lower()
+                or "placeholder" in normalized.lower()
+            ):
+                issues.append(name)
+        for name, value in (
+            ("SUPPORT_EMAIL", self.SUPPORT_EMAIL),
+            ("PRIVACY_EMAIL", self.PRIVACY_EMAIL),
+        ):
+            local, separator, domain = value.strip().partition("@")
+            if not separator or not local or "." not in domain:
+                if name not in issues:
+                    issues.append(name)
+        if "\n" not in self.OPERATOR_ADDRESS:
+            issues.append("OPERATOR_ADDRESS")
+        return tuple(dict.fromkeys(issues))
 
     @property
     def session_cookie_name(self) -> str:
@@ -216,17 +255,7 @@ class Config:
                 raise RuntimeError("SESSION_ENCRYPTION_KEY must decode to 32 bytes")
             if "*" in self.ALLOWED_ORIGINS:
                 raise RuntimeError("Wildcard CORS origins are forbidden in production")
-            launch_placeholders = {
-                "OPERATOR_LEGAL_NAME": self.OPERATOR_LEGAL_NAME,
-                "OPERATOR_ADDRESS": self.OPERATOR_ADDRESS,
-                "GOVERNING_LAW": self.GOVERNING_LAW,
-                "SUPPORT_EMAIL": self.SUPPORT_EMAIL,
-                "PRIVACY_EMAIL": self.PRIVACY_EMAIL,
-            }
-            invalid = [
-                name for name, value in launch_placeholders.items()
-                if not value or "[" in value or value.endswith("@example.com")
-            ]
+            invalid = self.legal_publication_issues()
             if invalid:
                 raise RuntimeError(
                     "Legal publication blocked until these values are configured: "

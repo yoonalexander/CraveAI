@@ -12,6 +12,7 @@ export type LegalCurrent = {
   privacy_email: string;
   revision_history: Array<{ terms_version: string; privacy_version: string; effective_date: string; summary: string }>;
   publication_ready: boolean;
+  publication_issues?: string[];
 };
 
 export async function fetchLegalCurrent(): Promise<LegalCurrent> {

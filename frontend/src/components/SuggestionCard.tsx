@@ -183,6 +183,16 @@ export function SuggestionCard({
           ) : null}
         </div>
         <p className="suggestion-address">{description}</p>
+        {!placeId.startsWith("placeholder-") ? (
+          <a
+            className="suggestion-google-source"
+            href={`https://www.google.com/maps/search/?api=1&query_place_id=${encodeURIComponent(placeId)}`}
+            rel="noreferrer"
+            target="_blank"
+          >
+            View on Google Maps
+          </a>
+        ) : null}
         <div className="suggestion-card-footer">
           <div className="suggestion-meta">
             {tags.slice(0, 1).map((tag) => <span key={tag}>{tag}</span>)}

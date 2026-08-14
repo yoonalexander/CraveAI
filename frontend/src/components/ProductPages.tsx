@@ -32,80 +32,16 @@ import {
   resolvePlaces,
 } from "../api/product";
 import { deleteAccount, exportAccount } from "../api/auth";
+import { LEGAL_CONFIG } from "../config/legal";
 import { useAuth } from "../context/AuthContext";
 import { SuggestionCard } from "./SuggestionCard";
 
-const termsSections = [
-  ["1. Eligibility and acceptance", "CraveAI is available only to people who are at least 18 years old and able to enter a binding agreement. By using AI chat or voice, creating an account, or accepting a revised policy, you agree to these Terms and acknowledge the Privacy Policy."],
-  ["2. The service", "CraveAI combines map-area restaurant data with an AI-assisted recommendation pipeline. Results may be incomplete, unavailable, or wrong. Restaurant hours, prices, menus, accessibility, dietary information, and availability can change; verify important details directly with the restaurant."],
-  ["3. Food, allergy, and safety warning", "CraveAI is not a medical or allergen-safety service and cannot guarantee that a restaurant, dish, kitchen, or ingredient is safe for any allergy or dietary need. Contact the restaurant and, where appropriate, a qualified professional before relying on a recommendation."],
-  ["4. Acceptable use", "Do not misuse the service, attempt unauthorized access, evade quotas, interfere with other users, submit unlawful content, scrape restricted provider content, or use CraveAI to harm another person. Do not place sensitive personal information in prompts or voice recordings."],
-  ["5. Accounts, history, and quotas", "You are responsible for your account and credentials. History is off by default and is stored only after opt-in or an explicit save. Guest and Free usage limits are described on the Pricing page and may be enforced to protect reliability and provider costs."],
-  ["6. Third-party services and content", "CraveAI relies on Supabase, OpenAI, Google Maps and Places, Open-Meteo, and bounded restaurant websites. Their services and content remain subject to their own terms. Google-supplied venue details are hydrated when needed and are not treated as CraveAI-owned content."],
-  ["7. Intellectual property", "CraveAI and its original software, branding, and interface are protected by applicable law. You retain rights in your user-authored prompts, notes, and collection names, subject to the permissions needed to operate the service."],
-  ["8. Suspension and termination", "You may stop using CraveAI and delete your account. We may suspend or terminate access for material misuse, security risk, legal requirements, or prolonged service discontinuation. Account deletion removes account-owned application data, subject to narrowly required legal or security retention."],
-  ["9. Disclaimers and liability", "The service is provided on an as-available basis without guarantees of uninterrupted operation or restaurant accuracy. To the maximum extent permitted by law, the operator is not liable for indirect or consequential losses. Nothing in these Terms excludes rights or liabilities that applicable law does not permit us to exclude."],
-  ["10. Changes, governing law, and contact", "Material revisions require renewed acknowledgment for signed-in accounts. The configured operator identity, address, governing law, effective date, and support contact form part of these Terms. Mandatory consumer protections in your jurisdiction continue to apply."],
-] as const;
-
-const privacySections = [
-  ["What CraveAI collects", "We process account identifiers and email, authentication/session records, policy acknowledgments, separate consent choices, prompts and confirmed map context, optional saved conversations, Place IDs for saved restaurants and recommendations, collection names and notes, explicit preferences (including optional dietary or allergy information), feedback, quota counters, and security events. We do not store raw IP addresses in policy acceptance records."],
-  ["Why data is used", "Data is used to authenticate accounts, provide bounded restaurant recommendations, enforce quotas, remember choices you explicitly save, operate optional History and personalization, collect quality feedback, secure the service, answer rights requests, and meet legal obligations. Explicit prompt constraints always take priority over saved preferences."],
-  ["Providers and disclosures", "Confirmed location context and prompts may be processed by OpenAI for recommendation work. Google Maps and Places supplies map and venue data; Open-Meteo supplies weather; Supabase supplies authentication and database infrastructure; and a small bounded set of official restaurant pages may be checked for menu evidence. Data is not sold. Providers receive only the information needed for their function."],
-  ["Temporary and saved conversations", "With History off, messages stay in memory and sessionStorage for tab-scoped recovery and are not saved as conversations by CraveAI. New Chat, logout, explicit clearing, or closing the tab removes that recovery data. With History enabled or after Save conversation, CraveAI stores user messages, assistant narrative, and referenced Place IDs until you delete them."],
-  ["Retention", "Account preferences, collections, saved Place IDs, and opted-in conversations remain until deletion. Authentication sessions expire after no more than 30 days. Quota records are retained for up to 35 days; security events for up to 90 days; feedback for up to 24 months or until account deletion. Voice buffers are discarded immediately after transcription. Provider handling may differ; OpenAI API abuse-monitoring data may be retained for up to 30 days under its default controls."],
-  ["International processing", "Providers may process information outside your province, state, country, the EU/EEA, or the UK. The operator must use appropriate contractual and legal transfer safeguards where required and disclose the applicable provider locations before production publication."],
-  ["Your choices and rights", "Depending on your location, you may request access, correction, export, deletion, objection or restriction, portability, and withdrawal of consent. California residents may also exercise applicable disclosure, deletion, correction, and opt-out rights; CraveAI does not sell or share personal information for cross-context behavioural advertising. Withdrawing optional consent does not affect earlier lawful processing."],
-  ["Security and children", "CraveAI uses HTTPS, HttpOnly sessions, CSRF protection, scoped access checks, encryption for provider tokens, bounded inputs, and audit controls. No system is perfectly secure. CraveAI is an 18+ service and is not directed to children."],
-  ["Contact and revisions", "Use the configured privacy email for rights requests or complaints. The policy version and effective date appear above. A material change requires a new acknowledgment from signed-in users. You may also complain to the privacy regulator in your jurisdiction."],
-] as const;
-
-export function LegalPage({ kind }: { kind: "terms" | "privacy" }): JSX.Element {
-  const [current, setCurrent] = useState<LegalCurrent | null>(null);
-  useEffect(() => { void fetchLegalCurrent().then(setCurrent).catch(() => undefined); }, []);
-  const isTerms = kind === "terms";
-  const document = isTerms ? current?.terms : current?.privacy;
-  const contactEmail = (isTerms ? current?.support_email : current?.privacy_email) || (isTerms ? "support@example.com" : "privacy@example.com");
-  const revisions = current?.revision_history || [{ terms_version: "2026-08-13", privacy_version: "2026-08-13", effective_date: "2026-08-13", summary: "Initial privacy-first product policy release." }];
-  return (
-    <article className="product-page legal-page">
-      <header className="product-page-heading">
-        <p>Legal</p><h1>{isTerms ? "Terms and Conditions" : "Privacy Policy"}</h1>
-        <span>Version {document?.version || "2026-08-13"} · Effective {document?.effective_date || "August 13, 2026"}</span>
-      </header>
-      {!current?.publication_ready ? (
-        <div className="legal-review-banner" role="note">
-          Draft for professional legal review. Production publication is blocked until the operator name, address, governing law, and real support/privacy contacts are configured.
-        </div>
-      ) : null}
-      <p className="legal-intro">
-        {isTerms
-          ? "These Terms govern access to CraveAI’s restaurant discovery, map, chat, voice, saved-place, and account features."
-          : "This Policy explains how CraveAI handles information across guest browsing, AI chat, accounts, saved places, optional History, preferences, voice, and feedback."}
-      </p>
-      <div className="legal-sections">
-        {(isTerms ? termsSections : privacySections).map(([title, copy]) => (
-          <section key={title}><h2>{title}</h2><p>{copy}</p></section>
-        ))}
-      </div>
-      {!isTerms ? <section className="legal-sources"><h2>Rights and provider references</h2><p>This draft is designed around guidance from the <a href="https://www.priv.gc.ca/en/privacy-topics/business-privacy/collecting-personal-information/consent/gl_omc_201805/" rel="noreferrer" target="_blank">Office of the Privacy Commissioner of Canada</a>, <a href="https://commission.europa.eu/law/law-topic/data-protection/reform/rights-citizens/how-my-personal-data-protected/how-should-my-consent-be-requested_en" rel="noreferrer" target="_blank">European Commission</a>, <a href="https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/individual-rights/the-right-to-be-informed/what-privacy-information-should-we-provide/" rel="noreferrer" target="_blank">UK ICO</a>, and <a href="https://oag.ca.gov/privacy/ccpa" rel="noreferrer" target="_blank">California DOJ</a>. Provider handling references include <a href="https://developers.openai.com/api/docs/guides/your-data" rel="noreferrer" target="_blank">OpenAI API data controls</a> and <a href="https://developers.google.com/maps/documentation/places/web-service/policies" rel="noreferrer" target="_blank">Google Places policies</a>.</p></section> : null}
-      <footer className="legal-contact">
-        <strong>Contact</strong>
-        <span>{current?.operator_legal_name || "[Operator legal name]"} · {current?.operator_address || "[Operator address]"} · {current?.governing_law || "[Governing law]"}</span>
-        <a href={`mailto:${contactEmail}`}>{contactEmail}</a>
-        <a href="/help/data-use">Read how CraveAI uses your data</a>
-      </footer>
-      <section className="legal-revisions"><h2>Revision history</h2>{revisions.map((revision) => <p key={`${revision.terms_version}-${revision.privacy_version}`}><strong>{revision.effective_date}</strong> · {revision.summary} (Terms {revision.terms_version}, Privacy {revision.privacy_version})</p>)}</section>
-    </article>
-  );
-}
-
 const helpArticles = [
-  { id: "data-use", title: "How CraveAI uses your data", body: "Your prompt and confirmed map area are used to find and rank nearby restaurants. OpenAI processes recommendation requests; Google supplies map and Places data; Open-Meteo supplies current weather; Supabase handles authentication and application storage; and bounded official restaurant pages may be checked for menu evidence. Temporary chats are not saved by CraveAI unless you opt into History or explicitly save one. Use Settings to export, correct, clear, reset, or delete account data." },
+  { id: "data-use", title: "How CraveAI uses your data", body: "CraveAI separates temporary browsing from information you deliberately save. Your confirmed coordinates and map bounds go to CraveAI and Google to find restaurants, and the active coordinates go directly from your browser to Open-Meteo for weather. OpenAI can receive your prompt, bounded recent chat context, candidate Place IDs and menu evidence, and—only when personalization is enabled—selected preferences, dietary or allergy entries, and saved Place IDs. Voice clips go to OpenAI Whisper for transcription and are cleared from CraveAI memory afterward. Supabase handles identity and the PostgreSQL application database; Vercel and Render host and proxy the service; official restaurant sites may receive bounded server requests for public menu evidence. Temporary chat recovery stays in sessionStorage unless you enable History or explicitly save a conversation. CraveAI does not use an analytics or advertising SDK, does not sell personal information, and stores hashed—not raw—network prefixes for quotas and security. Use Settings to export account data, clear History, reset personalization, or delete the account, and use the Privacy Policy for retention details and provider links." },
   { id: "maps", title: "Maps, location, and Search this area", body: "CraveAI starts near your device or selected fallback. Moving the map does not spend a Places request until you choose Search this area. The confirmed visible area controls markers, Discovery, filters, weather, and later chat requests." },
   { id: "allergies", title: "Allergies and dietary safety", body: "Dietary evidence can be incomplete and CraveAI cannot guarantee allergen safety or kitchen separation. Treat results as discovery assistance, contact the restaurant, and use professional medical advice where appropriate." },
   { id: "history", title: "Temporary chat and History", body: "History is off by default. Temporary recovery is tab-scoped. Signed-in users can enable automatic History in Settings or explicitly save a conversation. Stored conversations remain until deleted." },
-  { id: "voice", title: "Voice privacy and limits", body: "Recording starts only after you select the microphone. Clips are limited to 60 seconds and 10 MB, sent through CraveAI to OpenAI Whisper for transcription, and discarded after transcription." },
+  { id: "voice", title: "Voice privacy and limits", body: "Recording starts only after you select the microphone and grant browser permission. Clips are limited to 60 seconds and 10 MB, sent through CraveAI to OpenAI Whisper for transcription, and cleared from CraveAI memory after the request. OpenAI may retain provider abuse-monitoring data under its API data controls; do not record sensitive information." },
   { id: "quotas", title: "Guest and Free quotas", body: "Guest and Free quotas protect reliability and third-party provider costs. Current daily limits appear on the Pricing page and reset daily." },
   { id: "account", title: "Account, export, and deletion", body: "Account Settings lets you export account-owned data, clear History, reset personalization, and delete your account. Place details are re-hydrated from Place IDs and are not included as durable provider content." },
   { id: "limitations", title: "AI limitations and incorrect information", body: "CraveAI can misunderstand prompts or show stale third-party data. Verify hours, prices, menus, accessibility, reservations, and dietary details directly with the restaurant. Use recommendation feedback to report errors." },
@@ -126,7 +62,7 @@ export function HelpPage(): JSX.Element {
       </div>
       <footer className="help-contact">
         <h2>Still need help?</h2>
-        <p>Contact <a href={`mailto:${current?.support_email || "support@example.com"}`}>support</a>, or send privacy and data-rights requests to <a href={`mailto:${current?.privacy_email || "privacy@example.com"}`}>the privacy team</a>.</p>
+        <p>Contact <a href={`mailto:${current?.support_email || LEGAL_CONFIG.supportEmail}`}>support</a>, or send privacy and data-rights requests to <a href={`mailto:${current?.privacy_email || LEGAL_CONFIG.privacyEmail}`}>the privacy team</a>.</p>
       </footer>
     </section>
   );

@@ -38,6 +38,11 @@ export function AuthPage({ mode }: { mode: PageMode }): JSX.Element {
         <div className="mx-auto mt-12 max-w-md rounded-3xl border border-border bg-secondary/10 p-8 shadow-xl">
           {mode === "account" ? <AccountPanel /> : <AuthForm mode={mode} />}
         </div>
+        <nav aria-label="Legal" className="mx-auto mt-6 flex max-w-md justify-center gap-5 text-xs text-muted-foreground">
+          <a className="underline underline-offset-4" href="/terms">Terms of Service</a>
+          <a className="underline underline-offset-4" href="/privacy">Privacy Policy</a>
+          <a className="underline underline-offset-4" href="/help/data-use">Data use</a>
+        </nav>
       </div>
     </ThemeProvider>
   );
@@ -167,7 +172,7 @@ function AuthForm({ mode }: { mode: Exclude<PageMode, "account"> }): JSX.Element
             <legend className="px-1 font-semibold">Legal acknowledgments</legend>
             <label className="flex gap-2">
               <input checked={acceptTerms} onChange={(event) => setAcceptTerms(event.target.checked)} required type="checkbox" />
-              <span>I agree to the <a className="underline" href="/terms" target="_blank">Terms and Conditions</a>.</span>
+              <span>I agree to the <a className="underline" href="/terms" target="_blank">Terms of Service</a>.</span>
             </label>
             <label className="flex gap-2">
               <input checked={acknowledgePrivacy} onChange={(event) => setAcknowledgePrivacy(event.target.checked)} required type="checkbox" />

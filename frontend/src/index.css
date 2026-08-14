@@ -200,7 +200,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .sidebar-weather-copy { display: flex; min-width: 130px; flex-direction: column; font-size: 10px; }
 .sidebar-weather-copy strong { color: #343532; font-size: 11px; }
 .sidebar-weather-copy span { color: #777975; }
+.weather-attribution { margin-top: 2px; color: #577753; font-size: 8px; line-height: 1.2; text-decoration: underline; text-underline-offset: 2px; }
 .sidebar-spacer { flex: 1; min-height: 20px; }
+.sidebar-legal-links { display: flex; justify-content: center; gap: 10px; padding: 4px 8px 8px; font-size: 9px; }.sidebar-legal-links a { color: #747873; text-decoration: underline; text-underline-offset: 2px; }
 .sidebar-nav-secondary { padding-bottom: 8px; }
 .sidebar-account { padding: 12px 5px 0; overflow: hidden; border-top: 1px solid #dddeda; }
 .sidebar-login-copy { min-width: 184px; padding: 0 4px 12px; }
@@ -233,7 +235,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .crave-sidebar.is-collapsed .sidebar-label,
 .crave-sidebar.is-collapsed .sidebar-weather-copy,
 .crave-sidebar.is-collapsed .sidebar-login-copy,
-.crave-sidebar.is-collapsed .sidebar-account-copy { display: none; }
+.crave-sidebar.is-collapsed .sidebar-account-copy,
+.crave-sidebar.is-collapsed .sidebar-legal-links { display: none; }
 .crave-sidebar.is-collapsed .sidebar-link { justify-content: center; padding: 8px; }
 .crave-sidebar.is-collapsed .sidebar-weather { justify-content: center; margin-inline: 0; padding-inline: 0; }
 .crave-sidebar.is-collapsed .sidebar-account { padding-inline: 1px; }
@@ -377,6 +380,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .chat-recommendations p { margin: 7px 0 0; color: #565953; font-size: 14px; line-height: 1.55; }
 .chat-recommendations .recommendation-confidence { margin-top: 8px; color: #8a6415; font-size: 11px; font-weight: 800; text-transform: uppercase; }
 .chat-recommendations .recommendation-confidence.is-high { color: #3d713b; }
+.chat-recommendations .recommendation-google-source { display: inline-block; margin-top: 5px; color: #477b45; font-size: 11px; font-weight: 700; text-decoration: underline; text-underline-offset: 2px; }
 .chat-recommendations .recommendation-preferences { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px; }
 .chat-recommendations .recommendation-preferences span { display: inline-flex; margin: 0; padding: 4px 8px; border-radius: 999px; color: #3d713b; background: #edf4ea; font-size: 11px; font-weight: 700; }
 .recommendation-dishes { margin: 9px 0 0; padding-left: 20px; color: #343733; font-size: 14px; line-height: 1.5; }
@@ -437,6 +441,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .suggestion-card-heading h3 { margin: 0; overflow: hidden; font-size: 14px; line-height: 1.35; text-overflow: ellipsis; white-space: nowrap; }
 .suggestion-card-heading span { flex: 0 0 auto; font-size: 12px; font-weight: 600; }
 .suggestion-address { display: -webkit-box; margin: 8px 0 0; overflow: hidden; color: #555851; font-size: 12px; line-height: 1.5; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.suggestion-google-source { width: fit-content; margin-top: 4px; color: #4d784a; font-size: 10px; font-weight: 700; text-decoration: underline; text-underline-offset: 2px; }
 .suggestion-card-footer { position: relative; display: flex; min-height: 52px; align-items: flex-end; margin-top: auto; padding-top: 8px; }
 .suggestion-meta { display: flex; flex-wrap: nowrap; align-items: center; gap: 4px; min-width: 0; padding: 0 37px 1px 0; }
 .suggestion-meta span { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 4px; padding: 4px 6px; border: 1px solid #e0e1dd; border-radius: 999px; color: #50534d; font-size: 11px; white-space: nowrap; }
@@ -540,6 +545,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   .crave-sidebar.is-collapsed .sidebar-label,
   .crave-sidebar.is-collapsed .sidebar-weather-copy,
   .crave-sidebar.is-collapsed .sidebar-account-copy { display: flex; }
+  .crave-sidebar.is-collapsed .sidebar-legal-links { display: flex; }
   .crave-sidebar.is-collapsed .sidebar-login-copy { display: block; }
   .crave-sidebar.is-collapsed .sidebar-link { justify-content: flex-start; padding: 7px 9px; }
   .crave-sidebar.is-collapsed .sidebar-weather { justify-content: flex-start; margin-inline: 4px; padding-inline: 5px; }
@@ -691,7 +697,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .discovery-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; }
 .discovery-heading p { margin: 0 0 6px; color: #4d824a; font-size: 11px; font-weight: 850; letter-spacing: .14em; text-transform: uppercase; }
 .discovery-heading h1 { margin: 0; font-family: Georgia,"Times New Roman",serif; font-size: clamp(28px,3vw,42px); font-weight: 500; letter-spacing: -.025em; }
-.discovery-heading > span { padding-bottom: 6px; color: #777a74; font-size: 11px; }
+.discovery-heading > a { padding-bottom: 6px; color: #557851; font-size: 11px; text-decoration: underline; text-underline-offset: 2px; }
 .discovery-intro { max-width: 720px; margin: 10px 0 24px; color: #696c66; font-size: 14px; line-height: 1.55; }
 .discovery-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 22px; }
 .discovery-grid .suggestion-card { display: flex; min-height: 365px; flex-direction: column; }
@@ -816,7 +822,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   .discovery-view { overflow: hidden; }
   .discovery-heading { align-items: flex-start; }
   .discovery-heading h1 { font-size: 29px; }
-  .discovery-heading > span { font-size: 9px; }
+  .discovery-heading > a { font-size: 9px; }
   .discovery-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px; }
   .discovery-grid .suggestion-card { min-height: 330px; }
   .discovery-grid .suggestion-photo, .discovery-grid .suggestion-photo-fallback { height: 180px; min-height: 180px; }
@@ -827,7 +833,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   .discovery-grid { grid-template-columns: 1fr; }
   .discovery-grid .suggestion-card { min-height: 380px; }
   .discovery-grid .suggestion-photo, .discovery-grid .suggestion-photo-fallback { height: 230px; min-height: 230px; }
-  .discovery-heading > span { display: none; }
+  .discovery-heading > a { display: none; }
   .discovery-intro { font-size: 13px; }
 }
 
@@ -842,16 +848,18 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .product-page-heading h1 { margin: 0; font-family: Georgia,"Times New Roman",serif; font-size: clamp(32px,4vw,52px); font-weight: 500; letter-spacing: -.035em; }
 .product-page-heading > span { display: block; margin-top: 9px; color: #696d67; font-size: 14px; line-height: 1.55; }
 .legal-review-banner { max-width: 920px; margin: 0 0 22px; padding: 13px 16px; border: 1px solid #e9d79e; border-radius: 12px; color: #664e13; background: #fff9df; font-size: 13px; line-height: 1.5; }
-.legal-intro { max-width: 850px; color: #4d514b; font-size: 16px; line-height: 1.7; }
-.legal-sections { display: grid; max-width: 980px; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16px; margin-top: 24px; }
-.legal-sections section { padding: 20px; border: 1px solid #e0e3dc; border-radius: 16px; background: #fbfcfa; }
-.legal-sections h2 { margin: 0 0 8px; font-size: 16px; }
-.legal-sections p { margin: 0; color: #555a53; font-size: 13px; line-height: 1.7; }
-.legal-contact { display: flex; max-width: 980px; align-items: center; gap: 18px; margin-top: 24px; padding: 18px; border-top: 1px solid #e2e4df; color: #555a53; font-size: 13px; }
+.legal-intro { max-width: 850px; color: #4d514b; font-size: 16px; line-height: 1.75; }
+.legal-cross-links { display: flex; max-width: 900px; flex-wrap: wrap; gap: 8px; margin-top: 18px; }.legal-cross-links a { padding: 8px 12px; border: 1px solid #dce1d8; border-radius: 999px; color: #3f7540; font-size: 13px; font-weight: 700; }.legal-cross-links a[aria-current="page"] { color: #fff; background: #4d8148; }
+.legal-sections { display: grid; max-width: 900px; grid-template-columns: 1fr; gap: 14px; margin-top: 24px; }
+.legal-sections section { padding: 22px 24px; border: 1px solid #e0e3dc; border-radius: 16px; background: #fbfcfa; }
+.legal-sections h2 { margin: 0 0 9px; font-size: 18px; }
+.legal-sections p { margin: 0; color: #4f554d; font-size: 15px; line-height: 1.78; }
+.legal-contact { display: flex; max-width: 900px; align-items: center; gap: 18px; margin-top: 24px; padding: 22px; border-top: 1px solid #e2e4df; color: #555a53; font-size: 13px; }
+.legal-contact > div { display: grid; gap: 5px; max-width: 570px; }.legal-contact address { white-space: pre-line; font-style: normal; line-height: 1.55; }
 .legal-contact a { margin-left: auto; color: #3f7540; font-weight: 700; }
 .legal-contact a + a { margin-left: 0; }
-.legal-revisions { max-width: 980px; padding: 0 18px; color: #555a53; font-size: 12px; }
-.legal-sources { max-width: 980px; margin-top: 20px; padding: 18px; border-radius: 14px; background: #f3f6f1; }.legal-sources h2 { margin: 0 0 8px; font-size: 15px; }.legal-sources p { margin: 0; color: #555a53; font-size: 12px; line-height: 1.7; }
+.legal-revisions { max-width: 900px; padding: 0 18px; color: #555a53; font-size: 13px; }
+.legal-sources { max-width: 900px; margin-top: 20px; padding: 20px 22px; border-radius: 14px; background: #f3f6f1; }.legal-sources h2 { margin: 0 0 8px; font-size: 17px; }.legal-sources p { margin: 0; color: #555a53; font-size: 14px; line-height: 1.75; }.legal-sources a { color: #3f7540; text-decoration: underline; text-underline-offset: 2px; }
 .help-search { display: block; max-width: 720px; }
 .help-search span { display: block; margin-bottom: 7px; font-size: 12px; font-weight: 750; }
 .help-search input, .collection-toolbar input, .settings-page input, .settings-page select, .saved-item textarea, .discovery-controls input { width: 100%; min-height: 44px; padding: 10px 13px; border: 1px solid #d9ddd5; border-radius: 11px; color: #282b27; background: #fff; font: inherit; }

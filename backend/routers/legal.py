@@ -22,6 +22,7 @@ class PolicyAcceptanceRequest(BaseModel):
 @router.get("/current")
 async def current_legal_documents() -> dict:
     settings = get_settings()
+    publication_issues = settings.legal_publication_issues()
     return {
         "terms": {"version": settings.TERMS_VERSION, "effective_date": settings.POLICY_EFFECTIVE_DATE, "path": "/terms"},
         "privacy": {"version": settings.PRIVACY_VERSION, "effective_date": settings.POLICY_EFFECTIVE_DATE, "path": "/privacy"},
@@ -36,16 +37,17 @@ async def current_legal_documents() -> dict:
                 "terms_version": settings.TERMS_VERSION,
                 "privacy_version": settings.PRIVACY_VERSION,
                 "effective_date": settings.POLICY_EFFECTIVE_DATE,
-                "summary": "Initial privacy-first product policy release.",
-            }
+                "summary": "Application-specific Terms and Privacy Policy finalized from the implemented CraveAI data flows.",
+            },
+            {
+                "terms_version": "2026-08-13",
+                "privacy_version": "2026-08-13",
+                "effective_date": "2026-08-13",
+                "summary": "Pre-publication technical draft; replaced before legal publication.",
+            },
         ],
-        "publication_ready": not any(
-            "[" in value or value.endswith("@example.com")
-            for value in (
-                settings.OPERATOR_LEGAL_NAME, settings.OPERATOR_ADDRESS,
-                settings.GOVERNING_LAW, settings.SUPPORT_EMAIL, settings.PRIVACY_EMAIL,
-            )
-        ),
+        "publication_ready": not publication_issues,
+        "publication_issues": list(publication_issues),
     }
 
 

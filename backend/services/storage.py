@@ -13,6 +13,8 @@ from sqlalchemy.exc import IntegrityError
 from backend.database import Base, get_engine, get_session_factory
 from backend.models import (
     AccountIdentity,
+    AppSession,
+    AuthTransaction,
     Favorite,
     Feedback,
     AbuseEvent,
@@ -43,8 +45,20 @@ async def purge_expired_operational_data() -> None:
         with get_session_factory()() as db:
             db.execute(delete(UsageLimit).where(UsageLimit.usage_date < (now - timedelta(days=35)).date()))
             db.execute(delete(SecurityAuditEvent).where(SecurityAuditEvent.created_at < now - timedelta(days=90)))
-            db.execute(delete(AbuseEvent).where(AbuseEvent.occurred_at < now - timedelta(days=90)))
+            db.execute(delete(AbuseEvent).where(AbuseEvent.occurred_at < now - timedelta(days=30)))
             db.execute(delete(Feedback).where(Feedback.created_at < now - timedelta(days=730)))
+            db.execute(
+                delete(AuthTransaction).where(
+                    (AuthTransaction.expires_at < now)
+                    | (AuthTransaction.consumed_at < now - timedelta(days=1))
+                )
+            )
+            db.execute(
+                delete(AppSession).where(
+                    (AppSession.absolute_expires_at < now)
+                    | (AppSession.revoked_at < now - timedelta(days=30))
+                )
+            )
             db.commit()
 
     await asyncio.to_thread(_delete)

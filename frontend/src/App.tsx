@@ -10,6 +10,7 @@ import { ChatPanel } from "./components/ChatPanel";
 import { DiscoveryPage } from "./components/DiscoveryPage";
 import { MenuIcon, PinIcon } from "./components/Icons";
 import { LocationDialog, SelectedLocation } from "./components/LocationDialog";
+import { LegalPage } from "./components/LegalPage";
 import { MapView } from "./components/MapView";
 import { MobileChatSheet } from "./components/MobileChatSheet";
 import { SearchToolbar } from "./components/SearchToolbar";
@@ -17,7 +18,6 @@ import { Sidebar } from "./components/Sidebar";
 import {
   HelpPage,
   HistoryPage,
-  LegalPage,
   LikesPage,
   PolicyGate,
   PricingPage,

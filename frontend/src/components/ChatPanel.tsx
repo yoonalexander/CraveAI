@@ -34,10 +34,8 @@ type ChatPanelProps = {
   onConversationStart?: () => void;
 };
 
-// Mirrors the temporary 1000x backend quota and uses a fresh cache key so an
-// exhausted pre-development quota does not leave a stale "0 messages" badge.
-const DEFAULT_DAILY_CHAT_LIMIT = 3_000;
-const CHAT_USAGE_STORAGE_KEY = "craveai-chat-usage-dev-1000x";
+const DEFAULT_DAILY_CHAT_LIMIT = 3;
+const CHAT_USAGE_STORAGE_KEY = "craveai-chat-usage-v1";
 const TEMP_CHAT_STORAGE_KEY = "craveai-temporary-chat";
 
 const createMessageId = (prefix: string): string =>
@@ -352,6 +350,7 @@ export function ChatPanel({
                           {typeof recommendation.rating === "number" ? `★ ${recommendation.rating.toFixed(1)}` : ""}
                           {recommendation.address ? `${typeof recommendation.rating === "number" ? " · " : ""}${recommendation.address}` : ""}
                         </span>
+                        {recommendation.place_id ? <a className="recommendation-google-source" href={`https://www.google.com/maps/search/?api=1&query_place_id=${encodeURIComponent(recommendation.place_id)}`} rel="noreferrer" target="_blank">Google Maps</a> : null}
                         {recommendation.confidence ? (
                           <div className={`recommendation-confidence is-${recommendation.confidence}`}>
                             {recommendation.confidence === "high" ? "Strong match" : "Relevant match"}
@@ -464,13 +463,13 @@ export function ChatPanel({
         <p className="chat-disclaimer">CraveAI can make mistakes. Check important details.</p>
       ) : (
         <p className="chat-legal-notice">
-          CraveAI uses AI. Don’t share sensitive information. Your prompt and confirmed location may be sent to AI and search providers. History is off by default; chats are saved only if you enable History or explicitly save one. Review our <a href="/terms">Terms</a>, <a href="/privacy">Privacy Policy</a>, and <a href="/help/data-use">learn more</a>.
+          CraveAI uses AI. Don’t share sensitive information. Prompts and bounded context go to OpenAI; confirmed location and search data go to map, Places, and weather providers. History is off by default; chats are saved only if you enable History or explicitly save one. Review our <a href="/terms">Terms</a>, <a href="/privacy">Privacy Policy</a>, and <a href="/help/data-use">learn more</a>.
         </p>
       )}
       {notice ? <div className="chat-notice" role="status">{notice}</div> : null}
       {isTranscribing ? <div className="chat-notice" role="status">Transcribing audio…</div> : null}
       {feedbackDraft ? <div className="feedback-dialog-backdrop"><form aria-labelledby="feedback-title" aria-modal="true" className="feedback-dialog" onKeyDown={(event) => trapDialogKeys(event, () => setFeedbackDraft(null))} onSubmit={(event) => { event.preventDefault(); void sendFeedback(feedbackDraft.recommendation, feedbackDraft.liked, feedbackDraft.notes, feedbackDraft.reportReason); }} role="dialog"><p>Recommendation feedback</p><h2 id="feedback-title">{feedbackDraft.liked ? "What worked well?" : "What should we improve?"}</h2><span>Your feedback is used for aggregate quality measurement, not automatic personalization.</span>{!feedbackDraft.liked ? <label>Issue<select onChange={(event) => setFeedbackDraft({ ...feedbackDraft, reportReason: event.target.value })} value={feedbackDraft.reportReason}><option value="">General mismatch</option><option value="incorrect_information">Incorrect restaurant information</option><option value="outside_search_area">Outside the search area</option><option value="closed_or_unavailable">Closed or unavailable</option><option value="other">Other</option></select></label> : null}<label>Optional note<textarea autoFocus maxLength={1000} onChange={(event) => setFeedbackDraft({ ...feedbackDraft, notes: event.target.value })} placeholder="Tell us what was useful or incorrect" value={feedbackDraft.notes} /></label><div><button onClick={() => setFeedbackDraft(null)} type="button">Cancel</button><button className="primary-action" type="submit">Submit feedback</button></div></form></div> : null}
-      {ageGateOpen ? <div className="age-gate-backdrop"><section aria-modal="true" className="age-gate" role="dialog"><img alt="" src="/craveai-pin.svg" /><p>Before you use AI chat or voice</p><h2>Confirm you are 18 or older</h2><span>CraveAI sends your prompt, confirmed location context, or voice clip to providers to return recommendations or a transcription. Don’t share sensitive information.</span><button onClick={() => { window.sessionStorage.setItem("craveai-age-18", "true"); setAgeGateOpen(false); void submit(); }}>I am 18 or older</button><button className="secondary" onClick={() => setAgeGateOpen(false)}>Cancel</button><small>By continuing, you agree to the <a href="/terms">Terms</a> and acknowledge the <a href="/privacy">Privacy Policy</a>.</small></section></div> : null}
+      {ageGateOpen ? <div className="age-gate-backdrop"><section aria-modal="true" className="age-gate" role="dialog"><img alt="" src="/craveai-pin.svg" /><p>Before you use AI chat or voice</p><h2>Confirm you are 18 or older</h2><span>CraveAI sends prompts and bounded context to OpenAI, location and search data to map/Places/weather providers, and voice clips to OpenAI for transcription. Don’t share sensitive information.</span><button onClick={() => { window.sessionStorage.setItem("craveai-age-18", "true"); setAgeGateOpen(false); void submit(); }}>I am 18 or older</button><button className="secondary" onClick={() => setAgeGateOpen(false)}>Cancel</button><small>By continuing, you agree to the <a href="/terms">Terms</a> and acknowledge the <a href="/privacy">Privacy Policy</a>.</small></section></div> : null}
     </section>
   );
 }

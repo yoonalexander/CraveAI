@@ -31,15 +31,15 @@ beforeEach(() => {
 });
 
 describe("ChatPanel", () => {
-  it("shows the temporary development chat allowance", () => {
+  it("shows the published guest daily chat allowance", () => {
     render(<ChatPanel />);
-    expect(screen.getByText("3000 messages left today")).toBeInTheDocument();
+    expect(screen.getByText("3 messages left today")).toBeInTheDocument();
   });
 
   it("starts empty and moves into conversation mode after Enter", async () => {
     const { container } = render(<ChatPanel />);
     expect(screen.getByRole("heading", { name: "What’s your craving today?" })).toBeVisible();
-    expect(screen.getByText(/your prompt and confirmed location may be sent to AI and search providers/i)).toBeInTheDocument();
+    expect(screen.getByText(/prompts and bounded context go to OpenAI/i)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Terms" })).toHaveAttribute("href", "/terms");
     expect(screen.getByRole("link", { name: "Privacy Policy" })).toHaveAttribute("href", "/privacy");
     expect(container.querySelector(".chat-panel")).toHaveClass("is-idle");

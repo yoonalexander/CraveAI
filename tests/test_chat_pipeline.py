@@ -590,7 +590,7 @@ def test_chat_status_does_not_report_unlimited_in_standard_mode(mocked_pipeline)
     assert mocked_pipeline["extract"] == 0
 
 
-def test_temporary_multiplier_scales_chat_and_discovery_quotas(monkeypatch):
+def test_configured_multiplier_scales_chat_and_discovery_quotas(monkeypatch):
     monkeypatch.setenv("DAILY_QUOTA_MULTIPLIER", "1000")
     get_settings.cache_clear()
 

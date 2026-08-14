@@ -182,6 +182,7 @@ export function Sidebar({
                 ? "Checking weather"
                 : weather?.condition || "Weather unavailable"}
             </span>
+            {weather ? <a className="weather-attribution" href="https://open-meteo.com/" rel="noreferrer" target="_blank">Weather by Open-Meteo</a> : null}
           </div>
         </div>
 
@@ -216,6 +217,10 @@ export function Sidebar({
             </>
           )}
         </div>
+        <nav aria-label="Legal" className="sidebar-legal-links">
+          <a href="/terms">Terms</a>
+          <a href="/privacy">Privacy</a>
+        </nav>
       </aside>
     </>
   );

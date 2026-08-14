@@ -44,7 +44,7 @@ export function DiscoveryPage({
           <p>Discovery</p>
           <h1 id="discovery-title">Today’s Suggested Spots</h1>
         </div>
-        <span>Powered by Google</span>
+        <a href="https://maps.google.com/" rel="noreferrer" target="_blank">Restaurant data by Google Maps</a>
       </header>
       <p className="discovery-intro">
         Explore every restaurant in your confirmed map area. Move the map on Home and choose Search this area to refresh this collection.

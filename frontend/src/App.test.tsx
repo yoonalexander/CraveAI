@@ -147,7 +147,7 @@ describe("Airbnb-style application shell", () => {
   });
 
   it.each([
-    ["/terms", "Terms and Conditions"],
+    ["/terms", "Terms of Service"],
     ["/privacy", "Privacy Policy"],
   ])("routes %s to its in-shell legal document", (path, heading) => {
     mockedFetchSuggestions.mockResolvedValue(makeSuggestions(4));
