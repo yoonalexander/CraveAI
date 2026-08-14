@@ -18,6 +18,7 @@ vi.mock("@react-google-maps/api", async () => {
     fitBounds: vi.fn(),
     setCenter: vi.fn(),
     setZoom: vi.fn(),
+    getZoom: () => 13,
     getCenter: () => ({ lat: () => mapHarness.center.lat, lng: () => mapHarness.center.lng }),
     getBounds: () => ({
       getNorthEast: () => ({ lat: () => mapHarness.bounds.north, lng: () => mapHarness.bounds.east }),

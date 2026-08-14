@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type { ChatRecommendation } from "./api/chat";
 import { fetchSuggestions, PlacesQuotaError, Suggestion } from "./api/places";
@@ -14,7 +14,11 @@ import { SearchToolbar } from "./components/SearchToolbar";
 import { Sidebar } from "./components/Sidebar";
 import { GoogleMapsProvider, useGoogleMaps } from "./context/GoogleMapsContext";
 import type { Coordinates, SearchArea } from "./types/searchArea";
-import { filterSuggestions, SuggestionFilter } from "./utils/suggestionPool";
+import {
+  filterSuggestions,
+  mergeSuggestionsForBounds,
+  SuggestionFilter,
+} from "./utils/suggestionPool";
 
 const SUGGESTION_TIMEOUT_MS = 90_000;
 const SEARCH_RADIUS_METERS = 5_000;
@@ -83,6 +87,7 @@ function CraveApplication(): JSX.Element {
   const [recenterVersion, setRecenterVersion] = useState(0);
 
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const suggestionsRef = useRef<Suggestion[]>([]);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const [isResolvingArea, setIsResolvingArea] = useState(false);
   const [suggestionError, setSuggestionError] = useState<string | null>(null);
@@ -186,11 +191,17 @@ function CraveApplication(): JSX.Element {
     )
       .then((places) => {
         if (!active) return;
-        setSuggestions(places);
+        const mergedPlaces = mergeSuggestionsForBounds(
+          suggestionsRef.current,
+          places,
+          requestedArea.bounds,
+        );
+        suggestionsRef.current = mergedPlaces;
+        setSuggestions(mergedPlaces);
         setSearchArea(requestedArea);
         setLastFailedArea(null);
         setMapRecommendations([]);
-        if (!places.length) setSuggestionError("No restaurants were found in this map area.");
+        if (!mergedPlaces.length) setSuggestionError("No restaurants were found in this map area.");
       })
       .catch((reason) => {
         if (!active) return;

@@ -5,7 +5,10 @@ import type { ChatRecommendation } from "../api/chat";
 import type { Suggestion } from "../api/places";
 import { useGoogleMaps } from "../context/GoogleMapsContext";
 import type { Coordinates, SearchArea, ViewportBounds } from "../types/searchArea";
-import { calculateDistanceKm } from "../utils/suggestionPool";
+import {
+  calculateDistanceKm,
+  groupSuggestionsForMap,
+} from "../utils/suggestionPool";
 import { PinIcon, SearchIcon } from "./Icons";
 
 type MapViewProps = {
@@ -56,6 +59,7 @@ export function MapView({
   const programmaticMove = useRef(false);
   const lastRecenterVersion = useRef(-1);
   const [draftArea, setDraftArea] = useState<SearchArea | null>(null);
+  const [mapZoom, setMapZoom] = useState(13);
 
   const recommendationIndexes = useMemo(() => {
     const indexes = new Map<string, number>();
@@ -65,6 +69,11 @@ export function MapView({
     });
     return indexes;
   }, [recommendations]);
+
+  const markerGroups = useMemo(
+    () => groupSuggestionsForMap(suggestions, mapZoom),
+    [mapZoom, suggestions],
+  );
 
   const recenter = useCallback(() => {
     const map = mapRef.current;
@@ -91,7 +100,10 @@ export function MapView({
 
   const captureViewport = () => {
     const map = mapRef.current;
-    if (!map || programmaticMove.current || !interactionArmed.current) return;
+    if (!map) return;
+    const zoom = map.getZoom();
+    if (typeof zoom === "number") setMapZoom(zoom);
+    if (programmaticMove.current || !interactionArmed.current) return;
     const center = map.getCenter();
     const bounds = map.getBounds();
     if (!center || !bounds) return;
@@ -145,8 +157,28 @@ export function MapView({
           title={originIsDevice ? "You are here" : `Selected location: ${locationLabel}`}
           zIndex={1000}
         />
-        {suggestions.map((place) => {
-          if (!Number.isFinite(place.lat) || !Number.isFinite(place.lng)) return null;
+        {markerGroups.map((group) => {
+          if (group.suggestions.length > 1) {
+            const hasRecommendation = group.suggestions.some((place) =>
+              recommendationIndexes.has(`id:${place.place_id}`) ||
+              recommendationIndexes.has(`name:${place.name.toLowerCase()}`),
+            );
+            return (
+              <OverlayView
+                key={group.key}
+                mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
+                position={{ lat: group.lat, lng: group.lng }}
+              >
+                <div
+                  className={`restaurant-map-marker is-cluster${hasRecommendation ? " is-recommendation" : ""}`}
+                  title={group.suggestions.map((place) => place.name).join(", ")}
+                >
+                  <strong>{group.suggestions.length} spots</strong>
+                </div>
+              </OverlayView>
+            );
+          }
+          const place = group.suggestions[0];
           const recommendationNumber = recommendationIndexes.get(`id:${place.place_id}`) ||
             recommendationIndexes.get(`name:${place.name.toLowerCase()}`);
           return (

@@ -681,6 +681,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .restaurant-map-marker span { display: grid; width: 20px; height: 20px; place-items: center; border-radius: 50%; color: #fff; background: #4f884b; font-weight: 850; }
 .restaurant-map-marker.is-recommendation { border-color: #5d9158; color: #2f5d2d; box-shadow: 0 4px 11px rgba(49,92,45,.28); }
 .restaurant-map-marker.is-chat-only { min-width: 34px; justify-content: center; background: #fff; }
+.restaurant-map-marker.is-cluster { min-height: 36px; padding: 8px 13px; border: 2px solid #fff; color: #fff; background: #477e45; box-shadow: 0 5px 14px rgba(38,73,36,.34); font-size: 12px; }
+.restaurant-map-marker.is-cluster.is-recommendation { color: #fff; background: #315f30; }
 
 .discovery-page { min-height: 0; padding: 28px clamp(20px,3vw,48px) 44px; overflow-y: auto; }
 .discovery-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; }

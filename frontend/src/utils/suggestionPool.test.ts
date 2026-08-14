@@ -6,6 +6,8 @@ import {
   filterSuggestions,
   getNextSuggestionIndex,
   getVisibleSuggestions,
+  groupSuggestionsForMap,
+  mergeSuggestionsForBounds,
 } from "./suggestionPool";
 
 function makeSuggestions(count: number): Suggestion[] {
@@ -80,5 +82,57 @@ describe("suggestion pool rotation", () => {
     expect(filterSuggestions(suggestions, new Set(["budget", "open"]))).toEqual([
       suggestions[0],
     ]);
+  });
+
+  it("keeps known in-bounds restaurants when a wider Google search returns a different subset", () => {
+    const knownPlaza = makeSuggestions(16).map((place, index) => ({
+      ...place,
+      lat: 43.65 + index * 0.0001,
+      lng: -79.38 + index * 0.0001,
+    }));
+    const broaderResults = makeSuggestions(8).map((place, index) => ({
+      ...place,
+      place_id: `broad-${index}`,
+      lat: 43.66 + index * 0.001,
+      lng: -79.39,
+    }));
+
+    const merged = mergeSuggestionsForBounds(knownPlaza, broaderResults, {
+      north: 43.75,
+      south: 43.6,
+      east: -79.3,
+      west: -79.5,
+    });
+
+    expect(merged).toHaveLength(20);
+    expect(merged.slice(0, 16).map((place) => place.place_id)).toEqual(
+      knownPlaza.map((place) => place.place_id),
+    );
+  });
+
+  it("drops known restaurants outside a newly contracted viewport", () => {
+    const places = makeSuggestions(3).map((place, index) => ({
+      ...place,
+      lat: 43.65 + index * 0.05,
+    }));
+
+    expect(mergeSuggestionsForBounds(places, [], {
+      north: 43.66,
+      south: 43.64,
+      east: -79.37,
+      west: -79.39,
+    })).toEqual([places[0]]);
+  });
+
+  it("groups dense plaza restaurants at wide zoom and separates them when zoomed in", () => {
+    const plaza = makeSuggestions(4).map((place, index) => ({
+      ...place,
+      lat: 43.65 + index * 0.0002,
+      lng: -79.38 + index * 0.0002,
+    }));
+
+    expect(groupSuggestionsForMap(plaza, 13)).toHaveLength(1);
+    expect(groupSuggestionsForMap(plaza, 13)[0].suggestions).toHaveLength(4);
+    expect(groupSuggestionsForMap(plaza, 17)).toHaveLength(4);
   });
 });

@@ -187,6 +187,29 @@ describe("Airbnb-style application shell", () => {
     expect(mockedFetchSuggestions.mock.calls[2][4]).toEqual(viewportArea.bounds);
   });
 
+  it("retains already discovered in-bounds restaurants when a wider search returns fewer places", async () => {
+    const plaza = makeSuggestions(16);
+    const broad = makeSuggestions(8).map((place, index) => ({
+      ...place,
+      place_id: `broad-${index}`,
+      name: `Broad ${index}`,
+    }));
+    mockedFetchSuggestions
+      .mockResolvedValueOnce(plaza)
+      .mockResolvedValueOnce(broad);
+    render(<App />);
+    await flushEffects();
+    expect(screen.getByTestId("chat-pool-size")).toHaveTextContent("16");
+
+    fireEvent.click(screen.getByRole("button", { name: "Search this area" }));
+    await flushEffects();
+
+    expect(screen.getByTestId("chat-pool-size")).toHaveTextContent("20");
+    fireEvent.click(screen.getByRole("button", { name: "Discovery" }));
+    expect(screen.getByText("Place 0")).toBeInTheDocument();
+    expect(screen.getByText("Place 15")).toBeInTheDocument();
+  });
+
   it("allows the backend cold start without an early timeout", async () => {
     mockedFetchSuggestions.mockImplementation(
       () => new Promise((resolve) => setTimeout(() => resolve(makeSuggestions(4)), 60_000)),
