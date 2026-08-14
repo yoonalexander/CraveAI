@@ -3,6 +3,21 @@ import { useEffect, useState } from "react";
 import { fetchLegalCurrent, LegalCurrent } from "../api/product";
 import { LEGAL_CONFIG, LEGAL_REVISION_FALLBACK } from "../config/legal";
 
+const formatLegalDate = (value?: string): string => {
+  if (!value) return LEGAL_CONFIG.effectiveDateLabel;
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!match) return value;
+  const months = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December",
+  ];
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  return month >= 1 && month <= 12 && day >= 1 && day <= 31
+    ? `${months[month - 1]} ${day}, ${match[1]}`
+    : value;
+};
+
 const termsSections = (operatorName: string) => [
   ["1. Agreement to these Terms", `These Terms are an agreement between you and ${operatorName}, the operator of CraveAI. By creating an account, using AI chat or voice, or otherwise using CraveAI after being shown these Terms, you agree to them and acknowledge the Privacy Policy. If you do not agree, do not use the service.`],
   ["2. Eligibility", "CraveAI is intended only for people who are at least 18 years old and legally able to enter this agreement. Registration and guest AI access require an 18-or-older confirmation. Do not use CraveAI if you do not meet these requirements."],
@@ -73,7 +88,7 @@ export function LegalPage({ kind }: { kind: "terms" | "privacy" }): JSX.Element 
         <p>Legal</p>
         <h1>{isTerms ? "Terms of Service" : "Privacy Policy"}</h1>
         <span>
-          Version {document?.version || (isTerms ? LEGAL_CONFIG.termsVersion : LEGAL_CONFIG.privacyVersion)} · Effective {document?.effective_date || LEGAL_CONFIG.effectiveDateLabel}
+          Version {document?.version || (isTerms ? LEGAL_CONFIG.termsVersion : LEGAL_CONFIG.privacyVersion)} · Effective {formatLegalDate(document?.effective_date)}
         </span>
       </header>
 
