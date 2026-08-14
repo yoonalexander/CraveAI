@@ -34,8 +34,8 @@ type ChatPanelProps = {
   onConversationStart?: () => void;
 };
 
-const DEFAULT_DAILY_CHAT_LIMIT = 3;
-const CHAT_USAGE_STORAGE_KEY = "craveai-chat-usage-v1";
+const DEFAULT_DAILY_CHAT_LIMIT = 9;
+const CHAT_USAGE_STORAGE_KEY = "craveai-chat-usage-v2";
 const TEMP_CHAT_STORAGE_KEY = "craveai-temporary-chat";
 
 const createMessageId = (prefix: string): string =>

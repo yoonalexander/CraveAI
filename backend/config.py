@@ -104,7 +104,7 @@ class Config:
     )
     GUEST_DAILY_CHAT_LIMIT: int = field(
         default_factory=lambda: _env_int_alias(
-            "GUEST_DAILY_CHAT_LIMIT", "DAILY_CHAT_MESSAGE_LIMIT", 3
+            "GUEST_DAILY_CHAT_LIMIT", "DAILY_CHAT_MESSAGE_LIMIT", 9
         )
     )
     ACCOUNT_DAILY_CHAT_LIMIT: int = field(
@@ -112,7 +112,7 @@ class Config:
     )
     GUEST_DAILY_PLACES_LIMIT: int = field(
         default_factory=lambda: _env_int_alias(
-            "GUEST_DAILY_PLACES_LIMIT", "DAILY_PLACES_REQUEST_LIMIT", 20
+            "GUEST_DAILY_PLACES_LIMIT", "DAILY_PLACES_REQUEST_LIMIT", 60
         )
     )
     ACCOUNT_DAILY_PLACES_LIMIT: int = field(
@@ -134,7 +134,7 @@ class Config:
         default_factory=lambda: _env_int("FEEDBACK_DAILY_LIMIT", 20)
     )
     GUEST_DAILY_VOICE_SECONDS: int = field(
-        default_factory=lambda: _env_int("GUEST_DAILY_VOICE_SECONDS", 180)
+        default_factory=lambda: _env_int("GUEST_DAILY_VOICE_SECONDS", 540)
     )
     ACCOUNT_DAILY_VOICE_SECONDS: int = field(
         default_factory=lambda: _env_int("ACCOUNT_DAILY_VOICE_SECONDS", 900)

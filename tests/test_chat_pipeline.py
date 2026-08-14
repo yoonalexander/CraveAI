@@ -604,6 +604,24 @@ def test_configured_multiplier_scales_chat_and_discovery_quotas(monkeypatch):
     assert settings.scaled_daily_quota(settings.GLOBAL_DAILY_PLACES_LIMIT) == 1_000_000
 
 
+def test_default_guest_allowances_are_tripled(monkeypatch):
+    for key in (
+        "GUEST_DAILY_CHAT_LIMIT",
+        "DAILY_CHAT_MESSAGE_LIMIT",
+        "GUEST_DAILY_PLACES_LIMIT",
+        "DAILY_PLACES_REQUEST_LIMIT",
+        "GUEST_DAILY_VOICE_SECONDS",
+    ):
+        monkeypatch.delenv(key, raising=False)
+    get_settings.cache_clear()
+
+    settings = get_settings()
+
+    assert settings.GUEST_DAILY_CHAT_LIMIT == 9
+    assert settings.GUEST_DAILY_PLACES_LIMIT == 60
+    assert settings.GUEST_DAILY_VOICE_SECONDS == 540
+
+
 def test_chat_dev_bypass_header_cannot_bypass_quota(
     monkeypatch,
     mocked_pipeline,

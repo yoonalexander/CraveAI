@@ -14,8 +14,6 @@ import {
 } from "../api/auth";
 import { useAuth } from "../context/AuthContext";
 import { fetchLegalCurrent, LegalCurrent } from "../api/product";
-import { ThemeProvider } from "../context/ThemeContext";
-import { ThemeToggle } from "./ThemeToggle";
 
 type PageMode =
   | "login"
@@ -26,25 +24,76 @@ type PageMode =
   | "account";
 
 export function AuthPage({ mode }: { mode: PageMode }): JSX.Element {
+  const accountPrompt = mode === "register"
+    ? { label: "Already have an account?", href: "/login", action: "Log in" }
+    : { label: "New to CraveAI?", href: "/register", action: "Sign up for free" };
+
   return (
-    <ThemeProvider defaultTheme="light" storageKey="craveai-theme">
-      <div className="min-h-screen bg-background px-6 py-10 text-foreground">
-        <div className="mx-auto flex max-w-4xl items-center justify-between">
-          <a href="/" className="text-sm font-bold uppercase tracking-[0.32em] text-primary">
-            craveai
-          </a>
-          <ThemeToggle />
-        </div>
-        <div className="mx-auto mt-12 max-w-md rounded-3xl border border-border bg-secondary/10 p-8 shadow-xl">
+    <div className={`auth-page auth-page-${mode}`}>
+      <header className="auth-header">
+        <a href="/" className="auth-brand" aria-label="CraveAI home">
+          <img alt="" src="/craveai-pin.svg" />
+          <span>CRAVEAI</span>
+        </a>
+        {mode !== "account" && mode !== "result" ? (
+          <div className="auth-header-prompt">
+            <span>{accountPrompt.label}</span>
+            <a href={accountPrompt.href}>{accountPrompt.action}</a>
+          </div>
+        ) : (
+          <a className="auth-home-link" href="/">Back to CraveAI</a>
+        )}
+      </header>
+
+      <main className="auth-layout">
+        <AuthShowcase mode={mode} />
+        <section className="auth-card" aria-label={mode === "account" ? "Account" : "Authentication"}>
           {mode === "account" ? <AccountPanel /> : <AuthForm mode={mode} />}
+        </section>
+      </main>
+
+      <nav aria-label="Legal" className="auth-legal-nav">
+        <span>© {new Date().getFullYear()} CraveAI</span>
+        <a href="/terms">Terms of Service</a>
+        <a href="/privacy">Privacy Policy</a>
+        <a href="/help/data-use">Data use</a>
+      </nav>
+    </div>
+  );
+}
+
+function AuthShowcase({ mode }: { mode: PageMode }): JSX.Element {
+  const isAccount = mode === "account";
+  return (
+    <section className="auth-showcase" aria-label="About CraveAI">
+      <p className="auth-eyebrow">Personalized restaurant discovery</p>
+      <h2>{isAccount ? "Your CraveAI, under your control." : "A better answer to “where should we eat?”"}</h2>
+      <p className="auth-showcase-copy">
+        {isAccount
+          ? "Manage your sign-in methods and account data from one clear, private place."
+          : "Tell us what sounds good. CraveAI searches the area you choose and brings back grounded restaurant recommendations."}
+      </p>
+      <div className="auth-preview" aria-hidden="true">
+        <div className="auth-preview-map">
+          <span className="auth-preview-road auth-preview-road-one" />
+          <span className="auth-preview-road auth-preview-road-two" />
+          <span className="auth-preview-road auth-preview-road-three" />
+          <span className="auth-preview-pin auth-preview-pin-one"><b>★ 4.7</b></span>
+          <span className="auth-preview-pin auth-preview-pin-two"><b>★ 4.5</b></span>
+          <span className="auth-preview-you" />
         </div>
-        <nav aria-label="Legal" className="mx-auto mt-6 flex max-w-md justify-center gap-5 text-xs text-muted-foreground">
-          <a className="underline underline-offset-4" href="/terms">Terms of Service</a>
-          <a className="underline underline-offset-4" href="/privacy">Privacy Policy</a>
-          <a className="underline underline-offset-4" href="/help/data-use">Data use</a>
-        </nav>
+        <div className="auth-preview-result">
+          <span className="auth-preview-kicker">A cozy match nearby</span>
+          <strong>Great food, picked for your craving</strong>
+          <span>Grounded in location, ratings, and live restaurant data.</span>
+        </div>
       </div>
-    </ThemeProvider>
+      <div className="auth-trust-row">
+        <span>Map-aware</span>
+        <span>Preference-ready</span>
+        <span>Privacy controls</span>
+      </div>
+    </section>
   );
 }
 
@@ -70,16 +119,17 @@ function AuthForm({ mode }: { mode: Exclude<PageMode, "account"> }): JSX.Element
   );
   if (mode === "result") {
     return (
-      <div>
-        <h1 className="text-2xl font-semibold">Account status</h1>
-        <p className="mt-4 text-muted-foreground">
+      <div className="auth-form auth-result">
+        <p className="auth-eyebrow">Account update</p>
+        <h1 className="auth-title">Account status</h1>
+        <p className="auth-subtitle">
           {result === "verified"
             ? "Your email is verified and you are signed in."
             : result === "link_required"
               ? "That email already has an account. Sign in first, then connect Google from Account."
               : "The authentication link was invalid or expired. Please try again."}
         </p>
-        <a className="mt-6 inline-block text-primary underline" href="/">
+        <a className="auth-text-link auth-result-link" href="/">
           Return to CraveAI
         </a>
       </div>
@@ -91,6 +141,12 @@ function AuthForm({ mode }: { mode: Exclude<PageMode, "account"> }): JSX.Element
     register: "Create your account",
     forgot: "Reset your password",
     reset: "Choose a new password",
+  }[mode];
+  const buttonLabel = {
+    login: "Log in",
+    register: "Sign up for free",
+    forgot: "Send reset link",
+    reset: "Update password",
   }[mode];
 
   async function submit(event: FormEvent): Promise<void> {
@@ -126,16 +182,17 @@ function AuthForm({ mode }: { mode: Exclude<PageMode, "account"> }): JSX.Element
   }
 
   return (
-    <div>
-      <h1 className="text-2xl font-semibold">{title}</h1>
-      <p className="mt-2 text-sm text-muted-foreground">
+    <div className="auth-form">
+      <p className="auth-eyebrow">{mode === "register" ? "Start discovering" : "Welcome to CraveAI"}</p>
+      <h1 className="auth-title">{title}</h1>
+      <p className="auth-subtitle">
         {mode === "register"
           ? "Save favorites and receive a higher daily recommendation limit."
           : "Your credentials are handled by Supabase and never stored by CraveAI."}
       </p>
-      <form className="mt-6 space-y-4" onSubmit={(event) => void submit(event)}>
+      <form className="auth-fields" onSubmit={(event) => void submit(event)}>
         {mode !== "reset" && (
-          <label className="block text-sm">
+          <label className="auth-field">
             Email
             <input
               required
@@ -143,12 +200,13 @@ function AuthForm({ mode }: { mode: Exclude<PageMode, "account"> }): JSX.Element
               autoComplete="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
-              className="mt-1 w-full rounded-xl border border-border bg-background px-4 py-3"
+              className="auth-input"
+              placeholder="you@example.com"
             />
           </label>
         )}
         {!["forgot"].includes(mode) && (
-          <label className="block text-sm">
+          <label className="auth-field">
             Password
             <input
               required
@@ -158,27 +216,27 @@ function AuthForm({ mode }: { mode: Exclude<PageMode, "account"> }): JSX.Element
               autoComplete={mode === "login" ? "current-password" : "new-password"}
               value={password}
               onChange={(event) => setPassword(event.target.value)}
-              className="mt-1 w-full rounded-xl border border-border bg-background px-4 py-3"
+              className="auth-input"
             />
             {mode !== "login" && (
-              <span className="mt-1 block text-xs text-muted-foreground">
+              <span className="auth-field-hint">
                 Use at least 12 characters.
               </span>
             )}
           </label>
         )}
         {mode === "register" ? (
-          <fieldset className="space-y-3 rounded-xl border border-border p-4 text-sm">
-            <legend className="px-1 font-semibold">Legal acknowledgments</legend>
-            <label className="flex gap-2">
+          <fieldset className="auth-legal-box">
+            <legend>Legal acknowledgments</legend>
+            <label>
               <input checked={acceptTerms} onChange={(event) => setAcceptTerms(event.target.checked)} required type="checkbox" />
-              <span>I agree to the <a className="underline" href="/terms" target="_blank">Terms of Service</a>.</span>
+              <span>I agree to the <a href="/terms" target="_blank">Terms of Service</a>.</span>
             </label>
-            <label className="flex gap-2">
+            <label>
               <input checked={acknowledgePrivacy} onChange={(event) => setAcknowledgePrivacy(event.target.checked)} required type="checkbox" />
-              <span>I acknowledge the <a className="underline" href="/privacy" target="_blank">Privacy Policy</a>.</span>
+              <span>I acknowledge the <a href="/privacy" target="_blank">Privacy Policy</a>.</span>
             </label>
-            <label className="flex gap-2">
+            <label>
               <input checked={ageConfirmed} onChange={(event) => setAgeConfirmed(event.target.checked)} required type="checkbox" />
               <span>I confirm that I am 18 years of age or older.</span>
             </label>
@@ -186,30 +244,30 @@ function AuthForm({ mode }: { mode: Exclude<PageMode, "account"> }): JSX.Element
         ) : null}
         <button
           disabled={busy || (mode === "register" && !legal)}
-          className="w-full rounded-xl bg-primary px-4 py-3 font-semibold text-primary-foreground disabled:opacity-60"
+          className="auth-primary-button"
         >
-          {busy ? "Working…" : title}
+          {busy ? "Working…" : buttonLabel}
         </button>
       </form>
       {["login", "register"].includes(mode) && (
         <>
-          <div className="my-5 flex items-center gap-4 text-sm text-foreground/60">
+          <div className="auth-divider">
             <span className="h-px flex-1 bg-foreground/20" />
             <span>or</span>
             <span className="h-px flex-1 bg-foreground/20" />
           </div>
           <a
             href={googleLoginUrl()}
-            className="flex w-full items-center justify-center gap-3 rounded-full border border-[#747775] bg-white px-4 py-3 text-sm font-medium text-[#1f1f1f] transition-colors hover:bg-[#f8fafd] focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+            className="auth-google-button"
           >
             <GoogleLogo />
             Continue with Google
           </a>
         </>
       )}
-      {message && <p className="mt-4 text-sm text-primary">{message}</p>}
-      {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
-      <nav className="mt-6 flex flex-wrap gap-4 text-sm text-muted-foreground">
+      {message && <p className="auth-message" role="status">{message}</p>}
+      {error && <p className="auth-error" role="alert">{error}</p>}
+      <nav className="auth-switch-links">
         {mode !== "login" && <a href="/login">Sign in</a>}
         {mode !== "register" && <a href="/register">Create account</a>}
         {mode === "login" && <a href="/forgot-password">Forgot password?</a>}
@@ -258,11 +316,11 @@ function AccountPanel(): JSX.Element {
     }
   }, [user]);
 
-  if (loading) return <p>Loading account…</p>;
+  if (loading) return <p className="auth-subtitle">Loading account…</p>;
   if (!user) {
     return (
-      <p>
-        Please <a className="text-primary underline" href="/login">sign in</a>.
+      <p className="auth-subtitle">
+        Please <a className="auth-text-link" href="/login">sign in</a>.
       </p>
     );
   }
@@ -294,39 +352,40 @@ function AccountPanel(): JSX.Element {
   }
 
   return (
-    <div>
-      <h1 className="text-2xl font-semibold">Your account</h1>
-      <p className="mt-2 text-sm text-muted-foreground">{user.email}</p>
-      <section className="mt-6">
-        <h2 className="font-semibold">Sign-in methods</h2>
-        <ul className="mt-2 space-y-2 text-sm">
+    <div className="auth-form account-form">
+      <p className="auth-eyebrow">Account</p>
+      <h1 className="auth-title">Your account</h1>
+      <p className="auth-subtitle">{user.email}</p>
+      <section className="account-section">
+        <h2>Sign-in methods</h2>
+        <ul className="account-identities">
           {identities.map((identity) => (
-            <li key={identity.id} className="flex items-center justify-between rounded-xl border border-border p-3">
-              <span className="capitalize">{identity.provider}</span>
+            <li key={identity.id}>
+              <span>{identity.provider}</span>
               {identity.provider === "google" && identities.length > 1 && (
-                <button onClick={() => void unlinkGoogle(identity.id)}>Disconnect</button>
+                <button className="auth-text-link" onClick={() => void unlinkGoogle(identity.id)}>Disconnect</button>
               )}
             </li>
           ))}
         </ul>
         {!identities.some((identity) => identity.provider === "google") && (
-          <button className="mt-3 text-sm text-primary underline" onClick={() => void startGoogleLink()}>
+          <button className="auth-text-link account-connect" onClick={() => void startGoogleLink()}>
             Connect Google
           </button>
         )}
       </section>
-      <div className="mt-8 space-y-3">
-        <button className="w-full rounded-xl border border-border px-4 py-3" onClick={() => void downloadExport()}>
+      <div className="account-actions">
+        <button className="auth-secondary-button" onClick={() => void downloadExport()}>
           Download my data
         </button>
-        <button className="w-full rounded-xl border border-border px-4 py-3" onClick={() => void logout()}>
+        <button className="auth-secondary-button" onClick={() => void logout()}>
           Sign out
         </button>
-        <button className="w-full rounded-xl border border-red-500 px-4 py-3 text-red-600" onClick={() => void removeAccount()}>
+        <button className="auth-danger-button" onClick={() => void removeAccount()}>
           Delete account
         </button>
       </div>
-      {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
+      {error && <p className="auth-error" role="alert">{error}</p>}
     </div>
   );
 }

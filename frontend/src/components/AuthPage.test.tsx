@@ -13,10 +13,6 @@ vi.mock("../context/AuthContext", () => ({
   }),
 }));
 
-vi.mock("./ThemeToggle", () => ({
-  ThemeToggle: () => <button type="button">Theme</button>,
-}));
-
 describe("AuthPage", () => {
   it("starts Google OAuth as a full-page, same-tab navigation", () => {
     render(<AuthPage mode="login" />);
@@ -27,5 +23,13 @@ describe("AuthPage", () => {
 
     expect(googleLink).toHaveAttribute("href", "/api/auth/google/start");
     expect(googleLink).not.toHaveAttribute("target");
+  });
+
+  it("uses the light-only CraveAI authentication shell without a theme control", () => {
+    render(<AuthPage mode="register" />);
+
+    expect(screen.getByRole("link", { name: "CraveAI home" })).toHaveAttribute("href", "/");
+    expect(screen.getByRole("heading", { name: "Create your account" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /toggle theme/i })).not.toBeInTheDocument();
   });
 });

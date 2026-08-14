@@ -33,7 +33,7 @@ beforeEach(() => {
 describe("ChatPanel", () => {
   it("shows the published guest daily chat allowance", () => {
     render(<ChatPanel />);
-    expect(screen.getByText("3 messages left today")).toBeInTheDocument();
+    expect(screen.getByText("9 messages left today")).toBeInTheDocument();
   });
 
   it("starts empty and moves into conversation mode after Enter", async () => {
