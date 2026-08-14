@@ -102,6 +102,9 @@ class Config:
     DAILY_QUOTA_MULTIPLIER: int = field(
         default_factory=lambda: _env_int("DAILY_QUOTA_MULTIPLIER", 1)
     )
+    GUEST_USAGE_LIMITS_ENABLED: bool = field(
+        default_factory=lambda: _env_bool("GUEST_USAGE_LIMITS_ENABLED", False)
+    )
     GUEST_DAILY_CHAT_LIMIT: int = field(
         default_factory=lambda: _env_int_alias(
             "GUEST_DAILY_CHAT_LIMIT", "DAILY_CHAT_MESSAGE_LIMIT", 9
@@ -129,6 +132,9 @@ class Config:
             "GLOBAL_DAILY_PLACES_REQUEST_LIMIT",
             1000,
         )
+    )
+    GLOBAL_DAILY_VOICE_SECONDS: int = field(
+        default_factory=lambda: _env_int("GLOBAL_DAILY_VOICE_SECONDS", 36000)
     )
     FEEDBACK_DAILY_LIMIT: int = field(
         default_factory=lambda: _env_int("FEEDBACK_DAILY_LIMIT", 20)

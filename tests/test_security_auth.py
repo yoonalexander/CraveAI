@@ -24,6 +24,8 @@ def security_test_settings(monkeypatch, tmp_path):
     )
     monkeypatch.setenv("AUTO_CREATE_SCHEMA", "true")
     monkeypatch.setenv("DAILY_QUOTA_MULTIPLIER", "1")
+    monkeypatch.setenv("GUEST_USAGE_LIMITS_ENABLED", "true")
+    monkeypatch.setenv("GUEST_DAILY_CHAT_LIMIT", "3")
     monkeypatch.setenv("SUPABASE_ANON_KEY", "test-anon")
     monkeypatch.setenv("SUPABASE_SERVICE_ROLE_KEY", "test-service")
     monkeypatch.setenv("IDENTITY_SIGNING_SECRET", "test-identity-signing-secret")

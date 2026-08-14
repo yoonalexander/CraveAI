@@ -230,7 +230,13 @@ class ChatStatusResponse(BaseModel):
 
 
 @router.get("/status", response_model=ChatStatusResponse, response_model_exclude_defaults=True)
-async def get_chat_status(request: Request) -> ChatStatusResponse:
+async def get_chat_status(
+    request: Request,
+    session: SessionContext | None = Depends(optional_session),
+) -> ChatStatusResponse:
+    settings = get_settings()
+    if session is None and not settings.GUEST_USAGE_LIMITS_ENABLED:
+        return ChatStatusResponse(usage=_unlimited_usage_metadata())
     return ChatStatusResponse()
 
 
@@ -271,6 +277,7 @@ async def generate_chat_response(
     )
     configured_daily_limit = resolve_entitlements(bool(session))["limits"]["chats_per_day"]
     daily_limit = settings.scaled_daily_quota(configured_daily_limit)
+    enforce_actor_limit = session is not None or settings.GUEST_USAGE_LIMITS_ENABLED
     try:
         usage = await reserve_daily_quota(
             user_id=usage_user_id,
@@ -280,6 +287,7 @@ async def generate_chat_response(
                 settings.GLOBAL_DAILY_CHAT_LIMIT
             ),
             namespace="chat",
+            enforce_actor_limit=enforce_actor_limit,
         )
     except DailyQuotaExceeded as exc:
         raise HTTPException(
@@ -292,9 +300,10 @@ async def generate_chat_response(
             headers=rate_limit_headers(exc.usage, include_retry_after=True),
         ) from exc
 
-    for header, value in rate_limit_headers(usage).items():
-        response.headers[header] = value
-    usage_metadata = _usage_metadata(usage)
+    if enforce_actor_limit:
+        for header, value in rate_limit_headers(usage).items():
+            response.headers[header] = value
+    usage_metadata = _usage_metadata(usage) if enforce_actor_limit else _unlimited_usage_metadata()
 
     location_payload = payload.location.model_dump() if payload.location else {}
     pipeline_text = _contextual_query(context_messages, user_text, stored_summary)

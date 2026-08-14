@@ -79,6 +79,7 @@ async def get_suggestions(
     )
     configured_daily_limit = resolve_entitlements(bool(session))["limits"]["places_per_day"]
     daily_limit = settings.scaled_daily_quota(configured_daily_limit)
+    enforce_actor_limit = session is not None or settings.GUEST_USAGE_LIMITS_ENABLED
     try:
         usage = await reserve_daily_quota(
             user_id=usage_user_id,
@@ -89,6 +90,7 @@ async def get_suggestions(
             ),
             global_user_id=PLACES_GLOBAL_USAGE_USER_ID,
             namespace="places",
+            enforce_actor_limit=enforce_actor_limit,
         )
     except DailyQuotaExceeded as exc:
         raise HTTPException(
@@ -96,8 +98,9 @@ async def get_suggestions(
             detail={"code": "daily_places_request_quota_exceeded"},
             headers=rate_limit_headers(exc.usage, include_retry_after=True),
         ) from exc
-    for header, value in rate_limit_headers(usage).items():
-        response.headers[header] = value
+    if enforce_actor_limit:
+        for header, value in rate_limit_headers(usage).items():
+            response.headers[header] = value
 
     suggestions = await get_top_rated_nearby(lat, lng, radius, bounds=bounds)
     return suggestions
@@ -114,6 +117,7 @@ async def resolve_places(
     usage_user_id = resolve_request_usage_identity(
         "places", request, response, session.user_id if session else None
     )
+    enforce_actor_limit = session is not None or settings.GUEST_USAGE_LIMITS_ENABLED
     try:
         usage = await reserve_daily_quota(
             user_id=usage_user_id,
@@ -124,6 +128,7 @@ async def resolve_places(
             global_daily_limit=settings.scaled_daily_quota(settings.GLOBAL_DAILY_PLACES_LIMIT),
             global_user_id=PLACES_GLOBAL_USAGE_USER_ID,
             namespace="places",
+            enforce_actor_limit=enforce_actor_limit,
         )
     except DailyQuotaExceeded as exc:
         raise HTTPException(
@@ -131,8 +136,9 @@ async def resolve_places(
             detail={"code": "daily_places_request_quota_exceeded"},
             headers=rate_limit_headers(exc.usage, include_retry_after=True),
         ) from exc
-    for header, value in rate_limit_headers(usage).items():
-        response.headers[header] = value
+    if enforce_actor_limit:
+        for header, value in rate_limit_headers(usage).items():
+            response.headers[header] = value
     return {"places": await resolve_place_ids(payload.place_ids)}
 
 
@@ -152,6 +158,7 @@ async def verify_dietary_evidence(
         f"places-dietary:{usage_user_id}", limit=5, window_seconds=60,
         code="places_dietary_rate_limited",
     )
+    enforce_actor_limit = session is not None or settings.GUEST_USAGE_LIMITS_ENABLED
     try:
         usage = await reserve_daily_quota(
             user_id=usage_user_id,
@@ -162,6 +169,7 @@ async def verify_dietary_evidence(
             global_daily_limit=settings.scaled_daily_quota(settings.GLOBAL_DAILY_PLACES_LIMIT),
             global_user_id=PLACES_GLOBAL_USAGE_USER_ID,
             namespace="places",
+            enforce_actor_limit=enforce_actor_limit,
         )
     except DailyQuotaExceeded as exc:
         raise HTTPException(
@@ -169,6 +177,7 @@ async def verify_dietary_evidence(
             detail={"code": "daily_places_request_quota_exceeded"},
             headers=rate_limit_headers(exc.usage, include_retry_after=True),
         ) from exc
-    for header, value in rate_limit_headers(usage).items():
-        response.headers[header] = value
+    if enforce_actor_limit:
+        for header, value in rate_limit_headers(usage).items():
+            response.headers[header] = value
     return {"matches": await verify_dietary_place_ids(payload.place_ids, payload.requirements)}

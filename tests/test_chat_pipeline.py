@@ -52,6 +52,7 @@ def configure_test_settings(monkeypatch, tmp_path):
     monkeypatch.setenv("AUTO_CREATE_SCHEMA", "true")
     monkeypatch.setenv("USAGE_LIMITS_ENABLED", "true")
     monkeypatch.setenv("DAILY_QUOTA_MULTIPLIER", "1")
+    monkeypatch.setenv("GUEST_USAGE_LIMITS_ENABLED", "true")
     monkeypatch.setenv("DAILY_TOKEN_LIMIT", "10000")
     monkeypatch.setenv("DAILY_CHAT_MESSAGE_LIMIT", "3")
     monkeypatch.setenv("CHAT_DEVELOPER_MODE", "false")
@@ -590,6 +591,25 @@ def test_chat_status_does_not_report_unlimited_in_standard_mode(mocked_pipeline)
     assert mocked_pipeline["extract"] == 0
 
 
+def test_guest_chat_status_reports_unmetered_testing_access(monkeypatch, mocked_pipeline):
+    monkeypatch.setenv("GUEST_USAGE_LIMITS_ENABLED", "false")
+    get_settings.cache_clear()
+    app = create_app()
+
+    async def exercise():
+        async with AsyncClient(
+            transport=ASGITransport(app=app),
+            base_url="http://test",
+        ) as client:
+            return await client.get("/chat/status")
+
+    response = asyncio.run(exercise())
+
+    assert response.status_code == 200
+    assert response.json()["usage"]["unlimited"] is True
+    assert mocked_pipeline["extract"] == 0
+
+
 def test_configured_multiplier_scales_chat_and_discovery_quotas(monkeypatch):
     monkeypatch.setenv("DAILY_QUOTA_MULTIPLIER", "1000")
     get_settings.cache_clear()
@@ -611,6 +631,7 @@ def test_default_guest_allowances_are_tripled(monkeypatch):
         "GUEST_DAILY_PLACES_LIMIT",
         "DAILY_PLACES_REQUEST_LIMIT",
         "GUEST_DAILY_VOICE_SECONDS",
+        "GUEST_USAGE_LIMITS_ENABLED",
     ):
         monkeypatch.delenv(key, raising=False)
     get_settings.cache_clear()
@@ -620,6 +641,43 @@ def test_default_guest_allowances_are_tripled(monkeypatch):
     assert settings.GUEST_DAILY_CHAT_LIMIT == 9
     assert settings.GUEST_DAILY_PLACES_LIMIT == 60
     assert settings.GUEST_DAILY_VOICE_SECONDS == 540
+    assert settings.GUEST_USAGE_LIMITS_ENABLED is False
+
+
+def test_disabled_actor_limit_keeps_global_safety_ceiling():
+    init_storage()
+
+    first = asyncio.run(
+        reserve_daily_quota(
+            user_id="guest-one",
+            token_cost=1,
+            daily_limit=0,
+            global_daily_limit=2,
+            enforce_actor_limit=False,
+        )
+    )
+    second = asyncio.run(
+        reserve_daily_quota(
+            user_id="guest-one",
+            token_cost=1,
+            daily_limit=0,
+            global_daily_limit=2,
+            enforce_actor_limit=False,
+        )
+    )
+
+    assert first.used == 1
+    assert second.used == 2
+    with pytest.raises(DailyQuotaExceeded):
+        asyncio.run(
+            reserve_daily_quota(
+                user_id="guest-two",
+                token_cost=1,
+                daily_limit=0,
+                global_daily_limit=2,
+                enforce_actor_limit=False,
+            )
+        )
 
 
 def test_chat_dev_bypass_header_cannot_bypass_quota(

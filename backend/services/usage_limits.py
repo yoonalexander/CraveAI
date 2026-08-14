@@ -13,6 +13,7 @@ from backend.models import UsageLimit
 
 GLOBAL_USAGE_USER_ID = "__global__"
 PLACES_GLOBAL_USAGE_USER_ID = "__global_places__"
+VOICE_GLOBAL_USAGE_USER_ID = "__global_voice__"
 
 
 @dataclass(frozen=True)
@@ -38,8 +39,9 @@ async def reserve_daily_quota(
     global_user_id: str = GLOBAL_USAGE_USER_ID,
     now: datetime | None = None,
     namespace: str = "chat",
+    enforce_actor_limit: bool = True,
 ) -> UsageReservation:
-    """Atomically reserve actor and service-wide quota in one transaction."""
+    """Atomically reserve usage while optionally enforcing the actor ceiling."""
     token_cost = max(token_cost, 0)
     daily_limit = max(daily_limit, 0)
     timestamp = _utc(now or datetime.now(timezone.utc))
@@ -52,7 +54,7 @@ async def reserve_daily_quota(
     def _reserve() -> UsageReservation:
         with get_session_factory()() as db:
             actor = _locked_usage_row(db, namespace, user_id, usage_date, timestamp)
-            if actor.units_used + token_cost > daily_limit:
+            if enforce_actor_limit and actor.units_used + token_cost > daily_limit:
                 reservation = _reservation(actor, daily_limit, reset_at)
                 db.rollback()
                 raise DailyQuotaExceeded(reservation)
@@ -75,7 +77,7 @@ async def reserve_daily_quota(
                 global_row.request_count += 1
                 global_row.updated_at = timestamp
             db.commit()
-            return _reservation(actor, daily_limit, reset_at)
+            return _reservation(actor, daily_limit if enforce_actor_limit else 0, reset_at)
 
     return await asyncio.to_thread(_reserve)
 

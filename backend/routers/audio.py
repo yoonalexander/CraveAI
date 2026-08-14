@@ -10,9 +10,14 @@ from backend.config import get_settings
 from backend.services.identity import resolve_request_usage_identity
 from backend.services.entitlements import resolve_entitlements
 from backend.services.product_data import has_current_policy_acceptance
+from backend.services.rate_limit import burst_limiter
 from backend.services.security import require_allowed_origin, sha256
 from backend.services.sessions import SessionContext, optional_session
-from backend.services.usage_limits import DailyQuotaExceeded, reserve_daily_quota
+from backend.services.usage_limits import (
+    DailyQuotaExceeded,
+    VOICE_GLOBAL_USAGE_USER_ID,
+    reserve_daily_quota,
+)
 
 router = APIRouter(prefix="/audio", tags=["audio"])
 ALLOWED_AUDIO_TYPES = {
@@ -52,12 +57,24 @@ async def transcribe_audio(
     actor = resolve_request_usage_identity(
         "voice", request, response, session.user_id if session else None
     )
+    await burst_limiter.enforce(
+        f"voice:{actor}",
+        limit=12 if session else 6,
+        window_seconds=60,
+        code="voice_rate_limited",
+    )
+    enforce_actor_limit = session is not None or settings.GUEST_USAGE_LIMITS_ENABLED
     try:
         await reserve_daily_quota(
             user_id=actor,
             token_cost=max(1, math.ceil(duration_seconds)),
             daily_limit=resolve_entitlements(bool(session))["limits"]["voice_seconds_per_day"],
+            global_daily_limit=settings.scaled_daily_quota(
+                settings.GLOBAL_DAILY_VOICE_SECONDS
+            ),
+            global_user_id=VOICE_GLOBAL_USAGE_USER_ID,
             namespace="voice",
+            enforce_actor_limit=enforce_actor_limit,
         )
     except DailyQuotaExceeded as exc:
         data = b""
