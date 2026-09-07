@@ -1,2 +1,4 @@
 # Synthetic provider token used by the authentication security test.
 b0ddb4d55e69ebaef5d1b89e7611839baf0f7f05:tests/test_security_auth.py:generic-api-key:41
+# Same synthetic JWT in the product tests (empty header, fake signature, future expiry).
+3e45a17d0ac82e73397187adc4685451ffd248bc:tests/test_product_completion.py:generic-api-key:39

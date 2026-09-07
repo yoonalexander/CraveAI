@@ -36,7 +36,8 @@ def product_settings(monkeypatch, tmp_path):
 @pytest.fixture
 def provider() -> ProviderSession:
     return ProviderSession(
-        access_token="e30.eyJleHAiOjQxMDI0NDQ4MDB9.signature",
+        # Synthetic JWT with a future expiry; never a real provider credential.
+        access_token="e30.eyJleHAiOjQxMDI0NDQ4MDB9.signature",  # gitleaks:allow
         refresh_token="refresh",
         user_id=str(uuid.uuid4()),
         email="product@example.com",
