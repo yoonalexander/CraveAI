@@ -432,6 +432,16 @@ The repository is arranged for this production boundary:
   headers, serves the SPA, and proxies `/api/*` to the Render backend.
 - Run the backend on Python 3.11.9 with
   `uvicorn backend.main:create_app --factory`.
+- Keep the backend on Render Free and configure a free external HTTP monitor to
+  request the public Vercel `/api/health` URL every five minutes. This exercises
+  the same Vercel proxy used by browsers and supplies inbound traffic inside
+  Render's 15-minute idle window. Set Render's service health-check path to
+  `/api/health` for deploy/runtime health, but do not treat that internal check
+  as a keep-awake request; it only checks an instance while it is already
+  running.
+- Watch Render's 750 free instance hours per workspace. One continuously warm
+  service can use 672-744 hours in a calendar month, so other active Free
+  services in the same workspace can exhaust the allowance and suspend them.
 - Use Supabase transaction-pooler Postgres and run `alembic upgrade head` before
   deployment. Keep `AUTO_CREATE_SCHEMA=false` in production.
 - Configure the external Vercel `/api` URL in Supabase email/OAuth redirects so
@@ -439,6 +449,11 @@ The repository is arranged for this production boundary:
 - Run `python scripts/security_maintenance.py` daily to enforce configured
   retention for abuse events, audit events, expired transactions, and revoked
   sessions.
+- Use a five-minute HTTP monitor (for example, UptimeRobot's free plan) against
+  the public Vercel URL at `/api/health`, require HTTP 200, and send outage or
+  slow-response alerts to the site owner. Also review Render warning logs
+  containing `startup_timing`; those warnings identify slow or failed browser
+  startup stages without including account or location data.
 
 CI in `.github/workflows/security.yml` runs tests, frontend checks, dependency
 audits, migration rendering, and secret scanning.

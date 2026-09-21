@@ -13,8 +13,8 @@ export type Identity = {
   email?: string | null;
 };
 
-export async function fetchCurrentUser(): Promise<AuthUser | null> {
-  const response = await apiFetch("/auth/me", {}, { csrf: false });
+export async function fetchCurrentUser(signal?: AbortSignal): Promise<AuthUser | null> {
+  const response = await apiFetch("/auth/me", { signal }, { csrf: false });
   if (response.status === 401) return null;
   if (!response.ok) throw new Error(await readApiError(response));
   return ((await response.json()) as { user: AuthUser }).user;

@@ -29,6 +29,22 @@
 7. Set `TRUSTED_PROXY_IPS` only to verified immediate proxy addresses. Forwarded
    client-IP headers are ignored from every other peer.
 8. Keep `AUTO_CREATE_SCHEMA=false` in production.
+9. Keep the service on Render Free and configure a free external HTTP monitor
+   to request the public Vercel `/api/health` URL every five minutes, require an
+   HTTP 200 response, and notify the site owner on downtime or slow responses.
+   The external request both exercises the Vercel proxy and arrives inside
+   Render's 15-minute idle window. Set the Render service health-check path to
+   `/api/health` for deploy/runtime health. That internal check is not a
+   keep-awake mechanism because it only runs while an instance is active.
+10. Track Render's workspace-wide allowance of 750 Free instance hours per
+    month. A single continuously warm service can consume 672-744 hours; other
+    active Free services can exhaust the allowance and suspend every Free web
+    service in the workspace. Pause the external monitor when preserving hours
+    is more important than eliminating cold starts.
+11. Review Render warning logs containing `startup_timing` alongside the
+    external monitor's alerts. Startup telemetry contains only a bounded event
+    name, duration, and outcome; it does not accept account identifiers,
+    coordinates, URLs, or arbitrary client messages.
 
 Before cutover, confirm the legacy SQLite tables are still empty. If any row
 exists, stop rather than silently losing or misattributing data:

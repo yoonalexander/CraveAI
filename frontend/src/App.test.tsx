@@ -3,8 +3,27 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { Suggestion } from "./api/places";
 import App from "./App";
+import { listSavedPlaces } from "./api/favorites";
 import { fetchSuggestions, PlacesQuotaError } from "./api/places";
+import { fetchPreferences } from "./api/product";
 import type { SearchArea } from "./types/searchArea";
+
+const { authState } = vi.hoisted(() => ({
+  authState: {
+    user: null as null | { user_id: string; email: string; email_verified: boolean },
+    loading: false,
+  },
+}));
+
+vi.mock("./context/AuthContext", () => ({
+  useAuth: () => ({
+    user: authState.user,
+    loading: authState.loading,
+    login: vi.fn(),
+    logout: vi.fn(),
+    refresh: vi.fn(),
+  }),
+}));
 
 vi.mock("./api/places", async () => {
   const actual = await vi.importActual<typeof import("./api/places")>("./api/places");
@@ -39,8 +58,17 @@ const viewportArea: SearchArea = {
 };
 
 vi.mock("./components/MapView", () => ({
-  MapView: ({ onSearchArea }: { onSearchArea: (area: SearchArea) => void }) => (
+  MapView: ({
+    isLocating,
+    locationLabel,
+    onSearchArea,
+  }: {
+    isLocating: boolean;
+    locationLabel: string;
+    onSearchArea: (area: SearchArea) => void;
+  }) => (
     <div data-testid="map">
+      <span data-testid="map-location">{isLocating ? "Locating" : locationLabel}</span>
       <button onClick={() => onSearchArea(viewportArea)} type="button">Search this area</button>
     </div>
   ),
@@ -64,6 +92,7 @@ vi.mock("./api/product", async () => {
   const actual = await vi.importActual<typeof import("./api/product")>("./api/product");
   return {
     ...actual,
+    fetchPreferences: vi.fn(),
     fetchLegalCurrent: vi.fn().mockResolvedValue({
       terms: { version: "test", effective_date: "2026-08-13", path: "/terms" },
       privacy: { version: "test", effective_date: "2026-08-13", path: "/privacy" },
@@ -74,6 +103,10 @@ vi.mock("./api/product", async () => {
     }),
   };
 });
+vi.mock("./api/favorites", async () => {
+  const actual = await vi.importActual<typeof import("./api/favorites")>("./api/favorites");
+  return { ...actual, listSavedPlaces: vi.fn() };
+});
 vi.mock("./components/AccountMenu", () => ({
   AccountMenu: () => <a href="/login">Sign in</a>,
 }));
@@ -82,6 +115,22 @@ vi.mock("./components/SuggestionCard", () => ({
 }));
 
 const mockedFetchSuggestions = vi.mocked(fetchSuggestions);
+const mockedFetchPreferences = vi.mocked(fetchPreferences);
+const mockedListSavedPlaces = vi.mocked(listSavedPlaces);
+
+const defaultPreferences = {
+  favorite_cuisines: [],
+  disliked_foods: [],
+  dietary_restrictions: [],
+  allergies: [],
+  default_location: null,
+  default_radius_meters: 5_000,
+  recommendation_preferences: {},
+  personalization_enabled: false,
+  history_enabled: false,
+  reduced_motion: "system" as const,
+  notification_preferences: {},
+};
 
 function makeSuggestions(count: number): Suggestion[] {
   return Array.from({ length: count }, (_, index) => ({
@@ -107,7 +156,13 @@ async function flushEffects(): Promise<void> {
 beforeEach(() => {
   vi.useFakeTimers();
   window.history.replaceState({}, "", "/");
+  authState.user = null;
+  authState.loading = false;
   mockedFetchSuggestions.mockReset();
+  mockedFetchPreferences.mockReset();
+  mockedFetchPreferences.mockResolvedValue(defaultPreferences);
+  mockedListSavedPlaces.mockReset();
+  mockedListSavedPlaces.mockResolvedValue([]);
   chatMount = 0;
   Object.defineProperty(navigator, "geolocation", {
     configurable: true,
@@ -133,6 +188,108 @@ beforeEach(() => {
 });
 
 describe("Airbnb-style application shell", () => {
+  it("resolves location without waiting for account status", async () => {
+    authState.loading = true;
+    mockedFetchSuggestions.mockResolvedValue(makeSuggestions(4));
+
+    render(<App />);
+    await flushEffects();
+
+    expect(screen.getByTestId("map-location")).toHaveTextContent("Current location");
+    expect(mockedFetchSuggestions).toHaveBeenCalledTimes(1);
+  });
+
+  it("uses a saved location when preferences arrive before device location", async () => {
+    authState.user = {
+      user_id: "user-1",
+      email: "signed-in@example.com",
+      email_verified: true,
+    };
+    let deviceSuccess: PositionCallback | undefined;
+    Object.defineProperty(navigator, "geolocation", {
+      configurable: true,
+      value: {
+        getCurrentPosition: vi.fn((success: PositionCallback) => {
+          deviceSuccess = success;
+        }),
+      },
+    });
+    mockedFetchPreferences.mockResolvedValue({
+      ...defaultPreferences,
+      default_location: { lat: 45.5019, lng: -73.5674, label: "Montreal, QC" },
+    });
+    mockedFetchSuggestions.mockResolvedValue(makeSuggestions(4));
+
+    render(<App />);
+    await flushEffects();
+    expect(screen.getByTestId("map-location")).toHaveTextContent("Montreal, QC");
+
+    act(() => {
+      deviceSuccess?.({
+        coords: {
+          latitude: 43.65,
+          longitude: -79.38,
+          accuracy: 10,
+          altitude: null,
+          altitudeAccuracy: null,
+          heading: null,
+          speed: null,
+          toJSON: () => ({}),
+        },
+        timestamp: Date.now(),
+        toJSON: () => ({}),
+      } as GeolocationPosition);
+    });
+    expect(screen.getByTestId("map-location")).toHaveTextContent("Montreal, QC");
+  });
+
+  it("keeps a resolved device location when preferences arrive later", async () => {
+    authState.user = {
+      user_id: "user-1",
+      email: "signed-in@example.com",
+      email_verified: true,
+    };
+    let resolvePreferences: ((value: typeof defaultPreferences & {
+      default_location: { lat: number; lng: number; label: string };
+    }) => void) | undefined;
+    mockedFetchPreferences.mockImplementation(() => new Promise((resolve) => {
+      resolvePreferences = resolve;
+    }));
+    mockedFetchSuggestions.mockResolvedValue(makeSuggestions(4));
+
+    render(<App />);
+    await flushEffects();
+    expect(screen.getByTestId("map-location")).toHaveTextContent("Current location");
+
+    await act(async () => {
+      resolvePreferences?.({
+        ...defaultPreferences,
+        default_location: { lat: 45.5019, lng: -73.5674, label: "Montreal, QC" },
+      });
+      await Promise.resolve();
+    });
+    expect(screen.getByTestId("map-location")).toHaveTextContent("Current location");
+  });
+
+  it("falls back to Toronto when device location is denied", async () => {
+    Object.defineProperty(navigator, "geolocation", {
+      configurable: true,
+      value: {
+        getCurrentPosition: vi.fn((
+          _success: PositionCallback,
+          error: PositionErrorCallback,
+        ) => error({ code: 1, message: "denied", PERMISSION_DENIED: 1 } as GeolocationPositionError)),
+      },
+    });
+    mockedFetchSuggestions.mockResolvedValue(makeSuggestions(4));
+
+    render(<App />);
+    await flushEffects();
+
+    expect(screen.getByTestId("map-location")).toHaveTextContent("Toronto, ON");
+    expect(mockedFetchSuggestions).toHaveBeenCalledTimes(1);
+  });
+
   it("renders Help and responds to browser history", async () => {
     mockedFetchSuggestions.mockResolvedValue(makeSuggestions(4));
     window.history.replaceState({}, "", "/help");

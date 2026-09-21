@@ -43,9 +43,12 @@ export type FavoriteCollection = {
   item_count: number;
 };
 
-export async function listSavedPlaces(collectionId?: string): Promise<SavedPlace[]> {
+export async function listSavedPlaces(
+  collectionId?: string,
+  signal?: AbortSignal,
+): Promise<SavedPlace[]> {
   const query = collectionId ? `?collection_id=${encodeURIComponent(collectionId)}` : "";
-  const response = await apiFetch(`/favorites/saved${query}`, {}, { csrf: false });
+  const response = await apiFetch(`/favorites/saved${query}`, { signal }, { csrf: false });
   if (!response.ok) throw new Error(await readApiError(response));
   return ((await response.json()) as { favorites: SavedPlace[] }).favorites;
 }

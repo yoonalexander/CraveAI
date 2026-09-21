@@ -1,3 +1,5 @@
+import { recordStartupTiming } from "../utils/startupTelemetry";
+
 // Authentication relies on first-party cookies, so browser requests must stay
 // on the frontend origin and pass through the Vite/Vercel /api proxy.
 export const API_BASE = "/api";
@@ -20,11 +22,18 @@ export async function apiFetch(
   if (needsCsrf) {
     headers.set("X-CSRF-Token", await getCsrfToken());
   }
-  return fetch(`${API_BASE}${path}`, {
-    ...init,
-    headers,
-    credentials: "include",
-  });
+  try {
+    const response = await fetch(`${API_BASE}${path}`, {
+      ...init,
+      headers,
+      credentials: "include",
+    });
+    recordStartupTiming("first_api_response", "success");
+    return response;
+  } catch (error) {
+    recordStartupTiming("first_api_response", "error");
+    throw error;
+  }
 }
 
 async function getCsrfToken(): Promise<string> {

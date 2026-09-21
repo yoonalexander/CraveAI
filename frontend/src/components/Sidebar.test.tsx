@@ -3,10 +3,19 @@ import { describe, expect, it, vi } from "vitest";
 
 import { Sidebar } from "./Sidebar";
 
+const { authState } = vi.hoisted(() => ({
+  authState: {
+    user: null as null | { user_id: string; email: string; email_verified: boolean },
+    loading: false,
+    status: "guest",
+  },
+}));
+
 vi.mock("../context/AuthContext", () => ({
   useAuth: () => ({
-    user: null,
-    loading: false,
+    user: authState.user,
+    loading: authState.loading,
+    status: authState.status,
     login: vi.fn(),
     logout: vi.fn(),
     refresh: vi.fn(),
@@ -14,6 +23,12 @@ vi.mock("../context/AuthContext", () => ({
 }));
 
 describe("Sidebar", () => {
+  beforeEach(() => {
+    authState.user = null;
+    authState.loading = false;
+    authState.status = "guest";
+  });
+
   it("renders the complete navigation and marks the current page", () => {
     render(
       <Sidebar
@@ -69,5 +84,26 @@ describe("Sidebar", () => {
     );
     expect(screen.getByRole("link", { name: "Discovery" })).toHaveAttribute("title", "Discovery");
     expect(screen.getByRole("button", { name: "Expand sidebar" })).toBeInTheDocument();
+  });
+
+  it("does not offer login while account status is still loading", () => {
+    authState.loading = true;
+    authState.status = "checking";
+
+    render(
+      <Sidebar
+        collapsed={false}
+        currentPath="/"
+        mobileOpen={false}
+        onCloseMobile={vi.fn()}
+        onNavigate={vi.fn()}
+        onToggle={vi.fn()}
+        weather={null}
+        weatherLoading={false}
+      />,
+    );
+
+    expect(screen.getByText("Checking account…")).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Log in" })).not.toBeInTheDocument();
   });
 });

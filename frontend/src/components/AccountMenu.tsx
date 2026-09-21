@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 
 export function AccountMenu(): JSX.Element {
-  const { user, loading, logout } = useAuth();
+  const { user, loading, logout, status } = useAuth();
   const [showSignOutConfirm, setShowSignOutConfirm] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [signOutError, setSignOutError] = useState<string | null>(null);
@@ -23,6 +23,9 @@ export function AccountMenu(): JSX.Element {
 
   if (loading) {
     return <span className="text-sm text-muted-foreground">Checking account…</span>;
+  }
+  if (status === "offline") {
+    return <span className="text-sm text-muted-foreground">Account unavailable — retrying…</span>;
   }
   if (!user) {
     return (

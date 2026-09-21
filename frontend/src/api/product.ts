@@ -46,8 +46,8 @@ export type Preferences = {
   notification_preferences: Record<string, boolean>;
 };
 
-export async function fetchPreferences(): Promise<Preferences> {
-  const response = await apiFetch("/account/preferences", {}, { csrf: false });
+export async function fetchPreferences(signal?: AbortSignal): Promise<Preferences> {
+  const response = await apiFetch("/account/preferences", { signal }, { csrf: false });
   if (!response.ok) throw new Error(await readApiError(response));
   return response.json();
 }

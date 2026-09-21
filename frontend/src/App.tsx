@@ -33,8 +33,10 @@ import {
   mergeSuggestionsForBounds,
   SuggestionFilter,
 } from "./utils/suggestionPool";
+import { recordStartupTiming } from "./utils/startupTelemetry";
 
 const SUGGESTION_TIMEOUT_MS = 90_000;
+const PREFERENCES_TIMEOUT_MS = 4_000;
 const SEARCH_RADIUS_METERS = 5_000;
 const SIDEBAR_STORAGE_KEY = "craveai-sidebar-collapsed";
 
@@ -55,8 +57,8 @@ export default function App(): JSX.Element {
 }
 
 function CraveApplication(): JSX.Element {
-  const { isLoaded: mapsLoaded } = useGoogleMaps();
-  const { user, loading: authLoading } = useAuth();
+  const { isLoaded: mapsLoaded, loadError: mapsLoadError, hasApiKey: mapsHasApiKey } = useGoogleMaps();
+  const { user } = useAuth();
   const [currentPath, setCurrentPath] = useState(() => normalizePath(window.location.pathname));
   const [chatSession, setChatSession] = useState(0);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(readSidebarPreference);
@@ -91,22 +93,49 @@ function CraveApplication(): JSX.Element {
     key: string; loading: boolean; error: string | null; matches: Map<string, string[]>;
   }>({ key: "", loading: false, error: null, matches: new Map() });
   const [dietaryRetry, setDietaryRetry] = useState(0);
-  const locationInitialized = useRef(false);
+  const locationSourceRef = useRef<LocationSource | null>(null);
 
   useEffect(() => {
     setPreferencesLoaded(false);
     if (!user) { setPreferences(null); setSavedPlaceIds(new Set()); setPreferencesLoaded(true); return; }
     let active = true;
-    void Promise.all([fetchPreferences(), listSavedPlaces()])
+    const startedAt = performance.now();
+    let outcome: "success" | "timeout" | "error" = "success";
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), PREFERENCES_TIMEOUT_MS);
+    void Promise.all([
+      fetchPreferences(controller.signal),
+      listSavedPlaces(undefined, controller.signal),
+    ])
       .then(([value, saved]) => {
         if (!active) return;
         setPreferences(value);
         setSavedPlaceIds(new Set(saved.flatMap((item) => item.place_id ? [item.place_id] : [])));
       })
-      .catch(() => undefined)
-      .finally(() => { if (active) setPreferencesLoaded(true); });
-    return () => { active = false; };
+      .catch(() => {
+        outcome = controller.signal.aborted ? "timeout" : "error";
+      })
+      .finally(() => {
+        window.clearTimeout(timeout);
+        if (active) {
+          recordStartupTiming("preferences", outcome, performance.now() - startedAt);
+          setPreferencesLoaded(true);
+        }
+      });
+    controller.signal.addEventListener("abort", () => {
+      outcome = "timeout";
+    }, { once: true });
+    return () => {
+      active = false;
+      controller.abort();
+      window.clearTimeout(timeout);
+    };
   }, [user]);
+
+  useEffect(() => {
+    if (mapsLoaded) recordStartupTiming("maps_ready", "success");
+    else if (mapsLoadError || !mapsHasApiKey) recordStartupTiming("maps_ready", "error");
+  }, [mapsHasApiKey, mapsLoadError, mapsLoaded]);
 
   useEffect(() => {
     const handlePopState = () => setCurrentPath(normalizePath(window.location.pathname));
@@ -127,6 +156,7 @@ function CraveApplication(): JSX.Element {
       label,
     };
     setOriginLocation(coordinates);
+    locationSourceRef.current = source;
     setLocationSource(source);
     setLocationStatus(status);
     setLocationReady(true);
@@ -138,39 +168,35 @@ function CraveApplication(): JSX.Element {
   }, []);
 
   useEffect(() => {
-    if (authLoading || !preferencesLoaded || locationInitialized.current) return;
-    locationInitialized.current = true;
-    if (preferences?.default_location) {
-      confirmLocation(
-        { lat: preferences.default_location.lat, lng: preferences.default_location.lng },
-        preferences.default_location.label,
-        "manual",
-        "Using your saved default location.",
-        preferences.default_radius_meters,
-      );
-      return;
-    }
+    const startedAt = performance.now();
     if (!("geolocation" in navigator)) {
       confirmLocation(
         { lat: TORONTO_FALLBACK.lat, lng: TORONTO_FALLBACK.lng },
         TORONTO_FALLBACK.city,
         "fallback",
         "Geolocation is unavailable; using Toronto, ON.",
-        preferences?.default_radius_meters,
       );
+      recordStartupTiming("geolocation", "fallback", performance.now() - startedAt);
       return;
     }
     navigator.geolocation.getCurrentPosition(
       (position) => {
+        recordStartupTiming("geolocation", "success", performance.now() - startedAt);
+        if (locationSourceRef.current === "manual") return;
         confirmLocation(
           { lat: position.coords.latitude, lng: position.coords.longitude },
           "Current location",
           "device",
           "Live location locked.",
-          preferences?.default_radius_meters,
         );
       },
       (error) => {
+        recordStartupTiming(
+          "geolocation",
+          error.code === error.PERMISSION_DENIED ? "denied" : "fallback",
+          performance.now() - startedAt,
+        );
+        if (locationSourceRef.current === "manual") return;
         confirmLocation(
           { lat: TORONTO_FALLBACK.lat, lng: TORONTO_FALLBACK.lng },
           TORONTO_FALLBACK.city,
@@ -178,12 +204,23 @@ function CraveApplication(): JSX.Element {
           error.code === error.PERMISSION_DENIED
             ? "Location permission denied; using Toronto, ON."
             : "Unable to read your location; using Toronto, ON.",
-          preferences?.default_radius_meters,
         );
       },
       { enableHighAccuracy: true, timeout: 10_000, maximumAge: 0 },
     );
-  }, [authLoading, confirmLocation, preferences, preferencesLoaded]);
+  }, [confirmLocation]);
+
+  useEffect(() => {
+    if (!preferencesLoaded || !preferences?.default_location) return;
+    if (locationSourceRef.current === "device" || locationSourceRef.current === "manual") return;
+    confirmLocation(
+      { lat: preferences.default_location.lat, lng: preferences.default_location.lng },
+      preferences.default_location.label,
+      "manual",
+      "Using your saved default location.",
+      preferences.default_radius_meters,
+    );
+  }, [confirmLocation, preferences, preferencesLoaded]);
 
   useEffect(() => {
     if (!mapsLoaded || !searchArea || searchArea.bounds || searchArea.label !== "Current location") return;

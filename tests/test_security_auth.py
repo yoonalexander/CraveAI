@@ -57,6 +57,64 @@ def provider_session() -> ProviderSession:
     )
 
 
+def test_health_check_is_public_and_discloses_no_configuration():
+    app = create_app()
+
+    async def exercise():
+        async with AsyncClient(
+            transport=ASGITransport(app=app), base_url="http://test"
+        ) as client:
+            return await client.get("/api/health")
+
+    response = asyncio.run(exercise())
+
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok"}
+    assert "database" not in response.text.lower()
+    assert "environment" not in response.text.lower()
+
+
+def test_startup_telemetry_accepts_bounded_events_and_warns_on_slow_start(caplog):
+    app = create_app()
+
+    async def exercise():
+        async with AsyncClient(
+            transport=ASGITransport(app=app), base_url="http://test"
+        ) as client:
+            accepted = await client.post(
+                "/api/telemetry/startup",
+                json={
+                    "events": [
+                        {
+                            "name": "auth_me",
+                            "duration_ms": 4_000,
+                            "outcome": "timeout",
+                        }
+                    ]
+                },
+            )
+            rejected = await client.post(
+                "/api/telemetry/startup",
+                json={
+                    "events": [
+                        {
+                            "name": "arbitrary_event",
+                            "duration_ms": 1,
+                            "outcome": "success",
+                        }
+                    ]
+                },
+            )
+            return accepted, rejected
+
+    with caplog.at_level("WARNING"):
+        accepted, rejected = asyncio.run(exercise())
+
+    assert accepted.status_code == 204
+    assert rejected.status_code == 422
+    assert "startup_timing event=auth_me duration_ms=4000 outcome=timeout" in caplog.text
+
+
 def test_login_uses_opaque_httponly_cookie_and_blocks_csrf(
     monkeypatch, provider_session
 ):

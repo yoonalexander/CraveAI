@@ -57,7 +57,7 @@ export function Sidebar({
   onNavigate,
   onToggle,
 }: SidebarProps): JSX.Element {
-  const { user } = useAuth();
+  const { user, loading: authLoading, status: authStatus } = useAuth();
   const panelRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -192,7 +192,17 @@ export function Sidebar({
         </nav>
 
         <div className="sidebar-account">
-          {user ? (
+          {authLoading ? (
+            <div className="sidebar-login-copy" role="status">
+              <strong>Checking account…</strong>
+              <p>Confirming your secure session.</p>
+            </div>
+          ) : authStatus === "offline" ? (
+            <div className="sidebar-login-copy" role="status">
+              <strong>Account unavailable</strong>
+              <p>CraveAI is retrying your secure session in the background.</p>
+            </div>
+          ) : user ? (
             <a
               className="sidebar-account-link"
               href="/account"

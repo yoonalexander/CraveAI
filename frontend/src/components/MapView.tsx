@@ -9,6 +9,7 @@ import {
   calculateDistanceKm,
   groupSuggestionsForMap,
 } from "../utils/suggestionPool";
+import { recordStartupTiming } from "../utils/startupTelemetry";
 import { PinIcon, SearchIcon } from "./Icons";
 
 type MapViewProps = {
@@ -144,6 +145,7 @@ export function MapView({
         onIdle={captureViewport}
         onLoad={(map) => {
           mapRef.current = map;
+          recordStartupTiming("first_map_render", "success");
           window.setTimeout(recenter, 0);
         }}
         onUnmount={() => { mapRef.current = null; }}

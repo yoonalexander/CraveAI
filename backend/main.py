@@ -22,6 +22,7 @@ from backend.routers import (
     places,
     plans,
     preferences,
+    telemetry,
 )
 from backend.services.storage import init_storage, purge_expired_operational_data
 
@@ -47,6 +48,10 @@ def create_app() -> FastAPI:
         lifespan=_lifespan,
     )
     app.state.settings = settings
+
+    @app.get("/api/health", include_in_schema=False)
+    async def health() -> dict[str, str]:
+        return {"status": "ok"}
 
     app.add_middleware(
         CORSMiddleware,
@@ -124,7 +129,7 @@ def create_app() -> FastAPI:
     api_routers = (
         auth.router, account.router, legal.router, preferences.router, audio.router,
         conversations.router, plans.router, chat.router, places.router,
-        favorites.router, feedback.router,
+        favorites.router, feedback.router, telemetry.router,
     )
     for router in api_routers:
         app.include_router(router, prefix="/api")
