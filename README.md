@@ -458,6 +458,25 @@ The repository is arranged for this production boundary:
 CI in `.github/workflows/security.yml` runs tests, frontend checks, dependency
 audits, migration rendering, and secret scanning.
 
+### Free-tier hosting status
+
+As of **September 21, 2026**, the unused **MAL Score Predictor** Render web
+service is suspended. This was done manually in the Render dashboard so it
+cannot wake up and consume the same workspace-level pool of 750 monthly Free
+instance hours used by CraveAI. Its source repository was not deleted.
+
+CraveAI's public `https://craveai.alexyoon.com/api/health` endpoint is monitored
+by UptimeRobot every five minutes. Those requests keep the Render backend inside
+its 15-minute idle window. A continuously warm CraveAI service uses 672-744
+instance hours depending on the calendar month; user visits during that time do
+not consume separate per-user hours. In a 31-day month, the expected usage is
+approximately 744 hours, leaving roughly six hours of workspace headroom.
+
+The suspension and monitor are external operational settings, not settings
+enforced by this repository. If either service is changed in Render or the
+UptimeRobot monitor is paused, update this note and recheck the workspace's
+monthly usage dashboard.
+
 ## Current limitations
 
 - Official menu coverage is uneven. JavaScript-only menus, PDFs, anti-bot pages,
