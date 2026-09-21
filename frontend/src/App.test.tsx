@@ -74,8 +74,9 @@ vi.mock("./components/MapView", () => ({
   ),
 }));
 vi.mock("./components/Sidebar", () => ({
-  Sidebar: ({ onNavigate }: { onNavigate: (path: string, reset?: boolean) => void }) => (
+  Sidebar: ({ onNavigate, weatherLoading }: { onNavigate: (path: string, reset?: boolean) => void; weatherLoading: boolean }) => (
     <nav data-testid="sidebar">
+      <span data-testid="weather-state">{weatherLoading ? "Loading" : "Settled"}</span>
       <button onClick={() => onNavigate("/", true)} type="button">New chat</button>
       <button onClick={() => onNavigate("/discovery")} type="button">Discovery</button>
     </nav>
@@ -188,6 +189,22 @@ beforeEach(() => {
 });
 
 describe("Airbnb-style application shell", () => {
+  it("keeps weather loading while waiting for location, then settles after the forecast", async () => {
+    const resolveDeviceLocation = vi.mocked(navigator.geolocation.getCurrentPosition).getMockImplementation()!;
+    const pendingLocation = vi.spyOn(navigator.geolocation, "getCurrentPosition").mockImplementation(() => undefined);
+    mockedFetchSuggestions.mockResolvedValue([]);
+
+    render(<App />);
+    await flushEffects();
+    expect(screen.getByTestId("weather-state")).toHaveTextContent("Loading");
+
+    await act(async () => {
+      resolveDeviceLocation(pendingLocation.mock.calls[0][0]);
+    });
+    await flushEffects();
+    expect(screen.getByTestId("weather-state")).toHaveTextContent("Settled");
+  });
+
   it("resolves location without waiting for account status", async () => {
     authState.loading = true;
     mockedFetchSuggestions.mockResolvedValue(makeSuggestions(4));

@@ -11,6 +11,7 @@ import {
 } from "../utils/suggestionPool";
 import { recordStartupTiming } from "../utils/startupTelemetry";
 import { PinIcon, SearchIcon } from "./Icons";
+import { LocationLoader } from "./LoadingIndicators";
 
 type MapViewProps = {
   originLocation: Coordinates | null;
@@ -125,7 +126,7 @@ export function MapView({
 
   let content: JSX.Element;
   if (isLocating || !originLocation) {
-    content = <MapState title="Finding your location">The map will appear when your location is ready.</MapState>;
+    content = <MapState loading title="Finding your location">The map will appear when your location is ready.</MapState>;
   } else if (!hasApiKey) {
     content = (
       <MapState title="Map unavailable">
@@ -135,7 +136,7 @@ export function MapView({
   } else if (loadError) {
     content = <MapState title="Google Maps could not load">Your current restaurant pool and chat still work.</MapState>;
   } else if (!isLoaded) {
-    content = <MapState title="Loading Google Maps">This should only take a moment.</MapState>;
+    content = <MapState loading title="Loading Google Maps">This should only take a moment.</MapState>;
   } else {
     content = (
       <GoogleMap
@@ -263,10 +264,10 @@ function RestaurantMarker({
   );
 }
 
-function MapState({ title, children }: { title: string; children: React.ReactNode }): JSX.Element {
+function MapState({ title, children, loading = false }: { title: string; children: React.ReactNode; loading?: boolean }): JSX.Element {
   return (
-    <div className="map-state">
-      <PinIcon />
+    <div className="map-state" role="status">
+      {loading ? <LocationLoader large /> : <PinIcon />}
       <strong>{title}</strong>
       <p>{children}</p>
     </div>

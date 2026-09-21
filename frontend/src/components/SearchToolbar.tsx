@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import type { SearchArea } from "../types/searchArea";
 import type { AdvancedFilters, SuggestionFilter } from "../utils/suggestionPool";
 import { ClockIcon, DollarIcon, PinIcon, SlidersIcon } from "./Icons";
+import { LocationLoader } from "./LoadingIndicators";
 
 type SearchToolbarProps = {
   area: SearchArea | null;
@@ -85,8 +86,8 @@ export function SearchToolbar({
       aria-label="Restaurant search controls"
     >
       <div className="search-toolbar-location">
-        <span className="search-toolbar-pin"><PinIcon /></span>
-        <div>
+        <span className="search-toolbar-pin">{area ? <PinIcon /> : <LocationLoader />}</span>
+        <div role="status">
           <span>Search area</span>
           <strong>{area?.label || "Finding your location…"}</strong>
         </div>

@@ -10,6 +10,7 @@ import { ChatPanel } from "./components/ChatPanel";
 import { DiscoveryPage } from "./components/DiscoveryPage";
 import { MenuIcon, PinIcon } from "./components/Icons";
 import { LocationDialog, SelectedLocation } from "./components/LocationDialog";
+import { LocationLoader } from "./components/LoadingIndicators";
 import { LegalPage } from "./components/LegalPage";
 import { MapView } from "./components/MapView";
 import { MobileChatSheet } from "./components/MobileChatSheet";
@@ -85,7 +86,7 @@ function CraveApplication(): JSX.Element {
   const [advancedFilters, setAdvancedFilters] = useState<AdvancedFilters>(DEFAULT_ADVANCED_FILTERS);
   const [mapRecommendations, setMapRecommendations] = useState<ChatRecommendation[]>([]);
   const [weather, setWeather] = useState<CurrentWeather | null>(null);
-  const [weatherLoading, setWeatherLoading] = useState(false);
+  const [weatherLoading, setWeatherLoading] = useState(true);
   const [preferences, setPreferences] = useState<Preferences | null>(null);
   const [preferencesLoaded, setPreferencesLoaded] = useState(false);
   const [savedPlaceIds, setSavedPlaceIds] = useState<Set<string>>(new Set());
@@ -491,7 +492,7 @@ function CraveApplication(): JSX.Element {
               onClick={() => setLocationDialogOpen(true)}
               type="button"
             >
-              <PinIcon />
+              {searchArea ? <PinIcon /> : <LocationLoader />}
               <span>
                 <strong>{searchArea?.label || "Finding your location…"}</strong>
                 <small>

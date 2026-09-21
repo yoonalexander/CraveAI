@@ -29,6 +29,29 @@ describe("Sidebar", () => {
     authState.status = "guest";
   });
 
+  it("announces weather loading in the collapsed sidebar and replaces it when settled", () => {
+    const props = {
+      collapsed: true,
+      currentPath: "/",
+      mobileOpen: false,
+      onCloseMobile: vi.fn(),
+      onNavigate: vi.fn(),
+      onToggle: vi.fn(),
+    };
+    const { rerender } = render(<Sidebar {...props} weather={null} weatherLoading />);
+
+    expect(screen.getByRole("status", { name: "Checking weather" })).toHaveAttribute("title", "Checking weather");
+    expect(screen.queryByText("Weather unavailable")).not.toBeInTheDocument();
+
+    rerender(<Sidebar {...props} weather={{ temperature: 18.4, condition: "Clear", isDay: true }} weatherLoading={false} />);
+    expect(screen.getByRole("status", { name: "18°C Clear" })).toBeInTheDocument();
+    expect(screen.queryByText("Checking weather")).not.toBeInTheDocument();
+
+    rerender(<Sidebar {...props} weather={null} weatherLoading={false} />);
+    expect(screen.getByRole("status", { name: "Weather unavailable" })).toBeInTheDocument();
+    expect(screen.queryByText("Checking weather")).not.toBeInTheDocument();
+  });
+
   it("renders the complete navigation and marks the current page", () => {
     render(
       <Sidebar

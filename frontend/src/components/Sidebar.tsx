@@ -2,6 +2,7 @@ import { ComponentType, useEffect, useRef } from "react";
 
 import type { CurrentWeather } from "../api/weather";
 import { useAuth } from "../context/AuthContext";
+import { WeatherLoader } from "./LoadingIndicators";
 import {
   BadgeIcon,
   CloudIcon,
@@ -162,9 +163,11 @@ export function Sidebar({
 
         <div
           className="sidebar-weather"
-          title={weather ? `${Math.round(weather.temperature)}°C ${weather.condition}` : "Weather unavailable"}
+          role="status"
+          aria-label={weatherLoading ? "Checking weather" : weather ? `${Math.round(weather.temperature)}°C ${weather.condition}` : "Weather unavailable"}
+          title={weatherLoading ? "Checking weather" : weather ? `${Math.round(weather.temperature)}°C ${weather.condition}` : "Weather unavailable"}
         >
-          {weather?.condition === "Clear" ? (
+          {weatherLoading ? <WeatherLoader /> : weather?.condition === "Clear" ? (
             <SunIcon className="sidebar-weather-icon is-sunny" />
           ) : (
             <CloudIcon className="sidebar-weather-icon" />
@@ -172,7 +175,7 @@ export function Sidebar({
           <div className="sidebar-weather-copy">
             <strong>
               {weatherLoading
-                ? "—"
+                ? <span aria-hidden="true" className="weather-loading-temperature" />
                 : weather
                   ? `${Math.round(weather.temperature)}°C`
                   : "—"}
@@ -182,7 +185,7 @@ export function Sidebar({
                 ? "Checking weather"
                 : weather?.condition || "Weather unavailable"}
             </span>
-            {weather ? <a className="weather-attribution" href="https://open-meteo.com/" rel="noreferrer" target="_blank">Weather by Open-Meteo</a> : null}
+            {weather && !weatherLoading ? <a className="weather-attribution" href="https://open-meteo.com/" rel="noreferrer" target="_blank">Weather by Open-Meteo</a> : null}
           </div>
         </div>
 
