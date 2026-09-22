@@ -99,12 +99,6 @@ class Config:
     CHAT_RANKING_TIMEOUT_SECONDS: int = field(
         default_factory=lambda: _env_int("CHAT_RANKING_TIMEOUT_SECONDS", 12)
     )
-    DAILY_QUOTA_MULTIPLIER: int = field(
-        default_factory=lambda: _env_int("DAILY_QUOTA_MULTIPLIER", 1)
-    )
-    GUEST_USAGE_LIMITS_ENABLED: bool = field(
-        default_factory=lambda: _env_bool("GUEST_USAGE_LIMITS_ENABLED", False)
-    )
     GUEST_DAILY_CHAT_LIMIT: int = field(
         default_factory=lambda: _env_int_alias(
             "GUEST_DAILY_CHAT_LIMIT", "DAILY_CHAT_MESSAGE_LIMIT", 9
@@ -175,10 +169,6 @@ class Config:
     @property
     def is_production(self) -> bool:
         return self.ENVIRONMENT.lower() == "production"
-
-    def scaled_daily_quota(self, configured_limit: int) -> int:
-        """Apply the configured deployment multiplier to a daily quota."""
-        return max(configured_limit, 0) * max(self.DAILY_QUOTA_MULTIPLIER, 1)
 
     def legal_publication_issues(self) -> tuple[str, ...]:
         """Return concrete configuration issues that block legal publication."""

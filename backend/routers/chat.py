@@ -11,8 +11,11 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from backend.config import get_settings
-from backend.services.identity import resolve_request_usage_identity
-from backend.services.entitlements import resolve_entitlements
+from backend.services.identity import resolve_request_usage_identities
+from backend.services.entitlements import (
+    has_unlimited_usage_access,
+    resolve_entitlements,
+)
 from backend.services.rate_limit import burst_limiter
 from backend.services.rag_pipeline import generate_recommendations
 from backend.services.product_data import (
@@ -28,6 +31,7 @@ from backend.services.security import require_allowed_origin, sha256
 from backend.services.usage_limits import (
     DailyQuotaExceeded,
     UsageReservation,
+    inspect_daily_quota,
     rate_limit_headers,
     reserve_daily_quota,
 )
@@ -232,12 +236,24 @@ class ChatStatusResponse(BaseModel):
 @router.get("/status", response_model=ChatStatusResponse, response_model_exclude_defaults=True)
 async def get_chat_status(
     request: Request,
+    response: Response,
     session: SessionContext | None = Depends(optional_session),
 ) -> ChatStatusResponse:
-    settings = get_settings()
-    if session is None and not settings.GUEST_USAGE_LIMITS_ENABLED:
+    if has_unlimited_usage_access(session):
         return ChatStatusResponse(usage=_unlimited_usage_metadata())
-    return ChatStatusResponse()
+    settings = get_settings()
+    usage_identities = getattr(request.state, "chat_usage_identities", None)
+    if usage_identities is None:
+        usage_identities = resolve_request_usage_identities(
+            "chat", request, response, session.user_id if session else None
+        )
+    configured_daily_limit = resolve_entitlements(bool(session))["limits"]["chats_per_day"]
+    usage = await inspect_daily_quota(
+        user_ids=usage_identities,
+        daily_limit=configured_daily_limit,
+        namespace="chat",
+    )
+    return ChatStatusResponse(usage=_usage_metadata(usage))
 
 
 @router.post("", response_model=ChatResponse, response_model_exclude_defaults=True)
@@ -266,9 +282,12 @@ async def generate_chat_response(
             ContextMessage(**item) for item in stored_context["messages"]
         ] + context_messages
         context_messages = context_messages[-12:]
-    usage_user_id = resolve_request_usage_identity(
-        "chat", request, response, session.user_id if session else None
-    )
+    usage_identities = getattr(request.state, "chat_usage_identities", None)
+    if usage_identities is None:
+        usage_identities = resolve_request_usage_identities(
+            "chat", request, response, session.user_id if session else None
+        )
+    usage_user_id = usage_identities[0]
     await burst_limiter.enforce(
         f"chat:{usage_user_id}",
         limit=20 if session else 10,
@@ -276,18 +295,17 @@ async def generate_chat_response(
         code="chat_rate_limited",
     )
     configured_daily_limit = resolve_entitlements(bool(session))["limits"]["chats_per_day"]
-    daily_limit = settings.scaled_daily_quota(configured_daily_limit)
-    enforce_actor_limit = session is not None or settings.GUEST_USAGE_LIMITS_ENABLED
+    daily_limit = configured_daily_limit
+    enforce_actor_limit = not has_unlimited_usage_access(session)
     try:
         usage = await reserve_daily_quota(
             user_id=usage_user_id,
             token_cost=1,
             daily_limit=daily_limit,
-            global_daily_limit=settings.scaled_daily_quota(
-                settings.GLOBAL_DAILY_CHAT_LIMIT
-            ),
+            global_daily_limit=settings.GLOBAL_DAILY_CHAT_LIMIT,
             namespace="chat",
             enforce_actor_limit=enforce_actor_limit,
+            additional_user_ids=usage_identities[1:],
         )
     except DailyQuotaExceeded as exc:
         raise HTTPException(
@@ -382,6 +400,9 @@ async def stream_chat_response(
 ) -> StreamingResponse:
     """Stream genuine retrieval stages and finalized grounded results as SSE."""
     await _enforce_chat_consent(payload, session, request)
+    request.state.chat_usage_identities = resolve_request_usage_identities(
+        "chat", request, response, session.user_id if session else None
+    )
 
     async def events():
         yield _sse("meta", {"protocol": 1})
@@ -426,10 +447,14 @@ async def stream_chat_response(
             yield _sse("usage", result.usage.model_dump())
         yield _sse("done", {"conversation_id": result.conversation_id})
 
-    return StreamingResponse(
-        events(), media_type="text/event-stream",
-        headers={"Cache-Control": "no-cache, no-transform", "X-Accel-Buffering": "no"},
-    )
+    headers = {
+        "Cache-Control": "no-cache, no-transform",
+        "X-Accel-Buffering": "no",
+    }
+    for header_name in ("set-cookie", "x-craveai-anonymous-token"):
+        if header_name in response.headers:
+            headers[header_name] = response.headers[header_name]
+    return StreamingResponse(events(), media_type="text/event-stream", headers=headers)
 
 
 async def _enforce_chat_consent(

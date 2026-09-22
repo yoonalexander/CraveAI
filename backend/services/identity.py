@@ -134,30 +134,34 @@ def resolve_anonymous_usage_identity(
     return f"{namespace}:guest-ip:{ip_actor}", issued_token
 
 
-def resolve_request_usage_identity(
+def resolve_request_usage_identities(
     namespace: str,
     request: Request,
     response: Response,
     user_id: str | None,
-) -> str:
+) -> tuple[str, ...]:
     """Resolve quotas to an account or a server-derived network actor.
 
-    The guest cookie improves continuity but is deliberately not the daily quota
-    authority, so deleting browser storage cannot reset the allowance.
+    Guests are bound to both a network-prefix bucket and a signed browser bucket.
+    Either exhausted bucket blocks usage, so deleting browser state on the same
+    network or changing networks in the same browser cannot reset the allowance.
     """
     if user_id:
-        return f"account:{user_id}"
+        return (f"account:{user_id}",)
     settings = get_settings()
     raw = request.cookies.get(settings.guest_cookie_name)
-    valid = False
+    anonymous_subject: str | None = None
     if raw and settings.IDENTITY_SIGNING_SECRET:
         try:
-            verify_anonymous_identity_token(raw, settings.IDENTITY_SIGNING_SECRET)
-            valid = True
+            anonymous_subject = verify_anonymous_identity_token(
+                raw, settings.IDENTITY_SIGNING_SECRET
+            )
         except ValueError:
             pass
-    if not valid and settings.IDENTITY_SIGNING_SECRET:
-        _, raw = issue_anonymous_identity_token(settings.IDENTITY_SIGNING_SECRET)
+    if anonymous_subject is None and settings.IDENTITY_SIGNING_SECRET:
+        anonymous_subject, raw = issue_anonymous_identity_token(
+            settings.IDENTITY_SIGNING_SECRET
+        )
         response.set_cookie(
             settings.guest_cookie_name,
             raw,
@@ -168,10 +172,12 @@ def resolve_request_usage_identity(
             path="/",
         )
     if raw:
-        # Compatibility only; the frontend no longer stores this value and the
-        # durable quota key is server-derived from the network prefix.
+        # Compatibility for older clients; the HttpOnly cookie is authoritative.
         response.headers["X-CraveAI-Anonymous-Token"] = raw
-    return f"guest-ip:{actor_ip_hash(request)}"
+    identities = [f"guest-ip:{actor_ip_hash(request)}"]
+    if anonymous_subject is not None:
+        identities.append(f"guest-browser:{anonymous_subject}")
+    return tuple(identities)
 
 
 async def require_user_identity(authorization: str | None = Header(default=None)) -> str:

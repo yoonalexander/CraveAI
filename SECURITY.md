@@ -20,7 +20,12 @@ contact the repository owner privately before publishing details.
 - State-changing account operations require a session-bound CSRF token and an
   allowed browser origin.
 - Resource ownership comes from the authenticated session, never request data.
-- Guest quota authority is server-derived; deleting browser storage cannot reset it.
+- Guest quotas atomically enforce both a signed browser identity and a hashed
+  network prefix; exhausting either bucket blocks provider-backed usage.
+- Unlimited development usage (chat, Places search, and voice actor ceilings) is
+  restricted to verified sessions for `proto95430@gmail.com` and
+  `alexanderyoon02@gmail.com`; caller-supplied email, headers, cookies, or
+  browser state cannot grant it. Global provider-cost ceilings still apply.
 - Passwords, tokens, cookies, OAuth codes, request bodies, and chat content are
   never written to application logs.
 - Supabase service-role credentials are restricted to backend account deletion

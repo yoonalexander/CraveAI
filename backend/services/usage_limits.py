@@ -40,8 +40,9 @@ async def reserve_daily_quota(
     now: datetime | None = None,
     namespace: str = "chat",
     enforce_actor_limit: bool = True,
+    additional_user_ids: tuple[str, ...] = (),
 ) -> UsageReservation:
-    """Atomically reserve usage while optionally enforcing the actor ceiling."""
+    """Atomically reserve usage across every identity bound to an actor."""
     token_cost = max(token_cost, 0)
     daily_limit = max(daily_limit, 0)
     timestamp = _utc(now or datetime.now(timezone.utc))
@@ -50,12 +51,24 @@ async def reserve_daily_quota(
     global_limit = (
         max(global_daily_limit, 0) if global_daily_limit is not None else None
     )
+    actor_ids = tuple(dict.fromkeys((user_id, *additional_user_ids)))
 
     def _reserve() -> UsageReservation:
         with get_session_factory()() as db:
-            actor = _locked_usage_row(db, namespace, user_id, usage_date, timestamp)
-            if enforce_actor_limit and actor.units_used + token_cost > daily_limit:
-                reservation = _reservation(actor, daily_limit, reset_at)
+            actor_rows = {
+                actor_id: _locked_usage_row(
+                    db, namespace, actor_id, usage_date, timestamp
+                )
+                for actor_id in sorted(actor_ids)
+            }
+            most_used_actor = max(
+                actor_rows.values(), key=lambda row: row.units_used
+            )
+            if enforce_actor_limit and any(
+                row.units_used + token_cost > daily_limit
+                for row in actor_rows.values()
+            ):
+                reservation = _reservation(most_used_actor, daily_limit, reset_at)
                 db.rollback()
                 raise DailyQuotaExceeded(reservation)
 
@@ -69,17 +82,65 @@ async def reserve_daily_quota(
                     db.rollback()
                     raise DailyQuotaExceeded(reservation)
 
-            actor.units_used += token_cost
-            actor.request_count += 1
-            actor.updated_at = timestamp
+            for actor in actor_rows.values():
+                actor.units_used += token_cost
+                actor.request_count += 1
+                actor.updated_at = timestamp
             if global_row is not None:
                 global_row.units_used += token_cost
                 global_row.request_count += 1
                 global_row.updated_at = timestamp
             db.commit()
-            return _reservation(actor, daily_limit if enforce_actor_limit else 0, reset_at)
+            most_used_actor = max(
+                actor_rows.values(), key=lambda row: row.units_used
+            )
+            return _reservation(
+                most_used_actor,
+                daily_limit if enforce_actor_limit else 0,
+                reset_at,
+            )
 
     return await asyncio.to_thread(_reserve)
+
+
+async def inspect_daily_quota(
+    user_ids: tuple[str, ...],
+    daily_limit: int,
+    now: datetime | None = None,
+    namespace: str = "chat",
+) -> UsageReservation:
+    """Read the most-consumed bound identity without mutating usage state."""
+    if not user_ids:
+        raise ValueError("At least one usage identity is required.")
+    limit = max(daily_limit, 0)
+    timestamp = _utc(now or datetime.now(timezone.utc))
+    usage_date = timestamp.date()
+    reset_at = _reset_at(timestamp)
+    actor_ids = tuple(dict.fromkeys(user_ids))
+
+    def _inspect() -> UsageReservation:
+        with get_session_factory()() as db:
+            rows = list(
+                db.scalars(
+                    select(UsageLimit).where(
+                        UsageLimit.namespace == namespace,
+                        UsageLimit.actor_key.in_(actor_ids),
+                        UsageLimit.usage_date == usage_date,
+                    )
+                )
+            )
+        if not rows:
+            return UsageReservation(
+                limit=limit,
+                used=0,
+                remaining=limit,
+                reset_at=reset_at,
+                request_count=0,
+            )
+        most_used = max(rows, key=lambda row: row.units_used)
+        return _reservation(most_used, limit, reset_at)
+
+    return await asyncio.to_thread(_inspect)
 
 
 def rate_limit_headers(

@@ -4,6 +4,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ChatPanel } from "./ChatPanel";
 import { fetchChatStatus, streamChat } from "../api/chat";
 
+const authState = vi.hoisted(() => ({
+  user: null as null | { user_id: string; email: string; email_verified: boolean },
+}));
+
 vi.mock("../api/chat", async () => {
   const actual = await vi.importActual<typeof import("../api/chat")>("../api/chat");
   return {
@@ -13,10 +17,15 @@ vi.mock("../api/chat", async () => {
   };
 });
 
+vi.mock("../context/AuthContext", () => ({
+  useAuth: () => authState,
+}));
+
 const mockedSendChat = vi.mocked(streamChat);
 const mockedFetchChatStatus = vi.mocked(fetchChatStatus);
 
 beforeEach(() => {
+  authState.user = null;
   window.localStorage.clear();
   window.sessionStorage.clear();
   window.sessionStorage.setItem("craveai-age-18", "true");
@@ -34,6 +43,39 @@ describe("ChatPanel", () => {
   it("shows the published guest daily chat allowance", () => {
     render(<ChatPanel />);
     expect(screen.getByText("9 messages left today")).toBeInTheDocument();
+  });
+
+  it("replaces admin usage when authentication changes to a guest", async () => {
+    authState.user = {
+      user_id: "admin-user",
+      email: "proto95430@gmail.com",
+      email_verified: true,
+    };
+    mockedFetchChatStatus.mockResolvedValueOnce({
+      usage: {
+        limit: 0,
+        used: 0,
+        remaining: 0,
+        reset_at: "2099-01-02T00:00:00Z",
+        unlimited: true,
+      },
+    });
+    const { rerender } = render(<ChatPanel />);
+    await waitFor(() => expect(screen.getByText("Unlimited messages")).toBeInTheDocument());
+
+    authState.user = null;
+    mockedFetchChatStatus.mockResolvedValueOnce({
+      usage: {
+        limit: 9,
+        used: 7,
+        remaining: 2,
+        reset_at: "2099-01-02T00:00:00Z",
+      },
+    });
+    rerender(<ChatPanel />);
+
+    await waitFor(() => expect(screen.getByText("2 messages left today")).toBeInTheDocument());
+    expect(mockedFetchChatStatus).toHaveBeenCalledTimes(2);
   });
 
   it("starts empty and moves into conversation mode after Enter", async () => {

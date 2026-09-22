@@ -24,7 +24,6 @@ def product_settings(monkeypatch, tmp_path):
     monkeypatch.setenv("SUPABASE_ANON_KEY", "test-anon")
     monkeypatch.setenv("SUPABASE_SERVICE_ROLE_KEY", "test-service")
     monkeypatch.setenv("IDENTITY_SIGNING_SECRET", "test-identity-signing-secret")
-    monkeypatch.setenv("DAILY_QUOTA_MULTIPLIER", "1")
     get_settings.cache_clear()
     reset_database_cache()
     burst_limiter.reset()

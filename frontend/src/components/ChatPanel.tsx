@@ -35,7 +35,7 @@ type ChatPanelProps = {
 };
 
 const DEFAULT_DAILY_CHAT_LIMIT = 9;
-const CHAT_USAGE_STORAGE_KEY = "craveai-chat-usage-v2";
+const CHAT_USAGE_STORAGE_KEY_PREFIX = "craveai-chat-usage-v3";
 const TEMP_CHAT_STORAGE_KEY = "craveai-temporary-chat";
 
 const createMessageId = (prefix: string): string =>
@@ -48,6 +48,7 @@ export function ChatPanel({
   onConversationStart,
 }: ChatPanelProps): JSX.Element {
   const { user } = useAuth();
+  const usageActorId = user?.user_id ?? "guest";
   const recovered = readTemporaryChat();
   const [messages, setMessages] = useState<Message[]>(recovered.messages);
   const [draft, setDraft] = useState(recovered.draft);
@@ -64,7 +65,7 @@ export function ChatPanel({
   } | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
-  const [usage, setUsage] = useState<UsageMetadata | null>(() => readCachedUsage());
+  const [usage, setUsage] = useState<UsageMetadata | null>(() => readCachedUsage(usageActorId));
   const conversationRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const noticeTimer = useRef<number | null>(null);
@@ -78,17 +79,18 @@ export function ChatPanel({
 
   useEffect(() => {
     let mounted = true;
+    setUsage(readCachedUsage(usageActorId));
     fetchChatStatus()
       .then((status) => {
         if (!mounted || !status.usage) return;
         setUsage(status.usage);
-        writeCachedUsage(status.usage);
+        writeCachedUsage(usageActorId, status.usage);
       })
       .catch(() => undefined);
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [usageActorId]);
 
   useEffect(() => {
     const conversation = conversationRef.current;
@@ -175,7 +177,7 @@ export function ChatPanel({
       if (response.conversation_id) setConversationId(response.conversation_id);
       const nextUsage = response.usage ?? estimateNextUsage(usage);
       setUsage(nextUsage);
-      writeCachedUsage(nextUsage);
+      writeCachedUsage(usageActorId, nextUsage);
 
       const recommendations = response.recommendations.length
         ? response.recommendations
@@ -204,7 +206,7 @@ export function ChatPanel({
         assistantMessage = reason.message;
         if (reason.usage) {
           setUsage(reason.usage);
-          writeCachedUsage(reason.usage);
+          writeCachedUsage(usageActorId, reason.usage);
         }
       } else if (reason instanceof ChatTimeoutError) {
         assistantMessage = reason.message;
@@ -490,30 +492,36 @@ function nextUtcResetAt(): string {
   return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1)).toISOString();
 }
 
-function readCachedUsage(): UsageMetadata | null {
+function usageStorageKey(actorId: string): string {
+  return `${CHAT_USAGE_STORAGE_KEY_PREFIX}:${actorId}`;
+}
+
+function readCachedUsage(actorId: string): UsageMetadata | null {
   if (!canUseLocalStorage()) return null;
-  const raw = window.localStorage.getItem(CHAT_USAGE_STORAGE_KEY);
+  const key = usageStorageKey(actorId);
+  const raw = window.localStorage.getItem(key);
   if (!raw) return null;
   try {
     const usage = JSON.parse(raw) as UsageMetadata;
     if (!isUsageMetadata(usage) || new Date(usage.reset_at).getTime() <= Date.now()) {
-      window.localStorage.removeItem(CHAT_USAGE_STORAGE_KEY);
+      window.localStorage.removeItem(key);
       return null;
     }
     return usage;
   } catch {
-    window.localStorage.removeItem(CHAT_USAGE_STORAGE_KEY);
+    window.localStorage.removeItem(key);
     return null;
   }
 }
 
-function writeCachedUsage(usage: UsageMetadata | null): void {
+function writeCachedUsage(actorId: string, usage: UsageMetadata | null): void {
   if (!canUseLocalStorage()) return;
+  const key = usageStorageKey(actorId);
   if (!usage || usage.unlimited) {
-    window.localStorage.removeItem(CHAT_USAGE_STORAGE_KEY);
+    window.localStorage.removeItem(key);
     return;
   }
-  window.localStorage.setItem(CHAT_USAGE_STORAGE_KEY, JSON.stringify(usage));
+  window.localStorage.setItem(key, JSON.stringify(usage));
 }
 
 function isUsageMetadata(usage: Partial<UsageMetadata>): usage is UsageMetadata {

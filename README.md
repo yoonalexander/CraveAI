@@ -340,7 +340,7 @@ All settings are documented in `.env.example`. The main groups are:
 | Timeouts | `CHAT_PIPELINE_TIMEOUT_SECONDS`, `CHAT_RANKING_TIMEOUT_SECONDS` |
 | Legal publication | `TERMS_VERSION`, `PRIVACY_VERSION`, `POLICY_EFFECTIVE_DATE`, `OPERATOR_LEGAL_NAME`, `OPERATOR_ADDRESS`, `GOVERNING_LAW`, `SUPPORT_EMAIL`, `PRIVACY_EMAIL` |
 | Voice | `GUEST_DAILY_VOICE_SECONDS`, `ACCOUNT_DAILY_VOICE_SECONDS`, `AUDIO_MAX_BYTES` |
-| Quotas | `DAILY_QUOTA_MULTIPLIER` plus guest, account, global, feedback, and authentication limit variables |
+| Quotas | Explicit guest, account, global, feedback, and authentication limit variables |
 | Request limits | `REQUEST_BODY_LIMIT_BYTES` |
 
 Generate a Fernet session encryption key with:

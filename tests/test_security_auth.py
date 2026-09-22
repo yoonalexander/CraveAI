@@ -23,8 +23,6 @@ def security_test_settings(monkeypatch, tmp_path):
         f"sqlite+pysqlite:///{(tmp_path / 'security.db').as_posix()}",
     )
     monkeypatch.setenv("AUTO_CREATE_SCHEMA", "true")
-    monkeypatch.setenv("DAILY_QUOTA_MULTIPLIER", "1")
-    monkeypatch.setenv("GUEST_USAGE_LIMITS_ENABLED", "true")
     monkeypatch.setenv("GUEST_DAILY_CHAT_LIMIT", "3")
     monkeypatch.setenv("SUPABASE_ANON_KEY", "test-anon")
     monkeypatch.setenv("SUPABASE_SERVICE_ROLE_KEY", "test-service")
@@ -272,6 +270,37 @@ def test_guest_quota_cannot_be_reset_by_clearing_browser_state(monkeypatch):
             transport=ASGITransport(app=app), base_url="http://test"
         ) as cleared:
             responses.append(await cleared.post("/api/chat", json=payload))
+        return responses
+
+    responses = asyncio.run(exercise())
+    assert [item.status_code for item in responses] == [200, 200, 200, 429]
+    assert responses[-1].json()["detail"]["code"] == "daily_chat_message_quota_exceeded"
+
+
+def test_guest_quota_follows_signed_browser_identity_across_network_change(monkeypatch):
+    async def fake_recommendations(**kwargs):
+        return {"reply": "ok", "recommendations": []}
+
+    monkeypatch.setattr(
+        "backend.routers.chat.generate_recommendations", fake_recommendations
+    )
+    app = create_app()
+
+    async def exercise():
+        payload = {"query": "ramen", "location": {"lat": 43.65, "lng": -79.38}}
+        async with AsyncClient(
+            transport=ASGITransport(app=app, client=("203.0.113.10", 50000)),
+            base_url="http://test",
+        ) as first:
+            responses = [await first.post("/api/chat", json=payload) for _ in range(3)]
+            guest_cookie = first.cookies.get(get_settings().guest_cookie_name)
+
+        async with AsyncClient(
+            transport=ASGITransport(app=app, client=("198.51.100.25", 50001)),
+            base_url="http://test",
+            headers={"Cookie": f"{get_settings().guest_cookie_name}={guest_cookie}"},
+        ) as changed_network:
+            responses.append(await changed_network.post("/api/chat", json=payload))
         return responses
 
     responses = asyncio.run(exercise())

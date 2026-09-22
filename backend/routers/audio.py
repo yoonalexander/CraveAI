@@ -7,8 +7,8 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, Resp
 from openai import AsyncOpenAI
 
 from backend.config import get_settings
-from backend.services.identity import resolve_request_usage_identity
-from backend.services.entitlements import resolve_entitlements
+from backend.services.identity import resolve_request_usage_identities
+from backend.services.entitlements import has_unlimited_usage_access, resolve_entitlements
 from backend.services.product_data import has_current_policy_acceptance
 from backend.services.rate_limit import burst_limiter
 from backend.services.security import require_allowed_origin, sha256
@@ -54,27 +54,27 @@ async def transcribe_audio(
     if not data or len(data) > settings.AUDIO_MAX_BYTES:
         data = b""
         raise HTTPException(status_code=413, detail={"code": "audio_too_large"})
-    actor = resolve_request_usage_identity(
+    usage_identities = resolve_request_usage_identities(
         "voice", request, response, session.user_id if session else None
     )
+    actor = usage_identities[0]
     await burst_limiter.enforce(
         f"voice:{actor}",
         limit=12 if session else 6,
         window_seconds=60,
         code="voice_rate_limited",
     )
-    enforce_actor_limit = session is not None or settings.GUEST_USAGE_LIMITS_ENABLED
+    enforce_actor_limit = not has_unlimited_usage_access(session)
     try:
         await reserve_daily_quota(
             user_id=actor,
             token_cost=max(1, math.ceil(duration_seconds)),
             daily_limit=resolve_entitlements(bool(session))["limits"]["voice_seconds_per_day"],
-            global_daily_limit=settings.scaled_daily_quota(
-                settings.GLOBAL_DAILY_VOICE_SECONDS
-            ),
+            global_daily_limit=settings.GLOBAL_DAILY_VOICE_SECONDS,
             global_user_id=VOICE_GLOBAL_USAGE_USER_ID,
             namespace="voice",
             enforce_actor_limit=enforce_actor_limit,
+            additional_user_ids=usage_identities[1:],
         )
     except DailyQuotaExceeded as exc:
         data = b""

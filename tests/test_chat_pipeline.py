@@ -4,7 +4,7 @@ import sys
 import time
 from pathlib import Path
 from typing import Any, Dict, List
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 import pytest
 from httpx import ASGITransport, AsyncClient
@@ -33,6 +33,12 @@ from backend.services.usage_limits import (
     reserve_daily_quota,
 )
 from backend.services.rate_limit import burst_limiter
+from backend.services.security import sha256
+from backend.services.sessions import (
+    SessionContext,
+    optional_session,
+    require_verified_session,
+)
 
 ANONYMOUS_TOKEN_HEADER = "X-CraveAI-Anonymous-Token"
 DEV_BYPASS_HEADER = "X-CraveAI-Dev-Bypass"
@@ -50,13 +56,7 @@ def configure_test_settings(monkeypatch, tmp_path):
         f"sqlite+pysqlite:///{(tmp_path / 'craveai-test.db').as_posix()}",
     )
     monkeypatch.setenv("AUTO_CREATE_SCHEMA", "true")
-    monkeypatch.setenv("USAGE_LIMITS_ENABLED", "true")
-    monkeypatch.setenv("DAILY_QUOTA_MULTIPLIER", "1")
-    monkeypatch.setenv("GUEST_USAGE_LIMITS_ENABLED", "true")
-    monkeypatch.setenv("DAILY_TOKEN_LIMIT", "10000")
     monkeypatch.setenv("DAILY_CHAT_MESSAGE_LIMIT", "3")
-    monkeypatch.setenv("CHAT_DEVELOPER_MODE", "false")
-    monkeypatch.delenv("CHAT_DEV_BYPASS_SECRET", raising=False)
     monkeypatch.setenv("GLOBAL_DAILY_TOKEN_LIMIT", "100000")
     monkeypatch.setenv("DAILY_PLACES_REQUEST_LIMIT", "20")
     monkeypatch.setenv("GLOBAL_DAILY_PLACES_REQUEST_LIMIT", "1000")
@@ -399,6 +399,30 @@ def test_chat_endpoint_returns_mocked_response(mocked_pipeline):
     assert mocked_pipeline["rank"] == 1
 
 
+def test_chat_stream_sets_signed_guest_identity_cookie(mocked_pipeline):
+    app = create_app()
+
+    async def exercise():
+        async with AsyncClient(
+            transport=ASGITransport(app=app),
+            base_url="http://test",
+        ) as client:
+            return await client.post(
+                "/chat/stream",
+                json={
+                    "query": "I want a cozy bowl of ramen tonight.",
+                    "location": {"lat": 43.6532, "lng": -79.3832},
+                },
+            )
+
+    response = asyncio.run(exercise())
+
+    assert response.status_code == 200
+    assert get_settings().guest_cookie_name in response.headers["set-cookie"]
+    assert "event: usage" in response.text
+    assert mocked_pipeline["extract"] == 1
+
+
 def test_chat_endpoint_returns_cumulative_usage_after_each_chat(mocked_pipeline):
     app = create_app()
 
@@ -574,7 +598,7 @@ def test_chat_endpoint_allows_three_messages_then_blocks_fourth(mocked_pipeline)
     assert mocked_pipeline["extract"] == 3
 
 
-def test_chat_status_does_not_report_unlimited_in_standard_mode(mocked_pipeline):
+def test_chat_status_reports_current_metered_usage_without_spending(mocked_pipeline):
     app = create_app()
 
     async def exercise():
@@ -582,19 +606,94 @@ def test_chat_status_does_not_report_unlimited_in_standard_mode(mocked_pipeline)
             transport=ASGITransport(app=app),
             base_url="http://test",
         ) as client:
-            return await client.get("/chat/status")
+            before = await client.get("/chat/status")
+            chat_response = await client.post(
+                "/chat",
+                json={
+                    "query": "I want a cozy bowl of ramen tonight.",
+                    "location": {"lat": 43.6532, "lng": -79.3832},
+                },
+            )
+            after = await client.get("/chat/status")
+            return before, chat_response, after
 
-    response = asyncio.run(exercise())
+    before, chat_response, after = asyncio.run(exercise())
 
-    assert response.status_code == 200
-    assert response.json() == {}
-    assert mocked_pipeline["extract"] == 0
+    assert before.status_code == 200
+    assert before.json()["usage"] == {
+        "limit": 3,
+        "used": 0,
+        "remaining": 3,
+        "reset_at": before.json()["usage"]["reset_at"],
+    }
+    assert chat_response.status_code == 200
+    assert after.json()["usage"]["used"] == 1
+    assert after.json()["usage"]["remaining"] == 2
+    assert mocked_pipeline["extract"] == 1
 
 
-def test_guest_chat_status_reports_unmetered_testing_access(monkeypatch, mocked_pipeline):
+def test_guest_chat_cannot_disable_daily_limit_with_testing_flag(
+    monkeypatch,
+    mocked_pipeline,
+):
     monkeypatch.setenv("GUEST_USAGE_LIMITS_ENABLED", "false")
+    monkeypatch.setenv("DAILY_QUOTA_MULTIPLIER", "1000")
     get_settings.cache_clear()
     app = create_app()
+
+    async def exercise():
+        async with AsyncClient(
+            transport=ASGITransport(app=app),
+            base_url="http://test",
+        ) as client:
+            payload = {
+                "query": "I want a cozy bowl of ramen tonight.",
+                "location": {"lat": 43.6532, "lng": -79.3832},
+            }
+            status_response = await client.get("/chat/status")
+            chat_responses = [
+                await client.post(
+                    "/chat",
+                    json={**payload, "query": f"{payload['query']} ({index})"},
+                )
+                for index in range(4)
+            ]
+            refreshed_status = await client.get("/chat/status")
+            return status_response, chat_responses, refreshed_status
+
+    status_response, chat_responses, refreshed_status = asyncio.run(exercise())
+
+    assert status_response.status_code == 200
+    assert status_response.json()["usage"]["remaining"] == 3
+    assert [response.status_code for response in chat_responses] == [200, 200, 200, 429]
+    assert chat_responses[-1].json()["detail"]["code"] == "daily_chat_message_quota_exceeded"
+    assert refreshed_status.json()["usage"]["used"] == 3
+    assert refreshed_status.json()["usage"]["remaining"] == 0
+    assert mocked_pipeline["extract"] == 3
+
+
+@pytest.mark.parametrize(
+    "email",
+    ["proto95430@gmail.com", "alexanderyoon02@gmail.com", "PROTO95430@GMAIL.COM"],
+)
+def test_verified_development_admin_accounts_have_unlimited_chat_status(
+    email,
+    mocked_pipeline,
+):
+    app = create_app()
+    now = datetime.now(timezone.utc)
+    session = SessionContext(
+        id="admin-session",
+        user_id=f"admin-{email.lower()}",
+        email=email,
+        email_verified=True,
+        access_token="test-access-token",
+        refresh_token="test-refresh-token",
+        csrf_token="test-csrf-token",
+        csrf_token_hash=sha256("test-csrf-token"),
+        authenticated_at=now - timedelta(minutes=1),
+    )
+    app.dependency_overrides[optional_session] = lambda: session
 
     async def exercise():
         async with AsyncClient(
@@ -610,18 +709,254 @@ def test_guest_chat_status_reports_unmetered_testing_access(monkeypatch, mocked_
     assert mocked_pipeline["extract"] == 0
 
 
-def test_configured_multiplier_scales_chat_and_discovery_quotas(monkeypatch):
-    monkeypatch.setenv("DAILY_QUOTA_MULTIPLIER", "1000")
+def test_verified_development_admin_account_bypasses_only_actor_daily_chat_limit(
+    monkeypatch,
+    mocked_pipeline,
+):
+    monkeypatch.setenv("ACCOUNT_DAILY_CHAT_LIMIT", "3")
     get_settings.cache_clear()
 
-    settings = get_settings()
+    async def accepted_policy(*_args, **_kwargs):
+        return True
 
-    assert settings.scaled_daily_quota(settings.GUEST_DAILY_CHAT_LIMIT) == 3_000
-    assert settings.scaled_daily_quota(settings.ACCOUNT_DAILY_CHAT_LIMIT) == 25_000
-    assert settings.scaled_daily_quota(settings.GUEST_DAILY_PLACES_LIMIT) == 20_000
-    assert settings.scaled_daily_quota(settings.ACCOUNT_DAILY_PLACES_LIMIT) == 100_000
-    assert settings.scaled_daily_quota(settings.GLOBAL_DAILY_CHAT_LIMIT) == 100_000_000
-    assert settings.scaled_daily_quota(settings.GLOBAL_DAILY_PLACES_LIMIT) == 1_000_000
+    monkeypatch.setattr(
+        "backend.routers.chat.has_current_policy_acceptance",
+        accepted_policy,
+    )
+    app = create_app()
+    now = datetime.now(timezone.utc)
+    session = SessionContext(
+        id="admin-session",
+        user_id="admin-user",
+        email="proto95430@gmail.com",
+        email_verified=True,
+        access_token="test-access-token",
+        refresh_token="test-refresh-token",
+        csrf_token="test-csrf-token",
+        csrf_token_hash=sha256("test-csrf-token"),
+        authenticated_at=now - timedelta(minutes=1),
+    )
+    app.dependency_overrides[optional_session] = lambda: session
+
+    async def exercise():
+        async with AsyncClient(
+            transport=ASGITransport(app=app),
+            base_url="http://test",
+        ) as client:
+            payload = {
+                "query": "I want a cozy bowl of ramen tonight.",
+                "location": {"lat": 43.6532, "lng": -79.3832},
+            }
+            return [
+                await client.post(
+                    "/chat",
+                    headers={
+                        "Origin": "http://localhost:5173",
+                        "X-CSRF-Token": session.csrf_token,
+                    },
+                    json={**payload, "query": f"{payload['query']} ({index})"},
+                )
+                for index in range(5)
+            ]
+
+    responses = asyncio.run(exercise())
+
+    assert [response.status_code for response in responses] == [200] * 5
+    assert all(response.json()["usage"]["unlimited"] is True for response in responses)
+    assert all("x-ratelimit-limit" not in response.headers for response in responses)
+    assert mocked_pipeline["extract"] == 5
+
+
+@pytest.mark.parametrize(
+    ("email", "verified"),
+    [
+        ("someone@example.com", True),
+        ("proto95430@gmail.com.attacker.example", True),
+        ("proto95430@gmail.com", False),
+    ],
+)
+def test_other_or_unverified_accounts_do_not_have_unlimited_chat_status(
+    email,
+    verified,
+    mocked_pipeline,
+):
+    app = create_app()
+    now = datetime.now(timezone.utc)
+    session = SessionContext(
+        id="regular-session",
+        user_id="regular-user",
+        email=email,
+        email_verified=verified,
+        access_token="test-access-token",
+        refresh_token="test-refresh-token",
+        csrf_token="test-csrf-token",
+        csrf_token_hash=sha256("test-csrf-token"),
+        authenticated_at=now - timedelta(minutes=1),
+    )
+    app.dependency_overrides[optional_session] = lambda: session
+
+    async def exercise():
+        async with AsyncClient(
+            transport=ASGITransport(app=app),
+            base_url="http://test",
+        ) as client:
+            return await client.get("/chat/status")
+
+    response = asyncio.run(exercise())
+
+    assert response.status_code == 200
+    assert response.json()["usage"].get("unlimited") is not True
+    assert mocked_pipeline["extract"] == 0
+
+
+def _development_admin_session() -> SessionContext:
+    return SessionContext(
+        id="admin-session",
+        user_id="admin-user",
+        email="proto95430@gmail.com",
+        email_verified=True,
+        access_token="test-access-token",
+        refresh_token="test-refresh-token",
+        csrf_token="test-csrf-token",
+        csrf_token_hash=sha256("test-csrf-token"),
+        authenticated_at=datetime.now(timezone.utc) - timedelta(minutes=1),
+    )
+
+
+def test_verified_development_admin_account_bypasses_places_actor_limit(monkeypatch):
+    monkeypatch.setenv("DAILY_PLACES_REQUEST_LIMIT", "1")
+    get_settings.cache_clear()
+
+    async def fake_places(*_args, **_kwargs):
+        return []
+
+    monkeypatch.setattr(places_router, "get_top_rated_nearby", fake_places)
+    app = create_app()
+    app.dependency_overrides[optional_session] = _development_admin_session
+
+    async def exercise():
+        async with AsyncClient(
+            transport=ASGITransport(app=app),
+            base_url="http://test",
+        ) as client:
+            return [
+                await client.get("/places/suggestions?lat=43.65&lng=-79.38")
+                for _ in range(3)
+            ]
+
+    responses = asyncio.run(exercise())
+
+    assert [response.status_code for response in responses] == [200, 200, 200]
+    assert all("x-ratelimit-limit" not in response.headers for response in responses)
+
+
+def test_verified_development_admin_account_bypasses_voice_actor_limit(monkeypatch):
+    monkeypatch.setenv("ACCOUNT_DAILY_VOICE_SECONDS", "30")
+    get_settings.cache_clear()
+
+    async def accepted_policy(*_args, **_kwargs):
+        return True
+
+    class FakeTranscriptions:
+        async def create(self, **_kwargs):
+            class Result:
+                text = "  hello  "
+
+            return Result()
+
+    class FakeAudio:
+        def __init__(self):
+            self.transcriptions = FakeTranscriptions()
+
+    class FakeAsyncOpenAI:
+        def __init__(self, **_kwargs):
+            self.audio = FakeAudio()
+
+    monkeypatch.setattr(
+        "backend.routers.audio.has_current_policy_acceptance", accepted_policy
+    )
+    monkeypatch.setattr("backend.routers.audio.AsyncOpenAI", FakeAsyncOpenAI)
+    app = create_app()
+    session = _development_admin_session()
+    app.dependency_overrides[optional_session] = lambda: session
+
+    async def exercise():
+        async with AsyncClient(
+            transport=ASGITransport(app=app),
+            base_url="http://test",
+        ) as client:
+            return [
+                await client.post(
+                    "/api/audio/transcriptions",
+                    headers={"X-CSRF-Token": session.csrf_token},
+                    files={"file": ("recording.webm", b"fake-audio", "audio/webm")},
+                    data={"duration_seconds": "60", "age_confirmed": "true"},
+                )
+                for _ in range(2)
+            ]
+
+    responses = asyncio.run(exercise())
+
+    # Each 60-second clip exceeds the 30-second account ceiling on its own.
+    assert [response.status_code for response in responses] == [200, 200]
+    assert all(response.json()["text"] == "hello" for response in responses)
+
+
+def test_account_entitlements_mark_only_development_admin_as_unlimited():
+    app = create_app()
+    app.dependency_overrides[require_verified_session] = _development_admin_session
+
+    async def exercise():
+        async with AsyncClient(
+            transport=ASGITransport(app=app),
+            base_url="http://test",
+        ) as client:
+            return await client.get("/api/account/entitlements")
+
+    response = asyncio.run(exercise())
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["role"] == "development_admin"
+    assert body["plan"] == "development_admin"
+    assert body["limits"] == {
+        "chats_per_day": None,
+        "places_per_day": None,
+        "voice_seconds_per_day": None,
+    }
+
+
+def test_account_entitlements_keep_numeric_limits_for_regular_users():
+    regular_session = SessionContext(
+        id="regular-session",
+        user_id="regular-user",
+        email="someone@example.com",
+        email_verified=True,
+        access_token="test-access-token",
+        refresh_token="test-refresh-token",
+        csrf_token="test-csrf-token",
+        csrf_token_hash=sha256("test-csrf-token"),
+        authenticated_at=datetime.now(timezone.utc) - timedelta(minutes=1),
+    )
+    app = create_app()
+    app.dependency_overrides[require_verified_session] = lambda: regular_session
+
+    async def exercise():
+        async with AsyncClient(
+            transport=ASGITransport(app=app),
+            base_url="http://test",
+        ) as client:
+            return await client.get("/api/account/entitlements")
+
+    response = asyncio.run(exercise())
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["role"] == "user"
+    assert body["plan"] == "free"
+    assert all(
+        isinstance(limit, int) for limit in body["limits"].values()
+    )
 
 
 def test_default_guest_allowances_are_tripled(monkeypatch):
@@ -631,7 +966,6 @@ def test_default_guest_allowances_are_tripled(monkeypatch):
         "GUEST_DAILY_PLACES_LIMIT",
         "DAILY_PLACES_REQUEST_LIMIT",
         "GUEST_DAILY_VOICE_SECONDS",
-        "GUEST_USAGE_LIMITS_ENABLED",
     ):
         monkeypatch.delenv(key, raising=False)
     get_settings.cache_clear()
@@ -641,7 +975,6 @@ def test_default_guest_allowances_are_tripled(monkeypatch):
     assert settings.GUEST_DAILY_CHAT_LIMIT == 9
     assert settings.GUEST_DAILY_PLACES_LIMIT == 60
     assert settings.GUEST_DAILY_VOICE_SECONDS == 540
-    assert settings.GUEST_USAGE_LIMITS_ENABLED is False
 
 
 def test_disabled_actor_limit_keeps_global_safety_ceiling():
