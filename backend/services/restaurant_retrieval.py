@@ -87,13 +87,13 @@ async def retrieve_candidate_restaurants(
                     EvidenceItem(
                         id="pending",
                         kind="provider_query",
-                        label=query.text,
+                        label=_query.text,
                         detail=(
                             "Returned by Google Places Text Search for this dish-oriented query."
                         ),
                         source_url=candidate.get("google_maps_uri"),
                         quality=0.55,
-                        declared_constraint_ids=query.constraint_ids,
+                        declared_constraint_ids=_query.constraint_ids,
                         retrieval_rank=rank,
                     ).model_dump()
                 ]

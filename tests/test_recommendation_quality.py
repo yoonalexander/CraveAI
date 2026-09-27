@@ -19,6 +19,7 @@ from backend.services.recommendation_models import (
     CandidateAssessment,
     CravingIntent,
     EvidenceLink,
+    SearchQuerySpec,
 )
 from backend.services import restaurant_retrieval
 from backend.services.restaurant_retrieval import _merge_query_results
@@ -103,6 +104,49 @@ def test_retrieval_never_returns_candidates_outside_confirmed_bounds(monkeypatch
     )
 
     assert [item["place_id"] for item in results] == ["inside"]
+
+
+def test_retrieval_builds_provider_evidence_for_successful_query(monkeypatch):
+    intent = spicy_soup_intent()
+    intent.search_queries = [
+        SearchQuerySpec(text="spicy food", constraint_ids=["c1"]),
+        SearchQuerySpec(text="soup", constraint_ids=["c2"]),
+    ]
+    searched_queries = []
+
+    async def fake_search(_client, query, **_kwargs):
+        searched_queries.append(query)
+        return [{
+            "id": "live-place",
+            "displayName": {"text": "Spicy Soup Kitchen"},
+            "location": {"latitude": 43.7, "longitude": -79.4},
+            "businessStatus": "OPERATIONAL",
+            "rating": 4.5,
+            "googleMapsUri": "https://maps.google.com/?cid=example",
+        }]
+
+    async def unexpected_fallback(*_args):
+        raise AssertionError("Successful Text Search must not use the legacy fallback")
+
+    monkeypatch.setattr(
+        restaurant_retrieval, "get_settings",
+        lambda: SimpleNamespace(GOOGLE_API_KEY="test-google"),
+    )
+    monkeypatch.setattr(restaurant_retrieval, "_search_text", fake_search)
+    monkeypatch.setattr(restaurant_retrieval, "_legacy_provider_fallback", unexpected_fallback)
+
+    results = asyncio.run(restaurant_retrieval.retrieve_candidate_restaurants(
+        intent, {"lat": 43.7, "lng": -79.4, "radius": 5000},
+    ))
+
+    assert searched_queries == ["spicy food", "soup"]
+    assert [item["place_id"] for item in results] == ["live-place"]
+    provider_evidence = results[0]["evidence"]
+    assert [item["label"] for item in provider_evidence] == ["spicy food", "soup"]
+    assert [item["declared_constraint_ids"] for item in provider_evidence] == [["c1"], ["c2"]]
+    assert all(item["kind"] == "provider_query" for item in provider_evidence)
+    assert all(item["retrieval_rank"] == 1 for item in provider_evidence)
+    assert [item["id"] for item in provider_evidence] == ["live-place:e1", "live-place:e2"]
 
 
 def evidence(
