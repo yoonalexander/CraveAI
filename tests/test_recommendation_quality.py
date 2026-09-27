@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 import asyncio
+import json
 from types import SimpleNamespace
 
-from backend.services import rag_pipeline
+import pytest
+
+from backend.services import evidence_ranker, rag_pipeline
 from backend.services.craving_intent import fallback_intent, normalize_intent
 from backend.services.evidence_ranker import rank_evidence_candidates, score_candidate
 from backend.services.menu_evidence import (
@@ -12,6 +15,7 @@ from backend.services.menu_evidence import (
     _validate_public_url,
 )
 from backend.services.recommendation_models import (
+    AssessmentBatch,
     CandidateAssessment,
     CravingIntent,
     EvidenceLink,
@@ -535,3 +539,151 @@ def test_pipeline_timeout_returns_no_ungrounded_rating_fallback(monkeypatch):
 
     assert result["recommendations"] == []
     assert "verify" in result["reply"].lower()
+
+
+def malformed_evidence() -> list:
+    return [
+        {"id": "bad:missing", "label": "Spicy noodles"},
+        evidence("bad:kind", "Spicy noodles", kind="unknown"),
+        evidence("bad:quality", "Spicy noodles", quality=2.0),
+        evidence("bad:rank", "Spicy noodles", rank=0),
+        None,
+        "Spicy noodles",
+    ]
+
+
+@pytest.mark.parametrize("semantic_mode", ["disabled", "success", "failure", "client_failure"])
+def test_assessment_skips_bad_evidence_and_computes_lexical_fallback_once(
+    monkeypatch, semantic_mode, caplog,
+):
+    intent = fallback_intent("im craving something spicy")
+    places = [
+        candidate("mixed", "Mixed", malformed_evidence() + [
+            evidence("mixed:good", "Spicy noodles"),
+            evidence("mixed:semantic", "Hot & Sour Soup"),
+        ]),
+        candidate("invalid", "Invalid", malformed_evidence()),
+    ]
+    monkeypatch.setattr(evidence_ranker, "get_settings", lambda: SimpleNamespace(
+        OPENAI_API_KEY="" if semantic_mode == "disabled" else "test-openai",
+        CHAT_RANKING_TIMEOUT_SECONDS=10,
+        MODEL_NAME="test-model",
+    ))
+    lexical_calls = 0
+    payloads = []
+    original_lexical = evidence_ranker._lexical_assessments
+
+    def count_lexical(*args):
+        nonlocal lexical_calls
+        lexical_calls += 1
+        return original_lexical(*args)
+
+    async def fake_parse(**kwargs):
+        payloads.append(json.loads(kwargs["messages"][1]["content"]))
+        if semantic_mode == "failure":
+            raise RuntimeError("Provider unavailable")
+        batch = AssessmentBatch(candidates=[
+            assessment("mixed",
+                       ("mixed:semantic", ["c1"], "supports"),
+                       ("bad:quality", ["c1"], "supports")),
+            assessment("invalid", ("bad:quality", ["c1"], "supports")),
+        ])
+        return SimpleNamespace(choices=[SimpleNamespace(message=SimpleNamespace(parsed=batch))])
+
+    def fake_client(**_kwargs):
+        if semantic_mode == "client_failure":
+            raise RuntimeError("Client unavailable")
+        return SimpleNamespace(chat=SimpleNamespace(completions=SimpleNamespace(parse=fake_parse)))
+
+    monkeypatch.setattr(evidence_ranker, "_lexical_assessments", count_lexical)
+    monkeypatch.setattr(evidence_ranker, "AsyncOpenAI", fake_client)
+    assessments = asyncio.run(evidence_ranker.assess_candidate_evidence(intent, places))
+    by_id = {item.place_id: item for item in assessments}
+
+    assert lexical_calls == 1
+    expected_ids = {"mixed:good"}
+    if semantic_mode == "success":
+        expected_ids.add("mixed:semantic")
+    assert {item.evidence_id for item in by_id["mixed"].links} == expected_ids
+    assert by_id["invalid"].links == []
+    if semantic_mode in {"success", "failure"}:
+        assert len(payloads) == 1
+        assert [item["id"] for item in payloads[0]["candidates"][0]["evidence"]] == [
+            "mixed:good", "mixed:semantic",
+        ]
+        assert payloads[0]["candidates"][1]["evidence"] == []
+    else:
+        assert payloads == []
+    assert ("outcome=lexical_fallback" in caplog.text) == (semantic_mode in {"failure", "client_failure"})
+    result = rank_evidence_candidates(intent, places, assessments)
+    assert [item["place_id"] for item in result["recommendations"]] == ["mixed"]
+    assert "outcome=skipped" in caplog.text
+
+
+@pytest.mark.parametrize("raw_evidence", [malformed_evidence(), {"id": "bad"}, "bad", 42])
+def test_scoring_discards_invalid_evidence_without_losing_other_candidates(raw_evidence):
+    intent = fallback_intent("im craving something spicy")
+    places = [
+        candidate("invalid", "Invalid", raw_evidence),
+        candidate("good", "Good", [evidence("good:e1", "Spicy noodles")]),
+    ]
+    result = rank_evidence_candidates(intent, places, [
+        assessment("invalid", ("bad:quality", ["c1"], "supports")),
+        assessment("good", ("good:e1", ["c1"], "supports")),
+    ])
+    assert [item["place_id"] for item in result["recommendations"]] == ["good"]
+
+
+@pytest.mark.parametrize("has_valid_evidence", [True, False])
+def test_spicy_pipeline_survives_malformed_retrieved_and_menu_evidence(monkeypatch, has_valid_evidence):
+    async def fake_intent(query):
+        return fallback_intent(query)
+
+    async def fake_retrieve(*_args):
+        valid = [evidence("mixed:good", "Spicy noodles")] if has_valid_evidence else []
+        return [candidate("mixed", "Mixed", malformed_evidence() + valid)]
+
+    async def fake_enrich(places, _intent):
+        # Raw retrieval evidence must be safe before menu enrichment uses it.
+        assert all(item["id"] == "mixed:good" for item in places[0]["evidence"])
+        places[0]["evidence"].extend(malformed_evidence())
+        return places
+
+    monkeypatch.setattr(rag_pipeline, "extract_craving_intent", fake_intent)
+    monkeypatch.setattr(rag_pipeline, "retrieve_candidate_restaurants", fake_retrieve)
+    monkeypatch.setattr(rag_pipeline, "enrich_candidates_with_menu_evidence", fake_enrich)
+    monkeypatch.setattr(evidence_ranker, "get_settings", lambda: SimpleNamespace(OPENAI_API_KEY=""))
+    result = asyncio.run(rag_pipeline.generate_recommendations(
+        "im craving something spicy", {"lat": 43.5, "lng": -79.7},
+    ))
+
+    assert result["intent"]["constraints"][0]["value"] == "spicy"
+    assert result["intent"]["constraints"][0]["strength"] == "strong"
+    assert "the evidence search failed" not in result["reply"]
+    assert [item["place_id"] for item in result["recommendations"]] == (["mixed"] if has_valid_evidence else [])
+
+
+def test_pipeline_error_logs_traceback_without_raw_exception_values(monkeypatch, caplog):
+    private_message = "sensitive-provider-payload"
+
+    async def fail_intent(_query):
+        try:
+            raise ValueError(private_message)
+        except ValueError as cause:
+            raise RuntimeError(private_message) from cause
+
+    monkeypatch.setattr(rag_pipeline, "extract_craving_intent", fail_intent)
+    monkeypatch.setattr(rag_pipeline.logger, "handlers", [caplog.handler])
+    result = asyncio.run(rag_pipeline.generate_recommendations(
+        "im craving something spicy", {"lat": 43.5, "lng": -79.7},
+    ))
+    logs = caplog.text
+
+    assert result["recommendations"] == []
+    assert "the evidence search failed" in result["reply"]
+    assert "stage=intent outcome=error error_type=RuntimeError" in logs
+    assert "Traceback (most recent call last)" in logs
+    assert "in fail_intent" in logs
+    assert "Exception details omitted." in logs
+    assert "NoneType: None" not in logs
+    assert "sensitive-provider-payload" not in logs

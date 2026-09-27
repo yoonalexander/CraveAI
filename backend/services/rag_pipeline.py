@@ -12,6 +12,7 @@ from backend.services.craving_intent import extract_craving_intent, fallback_int
 from backend.services.evidence_ranker import (
     assess_candidate_evidence,
     rank_evidence_candidates,
+    sanitize_candidate_evidence,
 )
 from backend.services.menu_evidence import enrich_candidates_with_menu_evidence
 from backend.services.restaurant_retrieval import retrieve_candidate_restaurants
@@ -61,7 +62,9 @@ async def generate_recommendations(
             stage = "menu_evidence"
             started = time.perf_counter()
             await _emit_stage(on_stage, "evidence", "Checking attributable menu evidence")
+            candidates = sanitize_candidate_evidence(candidates)
             candidates = await enrich_candidates_with_menu_evidence(candidates, intent)
+            candidates = sanitize_candidate_evidence(candidates)
             menu_evidence_count = sum(
                 evidence.get("kind") in {"official_menu", "official_website"}
                 for candidate in candidates
@@ -99,10 +102,13 @@ async def generate_recommendations(
         intent = fallback_intent(user_query)
         return _empty_response(intent.model_dump(), "the search timed out")
     except Exception as exc:
-        logger.error(
+        logger.exception(
             "recommendation_pipeline stage=%s outcome=error error_type=%s",
             stage,
             type(exc).__name__,
+            # Keep the original frames and error_type field without messages or
+            # chained causes containing request/provider data (see SECURITY.md).
+            exc_info=(Exception, Exception("Exception details omitted."), exc.__traceback__),
         )
         intent = fallback_intent(user_query)
         return _empty_response(intent.model_dump(), "the evidence search failed")

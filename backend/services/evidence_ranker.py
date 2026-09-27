@@ -8,6 +8,7 @@ from collections import defaultdict
 from typing import Any, Iterable, Sequence
 
 from openai import AsyncOpenAI
+from pydantic import ValidationError
 
 from backend.config import get_settings
 from backend.services.recommendation_models import (
@@ -81,9 +82,11 @@ async def assess_candidate_evidence(
     """Map evidence to constraints with structured output and validate every ID."""
     if not candidates:
         return []
+    candidates = sanitize_candidate_evidence(candidates)
+    lexical = _lexical_assessments(intent, candidates)
     settings = get_settings()
     if not settings.OPENAI_API_KEY:
-        return _lexical_assessments(intent, candidates)
+        return lexical
 
     payload = {
         "constraints": [item.model_dump() for item in intent.constraints],
@@ -107,12 +110,12 @@ async def assess_candidate_evidence(
             for place in candidates
         ],
     }
-    client = AsyncOpenAI(
-        api_key=settings.OPENAI_API_KEY,
-        max_retries=0,
-        timeout=min(settings.CHAT_RANKING_TIMEOUT_SECONDS, 10.5),
-    )
     try:
+        client = AsyncOpenAI(
+            api_key=settings.OPENAI_API_KEY,
+            max_retries=0,
+            timeout=min(settings.CHAT_RANKING_TIMEOUT_SECONDS, 10.5),
+        )
         completion = await client.chat.completions.parse(
             model=settings.MODEL_NAME,
             messages=[
@@ -129,11 +132,52 @@ async def assess_candidate_evidence(
         if parsed is None:
             raise ValueError("Evidence assessment returned no parsed content.")
         semantic = _validated_assessments(intent, candidates, parsed.candidates)
-        lexical = _lexical_assessments(intent, candidates)
-        return _merge_assessment_batches(semantic, lexical)
     except Exception as exc:
         logger.warning("evidence_assessment outcome=lexical_fallback error_type=%s", type(exc).__name__)
-        return _lexical_assessments(intent, candidates)
+        return lexical
+    return _merge_assessment_batches(semantic, lexical)
+
+
+def sanitize_candidate_evidence(
+    candidates: Sequence[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Copy candidates with only validated evidence for downstream consumers."""
+    return [
+        {**candidate, "evidence": [item.model_dump() for item in _validated_evidence(candidate)]}
+        for candidate in candidates
+    ]
+
+
+def _validated_evidence(candidate: dict[str, Any]) -> list[EvidenceItem]:
+    raw_items = candidate.get("evidence")
+    if raw_items is None:
+        return []
+    if not isinstance(raw_items, (list, tuple)):
+        logger.warning(
+            "candidate_evidence place_id=%s outcome=skipped reason=invalid_collection",
+            candidate.get("place_id"),
+        )
+        return []
+    valid: list[EvidenceItem] = []
+    invalid_count = 0
+    for raw in raw_items:
+        try:
+            item = EvidenceItem.model_validate(raw)
+        except ValidationError:
+            invalid_count += 1
+            continue
+        if not item.id:
+            invalid_count += 1
+            continue
+        valid.append(item)
+    if invalid_count:
+        # ValidationError strings include raw input; log only public IDs and counts.
+        logger.warning(
+            "candidate_evidence place_id=%s outcome=skipped invalid_items=%d",
+            candidate.get("place_id"),
+            invalid_count,
+        )
+    return valid
 
 
 def rank_evidence_candidates(
@@ -177,9 +221,7 @@ def score_candidate(
     if not candidate_matches_venue_constraints(intent, candidate):
         return None
     evidence_by_id = {
-        item["id"]: EvidenceItem.model_validate(item)
-        for item in candidate.get("evidence") or []
-        if item.get("id")
+        item.id: item for item in _validated_evidence(candidate)
     }
     if not evidence_by_id:
         return None
@@ -390,9 +432,7 @@ def _validated_assessments(
     valid_constraints = {item.id for item in intent.constraints}
     candidate_evidence = {
         str(candidate.get("place_id")): {
-            str(item.get("id"))
-            for item in candidate.get("evidence") or []
-            if item.get("id")
+            item.id for item in _validated_evidence(candidate)
         }
         for candidate in candidates
     }
@@ -428,8 +468,7 @@ def _lexical_assessments(
     results: list[CandidateAssessment] = []
     for candidate in candidates:
         links: list[EvidenceLink] = []
-        for raw in candidate.get("evidence") or []:
-            evidence = EvidenceItem.model_validate(raw)
+        for evidence in _validated_evidence(candidate):
             normalized = _normalize(f"{evidence.label} {evidence.detail}")
             supported = list(evidence.declared_constraint_ids)
             violated: list[str] = []
