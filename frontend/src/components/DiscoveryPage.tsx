@@ -31,7 +31,7 @@ export function DiscoveryPage({
   const visible = useMemo(() => suggestions.filter((item) => {
     const haystack = `${item.name} ${item.address} ${(item.tags || []).join(" ")}`.toLowerCase();
     if (query && !haystack.includes(query.toLowerCase())) return false;
-    if (collection === "top" && item.rating < 4.5) return false;
+    if (collection === "top" && (typeof item.rating !== "number" || item.rating < 4.5)) return false;
     if (collection === "budget" && (typeof item.price_level !== "number" || item.price_level > 1)) return false;
     if (collection === "open" && item.open_now !== true) return false;
     if (collection.startsWith("cuisine:")) return (item.tags || []).includes(collection.slice(8));

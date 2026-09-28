@@ -128,7 +128,7 @@ async def get_top_rated_nearby(
     bounds: Optional[Dict[str, float]] = None,
 ) -> List[Dict[str, Any]]:
     """
-    Fetch high-rated restaurants near the given location.
+    Fetch nearby restaurants; rating restrictions are chosen by the user.
     """
     if not GOOGLE_PLACES_API_KEY:
         if bounds:
@@ -142,11 +142,10 @@ async def get_top_rated_nearby(
                 lat=lat,
                 lng=lng,
                 radius=radius,
-                min_rating=4.0,
             )
             if len(candidates) < min(limit, MIN_SUGGESTION_POOL_SIZE):
-                # Fill a sparse first page from a wider area without weakening
-                # the quality threshold or discarding the original results.
+                # Fill a sparse first page from a wider bounded area while
+                # preserving the original results.
                 wider_radius = min(int(radius * 2), 20000)
                 if wider_radius > radius:
                     logger.info("Nearby Places result set was sparse; retrying a wider bounded radius.")
@@ -155,7 +154,6 @@ async def get_top_rated_nearby(
                         lat=lat,
                         lng=lng,
                         radius=wider_radius,
-                        min_rating=4.0,
                     )
                     candidates = _deduplicate_places([*candidates, *wider_candidates])
 
@@ -326,9 +324,8 @@ async def _fetch_and_filter(
     lat: float,
     lng: float,
     radius: int,
-    min_rating: float,
 ) -> List[Dict[str, Any]]:
-    """Fetch nearby restaurants and apply rating filter."""
+    """Fetch nearby restaurants without an implicit minimum rating."""
     params = {
         "key": GOOGLE_PLACES_API_KEY,
         "location": f"{lat},{lng}",
@@ -349,8 +346,7 @@ async def _fetch_and_filter(
 
     candidates: List[Dict[str, Any]] = []
     for item in results:
-        rating = item.get("rating")
-        if rating and rating >= min_rating and _is_restaurant_candidate(item):
+        if _is_restaurant_candidate(item):
             candidates.append(_parse_place_item(item))
     return candidates
 
@@ -425,7 +421,7 @@ def _parse_place_item(item: Dict[str, Any], reason_hint: Optional[str] = None) -
         reason_parts.append(f"{total_reviews} reviews")
     if vicinity:
         reason_parts.append(vicinity)
-    reason = " · ".join(reason_parts) if reason_parts else "Highly rated nearby"
+    reason = " · ".join(reason_parts) if reason_parts else "Nearby restaurant"
 
     tags = _clean_tags(item.get("types", []) or [], item.get("name", ""))
 

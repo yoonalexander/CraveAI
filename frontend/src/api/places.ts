@@ -3,7 +3,7 @@ import type { ViewportBounds } from "../types/searchArea";
 
 export interface Suggestion {
   name: string;
-  rating: number;
+  rating: number | null;
   address: string;
   reason: string;
   place_id: string;

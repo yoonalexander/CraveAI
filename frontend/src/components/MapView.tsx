@@ -1,14 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { GoogleMap, Marker, OverlayView } from "@react-google-maps/api";
+import { GoogleMap, InfoWindow, Marker, OverlayView } from "@react-google-maps/api";
 
 import type { ChatRecommendation } from "../api/chat";
 import type { Suggestion } from "../api/places";
 import { useGoogleMaps } from "../context/GoogleMapsContext";
 import type { Coordinates, SearchArea, ViewportBounds } from "../types/searchArea";
-import {
-  calculateDistanceKm,
-  groupSuggestionsForMap,
-} from "../utils/suggestionPool";
+import { calculateDistanceKm } from "../utils/suggestionPool";
 import { recordStartupTiming } from "../utils/startupTelemetry";
 import { PinIcon, SearchIcon } from "./Icons";
 import { LocationLoader } from "./LoadingIndicators";
@@ -20,6 +17,7 @@ type MapViewProps = {
   confirmedArea: SearchArea | null;
   suggestions: Suggestion[];
   recommendations: ChatRecommendation[];
+  focusRequest?: { requestId: number; place: ChatRecommendation } | null;
   isLocating: boolean;
   isSearching: boolean;
   recenterVersion: number;
@@ -50,6 +48,7 @@ export function MapView({
   confirmedArea,
   suggestions,
   recommendations,
+  focusRequest,
   isLocating,
   isSearching,
   recenterVersion,
@@ -61,27 +60,35 @@ export function MapView({
   const programmaticMove = useRef(false);
   const lastRecenterVersion = useRef(-1);
   const [draftArea, setDraftArea] = useState<SearchArea | null>(null);
-  const [mapZoom, setMapZoom] = useState(13);
+  const [mapReady, setMapReady] = useState(false);
+  const [selectedPlace, setSelectedPlace] = useState<Suggestion | ChatRecommendation | null>(null);
 
   const recommendationIndexes = useMemo(() => {
     const indexes = new Map<string, number>();
     recommendations.forEach((place, index) => {
       if (place.place_id) indexes.set(`id:${place.place_id}`, index + 1);
-      indexes.set(`name:${place.name.toLowerCase()}`, index + 1);
+      else indexes.set(`name:${place.name.toLowerCase()}`, index + 1);
     });
     return indexes;
   }, [recommendations]);
 
-  const markerGroups = useMemo(
-    () => groupSuggestionsForMap(suggestions, mapZoom),
-    [mapZoom, suggestions],
-  );
+  const selectPlace = useCallback((place: Suggestion | ChatRecommendation) => {
+    const map = mapRef.current;
+    if (!map || !hasCoordinates(place)) return;
+    programmaticMove.current = true;
+    interactionArmed.current = false;
+    setDraftArea(null);
+    setSelectedPlace(place);
+    map.panTo({ lat: place.lat, lng: place.lng });
+  }, []);
 
   const recenter = useCallback(() => {
     const map = mapRef.current;
     if (!map || !confirmedArea) return;
     programmaticMove.current = true;
+    interactionArmed.current = false;
     setDraftArea(null);
+    setSelectedPlace(null);
     if (confirmedArea.bounds) {
       map.fitBounds(confirmedArea.bounds, 32);
     } else {
@@ -95,17 +102,27 @@ export function MapView({
   }, [confirmedArea]);
 
   useEffect(() => {
+    if (!mapReady) return;
     if (recenterVersion === lastRecenterVersion.current) return;
     lastRecenterVersion.current = recenterVersion;
     recenter();
-  }, [recenter, recenterVersion]);
+  }, [mapReady, recenter, recenterVersion]);
+
+  useEffect(() => {
+    if (!mapReady || !focusRequest || !hasCoordinates(focusRequest.place)) return;
+    selectPlace(focusRequest.place);
+    const map = mapRef.current;
+    if (map && (map.getZoom() ?? 13) < 16) map.setZoom(16);
+  }, [focusRequest, mapReady, selectPlace]);
 
   const captureViewport = () => {
     const map = mapRef.current;
     if (!map) return;
-    const zoom = map.getZoom();
-    if (typeof zoom === "number") setMapZoom(zoom);
-    if (programmaticMove.current || !interactionArmed.current) return;
+    if (programmaticMove.current) {
+      programmaticMove.current = false;
+      return;
+    }
+    if (!interactionArmed.current) return;
     const center = map.getCenter();
     const bounds = map.getBounds();
     if (!center || !bounds) return;
@@ -142,14 +159,14 @@ export function MapView({
       <GoogleMap
         center={confirmedArea?.center || originLocation}
         mapContainerStyle={{ width: "100%", height: "100%" }}
-        onDragStart={() => { interactionArmed.current = true; }}
+        onDragStart={() => { programmaticMove.current = false; interactionArmed.current = true; }}
         onIdle={captureViewport}
         onLoad={(map) => {
           mapRef.current = map;
           recordStartupTiming("first_map_render", "success");
-          window.setTimeout(recenter, 0);
+          setMapReady(true);
         }}
-        onUnmount={() => { mapRef.current = null; }}
+        onUnmount={() => { mapRef.current = null; setMapReady(false); }}
         onZoomChanged={captureViewport}
         options={mapOptions}
         zoom={13}
@@ -160,57 +177,44 @@ export function MapView({
           title={originIsDevice ? "You are here" : `Selected location: ${locationLabel}`}
           zIndex={1000}
         />
-        {markerGroups.map((group) => {
-          if (group.suggestions.length > 1) {
-            const hasRecommendation = group.suggestions.some((place) =>
-              recommendationIndexes.has(`id:${place.place_id}`) ||
-              recommendationIndexes.has(`name:${place.name.toLowerCase()}`),
-            );
-            return (
-              <OverlayView
-                key={group.key}
-                mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
-                position={{ lat: group.lat, lng: group.lng }}
-              >
-                <div
-                  className={`restaurant-map-marker is-cluster${hasRecommendation ? " is-recommendation" : ""}`}
-                  title={group.suggestions.map((place) => place.name).join(", ")}
-                >
-                  <strong>{group.suggestions.length} spots</strong>
-                </div>
-              </OverlayView>
-            );
-          }
-          const place = group.suggestions[0];
-          const recommendationNumber = recommendationIndexes.get(`id:${place.place_id}`) ||
-            recommendationIndexes.get(`name:${place.name.toLowerCase()}`);
-          return (
+        {suggestions.filter(hasCoordinates).map((place) => (
+          <RestaurantMarker
+            key={place.place_id}
+            number={recommendationIndexes.get(`id:${place.place_id}`) || recommendationIndexes.get(`name:${place.name.toLowerCase()}`)}
+            onSelect={() => selectPlace(place)}
+            place={place}
+          />
+        ))}
+        {recommendations
+          .filter((place) => hasCoordinates(place) && !suggestions.some((suggestion) =>
+            place.place_id ? suggestion.place_id === place.place_id : suggestion.name.toLowerCase() === place.name.toLowerCase(),
+          ))
+          .filter(hasCoordinates)
+          .map((place) => (
             <RestaurantMarker
-              key={place.place_id}
-              number={recommendationNumber}
+              key={`chat-${place.place_id || place.name}`}
+              number={recommendationIndexes.get(`id:${place.place_id}`) || recommendationIndexes.get(`name:${place.name.toLowerCase()}`)}
+              onSelect={() => selectPlace(place)}
               place={place}
             />
-          );
-        })}
-        {recommendations
-          .filter((place) =>
-            typeof place.lat === "number" &&
-            typeof place.lng === "number" &&
-            !suggestions.some((suggestion) =>
-              (place.place_id && suggestion.place_id === place.place_id) ||
-              suggestion.name.toLowerCase() === place.name.toLowerCase(),
-            ))
-          .map((place, index) => (
-            <OverlayView
-              key={`chat-${place.place_id || place.name}-${index}`}
-              mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
-              position={{ lat: place.lat as number, lng: place.lng as number }}
-            >
-              <div className="restaurant-map-marker is-recommendation is-chat-only" title={place.name}>
-                <span>{index + 1}</span>
-              </div>
-            </OverlayView>
           ))}
+        {selectedPlace && hasCoordinates(selectedPlace) ? (
+          <InfoWindow
+            onCloseClick={() => setSelectedPlace(null)}
+            position={{ lat: selectedPlace.lat, lng: selectedPlace.lng }}
+          >
+            <div className="restaurant-map-popup">
+              <strong>{selectedPlace.name}</strong>
+              {typeof selectedPlace.rating === "number" ? <span>★ {selectedPlace.rating.toFixed(1)}</span> : null}
+              {selectedPlace.address ? <p>{selectedPlace.address}</p> : null}
+              {selectedPlace.place_id ? (
+                <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selectedPlace.name)}&query_place_id=${encodeURIComponent(selectedPlace.place_id)}`} rel="noreferrer" target="_blank">
+                  Open in Google Maps
+                </a>
+              ) : null}
+            </div>
+          </InfoWindow>
+        ) : null}
       </GoogleMap>
     );
   }
@@ -244,24 +248,34 @@ export function MapView({
 function RestaurantMarker({
   place,
   number,
+  onSelect,
 }: {
-  place: Suggestion;
+  place: (Suggestion | ChatRecommendation) & Coordinates;
   number?: number;
+  onSelect: () => void;
 }): JSX.Element {
   return (
     <OverlayView
       mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
       position={{ lat: place.lat, lng: place.lng }}
     >
-      <div
+      <button
+        aria-label={`Show ${place.name} on map`}
+        onClick={onSelect}
+        type="button"
         className={`restaurant-map-marker${number ? " is-recommendation" : ""}`}
         title={`${place.name}${typeof place.rating === "number" ? `, ${place.rating.toFixed(1)} stars` : ""}`}
       >
         {number ? <span>{number}</span> : null}
-        <strong>{typeof place.rating === "number" ? `★ ${place.rating.toFixed(1)}` : place.name}</strong>
-      </div>
+        <strong>{typeof place.rating === "number" ? `★ ${place.rating.toFixed(1)}` : "Restaurant"}</strong>
+      </button>
     </OverlayView>
   );
+}
+
+function hasCoordinates(place: Suggestion | ChatRecommendation): place is (Suggestion | ChatRecommendation) & Coordinates {
+  return typeof place.lat === "number" && Number.isFinite(place.lat)
+    && typeof place.lng === "number" && Number.isFinite(place.lng);
 }
 
 function MapState({ title, children, loading = false }: { title: string; children: React.ReactNode; loading?: boolean }): JSX.Element {

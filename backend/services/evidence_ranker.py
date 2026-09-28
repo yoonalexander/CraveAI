@@ -64,6 +64,13 @@ Evidence rules:
 - restaurant_tag supports only the explicit venue/cuisine/dish/diet metadata it states.
 - A restaurant name, rating, address, cuisine stereotype, or popularity is never dish
   evidence.
+- A condiment, sauce, dressing, dip, topping, seasoning, add-on, side, or flavor
+  option is not evidence of a complete matching dish unless the user's request
+  explicitly asks for that component.
+- For broad taste constraints such as spicy, sweet, smoky, or savory, prefer
+  evidence where that characteristic clearly applies to a complete dish.
+- A short flavor or product label alone must not be treated as a strong dish
+  match when its role on the menu is ambiguous.
 - Different dishes may support different preferences, but only link each evidence item to
   characteristics of that same item.
 - A combo, bento, platter, menu section, or description of several separate components is
@@ -135,7 +142,7 @@ async def assess_candidate_evidence(
     except Exception as exc:
         logger.warning("evidence_assessment outcome=lexical_fallback error_type=%s", type(exc).__name__)
         return lexical
-    return _merge_assessment_batches(semantic, lexical)
+    return semantic
 
 
 def sanitize_candidate_evidence(
@@ -325,9 +332,19 @@ def score_candidate(
         ),
         default=0.0,
     )
+    official_menu_matches = {
+        _normalize(item.label)
+        for item in evidence_by_id.values()
+        if item.kind == "official_menu"
+        and item.id in usable_evidence
+        and support_by_evidence.get(item.id)
+    }
+    menu_match_count = len(official_menu_matches)
+    menu_breadth = min(menu_match_count / 3.0, 1.0)
     food_relevance = 0.60 * coverage + 0.30 * joint_coverage + 0.10 * retrieval_relevance
     rating_quality = max(0.0, min((_number(candidate.get("rating")) - 3.0) / 2.0, 1.0))
     score = 0.82 * food_relevance + 0.13 * evidence_strength + 0.05 * rating_quality
+    score = min(1.0, score + 0.06 * menu_breadth)
     if score < MIN_RECOMMENDATION_SCORE:
         return None
 
@@ -411,6 +428,7 @@ def score_candidate(
         "match_score": round(score, 3),
         "confidence": confidence,
         "matching_dishes": matching_dishes,
+        "menu_match_count": menu_match_count,
         "matched_preferences": matched,
         "unmatched_preferences": unmatched,
         "evidence": [
@@ -497,38 +515,6 @@ def _lexical_assessments(
                 )
         results.append(
             CandidateAssessment(place_id=str(candidate.get("place_id") or ""), links=links)
-        )
-    return results
-
-
-def _merge_assessment_batches(
-    primary: Sequence[CandidateAssessment],
-    secondary: Sequence[CandidateAssessment],
-) -> list[CandidateAssessment]:
-    """Union semantic and literal evidence links without allowing unknown IDs."""
-    by_id: dict[str, list[EvidenceLink]] = defaultdict(list)
-    for assessment in [*primary, *secondary]:
-        by_id[assessment.place_id].extend(assessment.links)
-    results: list[CandidateAssessment] = []
-    for place_id, links in by_id.items():
-        grouped: dict[tuple[str, str], list[str]] = defaultdict(list)
-        for link in links:
-            key = (link.evidence_id, link.stance)
-            for constraint_id in link.constraint_ids:
-                if constraint_id not in grouped[key]:
-                    grouped[key].append(constraint_id)
-        results.append(
-            CandidateAssessment(
-                place_id=place_id,
-                links=[
-                    EvidenceLink(
-                        evidence_id=evidence_id,
-                        stance=stance,  # type: ignore[arg-type]
-                        constraint_ids=constraint_ids,
-                    )
-                    for (evidence_id, stance), constraint_ids in grouped.items()
-                ],
-            )
         )
     return results
 

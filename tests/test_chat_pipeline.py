@@ -95,6 +95,7 @@ def mocked_pipeline(monkeypatch):
                 "rating": 4.8,
                 "address": "123 Test Street",
                 "reason": "Mocked match for ramen craving.",
+                "menu_match_count": 3,
             }
         ]
 
@@ -383,6 +384,7 @@ def test_chat_endpoint_returns_mocked_response(mocked_pipeline):
     assert body["reply"]
     assert isinstance(body["recommendations"], list)
     assert body["recommendations"][0]["name"] == "Mock Ramen House"
+    assert body["recommendations"][0]["menu_match_count"] == 3
     assert body["usage"] == {
         "limit": 3,
         "used": 1,
@@ -1517,7 +1519,6 @@ def test_top_rated_places_filter_rejects_incidental_food_venues():
             lat=43.65,
             lng=-79.38,
             radius=5000,
-            min_rating=4.0,
         )
     )
 
@@ -1570,6 +1571,28 @@ def test_suggestion_quality_balances_rating_and_review_confidence():
         high_confidence
     ) > places_service._quality_sort_key(low_confidence)
 
+
+
+def test_nearby_discovery_keeps_lower_rated_and_unrated_restaurants():
+    class FakeResponse:
+        def raise_for_status(self):
+            pass
+
+        def json(self):
+            return {"status": "OK", "results": [
+                {"name": "Local Kitchen", "place_id": "lower", "rating": 3.6, "types": ["restaurant"],
+                 "geometry": {"location": {"lat": 43.7, "lng": -79.4}}},
+                {"name": "New Kitchen", "place_id": "new", "types": ["restaurant"],
+                 "geometry": {"location": {"lat": 43.71, "lng": -79.4}}},
+            ]}
+
+    class FakeClient:
+        async def get(self, *_args, **_kwargs):
+            return FakeResponse()
+
+    results = asyncio.run(places_service._fetch_and_filter(FakeClient(), lat=43.7, lng=-79.4, radius=5000))
+    assert [place["place_id"] for place in results] == ["lower", "new"]
+    assert results[0]["rating"] == 3.6
 
 def test_top_rated_suggestions_are_deduplicated_and_capped(monkeypatch):
     candidates = [

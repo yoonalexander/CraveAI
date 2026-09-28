@@ -85,6 +85,10 @@ function CraveApplication(): JSX.Element {
   const [activeFilters, setActiveFilters] = useState<Set<SuggestionFilter>>(new Set());
   const [advancedFilters, setAdvancedFilters] = useState<AdvancedFilters>(DEFAULT_ADVANCED_FILTERS);
   const [mapRecommendations, setMapRecommendations] = useState<ChatRecommendation[]>([]);
+  const mapFocusSequence = useRef(0);
+  const [mapFocusRequest, setMapFocusRequest] = useState<{
+    requestId: number; place: ChatRecommendation;
+  } | null>(null);
   const [weather, setWeather] = useState<CurrentWeather | null>(null);
   const [weatherLoading, setWeatherLoading] = useState(true);
   const [preferences, setPreferences] = useState<Preferences | null>(null);
@@ -166,6 +170,7 @@ function CraveApplication(): JSX.Element {
     setLastFailedArea(null);
     setRecenterVersion((version) => version + 1);
     setMapRecommendations([]);
+    setMapFocusRequest(null);
   }, []);
 
   useEffect(() => {
@@ -266,6 +271,7 @@ function CraveApplication(): JSX.Element {
         setSearchArea(requestedArea);
         setLastFailedArea(null);
         setMapRecommendations([]);
+        setMapFocusRequest(null);
         if (!mergedPlaces.length) setSuggestionError("No restaurants were found in this map area.");
       })
       .catch((reason) => {
@@ -375,6 +381,7 @@ function CraveApplication(): JSX.Element {
       window.sessionStorage.removeItem("craveai-temporary-chat");
       setChatSession((session) => session + 1);
       setMapRecommendations([]);
+      setMapFocusRequest(null);
       setMobileChatExpanded(false);
     }
   }, []);
@@ -521,11 +528,16 @@ function CraveApplication(): JSX.Element {
                       location={chatLocation}
                       onConversationStart={() => setMobileChatExpanded(true)}
                       onRecommendations={setMapRecommendations}
+                      onShowOnMap={(place) => {
+                        setMapFocusRequest({ requestId: ++mapFocusSequence.current, place });
+                        setMobileChatExpanded(false);
+                      }}
                     />
                   </MobileChatSheet>
                 </section>
                 <section className="home-map">
                   <MapView
+                    focusRequest={mapFocusRequest}
                     confirmedArea={searchArea}
                     isLocating={!locationReady}
                     isSearching={isLoadingSuggestions || isResolvingArea}

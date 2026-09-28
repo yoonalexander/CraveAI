@@ -46,7 +46,7 @@ async def get_suggestions(
     session: SessionContext | None = Depends(optional_session),
 ) -> List[dict]:
     """
-    Get a list of high-rated restaurant suggestions near the user.
+    Get nearby restaurant suggestions within the confirmed search area.
     """
     supplied_bounds = [north, south, east, west]
     if any(value is not None for value in supplied_bounds) and not all(

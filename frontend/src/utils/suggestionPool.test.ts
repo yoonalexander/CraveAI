@@ -7,7 +7,6 @@ import {
   filterSuggestions,
   getNextSuggestionIndex,
   getVisibleSuggestions,
-  groupSuggestionsForMap,
   mergeSuggestionsForBounds,
 } from "./suggestionPool";
 
@@ -139,15 +138,4 @@ describe("suggestion pool rotation", () => {
     })).toEqual([places[0]]);
   });
 
-  it("groups dense plaza restaurants at wide zoom and separates them when zoomed in", () => {
-    const plaza = makeSuggestions(4).map((place, index) => ({
-      ...place,
-      lat: 43.65 + index * 0.0002,
-      lng: -79.38 + index * 0.0002,
-    }));
-
-    expect(groupSuggestionsForMap(plaza, 13)).toHaveLength(1);
-    expect(groupSuggestionsForMap(plaza, 13)[0].suggestions).toHaveLength(4);
-    expect(groupSuggestionsForMap(plaza, 17)).toHaveLength(4);
-  });
 });

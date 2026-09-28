@@ -40,6 +40,49 @@ beforeEach(() => {
 });
 
 describe("ChatPanel", () => {
+  it("shows menu evidence counts, distinct sources, and a map action", async () => {
+    const recommendation = {
+      name: "Spicy Kitchen", place_id: "spicy", lat: 43.7, lng: -79.4,
+      confidence: "high" as const, match_score: 0.98, menu_match_count: 3,
+      evidence: [
+        { type: "official_website", label: "Site", source_url: "https://example.com/menu" },
+        { type: "official_menu", label: "Spicy fish", source_url: "https://example.com/menu" },
+        { type: "official_menu", label: "Spicy ribs", source_url: "https://example.com/menu" },
+        { type: "official_website", label: "Home", source_url: "https://example.com" },
+        { type: "provider_query", label: "Spicy", source_url: "https://maps.google.com" },
+      ],
+    };
+    mockedSendChat.mockResolvedValue({ reply: "Try this kitchen.", messages: [], recommendations: [recommendation] });
+    const onShowOnMap = vi.fn();
+    render(<ChatPanel onShowOnMap={onShowOnMap} />);
+    const composer = screen.getByRole("textbox", { name: "Ask CraveAI" });
+    fireEvent.change(composer, { target: { value: "Spicy food" } });
+    fireEvent.keyDown(composer, { key: "Enter" });
+    await screen.findByText("Strong match · 3 menu matches");
+    expect(screen.queryByText(/98%/)).not.toBeInTheDocument();
+    expect(screen.getAllByRole("link", { name: "View menu" })).toHaveLength(1);
+    expect(screen.getByRole("link", { name: "Restaurant website" })).toHaveAttribute("href", "https://example.com");
+    expect(screen.queryByRole("link", { name: "View source" })).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Open in Google Maps" })).toHaveAttribute("href", expect.stringContaining("query_place_id=spicy"));
+    fireEvent.click(screen.getByRole("button", { name: "Show on map" }));
+    expect(onShowOnMap).toHaveBeenCalledWith(recommendation);
+  });
+
+  it("keeps provider-only matches honest and hides map actions without coordinates", async () => {
+    mockedSendChat.mockResolvedValue({ reply: "Nearby result.", messages: [], recommendations: [{
+      name: "Nearby", confidence: "medium", menu_match_count: 0, match_score: 0.82,
+      evidence: [{ type: "provider_query", label: "Spicy", source_url: "https://maps.google.com" }],
+    }] });
+    render(<ChatPanel onShowOnMap={vi.fn()} />);
+    const composer = screen.getByRole("textbox", { name: "Ask CraveAI" });
+    fireEvent.change(composer, { target: { value: "Spicy" } });
+    fireEvent.keyDown(composer, { key: "Enter" });
+    await screen.findByText("Relevant match");
+    expect(screen.queryByText(/menu matches|82%/)).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Show on map" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "View source" })).not.toBeInTheDocument();
+  });
+
   it("shows the published guest daily chat allowance", () => {
     render(<ChatPanel />);
     expect(screen.getByText("9 messages left today")).toBeInTheDocument();

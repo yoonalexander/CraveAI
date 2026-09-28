@@ -31,13 +31,6 @@ export const DEFAULT_ADVANCED_FILTERS: AdvancedFilters = {
   sort: "relevance",
 };
 
-export type SuggestionMarkerGroup = {
-  key: string;
-  lat: number;
-  lng: number;
-  suggestions: Suggestion[];
-};
-
 export function filterSuggestions(
   suggestions: Suggestion[],
   filters: Set<SuggestionFilter>,
@@ -134,45 +127,6 @@ export function mergeSuggestionsForBounds(
     included.add(place.place_id);
   });
   return merged.slice(0, limit);
-}
-
-export function groupSuggestionsForMap(
-  suggestions: Suggestion[],
-  zoom: number,
-): SuggestionMarkerGroup[] {
-  if (zoom >= 16) {
-    return suggestions.map((place) => ({
-      key: place.place_id,
-      lat: place.lat,
-      lng: place.lng,
-      suggestions: [place],
-    }));
-  }
-
-  const thresholdKm = Math.min(1.2, 0.12 * 2 ** (16 - zoom));
-  const groups: SuggestionMarkerGroup[] = [];
-  suggestions.forEach((place) => {
-    if (!Number.isFinite(place.lat) || !Number.isFinite(place.lng)) return;
-    const nearby = groups.find((group) =>
-      calculateDistanceKm(group.lat, group.lng, place.lat, place.lng) <= thresholdKm,
-    );
-    if (!nearby) {
-      groups.push({
-        key: place.place_id,
-        lat: place.lat,
-        lng: place.lng,
-        suggestions: [place],
-      });
-      return;
-    }
-
-    nearby.suggestions.push(place);
-    const count = nearby.suggestions.length;
-    nearby.lat = (nearby.lat * (count - 1) + place.lat) / count;
-    nearby.lng = (nearby.lng * (count - 1) + place.lng) / count;
-    nearby.key = nearby.suggestions.map((item) => item.place_id).sort().join(":");
-  });
-  return groups;
 }
 
 function isSuggestionInBounds(

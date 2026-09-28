@@ -185,6 +185,7 @@ class Recommendation(BaseModel):
     match_score: Optional[float] = Field(default=None, ge=0, le=1)
     confidence: Optional[str] = None
     matching_dishes: List[str] = Field(default_factory=list)
+    menu_match_count: int = Field(default=0, ge=0)
     matched_preferences: List[str] = Field(default_factory=list)
     unmatched_preferences: List[str] = Field(default_factory=list)
     evidence: List[RecommendationEvidence] = Field(default_factory=list)
@@ -364,6 +365,7 @@ async def generate_chat_response(
             match_score=item.get("match_score"),
             confidence=item.get("confidence"),
             matching_dishes=item.get("matching_dishes") or [],
+            menu_match_count=item.get("menu_match_count", 0),
             matched_preferences=item.get("matched_preferences") or [],
             unmatched_preferences=item.get("unmatched_preferences") or [],
             evidence=item.get("evidence") or [],

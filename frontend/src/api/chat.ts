@@ -49,6 +49,7 @@ export type ChatRecommendation = {
   match_score?: number | null;
   confidence?: "high" | "medium" | "low" | null;
   matching_dishes?: string[];
+  menu_match_count?: number;
   matched_preferences?: string[];
   unmatched_preferences?: string[];
   evidence?: Array<{

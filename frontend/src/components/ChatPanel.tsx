@@ -32,6 +32,7 @@ type ChatPanelProps = {
   onRecommendations?: (recommendations: ChatRecommendation[]) => void;
   candidatePlaces?: Suggestion[];
   onConversationStart?: () => void;
+  onShowOnMap?: (recommendation: ChatRecommendation) => void;
 };
 
 const DEFAULT_DAILY_CHAT_LIMIT = 9;
@@ -41,11 +42,37 @@ const TEMP_CHAT_STORAGE_KEY = "craveai-temporary-chat";
 const createMessageId = (prefix: string): string =>
   `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
+function hasMapCoordinates(place: ChatRecommendation): boolean {
+  return typeof place.lat === "number" && Number.isFinite(place.lat)
+    && typeof place.lng === "number" && Number.isFinite(place.lng);
+}
+
+function getRecommendationSources(recommendation: ChatRecommendation) {
+  const seen = new Set<string>();
+  return (recommendation.evidence ?? [])
+    .filter((item) => item.source_url && item.type !== "provider_query")
+    .sort((a, b) => Number(b.type === "official_menu") - Number(a.type === "official_menu"))
+    .filter((item) => {
+      const url = item.source_url as string;
+      if (seen.has(url)) return false;
+      seen.add(url);
+      return true;
+    })
+    .slice(0, 2);
+}
+
+function recommendationSourceLabel(type: string): string {
+  if (type === "official_menu") return "View menu";
+  if (type === "official_website") return "Restaurant website";
+  return "View source";
+}
+
 export function ChatPanel({
   location,
   onRecommendations,
   candidatePlaces = [],
   onConversationStart,
+  onShowOnMap,
 }: ChatPanelProps): JSX.Element {
   const { user } = useAuth();
   const usageActorId = user?.user_id ?? "guest";
@@ -345,19 +372,21 @@ export function ChatPanel({
                 <p>{message.content}</p>
                 {message.recommendations?.length ? (
                   <div className="chat-recommendations">
-                    {message.recommendations.map((recommendation, index) => (
+                    {message.recommendations.map((recommendation, index) => {
+                      const sources = getRecommendationSources(recommendation);
+                      return (
                       <div key={`${message.id}-${recommendation.place_id || recommendation.name}-${index}`}>
                         <strong>{recommendation.name}</strong>
                         <span>
                           {typeof recommendation.rating === "number" ? `★ ${recommendation.rating.toFixed(1)}` : ""}
                           {recommendation.address ? `${typeof recommendation.rating === "number" ? " · " : ""}${recommendation.address}` : ""}
                         </span>
-                        {recommendation.place_id ? <a className="recommendation-google-source" href={`https://www.google.com/maps/search/?api=1&query_place_id=${encodeURIComponent(recommendation.place_id)}`} rel="noreferrer" target="_blank">Google Maps</a> : null}
+                        {recommendation.place_id ? <a className="recommendation-google-source" href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(recommendation.name)}&query_place_id=${encodeURIComponent(recommendation.place_id)}`} rel="noreferrer" target="_blank">Open in Google Maps</a> : null}
                         {recommendation.confidence ? (
                           <div className={`recommendation-confidence is-${recommendation.confidence}`}>
                             {recommendation.confidence === "high" ? "Strong match" : "Relevant match"}
-                            {typeof recommendation.match_score === "number"
-                              ? ` · ${Math.round(recommendation.match_score * 100)}%`
+                            {recommendation.menu_match_count
+                              ? ` · ${recommendation.menu_match_count} menu ${recommendation.menu_match_count === 1 ? "match" : "matches"}`
                               : ""}
                           </div>
                         ) : null}
@@ -374,26 +403,29 @@ export function ChatPanel({
                           </ul>
                         ) : null}
                         {recommendation.reason ? <p>{recommendation.reason}</p> : null}
-                        {recommendation.evidence?.some((item) => item.source_url) ? (
+                        {sources.length || (onShowOnMap && hasMapCoordinates(recommendation)) ? (
                           <div className="recommendation-sources">
-                            {recommendation.evidence
-                              .filter((item) => item.source_url)
-                              .slice(0, 2)
-                              .map((item, sourceIndex) => (
+                            {sources.map((item) => (
                                 <a
                                   href={item.source_url || undefined}
-                                  key={`${item.type}-${item.label}-${sourceIndex}`}
+                                  key={item.source_url}
                                   rel="noreferrer"
                                   target="_blank"
                                 >
-                                  View source
+                                  {recommendationSourceLabel(item.type)}
                                 </a>
                               ))}
+                            {onShowOnMap && hasMapCoordinates(recommendation) ? (
+                              <button className="recommendation-show-map" onClick={() => onShowOnMap(recommendation)} type="button">
+                                Show on map
+                              </button>
+                            ) : null}
                           </div>
                         ) : null}
                         {recommendation.recommendation_token ? <div className="recommendation-feedback" aria-label="Recommendation feedback"><button aria-label={`Mark ${recommendation.name} helpful`} disabled={submittedFeedback.has(recommendation.recommendation_token)} onClick={() => user ? setFeedbackDraft({ recommendation, liked: true, notes: "", reportReason: "" }) : window.location.assign("/login")} title="Helpful">👍</button><button aria-label={`Mark ${recommendation.name} not helpful`} disabled={submittedFeedback.has(recommendation.recommendation_token)} onClick={() => user ? setFeedbackDraft({ recommendation, liked: false, notes: "", reportReason: "" }) : window.location.assign("/login")} title="Not helpful">👎</button>{submittedFeedback.has(recommendation.recommendation_token) ? <span>Feedback submitted</span> : null}</div> : null}
                       </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 ) : null}
               </div>

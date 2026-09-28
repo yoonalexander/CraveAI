@@ -2,6 +2,7 @@ import { act, fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { Suggestion } from "./api/places";
+import type { ChatRecommendation } from "./api/chat";
 import App from "./App";
 import { listSavedPlaces } from "./api/favorites";
 import { fetchSuggestions, PlacesQuotaError } from "./api/places";
@@ -35,9 +36,11 @@ vi.mock("./components/ChatPanel", () => ({
   ChatPanel: ({
     candidatePlaces,
     onConversationStart,
+    onShowOnMap,
   }: {
     candidatePlaces: Suggestion[];
     onConversationStart?: () => void;
+    onShowOnMap?: (place: ChatRecommendation) => void;
   }) => {
     const mount = ++chatMount;
     return (
@@ -45,6 +48,7 @@ vi.mock("./components/ChatPanel", () => ({
         <span data-testid="chat-pool-size">{candidatePlaces.length}</span>
         <span data-testid="chat-mount">{mount}</span>
         <button onClick={onConversationStart} type="button">Start conversation</button>
+        <button onClick={() => onShowOnMap?.({ name: "Focused Restaurant", lat: 43.7, lng: -79.4 })} type="button">Show on map</button>
       </div>
     );
   },
@@ -62,13 +66,16 @@ vi.mock("./components/MapView", () => ({
     isLocating,
     locationLabel,
     onSearchArea,
+    focusRequest,
   }: {
     isLocating: boolean;
     locationLabel: string;
     onSearchArea: (area: SearchArea) => void;
+    focusRequest?: { requestId: number; place: ChatRecommendation } | null;
   }) => (
     <div data-testid="map">
       <span data-testid="map-location">{isLocating ? "Locating" : locationLabel}</span>
+      <span data-testid="map-focus">{focusRequest ? `${focusRequest.place.name}:${focusRequest.requestId}` : "None"}</span>
       <button onClick={() => onSearchArea(viewportArea)} type="button">Search this area</button>
     </div>
   ),
@@ -459,5 +466,37 @@ describe("Airbnb-style application shell", () => {
     expect(screen.getByTestId("chat-pool-size")).toHaveTextContent("5");
     expect(screen.getByTestId("chat-mount").textContent).not.toBe(firstMount);
     expect(mockedFetchSuggestions).toHaveBeenCalledTimes(1);
+  });
+
+  it("focuses chat recommendations, collapses the mobile sheet, and clears focus on New chat", async () => {
+    mockedFetchSuggestions.mockResolvedValue(makeSuggestions(5));
+    render(<App />);
+    await flushEffects();
+    fireEvent.click(screen.getByRole("button", { name: "Start conversation" }));
+    expect(screen.getByRole("button", { name: "Collapse chat" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Show on map" }));
+    expect(screen.getByTestId("map-focus")).toHaveTextContent("Focused Restaurant:1");
+    expect(screen.getByRole("button", { name: "Expand chat" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Show on map" }));
+    expect(screen.getByTestId("map-focus")).toHaveTextContent("Focused Restaurant:2");
+    expect(mockedFetchSuggestions).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByRole("button", { name: "New chat" }));
+    expect(screen.getByTestId("map-focus")).toHaveTextContent("None");
+  });
+
+  it("shows lower-rated and unrated restaurants until Top Rated is selected", async () => {
+    const suggestions = makeSuggestions(3);
+    suggestions[1].rating = 3.6;
+    suggestions[2].rating = null;
+    mockedFetchSuggestions.mockResolvedValue(suggestions);
+    render(<App />);
+    await flushEffects();
+    fireEvent.click(screen.getByRole("button", { name: "Discovery" }));
+    expect(screen.getByText("Place 1")).toBeInTheDocument();
+    expect(screen.getByText("Place 2")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Top Rated" }));
+    expect(screen.getByText("Place 0")).toBeInTheDocument();
+    expect(screen.queryByText("Place 1")).not.toBeInTheDocument();
+    expect(screen.queryByText("Place 2")).not.toBeInTheDocument();
   });
 });

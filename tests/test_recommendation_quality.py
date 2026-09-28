@@ -596,6 +596,56 @@ def malformed_evidence() -> list:
     ]
 
 
+def test_semantic_rejection_is_not_overridden_by_literal_flavor(monkeypatch):
+    intent = fallback_intent("I want something spicy")
+    places = [candidate("sauce", "Sauce Spot", [evidence("sauce:e1", "Spicy Garlic")])]
+
+    async def fake_parse(**_kwargs):
+        batch = AssessmentBatch(candidates=[assessment("sauce")])
+        return SimpleNamespace(choices=[SimpleNamespace(message=SimpleNamespace(parsed=batch))])
+
+    monkeypatch.setattr(evidence_ranker, "get_settings", lambda: SimpleNamespace(
+        OPENAI_API_KEY="test-openai", CHAT_RANKING_TIMEOUT_SECONDS=10, MODEL_NAME="test-model",
+    ))
+    monkeypatch.setattr(evidence_ranker, "AsyncOpenAI", lambda **_kwargs: SimpleNamespace(
+        chat=SimpleNamespace(completions=SimpleNamespace(parse=fake_parse)),
+    ))
+    results = asyncio.run(evidence_ranker.assess_candidate_evidence(intent, places))
+    assert results[0].links == []
+    assert rank_evidence_candidates(intent, places, results)["recommendations"] == []
+
+
+def test_menu_breadth_rewards_distinct_matches_and_caps_the_boost():
+    intent = fallback_intent("I want something spicy")
+
+    def score(labels):
+        items = [evidence(f"dish:{index}", label) for index, label in enumerate(labels)]
+        place = candidate("menu", "Menu Spot", items, rating=3.0)
+        links = assessment("menu", *((item["id"], ["c1"], "supports") for item in items))
+        return score_candidate(intent, place, links)
+
+    single = score(["Spicy noodles"])
+    duplicate = score(["Spicy noodles", " SPICY noodles "])
+    three = score(["Spicy noodles", "Spicy fish", "Spicy ribs"])
+    four = score(["Spicy noodles", "Spicy fish", "Spicy ribs", "Spicy chicken"])
+    assert single["menu_match_count"] == duplicate["menu_match_count"] == 1
+    assert duplicate["match_score"] == single["match_score"]
+    assert three["menu_match_count"] == 3
+    assert four["menu_match_count"] == 4
+    assert three["match_score"] > single["match_score"]
+    assert four["match_score"] == three["match_score"]
+
+
+def test_menu_breadth_ignores_unsupported_and_excluded_items():
+    intent = fallback_intent("I want spicy food but no pork")
+    spicy = next(item.id for item in intent.constraints if item.value == "spicy")
+    pork = next(item.id for item in intent.constraints if item.value == "pork")
+    items = [evidence("fish", "Spicy fish"), evidence("pork", "Spicy pork"), evidence("plain", "Plain rice")]
+    links = assessment("menu", ("fish", [spicy], "supports"), ("pork", [spicy], "supports"), ("pork", [pork], "violates"))
+    result = score_candidate(intent, candidate("menu", "Menu Spot", items), links)
+    assert result["menu_match_count"] == 1
+
+
 @pytest.mark.parametrize("semantic_mode", ["disabled", "success", "failure", "client_failure"])
 def test_assessment_skips_bad_evidence_and_computes_lexical_fallback_once(
     monkeypatch, semantic_mode, caplog,
@@ -647,7 +697,7 @@ def test_assessment_skips_bad_evidence_and_computes_lexical_fallback_once(
     assert lexical_calls == 1
     expected_ids = {"mixed:good"}
     if semantic_mode == "success":
-        expected_ids.add("mixed:semantic")
+        expected_ids = {"mixed:semantic"}
     assert {item.evidence_id for item in by_id["mixed"].links} == expected_ids
     assert by_id["invalid"].links == []
     if semantic_mode in {"success", "failure"}:

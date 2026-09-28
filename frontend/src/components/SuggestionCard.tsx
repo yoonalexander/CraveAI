@@ -11,7 +11,7 @@ type SuggestionCardProps = {
   description: string;
   tags?: string[];
   distance?: string;
-  rating?: number;
+  rating?: number | null;
 };
 
 type PhotoData = {
