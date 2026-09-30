@@ -884,7 +884,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   min-height: 86px;
   grid-template-columns: minmax(260px,1fr) minmax(180px,.7fr) auto;
   align-items: center;
-  gap: 24px;
+  gap: 10px 24px;
   padding: 13px 24px;
   border-block: 1px solid #e7e8e4;
   background: rgba(255,255,255,.98);
@@ -944,6 +944,47 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .search-filter-scroll button svg { width: 14px; }
 .toolbar-more-filter { position: relative; }
 .toolbar-filter-popover { position: absolute; z-index: 30; top: calc(100% + 9px); right: 0; width: 205px; padding: 12px 14px; border: 1px solid #dedfda; border-radius: 12px; color: #555851; background: #fff; box-shadow: 0 12px 34px rgba(27,33,25,.14); font-size: 12px; }
+
+/* Small, original dish illustrations give cuisines a shared food vocabulary. */
+.cuisine-icon { --food-ink: #594535; --food-gold: #f2bc57; --food-red: #e77e60; --food-leaf: #90b876; --food-cream: #fff1d7; width: 28px; height: 28px; flex: 0 0 auto; }
+.cuisine-icon .food-gold { fill: var(--food-gold); }
+.cuisine-icon .food-red { fill: var(--food-red); }
+.cuisine-icon .food-leaf { fill: var(--food-leaf); }
+.cuisine-icon .food-cream { fill: var(--food-cream); }
+.cuisine-filters { grid-column: 1 / -1; min-width: 0; }
+.cuisine-filter-heading { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 3px; color: #656861; font-size: 11px; }
+.cuisine-filter-heading > span:first-child { color: #3b5035; font-weight: 750; }
+.cuisine-filter-scroll { display: flex; min-width: 0; gap: 7px; padding: 4px 3px 7px; overflow-x: auto; overscroll-behavior-inline: contain; scrollbar-width: thin; scrollbar-color: #bbcdb3 transparent; }
+.cuisine-filter-scroll button { display: inline-flex; min-height: 44px; flex: 0 0 auto; align-items: center; gap: 7px; padding: 6px 10px; border: 1px solid #dedfd9; border-radius: 12px; color: #383c35; background: #fafbf8; font-size: 12px; font-weight: 650; white-space: nowrap; cursor: pointer; }
+.cuisine-filter-scroll button[aria-pressed="true"] { border-color: #6c965b; color: #30582b; background: #e8f1e2; }
+.cuisine-choice-check { width: 12px; flex: 0 0 auto; font-size: 13px; font-weight: 800; }
+.cuisine-filter-scroll button:focus-visible { outline: 2px solid #477d40; outline-offset: 1px; }
+.cuisine-filter-scroll button:disabled { opacity: .5; cursor: wait; }
+@media (hover: hover) and (pointer: fine) {
+  .cuisine-filter-scroll button:hover:not(:disabled):not([aria-pressed="true"]) { border-color: #b6c6aa; background: #f0f5eb; }
+}
+.cuisine-select { position: relative; display: flex; align-items: center; }
+.cuisine-select .cuisine-icon { position: absolute; left: 10px; width: 24px; height: 24px; pointer-events: none; }
+.advanced-filter-fields .cuisine-select select { width: 100%; padding-left: 42px; }
+.suggestion-meta { flex-wrap: wrap; }
+.suggestion-meta .restaurant-food-tag { min-width: 0; max-width: 100%; flex: 0 1 auto; white-space: normal; overflow-wrap: anywhere; }
+.suggestion-meta .cuisine-icon { width: 20px; height: 20px; }
+.discovery-empty > .cuisine-icon { width: 52px; height: 52px; }
+.dark .cuisine-filters { padding: 7px; border-radius: 12px; background: #202b1c; }
+.dark .cuisine-filter-heading { color: #bacab0; }
+.dark .cuisine-filter-heading > span:first-child { color: #e4eddf; }
+.dark .cuisine-filter-scroll { scrollbar-color: #627c54 transparent; }
+.dark .cuisine-filter-scroll button, .dark .suggestion-meta .restaurant-food-tag { border-color: #526347; color: #e4eddf; background: #2b3824; }
+.dark .cuisine-filter-scroll button[aria-pressed="true"] { border-color: #abc992; color: #f1f6ed; background: #435e34; }
+.dark .cuisine-filter-scroll button:focus-visible { outline-color: #c5e3ad; }
+.dark .cuisine-filters .cuisine-icon, .dark .restaurant-food-tag .cuisine-icon { --food-ink: #ebddc8; --food-gold: #dca849; --food-red: #df7e62; --food-leaf: #81ad64; --food-cream: #526347; }
+@media (hover: hover) and (pointer: fine) {
+  .dark .cuisine-filter-scroll button:hover:not(:disabled):not([aria-pressed="true"]) { border-color: #799168; background: #35482b; }
+}
+@media (max-width: 960px) {
+  .cuisine-filters { margin-top: 8px; }
+  .cuisine-filter-scroll { gap: 6px; }
+}
 .mobile-location-pill { display: none; }
 
 .home-split { display: grid; min-height: 0; grid-template-columns: minmax(0,1fr) minmax(0,1fr); overflow: hidden; }
@@ -1021,7 +1062,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .discovery-intro { max-width: 720px; margin: 10px 0 24px; color: #696c66; font-size: 14px; line-height: 1.55; }
 .discovery-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 22px; }
 .discovery-grid .suggestion-card { display: flex; min-height: 365px; flex-direction: column; }
-.discovery-grid .suggestion-photo { width: 100%; }
+.discovery-grid .suggestion-photo { width: 100%; min-height: 0; flex: 0 0 auto; }
 .discovery-grid .restaurant-photo-frame { height: 220px; aspect-ratio: auto; }
 .discovery-grid .suggestion-card-body { min-height: 145px; padding: 15px; }
 .discovery-grid .suggestion-card-heading h3 { font-size: 16px; }
@@ -1205,6 +1246,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .saved-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 18px; }
 .saved-item { min-width: 0; padding: 12px; border: 1px solid #dfe2dc; border-radius: 17px; background: #fff; }
 .saved-item .suggestion-card { display: flex; min-height: 320px; flex-direction: column; }
+.saved-item .suggestion-photo { min-height: 0; flex: 0 0 auto; }
 .saved-item .restaurant-photo-frame { height: 200px; aspect-ratio: auto; }
 .saved-item .suggestion-card-body { min-height: 145px; padding: 15px; }
 .saved-item > label { display: block; margin-top: 12px; font-size: 12px; font-weight: 700; }

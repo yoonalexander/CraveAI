@@ -487,6 +487,9 @@ function CraveApplication(): JSX.Element {
       }}
       onRetry={retrySearch}
       onToggleFilter={toggleFilter}
+      onCuisineChange={(cuisine) => setAdvancedFilters((current) => ({
+        ...current, cuisine: current.cuisine === cuisine ? "" : cuisine,
+      }))}
       onAdvancedFiltersChange={(filters) => {
         if (filters.priceLevels.length) setActiveFilters((current) => new Set([...current].filter((item) => item !== "budget")));
         setAdvancedFilters(filters);

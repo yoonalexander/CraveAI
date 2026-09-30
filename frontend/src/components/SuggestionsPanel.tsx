@@ -61,6 +61,7 @@ export function SuggestionsPanel({
               placeId={suggestion.place_id}
               rating={suggestion.rating}
               tags={suggestion.tags}
+              cuisineLabels={suggestion.cuisine_labels}
               title={suggestion.name}
             />
           ))

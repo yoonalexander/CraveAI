@@ -129,6 +129,14 @@ it("checks details on demand and keeps unknown service data excluded across map 
   await screen.findByRole("button", { name: "Show Ramen Spot on map" });
   expect(markers()).toHaveLength(1);
   expect(screen.getByText("1 of 2 loaded restaurants shown")).toBeInTheDocument();
+  const japanese = screen.getByRole("button", { name: "Japanese" });
+  fireEvent.click(japanese);
+  expect(japanese).toHaveAttribute("aria-pressed", "true");
+  expect(markers()).toHaveLength(1);
+  act(() => { for (let i = 0; i < 5; i++) japanese.click(); });
+  expect(japanese).toHaveAttribute("aria-pressed", "false");
+  expect(screen.getByRole("button", { name: "Any cuisine" })).toHaveAttribute("aria-pressed", "true");
+  expect(markers()).toHaveLength(1); // Dietary and service filters survive cuisine changes.
   fireEvent.click(screen.getByRole("button", { name: /^Filters/ }));
   fireEvent.click(screen.getByLabelText("Include labels inferred from official menus"));
   fireEvent.click(screen.getByRole("button", { name: "Show results" }));

@@ -24,4 +24,13 @@ describe("SuggestionCard", () => {
     expect(screen.getByText("Photo: Coauthor")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Google Maps" })).toHaveAttribute("href", "https://maps.google.com/photo");
   });
+  it("illustrates a supported cuisine label and keeps unfamiliar cuisines readable with a neutral icon", () => {
+    const { container, rerender } = render(<SuggestionCard placeId="place-1" title="Sushi Spot" description="Test Street" tags={["Restaurant"]} cuisineLabels={[{ value: "Japanese", source: "google", evidence: [] }]} />);
+    expect(container.querySelector(".restaurant-food-tag")).toHaveTextContent("Japanese");
+    expect(container.querySelector(".restaurant-food-tag svg")).toHaveAttribute("data-food-icon", "sushi");
+    expect(screen.getByText("Label sources")).toBeInTheDocument();
+    rerender(<SuggestionCard placeId="place-1" title="New Spot" description="Test Street" tags={["Ethiopian"]} />);
+    expect(container.querySelector(".restaurant-food-tag")).toHaveTextContent("Ethiopian");
+    expect(container.querySelector(".restaurant-food-tag svg")).toHaveAttribute("data-food-icon", "plate");
+  });
 });

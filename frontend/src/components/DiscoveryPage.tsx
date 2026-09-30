@@ -4,6 +4,7 @@ import type { Suggestion } from "../api/places";
 import type { Coordinates } from "../types/searchArea";
 import { calculateDistanceKm } from "../utils/suggestionPool";
 import { SuggestionCard } from "./SuggestionCard";
+import { CuisineIcon } from "./CuisineIcon";
 
 type DiscoveryPageProps = {
   suggestions: Suggestion[];
@@ -58,6 +59,7 @@ export function DiscoveryPage({
               placeId={suggestion.place_id}
               rating={suggestion.rating}
               tags={suggestion.tags}
+              cuisineLabels={suggestion.cuisine_labels}
               filterLabels={[...(suggestion.cuisine_labels || []), ...(suggestion.dietary_labels || [])]}
               title={suggestion.name}
             />
@@ -65,7 +67,7 @@ export function DiscoveryPage({
         </div>
       ) : (
         <div className="discovery-empty" aria-live="polite">
-          <img alt="" src="/craveai-pin.svg" />
+          <CuisineIcon />
           <h2>{isLoading ? "Finding restaurants…" : "No spots to show yet"}</h2>
           <p>{error || "Try clearing a filter or confirm another map area from Home."}</p>
           {!isLoading && canRetry ? <button onClick={onRetry} type="button">Try again</button> : null}

@@ -2,7 +2,9 @@ import { expect, test } from "@playwright/test";
 import { mkdir } from "node:fs/promises";
 import { resolve } from "node:path";
 
-const restaurants = Array.from({ length: 30 }, (_, i) => ({ place_id: `venue-${i}`, name: `Restaurant ${i}`, rating: 4.3, address: "Test Street", reason: "Nearby", lat: 43.65, lng: -79.38 }));
+const restaurants = Array.from({ length: 30 }, (_, i) => ({ place_id: `venue-${i}`, name: `Restaurant ${i}`, rating: 4.3, address: "Test Street", reason: "Nearby", lat: 43.65, lng: -79.38,
+  cuisine_labels: i === 0 ? [{ value: "Japanese", source: "google", evidence: [] }] : [],
+}));
 test.beforeEach(async ({ page, context }) => {
   await context.grantPermissions(["geolocation"]);
   await context.setGeolocation({ latitude: 43.65, longitude: -79.38 });
@@ -23,6 +25,16 @@ async function navigate(page, hasTouch, name) {
   await page.getByRole("link", { name, exact: true }).click();
 }
 
+async function expectCardDetailsFit(card) {
+  const box = await card.boundingBox();
+  for (const content of [card.getByRole("heading"), card.locator(".restaurant-food-tag"), card.getByRole("link", { name: "Photo: Contributor 0" })]) {
+    const child = await content.boundingBox();
+    expect(child.y).toBeGreaterThanOrEqual(box.y);
+    expect(child.y + child.height).toBeLessThanOrEqual(box.y + box.height);
+  }
+  await expect(card.locator(".restaurant-food-tag svg")).toHaveAttribute("data-food-icon", "sushi");
+}
+
 for (const theme of ["light", "dark"]) {
   test(`lazy previews, gallery, attribution and saved photos fit ${theme} layouts`, async ({ page, hasTouch }, testInfo) => {
     const calls = [];
@@ -40,6 +52,7 @@ for (const theme of ["light", "dark"]) {
     await expect(first.getByRole("link", { name: "Photo: Contributor 0" })).toBeVisible();
     await expect(first.getByText("Photo: Second contributor", { exact: true })).toBeVisible();
     await expect(first.getByRole("link", { name: "Google Maps", exact: true })).toHaveAttribute("href", "https://maps.google.com/photo/venue-0/0");
+    await expectCardDetailsFit(first);
     expect(calls.length).toBeLessThan(restaurants.length);
     const open = first.getByRole("button", { name: "View photos of Restaurant 0" });
     await open.click();
@@ -63,6 +76,7 @@ for (const theme of ["light", "dark"]) {
     await expect(gallery).toHaveCount(0); await expect(open).toBeFocused();
     await navigate(page, hasTouch, "Likes");
     await expect(page.getByAltText("Google Maps photo of Restaurant 0")).toBeVisible();
+    await expectCardDetailsFit(page.locator(".saved-item .suggestion-card").first());
     await page.getByRole("button", { name: "View photos of Restaurant 0" }).click();
     await expect(page.getByRole("dialog", { name: "Photos of Restaurant 0" })).toBeVisible();
     await page.getByRole("button", { name: "Close photos" }).click();

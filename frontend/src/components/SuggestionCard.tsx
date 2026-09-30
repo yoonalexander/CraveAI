@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import { RestaurantPhotos } from "./RestaurantPhotos";
 import { BookmarkIcon, PinIcon } from "./Icons";
 import { FilterEvidence } from "./FilterEvidence";
+import { CuisineIcon } from "./CuisineIcon";
 import type { FilterLabel } from "../api/places";
 
 type SuggestionCardProps = {
@@ -15,6 +16,7 @@ type SuggestionCardProps = {
   distance?: string;
   rating?: number | null;
   filterLabels?: FilterLabel[];
+  cuisineLabels?: FilterLabel[];
   compactPhoto?: boolean;
 };
 
@@ -38,11 +40,13 @@ export function SuggestionCard({
   distance,
   rating,
   filterLabels,
+  cuisineLabels,
   compactPhoto = false,
 }: SuggestionCardProps): JSX.Element {
   const { user } = useAuth();
   const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const foodTag = cuisineLabels?.[0]?.value || tags[0];
 
   useEffect(() => {
     if (!user) {
@@ -94,7 +98,7 @@ export function SuggestionCard({
           ) : null}
         </div>
         <p className="suggestion-address">{description}</p>
-        <FilterEvidence labels={filterLabels} />
+        <FilterEvidence labels={filterLabels || cuisineLabels} />
         {!placeId.startsWith("placeholder-") ? (
           <a
             className="suggestion-google-source"
@@ -107,7 +111,7 @@ export function SuggestionCard({
         ) : null}
         <div className="suggestion-card-footer">
           <div className="suggestion-meta">
-            {tags.slice(0, 1).map((tag) => <span key={tag}>{tag}</span>)}
+            {foodTag ? <span className="restaurant-food-tag"><CuisineIcon cuisine={foodTag} />{foodTag}</span> : null}
             {distance ? <span><PinIcon /> {distance}</span> : null}
           </div>
 

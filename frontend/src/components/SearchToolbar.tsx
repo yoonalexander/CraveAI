@@ -6,6 +6,8 @@ import type { AdvancedFilters, SuggestionFilter } from "../utils/suggestionPool"
 import { advancedFilterSummary, CUISINE_OPTIONS, DEFAULT_ADVANCED_FILTERS } from "../utils/suggestionPool";
 import { ClockIcon, DollarIcon, PinIcon, SlidersIcon } from "./Icons";
 import { LocationLoader } from "./LoadingIndicators";
+import { CuisineFilters } from "./CuisineFilters";
+import { CuisineIcon } from "./CuisineIcon";
 
 type SearchToolbarProps = {
   area: SearchArea | null;
@@ -22,6 +24,7 @@ type SearchToolbarProps = {
   onToggleFilter: (filter: SuggestionFilter) => void;
   advancedFilters: AdvancedFilters;
   onAdvancedFiltersChange: (filters: AdvancedFilters) => void;
+  onCuisineChange: (cuisine: string) => void;
   filterDataStatus?: { loading: boolean; error: string | null; checked: number; menus: number; remaining: number; unavailable: number };
   filterDataPlaces?: Suggestion[];
   onCheckFilterData?: () => void;
@@ -42,6 +45,7 @@ export function SearchToolbar({
   onToggleFilter,
   advancedFilters,
   onAdvancedFiltersChange,
+  onCuisineChange,
   filterDataStatus = { loading: false, error: null, checked: 0, menus: 0, remaining: 0, unavailable: 0 },
   filterDataPlaces = [],
   onCheckFilterData = () => undefined,
@@ -149,6 +153,7 @@ export function SearchToolbar({
           </button>
         </div>
       </div>
+      <CuisineFilters cuisine={advancedFilters.cuisine} disabled={isLoading} onChange={onCuisineChange} />
       {!isLoading && coverageNotice ? <p className="discovery-coverage-notice" role="status">{coverageNotice}</p> : null}
       <span className="sr-only" id="budget-filter-explanation">
         Budget-friendly includes Google price levels free and inexpensive. It does not guarantee a meal under a dollar amount.
@@ -168,7 +173,7 @@ export function SearchToolbar({
           <section aria-labelledby="advanced-filter-title" aria-modal="true" className="advanced-filter-dialog" ref={dialogRef} role="dialog">
             <header><div><p>Filters</p><h2 id="advanced-filter-title">Find the right restaurant</h2></div><button aria-label="Close filters" onClick={() => setShowMore(false)}>×</button></header>
             <div className="advanced-filter-fields">
-              <label>Cuisine<select onChange={(event) => setDraftFilters({ ...draftFilters, cuisine: event.target.value })} value={draftFilters.cuisine}><option value="">Any cuisine</option>{CUISINE_OPTIONS.map((item) => <option key={item}>{item}</option>)}</select></label>
+              <label htmlFor="advanced-cuisine"><span id="advanced-cuisine-label">Cuisine</span><span className="cuisine-select"><CuisineIcon cuisine={draftFilters.cuisine} /><select id="advanced-cuisine" aria-labelledby="advanced-cuisine-label" onChange={(event) => setDraftFilters({ ...draftFilters, cuisine: event.target.value })} value={draftFilters.cuisine}><option value="">Any cuisine</option>{CUISINE_OPTIONS.map((item) => <option key={item}>{item}</option>)}</select></span></label>
               <label>Minimum rating<select onChange={(event) => setDraftFilters({ ...draftFilters, minimumRating: Number(event.target.value) })} value={draftFilters.minimumRating}><option value="0">Any rating</option><option value="4">4.0+</option><option value="4.5">4.5+</option></select></label>
               <label>Maximum distance<select onChange={(event) => setDraftFilters({ ...draftFilters, maximumDistanceKm: Number(event.target.value) })} value={draftFilters.maximumDistanceKm}><option value="2">2 km</option><option value="5">5 km</option><option value="10">10 km</option><option value="20">Any in map area</option></select></label>
               <label>Sort by<select onChange={(event) => setDraftFilters({ ...draftFilters, sort: event.target.value as AdvancedFilters["sort"] })} value={draftFilters.sort}><option value="relevance">Relevance</option><option value="rating">Rating</option><option value="distance">Distance</option><option value="price">Price</option></select></label>
