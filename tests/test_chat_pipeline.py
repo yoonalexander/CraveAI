@@ -401,6 +401,56 @@ def test_chat_endpoint_returns_mocked_response(mocked_pipeline):
     assert mocked_pipeline["rank"] == 1
 
 
+@pytest.mark.parametrize("mode", ["closed", "cancelled", "disconnected"])
+def test_chat_stream_cancels_background_work_when_the_stream_ends(monkeypatch, mode):
+    from fastapi import Request, Response
+    from backend.routers import chat as chat_router
+
+    async def consent(*args): pass
+    monkeypatch.setattr(chat_router, "_enforce_chat_consent", consent)
+    monkeypatch.setattr(chat_router, "resolve_request_usage_identities", lambda *args: ["test-actor"])
+
+    async def exercise():
+        stopped = asyncio.Event()
+        worker_task = None
+        disconnected = False
+        async def worker(payload, request, response, session):
+            nonlocal worker_task
+            worker_task = asyncio.current_task()
+            try:
+                await request.state.chat_stage_callback("evidence", "Checking menus")
+                await asyncio.Event().wait()
+            except asyncio.CancelledError:
+                stopped.set()
+                raise
+        monkeypatch.setattr(chat_router, "generate_chat_response", worker)
+        request = Request({"type": "http", "method": "POST", "path": "/chat/stream", "headers": []})
+        async def is_disconnected(): return disconnected
+        request.is_disconnected = is_disconnected
+        response = await chat_router.stream_chat_response(chat_router.ChatRequest(query="Dinner"), request, Response(), None)
+        events = response.body_iterator
+        try:
+            await anext(events)  # meta
+            assert "Checking menus" in await anext(events)
+            if mode == "closed":
+                await events.aclose()
+            elif mode == "cancelled":
+                pending_read = asyncio.create_task(anext(events))
+                await asyncio.sleep(0)
+                pending_read.cancel()
+                await asyncio.gather(pending_read, return_exceptions=True)
+            else:
+                disconnected = True
+                with pytest.raises(StopAsyncIteration): await anext(events)
+            await asyncio.wait_for(stopped.wait(), timeout=0.2)
+            assert not hasattr(request.state, "chat_stage_callback")
+        finally:
+            if worker_task and not worker_task.done():
+                worker_task.cancel()
+                await asyncio.gather(worker_task, return_exceptions=True)
+    asyncio.run(exercise())
+
+
 def test_chat_stream_sets_signed_guest_identity_cookie(mocked_pipeline):
     app = create_app()
 

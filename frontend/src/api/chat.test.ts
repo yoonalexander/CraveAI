@@ -10,6 +10,65 @@ afterEach(() => {
 });
 
 describe("sendChat", () => {
+  it("cancels a pending stream, releases its reader, and never falls back to another paid request", async () => {
+    let controller!: ReadableStreamDefaultController<Uint8Array>;
+    const cancel = vi.fn();
+    const body = new ReadableStream<Uint8Array>({ start(value) { controller = value; }, cancel });
+    const fetch = vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(body, { headers: { "Content-Type": "text/event-stream" } }));
+    const abort = new AbortController();
+    const onStage = vi.fn();
+    const result = streamChat("Dinner", { signal: abort.signal }, { onStage });
+    const rejection = expect(result).rejects.toMatchObject({ name: "AbortError" });
+    controller.enqueue(new TextEncoder().encode('event: stage\ndata: {"message":"Finding restaurants…"}\n\n'));
+    await vi.waitFor(() => expect(onStage).toHaveBeenCalledWith("Finding restaurants…"));
+    abort.abort();
+    await rejection;
+    expect(fetch).toHaveBeenCalledOnce();
+    expect(cancel).toHaveBeenCalledOnce();
+    expect(body.locked).toBe(false);
+    expect(fetch.mock.calls[0][1]?.signal).toBe(abort.signal);
+  });
+
+  it("does not retry an aborted streaming fetch through the JSON fallback", async () => {
+    const abort = new AbortController();
+    const fetch = vi.spyOn(globalThis, "fetch").mockImplementation(async (_url, init) => new Promise((_resolve, reject) => {
+      init?.signal?.addEventListener("abort", () => reject(new DOMException("Stopped", "AbortError")), { once: true });
+    }));
+    const result = streamChat("Dinner", { signal: abort.signal });
+    const rejection = expect(result).rejects.toMatchObject({ name: "AbortError" });
+    abort.abort();
+    await rejection;
+    expect(fetch).toHaveBeenCalledOnce();
+  });
+
+  it.each([404, 503])("passes cancellation through the JSON fallback without reporting it as a timeout (%s)", async (status) => {
+    const abort = new AbortController();
+    const fetch = vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(new Response("", { status }))
+      .mockImplementationOnce(async (_url, init) => new Promise((_resolve, reject) => {
+        init?.signal?.addEventListener("abort", () => reject(new DOMException("Stopped", "AbortError")), { once: true });
+      }));
+    const result = streamChat("Dinner", { signal: abort.signal });
+    const rejection = expect(result).rejects.toMatchObject({ name: "AbortError" });
+    await vi.waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
+    abort.abort(); await rejection;
+    expect(fetch.mock.calls[1][1]?.signal?.aborted).toBe(true);
+  });
+
+  it("keeps cancellation connected while a JSON response body is still loading", async () => {
+    const abort = new AbortController();
+    let bodyStarted = false;
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (_url, init) => ({
+      ok: true,
+      json: () => new Promise((_resolve, reject) => {
+        bodyStarted = true;
+        init?.signal?.addEventListener("abort", () => reject(new DOMException("Stopped", "AbortError")), { once: true });
+      }),
+    } as Response));
+    const result = sendChat("Dinner", { signal: abort.signal });
+    const rejection = expect(result).rejects.toMatchObject({ name: "AbortError" });
+    await vi.waitFor(() => expect(bodyStarted).toBe(true));
+    abort.abort(); await rejection;
+  });
   it("sends at most twenty sanitized session candidates", async () => {
     const candidates: Suggestion[] = Array.from({ length: 22 }, (_, index) => ({
       place_id: `place-${index}`,

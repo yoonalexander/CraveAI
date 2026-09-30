@@ -2,7 +2,7 @@ import { act, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ChatPanel } from "./ChatPanel";
-import { fetchChatStatus, streamChat } from "../api/chat";
+import { ChatQuotaError, ChatTimeoutError, fetchChatStatus, streamChat } from "../api/chat";
 
 const authState = vi.hoisted(() => ({
   user: null as null | { user_id: string; email: string; email_verified: boolean },
@@ -40,6 +40,99 @@ beforeEach(() => {
 });
 
 describe("ChatPanel", () => {
+  it("keeps the decorative indicator mounted through multiple genuine stage updates and completion", async () => {
+    let finish!: (value: Awaited<ReturnType<typeof streamChat>>) => void;
+    mockedSendChat.mockImplementation(() => new Promise((resolve) => { finish = resolve; }));
+    const { container } = render(<ChatPanel />);
+    const composer = screen.getByRole("textbox", { name: "Ask CraveAI" });
+    fireEvent.change(composer, { target: { value: "Noodles" } });
+    fireEvent.keyDown(composer, { key: "Enter" });
+    const indicator = container.querySelector(".chat-thinking-dots");
+    const status = screen.getByRole("status");
+    expect(status).toHaveTextContent("Getting your search ready…");
+    expect(status).toHaveAttribute("aria-live", "polite");
+    expect(indicator).toHaveAttribute("aria-hidden", "true");
+    expect(status).not.toContainElement(indicator as HTMLElement);
+    for (const stage of ["Finding nearby restaurants…", "Checking public menus for your preferences…", "Putting your recommendations together…"]) {
+      act(() => mockedSendChat.mock.calls[0][2]?.onStage?.(stage));
+      expect(status).toHaveTextContent(stage);
+      expect(container.querySelector(".chat-thinking-dots")).toBe(indicator);
+    }
+    await act(async () => finish({ reply: "Here are your noodle spots.", messages: [], recommendations: [] }));
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    expect(container.querySelector(".chat-thinking")).not.toBeInTheDocument();
+    expect(composer).toBeEnabled();
+  });
+
+  it("stops the active response and ignores its late stages, results and cleanup during a retry", async () => {
+    const finishes: Array<(value: Awaited<ReturnType<typeof streamChat>>) => void> = [];
+    mockedSendChat.mockImplementation(() => new Promise((resolve) => { finishes.push(resolve); }));
+    const onRecommendations = vi.fn();
+    render(<ChatPanel onRecommendations={onRecommendations} />);
+    const composer = screen.getByRole("textbox", { name: "Ask CraveAI" });
+    fireEvent.change(composer, { target: { value: "First request" } });
+    fireEvent.keyDown(composer, { key: "Enter" });
+    const [, firstOptions, firstCallbacks] = mockedSendChat.mock.calls[0];
+    act(() => mockedSendChat.mock.calls[0][2]?.onStage?.("First stage"));
+    fireEvent.click(screen.getByRole("button", { name: "Stop response" }));
+    expect(firstOptions.signal?.aborted).toBe(true);
+    expect(screen.queryByText("First stage")).not.toBeInTheDocument();
+    expect(screen.getByText("Response stopped.")).toBeInTheDocument();
+    expect(composer).toBeEnabled();
+    fireEvent.change(composer, { target: { value: "Retry" } });
+    fireEvent.keyDown(composer, { key: "Enter" });
+    expect(screen.getByText("Getting your search ready…")).toBeInTheDocument();
+    act(() => mockedSendChat.mock.calls[1][2]?.onStage?.("Fresh stage"));
+    const stale = { name: "Stale restaurant", place_id: "stale" };
+    act(() => {
+      firstCallbacks?.onStage?.("Stale stage");
+      firstCallbacks?.onRecommendation?.(stale);
+    });
+    await act(async () => finishes[0]({ reply: "Stale reply", messages: [], recommendations: [stale] }));
+    expect(screen.queryByText("Stale reply")).not.toBeInTheDocument();
+    expect(screen.queryByText("Stale stage")).not.toBeInTheDocument();
+    expect(screen.getByText("Fresh stage")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Stop response" })).toBeEnabled();
+    expect(onRecommendations).not.toHaveBeenCalledWith([stale]);
+    await act(async () => finishes[1]({ reply: "Fresh reply", messages: [], recommendations: [] }));
+    expect(screen.getByText("Fresh reply")).toBeInTheDocument();
+    expect(screen.queryByText("Fresh stage")).not.toBeInTheDocument();
+  });
+
+  it.each([new Error("provider failure"), new ChatTimeoutError(), new ChatQuotaError("Daily limit reached.")])("clears progress after an error and starts the next attempt without an old stage (%s)", async (failure) => {
+    mockedSendChat.mockImplementationOnce(async (_query, _options, callbacks) => {
+      callbacks?.onStage?.("Checking menus…");
+      throw failure;
+    });
+    render(<ChatPanel />);
+    const composer = screen.getByRole("textbox", { name: "Ask CraveAI" });
+    fireEvent.change(composer, { target: { value: "Dinner" } });
+    fireEvent.keyDown(composer, { key: "Enter" });
+    await screen.findByRole("alert");
+    expect(screen.queryByText("Checking menus…")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Stop response" })).not.toBeInTheDocument();
+    expect(composer).toBeEnabled();
+    mockedSendChat.mockImplementationOnce(() => new Promise(() => undefined));
+    fireEvent.change(composer, { target: { value: "Try again" } });
+    fireEvent.keyDown(composer, { key: "Enter" });
+    expect(screen.getByText("Getting your search ready…")).toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Stop response" }));
+  });
+
+  it("aborts pending work on unmount and ignores subsequent recommendation callbacks", () => {
+    mockedSendChat.mockImplementationOnce(() => new Promise(() => undefined));
+    const onRecommendations = vi.fn();
+    const { unmount } = render(<ChatPanel onRecommendations={onRecommendations} />);
+    const composer = screen.getByRole("textbox", { name: "Ask CraveAI" });
+    fireEvent.change(composer, { target: { value: "Dinner" } });
+    fireEvent.keyDown(composer, { key: "Enter" });
+    const options = mockedSendChat.mock.calls[0][1];
+    unmount();
+    expect(options.signal?.aborted).toBe(true);
+    mockedSendChat.mock.calls[0][2]?.onRecommendation?.({ name: "Late restaurant" });
+    expect(onRecommendations).not.toHaveBeenCalled();
+  });
   it("shows menu evidence counts, distinct sources, and a map action", async () => {
     const recommendation = {
       name: "Spicy Kitchen", place_id: "spicy", lat: 43.7, lng: -79.4,

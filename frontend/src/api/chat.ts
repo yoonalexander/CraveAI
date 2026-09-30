@@ -116,6 +116,22 @@ const FALLBACK_LOCATION: LocationHint = {
 const CHAT_REQUEST_TIMEOUT_MS = 25000;
 const LEGACY_CHAT_REQUEST_TIMEOUT_MS = 60000;
 
+function throwIfStopped(signal?: AbortSignal): void {
+  if (signal?.aborted) throw new DOMException("The response was stopped.", "AbortError");
+}
+
+function requestAbort(signal: AbortSignal | undefined, timeoutMs: number) {
+  const controller = new AbortController();
+  const stop = () => controller.abort();
+  signal?.addEventListener("abort", stop, { once: true });
+  if (signal?.aborted) stop();
+  const timeoutId = window.setTimeout(stop, timeoutMs);
+  return {
+    signal: controller.signal,
+    dispose: () => { window.clearTimeout(timeoutId); signal?.removeEventListener("abort", stop); },
+  };
+}
+
 /**
  * Send a chat query to the backend chat endpoint.
  */
@@ -123,6 +139,7 @@ export async function sendChat(
   query: string,
   options: ChatOptions = {},
 ): Promise<ChatResponse> {
+  throwIfStopped(options.signal);
   const { location, candidatePlaces = [] } = options;
 
   const locationPayload: LocationHint = location
@@ -153,63 +170,59 @@ export async function sendChat(
     "Content-Type": "application/json",
   };
 
-  const controller = new AbortController();
-  const timeoutId = window.setTimeout(
-    () => controller.abort(),
-    CHAT_REQUEST_TIMEOUT_MS,
-  );
-  let response: Response;
+  const abort = requestAbort(options.signal, CHAT_REQUEST_TIMEOUT_MS);
   try {
-    response = await apiFetch(
+    const response = await apiFetch(
       "/chat",
       {
         method: "POST",
         headers,
         body: JSON.stringify(payload),
-        signal: controller.signal,
+        signal: abort.signal,
       },
       { csrf: Boolean(options.authenticated) },
     );
-  } catch (error) {
-    if (controller.signal.aborted) {
-      throw new ChatTimeoutError();
-    }
-    throw error;
-  } finally {
-    window.clearTimeout(timeoutId);
-  }
-  if (!response.ok) {
-    const errorPayload = await readErrorPayload(response);
-    const quotaDetail = errorPayload.json?.detail;
-    if (
-      response.status === 429 &&
-      (quotaDetail?.code === "daily_chat_message_quota_exceeded" ||
-        quotaDetail?.code === "daily_token_quota_exceeded")
-    ) {
-      throw new ChatQuotaError(
-        "You've reached today's CraveAI chat limit. Please try again after the daily reset.",
-        quotaDetail.usage ?? readUsageHeaders(response),
+    if (!response.ok) {
+      const errorPayload = await readErrorPayload(response);
+      const quotaDetail = errorPayload.json?.detail;
+      if (
+        response.status === 429 &&
+        (quotaDetail?.code === "daily_chat_message_quota_exceeded" ||
+          quotaDetail?.code === "daily_token_quota_exceeded")
+      ) {
+        throw new ChatQuotaError(
+          "You've reached today's CraveAI chat limit. Please try again after the daily reset.",
+          quotaDetail.usage ?? readUsageHeaders(response),
+        );
+      }
+
+      if (response.status === 504) {
+        throw new ChatTimeoutError();
+      }
+
+      const errorMessage = errorPayload.text || JSON.stringify(errorPayload.json);
+      throw new Error(
+        `Chat request failed with status ${response.status}: ${errorMessage}`,
       );
     }
 
-    if (response.status === 504) {
-      throw new ChatTimeoutError();
-    }
-
-    const errorMessage = errorPayload.text || JSON.stringify(errorPayload.json);
-    throw new Error(
-      `Chat request failed with status ${response.status}: ${errorMessage}`,
-    );
+    const body = (await response.json()) as ChatResponse;
+    throwIfStopped(options.signal);
+    return {
+      ...body,
+      usage: body.usage ?? readUsageHeaders(response),
+    };
+  } catch (error) {
+    throwIfStopped(options.signal);
+    if (abort.signal.aborted) throw new ChatTimeoutError();
+    throw error;
+  } finally {
+    abort.dispose();
   }
-
-  const body = (await response.json()) as ChatResponse;
-  return {
-    ...body,
-    usage: body.usage ?? readUsageHeaders(response),
-  };
 }
 
 export type ChatOptions = {
+  signal?: AbortSignal;
   location?: LocationHint;
   candidatePlaces?: Suggestion[];
   contextMessages?: Array<{ role: "user" | "assistant"; content: string; place_ids: string[] }>;
@@ -229,6 +242,7 @@ export async function streamChat(
   options: ChatOptions,
   callbacks: ChatStreamCallbacks = {},
 ): Promise<ChatResponse> {
+  throwIfStopped(options.signal);
   const locationPayload = options.location ? { ...FALLBACK_LOCATION, ...options.location } : FALLBACK_LOCATION;
   const payload: ChatRequestPayload = {
     query, message: query, location: locationPayload,
@@ -247,10 +261,13 @@ export async function streamChat(
     response = await apiFetch("/chat/stream", {
       method: "POST", headers: { "Content-Type": "application/json", Accept: "text/event-stream" },
       body: JSON.stringify(payload),
+      signal: options.signal,
     }, { csrf: Boolean(options.authenticated) });
   } catch {
+    throwIfStopped(options.signal);
     return sendChat(query, options);
   }
+  throwIfStopped(options.signal);
   // During a phased production rollout, the frontend can reach an older API
   // that does not expose the SSE endpoint yet. Its strict request schema also
   // rejects the new context/consent fields, so retry with the legacy contract
@@ -266,38 +283,50 @@ export async function streamChat(
   let usage: UsageMetadata | undefined;
   let conversationId: string | undefined;
   const recommendations: ChatRecommendation[] = [];
-  while (true) {
-    const { done, value } = await reader.read();
-    buffer += decoder.decode(value || new Uint8Array(), { stream: !done });
-    const events = buffer.split("\n\n");
-    buffer = events.pop() || "";
-    for (const block of events) {
-      const event = block.match(/^event: (.+)$/m)?.[1];
-      const raw = block.match(/^data: (.+)$/m)?.[1];
-      if (!event || !raw) continue;
-      const data = JSON.parse(raw) as Record<string, unknown>;
-      if (event === "stage") callbacks.onStage?.(String(data.message || "Working…"));
-      if (event === "recommendation") {
-        const recommendation = data as unknown as ChatRecommendation;
-        recommendations.push(recommendation); callbacks.onRecommendation?.(recommendation);
+  const cancelReader = () => { void reader.cancel().catch(() => undefined); };
+  options.signal?.addEventListener("abort", cancelReader, { once: true });
+  try {
+    throwIfStopped(options.signal);
+    while (true) {
+      const { done, value } = await reader.read();
+      throwIfStopped(options.signal);
+      buffer += decoder.decode(value || new Uint8Array(), { stream: !done });
+      const events = buffer.split("\n\n");
+      buffer = events.pop() || "";
+      for (const block of events) {
+        throwIfStopped(options.signal);
+        const event = block.match(/^event: (.+)$/m)?.[1];
+        const raw = block.match(/^data: (.+)$/m)?.[1];
+        if (!event || !raw) continue;
+        const data = JSON.parse(raw) as Record<string, unknown>;
+        if (event === "stage") callbacks.onStage?.(String(data.message || "Working…"));
+        if (event === "recommendation") {
+          const recommendation = data as unknown as ChatRecommendation;
+          recommendations.push(recommendation); callbacks.onRecommendation?.(recommendation);
+        }
+        if (event === "reply") { reply = String(data.reply || ""); conversationId = data.conversation_id ? String(data.conversation_id) : undefined; }
+        if (event === "usage") usage = data as unknown as UsageMetadata;
+        if (event === "error") {
+          const detail = data.detail as { code?: string; usage?: UsageMetadata } | undefined;
+          if (Number(data.status) === 429) throw new ChatQuotaError("You've reached today's CraveAI chat limit.", detail?.usage);
+          throw new Error(detail?.code?.replaceAll("_", " ") || "Chat request failed.");
+        }
       }
-      if (event === "reply") { reply = String(data.reply || ""); conversationId = data.conversation_id ? String(data.conversation_id) : undefined; }
-      if (event === "usage") usage = data as unknown as UsageMetadata;
-      if (event === "error") {
-        const detail = data.detail as { code?: string; usage?: UsageMetadata } | undefined;
-        if (Number(data.status) === 429) throw new ChatQuotaError("You've reached today's CraveAI chat limit.", detail?.usage);
-        throw new Error(detail?.code?.replaceAll("_", " ") || "Chat request failed.");
-      }
+      if (done) break;
     }
-    if (done) break;
+    return { reply, messages: reply ? [{ role: "assistant", content: reply }] : [], recommendations, usage, conversation_id: conversationId };
+  } finally {
+    options.signal?.removeEventListener("abort", cancelReader);
+    await reader.cancel().catch(() => undefined);
+    reader.releaseLock();
   }
-  return { reply, messages: reply ? [{ role: "assistant", content: reply }] : [], recommendations, usage, conversation_id: conversationId };
 }
 
 async function sendLegacyChat(
   query: string,
   options: ChatOptions,
 ): Promise<ChatResponse> {
+  throwIfStopped(options.signal);
   const locationPayload = options.location
     ? { ...FALLBACK_LOCATION, ...options.location }
     : FALLBACK_LOCATION;
@@ -316,46 +345,43 @@ async function sendLegacyChat(
       tags: place.tags ?? [],
     })),
   };
-  const controller = new AbortController();
-  const timeoutId = window.setTimeout(
-    () => controller.abort(),
-    LEGACY_CHAT_REQUEST_TIMEOUT_MS,
-  );
-  let response: Response;
+  const abort = requestAbort(options.signal, LEGACY_CHAT_REQUEST_TIMEOUT_MS);
   try {
-    response = await apiFetch(
+    const response = await apiFetch(
       "/chat",
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
-        signal: controller.signal,
+        signal: abort.signal,
       },
       { csrf: Boolean(options.authenticated) },
     );
-  } catch (error) {
-    if (controller.signal.aborted) throw new ChatTimeoutError();
-    throw error;
-  } finally {
-    window.clearTimeout(timeoutId);
-  }
-  if (!response.ok) {
-    const errorPayload = await readErrorPayload(response);
-    const detail = errorPayload.json?.detail;
-    if (response.status === 429) {
-      throw new ChatQuotaError(
-        "You've reached today's CraveAI chat limit. Please try again after the daily reset.",
-        detail?.usage ?? readUsageHeaders(response),
+    if (!response.ok) {
+      const errorPayload = await readErrorPayload(response);
+      const detail = errorPayload.json?.detail;
+      if (response.status === 429) {
+        throw new ChatQuotaError(
+          "You've reached today's CraveAI chat limit. Please try again after the daily reset.",
+          detail?.usage ?? readUsageHeaders(response),
+        );
+      }
+      if (response.status === 504) throw new ChatTimeoutError();
+      const errorMessage = errorPayload.text || JSON.stringify(errorPayload.json);
+      throw new Error(
+        `Legacy chat request failed with status ${response.status}: ${errorMessage}`,
       );
     }
-    if (response.status === 504) throw new ChatTimeoutError();
-    const errorMessage = errorPayload.text || JSON.stringify(errorPayload.json);
-    throw new Error(
-      `Legacy chat request failed with status ${response.status}: ${errorMessage}`,
-    );
+    const body = (await response.json()) as ChatResponse;
+    throwIfStopped(options.signal);
+    return { ...body, usage: body.usage ?? readUsageHeaders(response) };
+  } catch (error) {
+    throwIfStopped(options.signal);
+    if (abort.signal.aborted) throw new ChatTimeoutError();
+    throw error;
+  } finally {
+    abort.dispose();
   }
-  const body = (await response.json()) as ChatResponse;
-  return { ...body, usage: body.usage ?? readUsageHeaders(response) };
 }
 
 export async function fetchChatStatus(): Promise<ChatStatusResponse> {

@@ -438,6 +438,10 @@ async def stream_chat_response(
             yield _sse("error", {"status": 500, "detail": {"code": "chat_stream_failed"}})
             return
         finally:
+            # StreamingResponse can cancel/close the generator before its next
+            # disconnect check. Do not leave recommendation work orphaned.
+            if not task.done():
+                task.cancel()
             if hasattr(request.state, "chat_stage_callback"):
                 del request.state.chat_stage_callback
         for recommendation in result.recommendations:

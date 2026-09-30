@@ -20,6 +20,7 @@ import { saveConversationMessages, submitFeedback, transcribeAudio } from "../ap
 import { useAuth } from "../context/AuthContext";
 import { ArrowUpIcon, CopyIcon, MicIcon, ShareIcon } from "./Icons";
 import { RestaurantPhotos } from "./RestaurantPhotos";
+import { ChatProgress } from "./ChatProgress";
 
 type Message = {
   id: string;
@@ -102,6 +103,7 @@ export function ChatPanel({
   const recordingStartedRef = useRef(0);
   const recordingTimerRef = useRef<number | null>(null);
   const currentRecommendationList = useRef<ChatRecommendation[]>([]);
+  const requestRef = useRef<AbortController | null>(null);
 
   const hasConversation = messages.length > 0;
 
@@ -124,7 +126,8 @@ export function ChatPanel({
     const conversation = conversationRef.current;
     if (!conversation || !hasConversation) return;
     if (typeof conversation.scrollTo === "function") {
-      conversation.scrollTo({ top: conversation.scrollHeight, behavior: "smooth" });
+      const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+      conversation.scrollTo({ top: conversation.scrollHeight, behavior: reducedMotion ? "auto" : "smooth" });
     } else {
       conversation.scrollTop = conversation.scrollHeight;
     }
@@ -132,6 +135,8 @@ export function ChatPanel({
 
   useEffect(() => {
     return () => {
+      requestRef.current?.abort();
+      requestRef.current = null;
       if (noticeTimer.current) window.clearTimeout(noticeTimer.current);
       if (recordingTimerRef.current) window.clearTimeout(recordingTimerRef.current);
       if (recorderRef.current?.state === "recording") recorderRef.current.stop();
@@ -163,7 +168,7 @@ export function ChatPanel({
   };
 
   const submit = async () => {
-    if (isLoading) return;
+    if (requestRef.current) return;
     const trimmed = draft.trim();
     if (!trimmed) return;
     if (!user && window.sessionStorage.getItem("craveai-age-18") !== "true") {
@@ -181,11 +186,16 @@ export function ChatPanel({
     setMessages((current) => [...current, userMessage]);
     setDraft("");
     setError(null);
+    setStage(null);
+    const controller = new AbortController();
+    requestRef.current = controller;
+    const active = () => requestRef.current === controller && !controller.signal.aborted;
     setIsLoading(true);
     if (textareaRef.current) textareaRef.current.style.height = "auto";
 
     try {
       const response = await streamChat(trimmed, {
+        signal: controller.signal,
         location: location ?? undefined,
         candidatePlaces,
         conversationId: conversationId || undefined,
@@ -197,11 +207,13 @@ export function ChatPanel({
         ageConfirmed: Boolean(user) || window.sessionStorage.getItem("craveai-age-18") === "true",
         authenticated: Boolean(user),
       }, {
-        onStage: setStage,
+        onStage: (message) => { if (active()) setStage(message); },
         onRecommendation: (recommendation) => {
+          if (!active()) return;
           onRecommendations?.((currentRecommendationList.current = [...currentRecommendationList.current, recommendation]));
         },
       });
+      if (!active()) return;
       if (response.conversation_id) setConversationId(response.conversation_id);
       const nextUsage = response.usage ?? estimateNextUsage(usage);
       setUsage(nextUsage);
@@ -229,6 +241,7 @@ export function ChatPanel({
           ];
       setMessages((current) => [...current, ...assistantMessages]);
     } catch (reason) {
+      if (!active()) return;
       let assistantMessage = "Sorry, I ran into a problem finding recommendations. Please try again.";
       if (reason instanceof ChatQuotaError) {
         assistantMessage = reason.message;
@@ -250,10 +263,24 @@ export function ChatPanel({
         },
       ]);
     } finally {
-      setIsLoading(false);
-      setStage(null);
-      currentRecommendationList.current = [];
+      if (requestRef.current === controller) {
+        requestRef.current = null;
+        setIsLoading(false);
+        setStage(null);
+        currentRecommendationList.current = [];
+      }
     }
+  };
+
+  const stopResponse = () => {
+    requestRef.current?.abort();
+    requestRef.current = null;
+    setIsLoading(false);
+    setStage(null);
+    currentRecommendationList.current = [];
+    onRecommendations?.([]);
+    showNotice("Response stopped.");
+    window.requestAnimationFrame(() => textareaRef.current?.focus());
   };
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -446,12 +473,7 @@ export function ChatPanel({
               ) : null}
             </article>
           ))}
-          {isLoading ? (
-            <div className="chat-thinking" aria-label="CraveAI is thinking">
-              <span /><span /><span />
-              {stage ? <strong>{stage}</strong> : null}
-            </div>
-          ) : null}
+          {isLoading ? <ChatProgress stage={stage} /> : null}
         </div>
       </div>
 
@@ -473,7 +495,7 @@ export function ChatPanel({
           <button
             aria-label={isRecording ? "Stop recording" : "Record voice input"}
             className={`composer-mic${isRecording ? " is-recording" : ""}`}
-            disabled={isTranscribing}
+            disabled={isTranscribing || (isLoading && !isRecording)}
             onClick={() => void toggleRecording()}
             title={isRecording ? "Stop recording" : "Record up to 60 seconds"}
             type="button"
@@ -481,12 +503,14 @@ export function ChatPanel({
             <MicIcon />
           </button>
           <button
-            aria-label="Send message"
+            aria-label={isLoading ? "Stop response" : "Send message"}
             className="composer-send"
-            disabled={isLoading || !draft.trim()}
-            type="submit"
+            disabled={!isLoading && !draft.trim()}
+            onClick={isLoading ? stopResponse : undefined}
+            type={isLoading ? "button" : "submit"}
           >
-            <span>Send</span><ArrowUpIcon />
+            <span>{isLoading ? "Stop" : "Send"}</span>
+            {isLoading ? <svg aria-hidden="true" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor" /></svg> : <ArrowUpIcon />}
           </button>
         </div>
         <div className="chat-composer-meta">
