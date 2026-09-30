@@ -49,6 +49,17 @@ describe("fetchSuggestions", () => {
         );
     });
 
+    it("reports partial coverage while returning usable restaurants", async () => {
+        const places = [{ place_id: "test", name: "Test Restaurant" }];
+        vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(JSON.stringify(places), {
+            status: 200,
+            headers: { "Content-Type": "application/json", "X-Places-Coverage": "quota", "X-RateLimit-Reset": "2026-10-01T00:00:00Z" },
+        }));
+        const onCoverage = vi.fn();
+        expect(await fetchSuggestions(43.65, -79.38, 5000, undefined, undefined, onCoverage)).toEqual(places);
+        expect(onCoverage).toHaveBeenCalledWith({ partialReason: "quota", resetAt: "2026-10-01T00:00:00Z" });
+    });
+
     it("sends a complete confirmed viewport without changing radial compatibility", async () => {
         const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
             new Response("[]", {

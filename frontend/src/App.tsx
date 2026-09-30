@@ -82,6 +82,7 @@ function CraveApplication(): JSX.Element {
   const [isResolvingArea, setIsResolvingArea] = useState(false);
   const [suggestionError, setSuggestionError] = useState<string | null>(null);
   const [suggestionQuotaResetAt, setSuggestionQuotaResetAt] = useState<string | null>(null);
+  const [coverageNotice, setCoverageNotice] = useState<string | null>(null);
   const [activeFilters, setActiveFilters] = useState<Set<SuggestionFilter>>(new Set());
   const [advancedFilters, setAdvancedFilters] = useState<AdvancedFilters>(DEFAULT_ADVANCED_FILTERS);
   const [mapRecommendations, setMapRecommendations] = useState<ChatRecommendation[]>([]);
@@ -258,6 +259,15 @@ function CraveApplication(): JSX.Element {
       requestedArea.radius,
       controller.signal,
       requestedArea.bounds,
+      (coverage) => {
+        if (!active) return;
+        setCoverageNotice(coverage.partialReason === "quota"
+          ? "Some restaurants are shown. The discovery limit prevented loading more; try again after the daily reset."
+          : coverage.partialReason
+            ? "Some restaurants are shown. Additional results could not be loaded; try searching this area again."
+            : null);
+        if (coverage.partialReason === "quota") setSuggestionQuotaResetAt(coverage.resetAt);
+      },
     )
       .then((places) => {
         if (!active) return;
@@ -449,10 +459,15 @@ function CraveApplication(): JSX.Element {
       area={searchArea}
       canRetry={!suggestionQuotaResetAt}
       count={filteredSuggestions.length}
+      totalCount={suggestions.length}
+      coverageNotice={coverageNotice}
       error={suggestionError}
       isLoading={isLoadingSuggestions || isResolvingArea}
       onChangeLocation={() => setLocationDialogOpen(true)}
-      onClearFilters={() => setActiveFilters(new Set())}
+      onClearFilters={() => {
+        setActiveFilters(new Set());
+        setAdvancedFilters({ ...DEFAULT_ADVANCED_FILTERS });
+      }}
       onRetry={retrySearch}
       onToggleFilter={toggleFilter}
       onAdvancedFiltersChange={setAdvancedFilters}

@@ -409,7 +409,7 @@ describe("Airbnb-style application shell", () => {
     fireEvent.click(screen.getByRole("button", { name: "Search this area" }));
     await flushEffects();
 
-    expect(screen.getByTestId("chat-pool-size")).toHaveTextContent("20");
+    expect(screen.getByTestId("chat-pool-size")).toHaveTextContent("24");
     fireEvent.click(screen.getByRole("button", { name: "Discovery" }));
     expect(screen.getByText("Place 0")).toBeInTheDocument();
     expect(screen.getByText("Place 15")).toBeInTheDocument();
@@ -454,6 +454,37 @@ describe("Airbnb-style application shell", () => {
     expect(screen.getByText("Place 0")).toBeInTheDocument();
     expect(screen.queryByText("Place 1")).not.toBeInTheDocument();
     expect(screen.queryByText("Place 2")).not.toBeInTheDocument();
+  });
+
+  it("keeps all sixty results and restores them when quick and advanced filters are cleared", async () => {
+    mockedFetchSuggestions.mockResolvedValue(makeSuggestions(60).map((place) => ({ ...place, rating: 3.6 })));
+    render(<App />);
+    await flushEffects();
+    expect(screen.getByTestId("chat-pool-size")).toHaveTextContent("60");
+    fireEvent.click(screen.getByRole("button", { name: "Open Now" }));
+    expect(screen.getByText("30 of 60 loaded restaurants shown")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Filters" }));
+    fireEvent.change(screen.getByLabelText("Minimum rating"), { target: { value: "4.5" } });
+    fireEvent.click(screen.getByRole("button", { name: "Show results" }));
+    expect(screen.getByText("0 of 60 loaded restaurants shown")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Clear filters" }));
+    expect(screen.getByTestId("chat-pool-size")).toHaveTextContent("60");
+    expect(screen.getByRole("button", { name: "All" })).toHaveAttribute("aria-pressed", "true");
+    expect(mockedFetchSuggestions).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByRole("button", { name: "Discovery" }));
+    expect(screen.getByText("Place 59")).toBeInTheDocument();
+  });
+
+  it("explains partial coverage without discarding loaded restaurants", async () => {
+    mockedFetchSuggestions.mockImplementation(async (_lat, _lng, _radius, _signal, _bounds, onCoverage) => {
+      onCoverage?.({ partialReason: "quota", resetAt: "2026-10-01T00:00:00Z" });
+      return makeSuggestions(20);
+    });
+    render(<App />);
+    await flushEffects();
+    expect(screen.getByTestId("chat-pool-size")).toHaveTextContent("20");
+    expect(screen.getByText(/discovery limit prevented loading more/i)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Try again" })).not.toBeInTheDocument();
   });
 
   it("New chat resets the conversation but retains the confirmed restaurant pool", async () => {

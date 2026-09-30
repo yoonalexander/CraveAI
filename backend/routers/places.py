@@ -9,7 +9,7 @@ from backend.services.rate_limit import burst_limiter
 from backend.services.sessions import SessionContext, optional_session
 from pydantic import BaseModel, ConfigDict, Field
 
-from backend.services.places import get_top_rated_nearby, resolve_place_ids, verify_dietary_place_ids
+from backend.services.places import DiscoveryCoverage, get_top_rated_nearby, resolve_place_ids, verify_dietary_place_ids
 from backend.services.usage_limits import (
     DailyQuotaExceeded,
     PLACES_GLOBAL_USAGE_USER_ID,
@@ -102,7 +102,45 @@ async def get_suggestions(
         for header, value in rate_limit_headers(usage).items():
             response.headers[header] = value
 
-    suggestions = await get_top_rated_nearby(lat, lng, radius, bounds=bounds)
+    coverage = DiscoveryCoverage()
+    first_request = True
+
+    async def before_provider_request() -> None:
+        nonlocal first_request, usage
+        if first_request:
+            first_request = False
+            return  # The initial request was reserved above.
+        try:
+            usage = await reserve_daily_quota(
+                user_id=usage_user_id,
+                token_cost=1,
+                daily_limit=daily_limit,
+                global_daily_limit=settings.GLOBAL_DAILY_PLACES_LIMIT,
+                global_user_id=PLACES_GLOBAL_USAGE_USER_ID,
+                namespace="places",
+                enforce_actor_limit=enforce_actor_limit,
+                additional_user_ids=usage_identities[1:],
+            )
+        except DailyQuotaExceeded as exc:
+            # Keep already loaded pages; let the client explain why coverage is limited.
+            for header, value in rate_limit_headers(exc.usage).items():
+                response.headers[header] = value
+            raise
+        if enforce_actor_limit:
+            for header, value in rate_limit_headers(usage).items():
+                response.headers[header] = value
+
+    try:
+        suggestions = await get_top_rated_nearby(
+            lat, lng, radius, bounds=bounds,
+            before_request=before_provider_request, coverage=coverage,
+        )
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail={"code": "places_provider_unavailable"}) from exc
+    response.headers["X-Places-Coverage"] = coverage.partial_reason or "complete"
+    response.headers["X-Places-Requests"] = str(coverage.provider_requests)
+    response.headers["X-Places-Pages"] = str(coverage.pages_loaded)
+    response.headers["Cache-Control"] = "no-store"
     return suggestions
 
 

@@ -99,6 +99,21 @@ describe("MapView viewport confirmation", () => {
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
+  it("renders sixty restaurant pins and does not search when the map is moved", async () => {
+    const suggestions = Array.from({ length: 60 }, (_, index) => ({
+      place_id: `place-${index}`, name: `Restaurant ${index}`, rating: index % 2 ? null : 3.6,
+      address: `${index} Main Street`, reason: "Nearby", lat: 43.7 + index * 0.0001, lng: -79.4,
+    }));
+    const onSearchArea = vi.fn();
+    render(<MapView confirmedArea={area} isLocating={false} isSearching={false} locationLabel="Toronto"
+      onSearchArea={onSearchArea} originIsDevice originLocation={area.center} recenterVersion={1}
+      recommendations={[]} suggestions={suggestions} />);
+    await settleMapLoad();
+    expect(screen.getAllByRole("button", { name: /Show Restaurant/ })).toHaveLength(60);
+    fireEvent.click(screen.getByRole("button", { name: "Pan map" }));
+    expect(onSearchArea).not.toHaveBeenCalled();
+  });
+
   it("focuses chat-only places repeatedly and keeps the original recommendation number", async () => {
     const inside = { place_id: "inside", name: "Inside", rating: 4.5, address: "1 Main Street", reason: "Nearby", lat: 43.7, lng: -79.4 };
     const places = [

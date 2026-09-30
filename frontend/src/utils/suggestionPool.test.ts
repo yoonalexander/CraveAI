@@ -118,8 +118,8 @@ describe("suggestion pool rotation", () => {
       west: -79.5,
     });
 
-    expect(merged).toHaveLength(20);
-    expect(merged.slice(0, 16).map((place) => place.place_id)).toEqual(
+    expect(merged).toHaveLength(24);
+    expect(merged.slice(8).map((place) => place.place_id)).toEqual(
       knownPlaza.map((place) => place.place_id),
     );
   });
@@ -136,6 +136,24 @@ describe("suggestion pool rotation", () => {
       east: -79.37,
       west: -79.39,
     })).toEqual([places[0]]);
+  });
+
+  it("prioritizes fresh results when old pins would fill the enlarged pool", () => {
+    const current = makeSuggestions(60);
+    const incoming = makeSuggestions(40).map((place) => ({ ...place, place_id: `new-${place.place_id}` }));
+    const merged = mergeSuggestionsForBounds(current, [...incoming, incoming[0]], {
+      north: 43.75, south: 43.6, east: -79.3, west: -79.5,
+    });
+    expect(merged).toHaveLength(60);
+    expect(merged.slice(0, 40)).toEqual(incoming);
+    expect(new Set(merged.map((place) => place.place_id)).size).toBe(60);
+  });
+
+  it("deduplicates radial results and retains up to sixty restaurants", () => {
+    const incoming = makeSuggestions(65);
+    const merged = mergeSuggestionsForBounds([], [incoming[0], ...incoming]);
+    expect(merged).toHaveLength(60);
+    expect(new Set(merged.map((place) => place.place_id)).size).toBe(60);
   });
 
 });

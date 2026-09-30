@@ -3,7 +3,7 @@ import type { ViewportBounds } from "../types/searchArea";
 
 export const SUGGESTIONS_PER_ROTATION = 3;
 export const MATERIAL_LOCATION_CHANGE_KM = 1;
-export const SUGGESTION_POOL_LIMIT = 20;
+export const SUGGESTION_POOL_LIMIT = 60;
 export type SuggestionFilter = "budget" | "open";
 export type AdvancedFilters = {
   cuisine: string;
@@ -105,19 +105,18 @@ export function mergeSuggestionsForBounds(
   bounds?: ViewportBounds,
   limit: number = SUGGESTION_POOL_LIMIT,
 ): Suggestion[] {
-  if (!bounds) return incoming.slice(0, limit);
-
   const incomingById = new Map(incoming.map((place) => [place.place_id, place]));
   const merged: Suggestion[] = [];
   const included = new Set<string>();
 
-  current.forEach((place) => {
-    if (!isSuggestionInBounds(place, bounds) || included.has(place.place_id)) return;
-    const refreshed = incomingById.get(place.place_id);
-    merged.push(refreshed ? { ...place, ...refreshed } : place);
+  // Fresh results take priority; old in-bounds places fill remaining capacity.
+  incomingById.forEach((place) => {
+    if (merged.length >= limit || (bounds && !isSuggestionInBounds(place, bounds))) return;
+    merged.push(place);
     included.add(place.place_id);
   });
-  incoming.forEach((place) => {
+  if (!bounds) return merged;
+  current.forEach((place) => {
     if (
       merged.length >= limit ||
       included.has(place.place_id) ||

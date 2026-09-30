@@ -4,13 +4,15 @@ import asyncio
 import hashlib
 import logging
 import os
-from typing import Any, Dict, List, Optional
+from dataclasses import dataclass
+from typing import Any, Awaitable, Callable, Dict, List, Optional
 
 import httpx
 
 from backend.config import get_settings
 from backend.services.menu_evidence import enrich_candidates_with_menu_evidence
 from backend.services.recommendation_models import CravingIntent, IntentConstraint, SearchQuerySpec
+from backend.services.usage_limits import DailyQuotaExceeded
 
 logger = logging.getLogger(__name__)
 
@@ -18,10 +20,20 @@ settings = get_settings()
 GOOGLE_PLACES_API_KEY = settings.GOOGLE_API_KEY
 DEFAULT_SEARCH_RADIUS_METERS = int(os.getenv("GOOGLE_SEARCH_RADIUS", "5000"))
 MAX_PLACES_PER_CUISINE = 5
-SUGGESTION_POOL_LIMIT = 20
+SUGGESTION_POOL_LIMIT = 60
+MAX_DISCOVERY_PAGES = 3
+MAX_DISCOVERY_REQUESTS = 6
+PAGE_TOKEN_DELAY_SECONDS = 2.0
 MIN_SUGGESTION_POOL_SIZE = 6
 QUALITY_PRIOR_RATING = 4.0
 QUALITY_PRIOR_REVIEWS = 100
+
+
+@dataclass
+class DiscoveryCoverage:
+    provider_requests: int = 0
+    pages_loaded: int = 0
+    partial_reason: str | None = None
 
 FOOD_PLACE_TYPES = {
     "restaurant",
@@ -126,6 +138,9 @@ async def get_top_rated_nearby(
     radius: int = 5000,
     limit: int = SUGGESTION_POOL_LIMIT,
     bounds: Optional[Dict[str, float]] = None,
+    *,
+    before_request: Callable[[], Awaitable[None]] | None = None,
+    coverage: DiscoveryCoverage | None = None,
 ) -> List[Dict[str, Any]]:
     """
     Fetch nearby restaurants; rating restrictions are chosen by the user.
@@ -135,54 +150,39 @@ async def get_top_rated_nearby(
             return []
         return _placeholder_places(["Local Favorite", "Trending"], lat, lng)[:limit]
 
+    coverage = coverage or DiscoveryCoverage()
+    candidates: List[Dict[str, Any]] = []
     async with httpx.AsyncClient(timeout=httpx.Timeout(10.0)) as client:
-        try:
-            candidates = await _fetch_and_filter(
-                client,
-                lat=lat,
-                lng=lng,
-                radius=radius,
-            )
-            if len(candidates) < min(limit, MIN_SUGGESTION_POOL_SIZE):
-                # Fill a sparse first page from a wider bounded area while
-                # preserving the original results.
-                wider_radius = min(int(radius * 2), 20000)
-                if wider_radius > radius:
-                    logger.info("Nearby Places result set was sparse; retrying a wider bounded radius.")
-                    wider_candidates = await _fetch_and_filter(
-                        client,
-                        lat=lat,
-                        lng=lng,
-                        radius=wider_radius,
-                    )
-                    candidates = _deduplicate_places([*candidates, *wider_candidates])
+        candidates = await _fetch_and_filter(
+            client, lat=lat, lng=lng, radius=radius,
+            before_request=before_request, coverage=coverage,
+        )
+        in_area = [
+            place for place in candidates
+            if not bounds or is_coordinate_in_bounds(place.get("lat"), place.get("lng"), bounds)
+        ]
+        # Judge sparsity after applying the viewport; preserve exact bounds even
+        # when trying a wider radius to improve Google's candidate selection.
+        wider_radius = min(int(radius * 2), 20000)
+        if len(in_area) < min(limit, MIN_SUGGESTION_POOL_SIZE) and wider_radius > radius and not coverage.partial_reason:
+            try:
+                wider = await _fetch_and_filter(
+                    client, lat=lat, lng=lng, radius=wider_radius,
+                    before_request=before_request, coverage=coverage,
+                )
+                candidates = _deduplicate_places([*candidates, *wider])
+            except Exception:
+                coverage.partial_reason = "provider"
+                logger.warning("Wider nearby discovery failed; keeping original results.")
 
-            if bounds:
-                candidates = [
-                    candidate
-                    for candidate in candidates
-                    if is_coordinate_in_bounds(
-                        candidate.get("lat"), candidate.get("lng"), bounds
-                    )
-                ]
-
-            if not candidates and bounds:
-                return []
-
-            if not candidates:
-                return _placeholder_places(
-                    ["Local Favorite", "Trending", "Chef's Pick"], lat, lng
-                )[:limit]
-
-            candidates = _deduplicate_places(candidates)
-            candidates.sort(key=_quality_sort_key, reverse=True)
-            return candidates[: min(limit, SUGGESTION_POOL_LIMIT)]
-
-        except Exception:
-            logger.warning("Nearby Places lookup failed; using the safe fallback behavior.")
-            if bounds:
-                return []
-            return _placeholder_places(["Local Favorite", "Trending"], lat, lng)[:limit]
+    if bounds:
+        candidates = [
+            place for place in candidates
+            if is_coordinate_in_bounds(place.get("lat"), place.get("lng"), bounds)
+        ]
+    candidates = _deduplicate_places(candidates)
+    candidates.sort(key=_quality_sort_key, reverse=True)
+    return candidates[: max(0, min(limit, SUGGESTION_POOL_LIMIT))]
 
 
 async def resolve_place_ids(place_ids: List[str]) -> List[Dict[str, Any]]:
@@ -324,31 +324,69 @@ async def _fetch_and_filter(
     lat: float,
     lng: float,
     radius: int,
+    before_request: Callable[[], Awaitable[None]] | None = None,
+    coverage: DiscoveryCoverage | None = None,
 ) -> List[Dict[str, Any]]:
-    """Fetch nearby restaurants without an implicit minimum rating."""
+    """Fetch at most three pages, preserving successes on later failures."""
+    coverage = coverage or DiscoveryCoverage()
     params = {
         "key": GOOGLE_PLACES_API_KEY,
         "location": f"{lat},{lng}",
         "radius": radius,
         "type": "restaurant",
     }
-    response = await client.get(
-        "https://maps.googleapis.com/maps/api/place/nearbysearch/json",
-        params=params,
-    )
-    response.raise_for_status()
-    payload = response.json()
-    status = payload.get("status")
-    results = payload.get("results", [])
-    if status not in ("OK", "ZERO_RESULTS"):
-        logger.warning("Google Places returned a non-success status: %s", status)
-        return []
-
     candidates: List[Dict[str, Any]] = []
-    for item in results:
-        if _is_restaurant_candidate(item):
-            candidates.append(_parse_place_item(item))
-    return candidates
+    seen_tokens: set[str] = set()
+    page_token: str | None = None
+    for page in range(MAX_DISCOVERY_PAGES):
+        for attempt in range(2 if page_token else 1):
+            if coverage.provider_requests >= MAX_DISCOVERY_REQUESTS:
+                coverage.partial_reason = "request_limit"
+                return _deduplicate_places(candidates)
+            try:
+                if page_token:
+                    # Google page tokens are not valid immediately after issue.
+                    await asyncio.sleep(PAGE_TOKEN_DELAY_SECONDS)
+                if before_request:
+                    await before_request()
+                coverage.provider_requests += 1
+                response = await client.get(
+                    "https://maps.googleapis.com/maps/api/place/nearbysearch/json",
+                    params={"key": GOOGLE_PLACES_API_KEY, "pagetoken": page_token} if page_token else params,
+                )
+                response.raise_for_status()
+                payload = response.json()
+                status = payload.get("status")
+                if status == "INVALID_REQUEST" and page_token and attempt == 0:
+                    continue
+                if status not in ("OK", "ZERO_RESULTS"):
+                    raise RuntimeError("Nearby discovery provider rejected the request")
+                results = payload.get("results", [])
+                if not isinstance(results, list):
+                    raise RuntimeError("Nearby discovery returned malformed results")
+                for item in results:
+                    if isinstance(item, dict) and _is_restaurant_candidate(item):
+                        candidates.append(_parse_place_item(item))
+                coverage.pages_loaded += 1
+                break
+            except DailyQuotaExceeded:
+                coverage.partial_reason = "quota"
+                return _deduplicate_places(candidates)
+            except Exception:
+                if page == 0:
+                    raise
+                coverage.partial_reason = "provider"
+                logger.warning("Additional nearby discovery page failed; keeping loaded results.")
+                return _deduplicate_places(candidates)
+        next_token = payload.get("next_page_token") if status == "OK" else None
+        if not isinstance(next_token, str) or not next_token:
+            break
+        if next_token in seen_tokens:
+            coverage.partial_reason = "provider"
+            break
+        seen_tokens.add(next_token)
+        page_token = next_token
+    return _deduplicate_places(candidates)
 
 
 async def _query_places_api(

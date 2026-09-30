@@ -1401,6 +1401,48 @@ def test_places_endpoint_rejects_incomplete_or_invalid_viewport_bounds(monkeypat
     assert invalid.json()["detail"]["code"] == "invalid_viewport_bounds"
 
 
+@pytest.mark.parametrize("actor_limit,global_limit", [(1, 10), (10, 1), (10, 10)])
+def test_paginated_discovery_counts_provider_requests_and_preserves_quota_limited_results(monkeypatch, actor_limit, global_limit):
+    import httpx
+
+    monkeypatch.setenv("DAILY_PLACES_REQUEST_LIMIT", str(actor_limit))
+    monkeypatch.setenv("GLOBAL_DAILY_PLACES_REQUEST_LIMIT", str(global_limit))
+    get_settings.cache_clear()
+    monkeypatch.setattr(places_service, "GOOGLE_PLACES_API_KEY", "test-google")
+    monkeypatch.setattr(places_service, "PAGE_TOKEN_DELAY_SECONDS", 0)
+    calls = []
+
+    def provider(request):
+        calls.append(request)
+        start = 20 if "pagetoken" in request.url.params else 0
+        payload = {"status": "OK", "results": [
+            {"place_id": f"place-{i}", "name": f"Restaurant {i}", "types": ["restaurant"],
+             "geometry": {"location": {"lat": 43.65, "lng": -79.38}}}
+            for i in range(start, start + 20)
+        ]}
+        if not start:
+            payload["next_page_token"] = "page2"
+        return httpx.Response(200, json=payload)
+
+    monkeypatch.setattr(places_service.httpx, "AsyncClient", lambda **kwargs: AsyncClient(transport=httpx.MockTransport(provider), **kwargs))
+    app = create_app()
+
+    async def exercise():
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            return await client.get("/places/suggestions?lat=43.65&lng=-79.38")
+
+    response = asyncio.run(exercise())
+    limited = min(actor_limit, global_limit) == 1
+    expected_requests = 1 if limited else 2
+    assert response.status_code == 200
+    assert len(response.json()) == (20 if limited else 40)
+    assert len(calls) == expected_requests
+    assert response.headers["x-places-requests"] == str(expected_requests)
+    assert response.headers["x-places-pages"] == str(expected_requests)
+    assert response.headers["x-places-coverage"] == ("quota" if limited else "complete")
+    assert response.headers["x-ratelimit-remaining"] == ("0" if limited else "8")
+
+
 def test_chat_endpoint_rejects_invalid_viewport_bounds(mocked_pipeline):
     app = create_app()
 
@@ -1602,7 +1644,7 @@ def test_top_rated_suggestions_are_deduplicated_and_capped(monkeypatch):
             "rating": 4.5,
             "user_ratings_total": 100 + index,
         }
-        for index in range(25)
+        for index in range(75)
     ]
     candidates.append({**candidates[0], "name": "Duplicate"})
 
@@ -1613,8 +1655,8 @@ def test_top_rated_suggestions_are_deduplicated_and_capped(monkeypatch):
 
     results = asyncio.run(places_service.get_top_rated_nearby(43.65, -79.38))
 
-    assert len(results) == 20
-    assert len({item["place_id"] for item in results}) == 20
+    assert len(results) == 60
+    assert len({item["place_id"] for item in results}) == 60
 
 
 def test_top_rated_suggestions_apply_exact_viewport_bounds(monkeypatch):

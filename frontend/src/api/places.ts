@@ -30,12 +30,18 @@ export class PlacesQuotaError extends Error {
   }
 }
 
+export type DiscoveryCoverage = {
+  partialReason: string | null;
+  resetAt: string | null;
+};
+
 export async function fetchSuggestions(
     lat: number,
     lng: number,
     radius: number = 5000,
     signal?: AbortSignal,
     bounds?: ViewportBounds,
+    onCoverage?: (coverage: DiscoveryCoverage) => void,
 ): Promise<Suggestion[]> {
   const search = new URLSearchParams({
     lat: String(lat),
@@ -59,7 +65,13 @@ export async function fetchSuggestions(
     }
     throw new Error(`Failed to fetch suggestions (${response.status})`);
   }
-  return response.json();
+  const places: Suggestion[] = await response.json();
+  const coverage = response.headers.get("x-places-coverage");
+  onCoverage?.({
+    partialReason: coverage && coverage !== "complete" ? coverage : null,
+    resetAt: response.headers.get("x-ratelimit-reset"),
+  });
+  return places;
 }
 
 export type DietaryEvidenceMatch = {

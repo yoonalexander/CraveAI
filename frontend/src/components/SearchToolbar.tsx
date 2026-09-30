@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 
 import type { SearchArea } from "../types/searchArea";
 import type { AdvancedFilters, SuggestionFilter } from "../utils/suggestionPool";
+import { DEFAULT_ADVANCED_FILTERS } from "../utils/suggestionPool";
 import { ClockIcon, DollarIcon, PinIcon, SlidersIcon } from "./Icons";
 import { LocationLoader } from "./LoadingIndicators";
 
@@ -9,6 +10,8 @@ type SearchToolbarProps = {
   area: SearchArea | null;
   activeFilters: Set<SuggestionFilter>;
   count: number;
+  totalCount?: number;
+  coverageNotice?: string | null;
   error: string | null;
   isLoading: boolean;
   canRetry: boolean;
@@ -26,6 +29,8 @@ export function SearchToolbar({
   area,
   activeFilters,
   count,
+  totalCount = count,
+  coverageNotice,
   error,
   isLoading,
   canRetry,
@@ -72,17 +77,20 @@ export function SearchToolbar({
     return () => { document.removeEventListener("keydown", handleKey); previous?.focus(); };
   }, [showMore]);
 
+  const hasFilters = activeFilters.size > 0 || JSON.stringify(advancedFilters) !== JSON.stringify(DEFAULT_ADVANCED_FILTERS);
   const status = isLoading
     ? count
       ? `Updating ${count} restaurant${count === 1 ? "" : "s"}…`
       : "Finding restaurants…"
     : error
       ? error
-      : `${count} restaurant${count === 1 ? "" : "s"} in this area`;
+      : hasFilters || count !== totalCount
+        ? `${count} of ${totalCount} loaded restaurants shown`
+        : `${count} restaurant${count === 1 ? "" : "s"} in this area`;
 
   return (
     <section
-      className={`search-toolbar${error ? " has-error" : ""}${isLoading ? " is-loading" : ""}`}
+      className={`search-toolbar${error ? " has-error" : ""}${isLoading ? " is-loading" : ""}${hasFilters || count !== totalCount ? " has-filtered-results" : ""}`}
       aria-label="Restaurant search controls"
     >
       <div className="search-toolbar-location">
@@ -97,12 +105,13 @@ export function SearchToolbar({
       <div className="search-toolbar-status" aria-live="polite">
         <span className={error ? "is-error" : ""}>{status}</span>
         {error && canRetry ? <button onClick={onRetry} type="button">Try again</button> : null}
+        {!isLoading && hasFilters ? <button onClick={onClearFilters} type="button">Clear filters</button> : null}
       </div>
 
       <div className="search-filter-scroll" aria-label="Restaurant filters">
         <button
-          aria-pressed={activeFilters.size === 0}
-          className={activeFilters.size === 0 ? "is-active" : ""}
+          aria-pressed={!hasFilters}
+          className={!hasFilters ? "is-active" : ""}
           onClick={onClearFilters}
           type="button"
         >
@@ -135,6 +144,7 @@ export function SearchToolbar({
           </button>
         </div>
       </div>
+      {!isLoading && coverageNotice ? <p className="discovery-coverage-notice" role="status">{coverageNotice}</p> : null}
       <span className="sr-only" id="budget-filter-explanation">
         Under $20 is estimated from Google price levels zero and one.
       </span>
