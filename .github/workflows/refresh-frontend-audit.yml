@@ -1,0 +1,27 @@
+name: Refresh frontend audit dependencies
+on:
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  refresh:
+    if: github.head_ref == 'fix/frontend-audit-dependencies'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - run: npm audit fix --package-lock-only
+      - name: Print refreshed lockfile entries
+        run: |
+          node --input-type=module -e 'import fs from "node:fs"; const lock = JSON.parse(fs.readFileSync("package-lock.json", "utf8")); console.log("REFRESHED_LOCK=" + JSON.stringify(lock));'
+      - run: npm ci
+      - run: npm test
+      - run: npm run lint
+      - run: npm run build
+      - run: npm audit --audit-level=high
