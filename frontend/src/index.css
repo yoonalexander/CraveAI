@@ -875,7 +875,10 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   white-space: nowrap;
   cursor: pointer;
 }
-.search-filter-scroll button:hover, .search-filter-scroll button.is-active { border-color: #aec5a7; color: #386c37; background: #edf4e9; }
+.search-filter-scroll button[aria-pressed="true"] { border-color: #aec5a7; color: #386c37; background: #edf4e9; }
+@media (hover: hover) and (pointer: fine) {
+  .search-filter-scroll button:hover:not([aria-pressed="true"]) { border-color: #bfc5ba; background: #f7f8f6; }
+}
 .search-filter-scroll button svg { width: 14px; }
 .toolbar-more-filter { position: relative; }
 .toolbar-filter-popover { position: absolute; z-index: 30; top: calc(100% + 9px); right: 0; width: 205px; padding: 12px 14px; border: 1px solid #dedfda; border-radius: 12px; color: #555851; background: #fff; box-shadow: 0 12px 34px rgba(27,33,25,.14); font-size: 12px; }
