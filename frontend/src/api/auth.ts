@@ -4,8 +4,25 @@ export type AuthUser = {
   user_id: string;
   email: string;
   email_verified: boolean;
+  username?: string | null;
   policy_required?: boolean;
 };
+
+export function accountName(user: AuthUser): string {
+  return user.username?.trim() || "Food explorer";
+}
+
+export async function updateUsername(username: string): Promise<string> {
+  const response = await apiFetch("/account/profile", {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username }),
+  });
+  if (response.status === 409) throw new Error("That username is taken. Try another one.");
+  if (response.status === 422) throw new Error("Use 3–30 letters, numbers, or underscores for your username.");
+  if (!response.ok) throw new Error(await readApiError(response));
+  return ((await response.json()) as { username: string }).username;
+}
 
 export type Identity = {
   id: string;

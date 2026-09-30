@@ -33,6 +33,7 @@ from backend.services.sessions import (
 from backend.services.storage import (
     audit_event,
     find_profile_by_email,
+    get_profile_username,
     has_account_identity,
     remove_account_identity,
     sync_account_identities,
@@ -77,6 +78,7 @@ class UserResponse(BaseModel):
     user_id: str
     email: EmailStr
     email_verified: bool
+    username: str | None = None
     policy_required: bool = False
 
 
@@ -555,6 +557,7 @@ async def _user_response(session: SessionContext) -> UserResponse:
         user_id=session.user_id,
         email=session.email,
         email_verified=session.email_verified,
+        username=await get_profile_username(session.user_id),
         policy_required=not accepted,
     )
 

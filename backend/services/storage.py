@@ -104,6 +104,31 @@ async def find_profile_by_email(email: str) -> dict[str, Any] | None:
     return await asyncio.to_thread(_read)
 
 
+async def get_profile_username(user_id: str) -> str | None:
+    def _read() -> str | None:
+        with get_session_factory()() as db:
+            return db.scalar(select(Profile.username).where(Profile.user_id == user_id))
+
+    return await asyncio.to_thread(_read)
+
+
+async def set_profile_username(user_id: str, username: str) -> None:
+    def _write() -> None:
+        with get_session_factory()() as db:
+            profile = db.get(Profile, user_id)
+            if profile is None:
+                raise LookupError("profile_not_found")
+            profile.username = username
+            profile.updated_at = datetime.now(timezone.utc)
+            try:
+                db.commit()
+            except IntegrityError as exc:
+                db.rollback()
+                raise ValueError("username_unavailable") from exc
+
+    await asyncio.to_thread(_write)
+
+
 async def has_account_identity(user_id: str, provider: str) -> bool:
     def _read() -> bool:
         with get_session_factory()() as db:
@@ -271,6 +296,7 @@ async def export_user_data(user_id: str) -> dict[str, Any]:
                     {
                         "user_id": profile.user_id,
                         "email": profile.email,
+                        "username": profile.username,
                         "email_verified": profile.email_verified,
                         "created_at": _iso(profile.created_at),
                     }

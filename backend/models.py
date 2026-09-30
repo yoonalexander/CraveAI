@@ -21,9 +21,11 @@ from backend.database import Base
 
 class Profile(Base):
     __tablename__ = "profiles"
+    __table_args__ = (Index("uq_profiles_username", "username", unique=True),)
 
     user_id: Mapped[str] = mapped_column(Uuid(as_uuid=False), primary_key=True)
     email: Mapped[str] = mapped_column(String(320), nullable=False)
+    username: Mapped[str | None] = mapped_column(String(30))
     email_verified: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)

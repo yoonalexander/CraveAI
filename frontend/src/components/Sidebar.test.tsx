@@ -1,11 +1,12 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { AuthUser } from "../api/auth";
 
 import { Sidebar } from "./Sidebar";
 
 const { authState } = vi.hoisted(() => ({
   authState: {
-    user: null as null | { user_id: string; email: string; email_verified: boolean },
+    user: null as AuthUser | null,
     loading: false,
     status: "guest",
   },
@@ -27,6 +28,17 @@ describe("Sidebar", () => {
     authState.user = null;
     authState.loading = false;
     authState.status = "guest";
+  });
+
+  it("uses the username in expanded and collapsed account navigation", () => {
+    authState.user = { user_id: "user-1", email: "private@example.com", email_verified: true, username: "ramen_fan" };
+    authState.status = "authenticated";
+    const props = { collapsed: false, currentPath: "/", mobileOpen: false, onCloseMobile: vi.fn(), onNavigate: vi.fn(), onToggle: vi.fn(), weather: null, weatherLoading: false };
+    const { rerender } = render(<Sidebar {...props} />);
+    expect(screen.getByRole("link", { name: "Account: ramen_fan" })).toHaveAttribute("href", "/account");
+    expect(screen.queryByText("private@example.com")).not.toBeInTheDocument();
+    rerender(<Sidebar {...props} collapsed />);
+    expect(screen.getByRole("link", { name: "Account: ramen_fan" })).toHaveAttribute("title", "Account: ramen_fan");
   });
 
   it("announces weather loading in the collapsed sidebar and replaces it when settled", () => {

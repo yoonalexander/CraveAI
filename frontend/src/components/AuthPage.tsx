@@ -2,6 +2,7 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 
 import {
   deleteAccount,
+  accountName,
   exportAccount,
   forgotPassword,
   googleLoginUrl,
@@ -304,17 +305,24 @@ function GoogleLogo(): JSX.Element {
 }
 
 function AccountPanel(): JSX.Element {
-  const { user, loading, logout } = useAuth();
+  const { user, loading, logout, updateUsername } = useAuth();
   const [identities, setIdentities] = useState<Identity[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [username, setUsername] = useState(user?.username || "");
+  const [savingUsername, setSavingUsername] = useState(false);
+  const [usernameError, setUsernameError] = useState<string | null>(null);
+  const [usernameSaved, setUsernameSaved] = useState(false);
+  const userId = user?.user_id;
+
+  useEffect(() => { setUsername(user?.username || ""); }, [user?.username]);
 
   useEffect(() => {
-    if (user) {
+    if (userId) {
       void listIdentities().then(setIdentities).catch((reason) => {
         setError(reason instanceof Error ? reason.message : "Unable to load identities.");
       });
     }
-  }, [user]);
+  }, [userId]);
 
   if (loading) return <p className="auth-subtitle">Loading account…</p>;
   if (!user) {
@@ -351,11 +359,62 @@ function AccountPanel(): JSX.Element {
     }
   }
 
+  async function saveUsername(event: FormEvent<HTMLFormElement>): Promise<void> {
+    event.preventDefault();
+    setSavingUsername(true);
+    setUsernameError(null);
+    setUsernameSaved(false);
+    try {
+      await updateUsername(username.trim().toLowerCase());
+      setUsernameSaved(true);
+    } catch (reason) {
+      setUsernameError(reason instanceof Error ? reason.message : "Unable to save your username.");
+    } finally {
+      setSavingUsername(false);
+    }
+  }
+
   return (
     <div className="auth-form account-form">
       <p className="auth-eyebrow">Account</p>
       <h1 className="auth-title">Your account</h1>
-      <p className="auth-subtitle">{user.email}</p>
+      <p className="auth-subtitle account-display-name">{accountName(user)}</p>
+      <form className="account-section account-profile-form" onSubmit={(event) => void saveUsername(event)}>
+        <label className="auth-field" htmlFor="account-username">
+          <span>Username</span>
+          <input
+            className="auth-input"
+            id="account-username"
+            name="username"
+            autoComplete="nickname"
+            autoCapitalize="none"
+            spellCheck={false}
+            required
+            minLength={3}
+            maxLength={30}
+            pattern="[A-Za-z0-9_]{3,30}"
+            aria-describedby={usernameError ? "username-help username-error" : "username-help"}
+            aria-invalid={usernameError ? true : undefined}
+            disabled={savingUsername}
+            value={username}
+            onChange={(event) => {
+              setUsername(event.target.value);
+              setUsernameSaved(false);
+              setUsernameError(null);
+            }}
+          />
+        </label>
+        <p className="account-profile-help" id="username-help">Choose 3–30 letters (a–z), numbers, or underscores. Usernames are saved in lowercase.</p>
+        <button className="auth-primary-button" type="submit" disabled={savingUsername || username.trim().toLowerCase() === user.username}>
+          {savingUsername ? "Saving…" : "Save username"}
+        </button>
+        {usernameSaved ? <p className="auth-message" role="status">Username saved.</p> : null}
+        {usernameError ? <p className="auth-error" id="username-error" role="alert">{usernameError}</p> : null}
+      </form>
+      <section className="account-section account-email-details">
+        <h2>Email address</h2>
+        <p>{user.email}</p>
+      </section>
       <section className="account-section">
         <h2>Sign-in methods</h2>
         <ul className="account-identities">

@@ -1,6 +1,7 @@
 import { ComponentType, useEffect, useRef } from "react";
 
 import type { CurrentWeather } from "../api/weather";
+import { accountName } from "../api/auth";
 import { useAuth } from "../context/AuthContext";
 import { WeatherLoader } from "./LoadingIndicators";
 import {
@@ -209,12 +210,13 @@ export function Sidebar({
             <a
               className="sidebar-account-link"
               href="/account"
-              title={collapsed ? "Account" : undefined}
+              aria-label={`Account: ${accountName(user)}`}
+              title={collapsed ? `Account: ${accountName(user)}` : undefined}
             >
               <UserIcon className="sidebar-icon" />
               <span className="sidebar-account-copy">
                 <strong>Your account</strong>
-                <small>{user.email}</small>
+                <small>{accountName(user)}</small>
               </span>
             </a>
           ) : (

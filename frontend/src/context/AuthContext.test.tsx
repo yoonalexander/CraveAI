@@ -1,23 +1,26 @@
-import { act, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { AuthProvider, useAuth } from "./AuthContext";
-import { fetchCurrentUser } from "../api/auth";
+import { fetchCurrentUser, updateUsername } from "../api/auth";
 
 vi.mock("../api/auth", () => ({
   fetchCurrentUser: vi.fn(),
   login: vi.fn(),
   logout: vi.fn(),
+  updateUsername: vi.fn(),
 }));
 
 const mockedFetchCurrentUser = vi.mocked(fetchCurrentUser);
 
 function AccountState(): JSX.Element {
-  const { loading, status, user } = useAuth();
+  const { loading, status, user, updateUsername: saveUsername } = useAuth();
   return (
     <div>
       <span>{loading ? "checking" : status}</span>
       <span>{user?.email || "no confirmed user"}</span>
+      <span>{user?.username || "no username"}</span>
+      <button onClick={() => void saveUsername("ramen_fan")}>Save name</button>
     </div>
   );
 }
@@ -58,5 +61,17 @@ describe("AuthProvider startup", () => {
     await flushEffects();
     expect(screen.getByText("authenticated")).toBeInTheDocument();
     expect(screen.getByText("signed-in@example.com")).toBeInTheDocument();
+  });
+
+  it("updates the shared identity after saving without another blocking account check", async () => {
+    mockedFetchCurrentUser.mockResolvedValue({ user_id: "user-1", email: "signed-in@example.com", email_verified: true });
+    vi.mocked(updateUsername).mockResolvedValue("ramen_fan");
+    render(<AuthProvider><AccountState /></AuthProvider>);
+    await flushEffects();
+    fireEvent.click(screen.getByRole("button", { name: "Save name" }));
+    await flushEffects();
+    expect(screen.getByText("ramen_fan")).toBeInTheDocument();
+    expect(screen.getByText("authenticated")).toBeInTheDocument();
+    expect(mockedFetchCurrentUser).toHaveBeenCalledOnce();
   });
 });

@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { AuthUser } from "../api/auth";
 
 import { AccountMenu } from "./AccountMenu";
 
@@ -9,7 +10,7 @@ const { authState, logout } = vi.hoisted(() => ({
       user_id: "user-1",
       email: "signed-in@example.com",
       email_verified: true,
-    } as null | { user_id: string; email: string; email_verified: boolean },
+    } as AuthUser | null,
     loading: false,
     status: "authenticated",
   },
@@ -49,6 +50,22 @@ describe("AccountMenu", () => {
     );
   });
 
+  it("shows an accessible profile icon without exposing the email", () => {
+    authState.user = { ...authState.user!, username: "ramen_fan" };
+    render(<AccountMenu />);
+    const profile = screen.getByRole("link", { name: "Account: ramen_fan" });
+    expect(profile).toHaveAttribute("href", "/account");
+    expect(profile.querySelector("svg")).toHaveAttribute("aria-hidden", "true");
+    expect(profile).toHaveTextContent("");
+    expect(screen.queryByText("signed-in@example.com")).not.toBeInTheDocument();
+  });
+
+  it("keeps legacy accounts accessible with an email-independent fallback", () => {
+    render(<AccountMenu />);
+    expect(screen.getByRole("link", { name: "Account: Food explorer" })).toHaveAttribute("href", "/account");
+    expect(screen.queryByText("signed-in@example.com")).not.toBeInTheDocument();
+  });
+
   it("asks for confirmation before signing out", async () => {
     render(<AccountMenu />);
 
@@ -72,6 +89,23 @@ describe("AccountMenu", () => {
 
     expect(logout).not.toHaveBeenCalled();
     expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Sign out" })).toHaveFocus();
+  });
+
+  it("keeps keyboard focus in the confirmation and returns it on Escape", () => {
+    render(<AccountMenu />);
+    const trigger = screen.getByRole("button", { name: "Sign out" });
+    fireEvent.click(trigger);
+    const dialog = screen.getByRole("alertdialog");
+    const cancel = within(dialog).getByRole("button", { name: "Cancel" });
+    const confirm = within(dialog).getByRole("button", { name: "Sign out" });
+    fireEvent.keyDown(cancel, { key: "Tab", shiftKey: true });
+    expect(confirm).toHaveFocus();
+    fireEvent.keyDown(confirm, { key: "Tab" });
+    expect(cancel).toHaveFocus();
+    fireEvent.keyDown(cancel, { key: "Escape" });
+    expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
+    expect(trigger).toHaveFocus();
   });
 
   it("does not show login until account checking finishes", () => {

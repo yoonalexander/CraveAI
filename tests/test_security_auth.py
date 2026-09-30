@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import importlib
 import uuid
 
 import pytest
@@ -11,6 +12,100 @@ from backend.database import reset_database_cache
 from backend.main import create_app
 from backend.services.rate_limit import burst_limiter
 from backend.services.supabase_auth import ProviderSession, SupabaseAuthClient
+
+
+async def login_with_csrf(client, email="owner@example.com"):
+    response = await client.post("/api/auth/login", json={"email": email, "password": "correct horse battery staple"})
+    assert response.status_code == 200
+    token = (await client.get("/api/auth/csrf")).json()["csrf_token"]
+    return response, {"X-CSRF-Token": token, "Origin": "http://localhost:5173"}
+
+
+def test_username_persists_through_login_refresh_and_export(monkeypatch, provider_session):
+    async def fake_login(self, email, password):
+        return provider_session
+    monkeypatch.setattr(SupabaseAuthClient, "password_login", fake_login)
+    app = create_app()
+
+    async def exercise():
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            before, headers = await login_with_csrf(client)
+            assert before.json()["user"]["username"] is None
+            saved = await client.patch("/api/account/profile", headers=headers, json={"username": " Ramen_Fan "})
+            assert saved.status_code == 200
+            assert saved.json() == {"username": "ramen_fan"}
+            assert (await client.get("/api/auth/me")).json()["user"]["username"] == "ramen_fan"
+            assert (await client.get("/api/account/export")).json()["profile"]["username"] == "ramen_fan"
+            await client.post("/api/auth/logout", headers=headers)
+            after, _ = await login_with_csrf(client)
+            assert after.json()["user"]["username"] == "ramen_fan"
+
+    asyncio.run(exercise())
+
+
+def test_username_update_requires_session_csrf_and_allowed_origin(monkeypatch, provider_session):
+    async def fake_login(self, email, password):
+        return provider_session
+    monkeypatch.setattr(SupabaseAuthClient, "password_login", fake_login)
+    app = create_app()
+
+    async def exercise():
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            assert (await client.patch("/api/account/profile", json={"username": "attacker"})).status_code == 401
+            _, headers = await login_with_csrf(client)
+            assert (await client.patch("/api/account/profile", json={"username": "attacker"})).status_code == 403
+            wrong_origin = {**headers, "Origin": "https://attacker.example"}
+            assert (await client.patch("/api/account/profile", headers=wrong_origin, json={"username": "attacker"})).status_code == 403
+            for invalid in ["ab", "x" * 31, "has spaces", "owner@example.com", "<script>", "ümlaut", "   ", "bad\nname"]:
+                rejected = await client.patch("/api/account/profile", headers=headers, json={"username": invalid})
+                assert rejected.status_code == 422, invalid
+            rejected = await client.patch("/api/account/profile", headers=headers, json={"username": "valid_name", "user_id": str(uuid.uuid4())})
+            assert rejected.status_code == 422
+            assert (await client.get("/api/auth/me")).json()["user"]["username"] is None
+
+    asyncio.run(exercise())
+
+
+def test_username_uniqueness_and_user_isolation(monkeypatch, provider_session):
+    from dataclasses import replace
+    second = replace(provider_session, user_id=str(uuid.uuid4()), email="other@example.com",
+                     identities=({"id": "other-password-identity", "provider": "email", "identity_data": {"email": "other@example.com"}},))
+    async def fake_login(self, email, password):
+        return second if email == second.email else provider_session
+    monkeypatch.setattr(SupabaseAuthClient, "password_login", fake_login)
+    app = create_app()
+
+    async def exercise():
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as owner, AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as other:
+            _, owner_headers = await login_with_csrf(owner)
+            _, other_headers = await login_with_csrf(other, second.email)
+            assert (await owner.patch("/api/account/profile", headers=owner_headers, json={"username": "ramen_fan"})).status_code == 200
+            assert (await other.patch("/api/account/profile", headers=other_headers, json={"username": "RAMEN_FAN"})).status_code == 409
+            assert (await other.get("/api/auth/me")).json()["user"]["username"] is None
+            assert (await other.patch("/api/account/profile", headers=other_headers, json={"username": "other_fan"})).status_code == 200
+            assert (await owner.get("/api/auth/me")).json()["user"]["username"] == "ramen_fan"
+            assert (await owner.patch("/api/account/profile", headers=owner_headers, json={"username": "ramen_fan"})).status_code == 200
+
+    asyncio.run(exercise())
+
+
+def test_username_migration_preserves_existing_profiles(monkeypatch):
+    from alembic.migration import MigrationContext
+    from alembic.operations import Operations
+    from sqlalchemy import create_engine, text
+    migration = importlib.import_module("backend.migrations.versions.0003_profile_username")
+    engine = create_engine("sqlite://")
+    with engine.begin() as connection:
+        connection.execute(text("CREATE TABLE profiles (user_id TEXT PRIMARY KEY, email TEXT NOT NULL)"))
+        connection.execute(text("INSERT INTO profiles VALUES ('existing', 'private@example.com')"))
+        monkeypatch.setattr(migration, "op", Operations(MigrationContext.configure(connection)))
+        migration.upgrade()
+        row = connection.execute(text("SELECT email, username FROM profiles")).one()
+        assert tuple(row) == ("private@example.com", None)
+        connection.execute(text("UPDATE profiles SET username = 'ramen_fan' WHERE user_id = 'existing'"))
+        migration.downgrade()
+        assert connection.execute(text("SELECT email FROM profiles")).scalar() == "private@example.com"
+    engine.dispose()
 
 
 @pytest.fixture(autouse=True)

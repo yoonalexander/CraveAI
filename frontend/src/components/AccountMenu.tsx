@@ -1,12 +1,23 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { useAuth } from "../context/AuthContext";
+import { accountName } from "../api/auth";
+import { UserIcon } from "./Icons";
 
 export function AccountMenu(): JSX.Element {
   const { user, loading, logout, status } = useAuth();
   const [showSignOutConfirm, setShowSignOutConfirm] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [signOutError, setSignOutError] = useState<string | null>(null);
+  const signOutButtonRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!showSignOutConfirm) return;
+    dialogRef.current?.querySelector<HTMLButtonElement>("button")?.focus();
+    const trigger = signOutButtonRef.current;
+    return () => trigger?.focus();
+  }, [showSignOutConfirm]);
 
   const confirmSignOut = async (): Promise<void> => {
     setIsSigningOut(true);
@@ -37,10 +48,16 @@ export function AccountMenu(): JSX.Element {
   }
   return (
     <div className="top-auth-actions signed-in-actions">
-      <a className="top-account-email" href="/account">
-        {user.email}
+      <a
+        className="top-profile-button"
+        href="/account"
+        aria-label={`Account: ${accountName(user)}`}
+        title={`Account: ${accountName(user)}`}
+      >
+        <UserIcon />
       </a>
       <button
+        ref={signOutButtonRef}
         type="button"
         className="top-signout-button shrink-0 whitespace-nowrap"
         onClick={() => {
@@ -58,9 +75,20 @@ export function AccountMenu(): JSX.Element {
             if (event.key === "Escape" && !isSigningOut) {
               setShowSignOutConfirm(false);
             }
+            if (event.key === "Tab") {
+              const buttons = dialogRef.current?.querySelectorAll<HTMLButtonElement>("button:not([disabled])");
+              if (!buttons?.length) { event.preventDefault(); return; }
+              const target = event.shiftKey ? buttons[buttons.length - 1] : buttons[0];
+              const boundary = event.shiftKey ? buttons[0] : buttons[buttons.length - 1];
+              if (document.activeElement === boundary) {
+                event.preventDefault();
+                target.focus();
+              }
+            }
           }}
         >
           <div
+            ref={dialogRef}
             aria-describedby="sign-out-description"
             aria-labelledby="sign-out-title"
             aria-modal="true"

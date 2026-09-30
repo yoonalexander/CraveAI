@@ -13,6 +13,7 @@ import {
   fetchCurrentUser,
   login as loginRequest,
   logout as logoutRequest,
+  updateUsername as updateUsernameRequest,
 } from "../api/auth";
 import { recordStartupTiming } from "../utils/startupTelemetry";
 
@@ -23,6 +24,7 @@ type AuthContextValue = {
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   refresh: () => Promise<void>;
+  updateUsername: (username: string) => Promise<void>;
 };
 
 export type AuthStatus = "checking" | "authenticated" | "guest" | "offline";
@@ -38,6 +40,7 @@ const guestAuthFallback: AuthContextValue = {
   login: async () => { throw new Error("Authentication provider is unavailable."); },
   logout: async () => undefined,
   refresh: async () => undefined,
+  updateUsername: async () => { throw new Error("Sign in to choose a username."); },
 };
 
 export function AuthProvider({ children }: { children: ReactNode }): JSX.Element {
@@ -104,6 +107,11 @@ export function AuthProvider({ children }: { children: ReactNode }): JSX.Element
         setStatus("guest");
       },
       refresh,
+      updateUsername: async (username) => {
+        if (!user) throw new Error("Sign in to choose a username.");
+        const savedUsername = await updateUsernameRequest(username);
+        setUser((current) => current?.user_id === user.user_id ? { ...current, username: savedUsername } : current);
+      },
     }),
     [loading, refresh, status, user],
   );
