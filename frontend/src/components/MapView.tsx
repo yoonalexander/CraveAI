@@ -172,7 +172,7 @@ export function MapView({
         zoom={13}
       >
         <Marker
-          label={{ text: "ME", color: "#ffffff", fontSize: "10px", fontWeight: "700" }}
+          label={{ text: "ME", color: "#ffffff", fontFamily: "var(--font-family-sans)", fontSize: "10px", fontWeight: "700" }}
           position={originLocation}
           title={originIsDevice ? "You are here" : `Selected location: ${locationLabel}`}
           zIndex={1000}

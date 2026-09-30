@@ -5,6 +5,11 @@ const config: Config = {
   darkMode: "class",
   theme: {
     extend: {
+      fontFamily: {
+        sans: ["var(--font-family-sans)"],
+        serif: ["var(--font-family-sans)"],
+        mono: ["var(--font-family-sans)"],
+      },
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",

@@ -2,8 +2,25 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: optional;
+  src: url("/fonts/InterVariable.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Inter";
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: optional;
+  src: url("/fonts/InterVariable-Italic.woff2") format("woff2");
+}
+
 @layer base {
   :root {
+    --font-family-sans: "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     --background: #fff;
     --foreground: #1f201e;
     --primary: #6e9c63;
@@ -44,13 +61,15 @@
 
 * { box-sizing: border-box; }
 html, body, #root { min-height: 100%; margin: 0; }
+html { font-family: var(--font-family-sans); }
 body {
   @apply bg-background text-foreground;
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-family-sans);
   -webkit-font-smoothing: antialiased;
 }
 body.crave-overlay-open { overflow: hidden !important; }
-button, input, textarea { font: inherit; }
+button, input, select, optgroup, textarea { font: inherit; }
+code, kbd, pre, samp { font-family: var(--font-family-sans); }
 button, a { -webkit-tap-highlight-color: transparent; }
 button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible {
   outline: 2px solid #6e9c63;
@@ -129,11 +148,10 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   max-width: 470px;
   margin: 0;
   color: #20211f;
-  font-family: Georgia, "Times New Roman", serif;
   font-size: clamp(40px, 5vw, 62px);
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: -.055em;
-  line-height: .98;
+  line-height: 1.08;
 }
 .auth-showcase-copy {
   max-width: 450px;
@@ -565,7 +583,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   transform: translateY(-94px);
   transition: opacity 220ms ease,transform 300ms ease;
 }
-.chat-idle-heading h1 { margin: 0; font-family: Georgia,"Times New Roman",serif; font-size: clamp(22px,2vw,30px); font-weight: 500; letter-spacing: -.025em; }
+.chat-idle-heading h1 { margin: 0; font-size: clamp(22px,2vw,30px); font-weight: 600; letter-spacing: -.025em; }
 .chat-panel.has-conversation .chat-idle-heading { opacity: 0; pointer-events: none; transform: translateY(-122px); }
 .chat-active-toolbar { position: absolute; z-index: 4; top: 0; right: 4px; height: 36px; opacity: 0; pointer-events: none; transition: opacity 180ms ease; }
 .chat-panel.has-conversation .chat-active-toolbar { opacity: 1; pointer-events: auto; }
@@ -713,7 +731,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .placeholder-page { display: flex; height: 100%; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; text-align: center; }
 .placeholder-page img { width: 42px; height: 58px; }
 .placeholder-page > p { margin: 18px 0 0; color: #50844d; font-size: 11px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
-.placeholder-page h1 { max-width: 620px; margin: 10px 0 0; font-family: Georgia,"Times New Roman",serif; font-size: clamp(28px,4vw,46px); font-weight: 500; letter-spacing: -.03em; }
+.placeholder-page h1 { max-width: 620px; margin: 10px 0 0; font-size: clamp(28px,4vw,46px); font-weight: 600; letter-spacing: -.03em; }
 .placeholder-page > span { max-width: 540px; margin-top: 13px; color: #737670; font-size: 13px; line-height: 1.6; }
 .placeholder-page > button { margin-top: 24px; padding: 10px 17px; border: 0; border-radius: 999px; color: #fff; background: #5f8f55; font-size: 12px; font-weight: 700; cursor: pointer; }
 
@@ -917,6 +935,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .restaurant-map-marker span { display: grid; width: 20px; height: 20px; place-items: center; border-radius: 50%; color: #fff; background: #4f884b; font-weight: 850; }
 .restaurant-map-marker.is-recommendation { border-color: #5d9158; color: #2f5d2d; box-shadow: 0 4px 11px rgba(49,92,45,.28); }
 .restaurant-map-marker.is-recommendation::after { border-color: #5d9158; }
+.restaurant-map-marker, .restaurant-map-popup { font-family: var(--font-family-sans); }
 .restaurant-map-popup { display: flex; max-width: 260px; flex-direction: column; gap: 7px; padding: 3px; color: #282a27; font-size: 13px; line-height: 1.4; }
 .restaurant-map-popup strong { font-size: 15px; }
 .restaurant-map-popup p { margin: 0; }
@@ -925,7 +944,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .discovery-page { min-height: 0; padding: 28px clamp(20px,3vw,48px) 44px; overflow-y: auto; }
 .discovery-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; }
 .discovery-heading p { margin: 0 0 6px; color: #4d824a; font-size: 11px; font-weight: 850; letter-spacing: .14em; text-transform: uppercase; }
-.discovery-heading h1 { margin: 0; font-family: Georgia,"Times New Roman",serif; font-size: clamp(28px,3vw,42px); font-weight: 500; letter-spacing: -.025em; }
+.discovery-heading h1 { margin: 0; font-size: clamp(28px,3vw,42px); font-weight: 600; letter-spacing: -.025em; }
 .search-toolbar:has(.discovery-coverage-notice) { row-gap: 8px; }
 .discovery-coverage-notice { grid-column: 1 / -1; margin: 0; color: var(--muted-foreground); font-size: 12px; line-height: 1.5; }
 .discovery-heading > a { padding-bottom: 6px; color: #557851; font-size: 11px; text-decoration: underline; text-underline-offset: 2px; }
@@ -1086,7 +1105,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .product-page { height: 100%; min-height: 0; padding: 34px clamp(22px,4vw,64px) 60px; overflow-y: auto; color: #252824; background: #fff; }
 .product-page-heading { max-width: 900px; margin-bottom: 28px; }
 .product-page-heading > p { margin: 0 0 7px; color: #4d824a; font-size: 12px; font-weight: 850; letter-spacing: .14em; text-transform: uppercase; }
-.product-page-heading h1 { margin: 0; font-family: Georgia,"Times New Roman",serif; font-size: clamp(32px,4vw,52px); font-weight: 500; letter-spacing: -.035em; }
+.product-page-heading h1 { margin: 0; font-size: clamp(32px,4vw,52px); font-weight: 600; letter-spacing: -.035em; }
 .product-page-heading > span { display: block; margin-top: 9px; color: #696d67; font-size: 14px; line-height: 1.55; }
 .legal-review-banner { max-width: 920px; margin: 0 0 22px; padding: 13px 16px; border: 1px solid #e9d79e; border-radius: 12px; color: #664e13; background: #fff9df; font-size: 13px; line-height: 1.5; }
 .legal-intro { max-width: 850px; color: #4d514b; font-size: 16px; line-height: 1.75; }
@@ -1172,7 +1191,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .policy-gate-backdrop, .age-gate-backdrop, .advanced-filter-backdrop { position: fixed; z-index: 120; inset: 0; display: grid; place-items: center; padding: 20px; background: rgba(25,29,24,.48); backdrop-filter: blur(4px); }
 .policy-gate, .age-gate { width: min(500px,100%); padding: 28px; border-radius: 22px; background: #fff; box-shadow: 0 24px 70px rgba(15,22,14,.24); }
 .policy-gate > img, .age-gate > img { width: 30px; }.policy-gate > p, .age-gate > p { color: #4c8248; font-size: 11px; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
-.policy-gate h1, .age-gate h2 { margin: 7px 0; font-family: Georgia,"Times New Roman",serif; }.policy-gate > span, .age-gate > span { display: block; color: #61675f; font-size: 13px; line-height: 1.6; }
+.policy-gate h1, .age-gate h2 { margin: 7px 0; }.policy-gate > span, .age-gate > span { display: block; color: #61675f; font-size: 13px; line-height: 1.6; }
 .policy-gate label { display: flex; gap: 9px; margin: 18px 0; padding: 13px; border-radius: 12px; background: #f3f6f1; font-size: 13px; line-height: 1.5; }.policy-gate button, .age-gate button { width: 100%; min-height: 44px; margin-top: 14px; border: 0; border-radius: 999px; color: #fff; background: #4e8149; font-weight: 780; }.policy-gate button:disabled { opacity: .45; }.age-gate button.secondary { color: #3b4039; background: #ecefeb; }.age-gate small { display: block; margin-top: 14px; color: #6c716a; line-height: 1.5; }
 .advanced-filter-dialog { width: min(720px,100%); max-height: min(850px,90dvh); padding: 23px; overflow-y: auto; border-radius: 20px; background: #fff; box-shadow: 0 24px 70px rgba(15,22,14,.24); }
 .advanced-filter-dialog header { display: flex; justify-content: space-between; }.advanced-filter-dialog header p { margin: 0; color: #4d824a; font-size: 11px; font-weight: 850; text-transform: uppercase; }.advanced-filter-dialog h2 { margin: 5px 0 18px; }.advanced-filter-dialog header button { width: 34px; height: 34px; border: 0; border-radius: 50%; font-size: 22px; }
