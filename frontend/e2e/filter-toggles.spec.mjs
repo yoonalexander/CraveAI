@@ -14,6 +14,7 @@ test.beforeEach(async ({ page, context }) => {
   await context.setGeolocation({ latitude: 43.65, longitude: -79.38 });
   await page.route("**/api/auth/me", (route) => route.fulfill({ json: { user: null } }));
   await page.route("**/api/places/suggestions?**", (route) => route.fulfill({ json: restaurants }));
+  await page.route("**/api/places/photo", (route) => route.fulfill({ json: { place_id: route.request().postDataJSON().place_id, index: 0, total: 0, photo: null } }));
   await page.route("**/api/chat/status", (route) => route.fulfill({ json: { usage: { limit: 3, used: 0, remaining: 3 } } }));
   await page.route("**/api/telemetry/startup", (route) => route.fulfill({ status: 204 }));
   await page.route("https://api.open-meteo.com/**", (route) => route.fulfill({ json: { current: { temperature_2m: 20, weather_code: 0, is_day: 1 } } }));

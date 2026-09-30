@@ -677,10 +677,41 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .suggestions-list { display: flex; min-height: 0; flex: 1 1 auto; flex-direction: column; gap: 10px; overflow-y: auto; scrollbar-width: thin; }
 .suggestion-card { display: grid; min-height: 128px; flex: 1 1 0; grid-template-columns: 104px minmax(0,1fr); overflow: hidden; border: 1px solid #e0e1dd; border-radius: 14px; background: #fff; }
 .suggestion-photo { position: relative; min-height: 100%; overflow: hidden; background: #eaf0e6; }
-.suggestion-photo > img { width: 100%; height: 100%; object-fit: cover; }
-.suggestion-photo-fallback { display: grid; width: 100%; height: 100%; min-height: 126px; place-items: center; background: radial-gradient(circle at 25% 20%,#dbe8d4,#91b584); }
-.suggestion-photo-fallback img { width: 34px; height: 48px; opacity: .85; }
-.photo-attribution { position: absolute; right: 3px; bottom: 3px; left: 3px; padding: 3px 4px; overflow: hidden; border-radius: 4px; color: #fff; background: rgba(0,0,0,.58); font-size: 6px; line-height: 1.2; text-align: center; text-decoration: none; text-overflow: ellipsis; white-space: nowrap; }
+.restaurant-photos { min-width: 0; width: 100%; margin: 0; color: #343d30; background: #f4f7f0; }
+.restaurant-photo-frame { position: relative; min-width: 0; aspect-ratio: 4 / 3; overflow: hidden; }
+.restaurant-photo-image { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; }
+.restaurant-photo-fallback { display: flex; min-height: 126px; height: 100%; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 14px 8px; background: radial-gradient(circle at 25% 20%, #edf3e8, #c1d5b7); text-align: center; }
+.restaurant-photo-fallback > img { width: 30px; height: 42px; }
+.restaurant-photos .restaurant-photo-fallback > p { margin: 0; color: #3c4c35; font-size: 12px; line-height: 1.4; }
+.restaurant-photo-fallback button { min-height: 44px; border: 1px solid #819277; border-radius: 8px; padding: 6px; color: #253920; background: #fff; font-size: 12px; }
+.restaurant-photos .photo-expand { position: absolute; right: 6px; bottom: 6px; display: grid; width: 44px; height: 44px; place-items: center; border: 1px solid #fff8; border-radius: 12px; color: #fff; background: #172311d9; font-size: 24px; cursor: pointer; }
+.restaurant-photos .restaurant-photo-credits { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; padding: 9px 8px; overflow-wrap: anywhere; font-size: 12px; line-height: 1.4; }
+.restaurant-photos .restaurant-photo-credits a { color: #344b2c; font-weight: 400; text-decoration: underline; text-underline-offset: 2px; }
+.restaurant-photos .restaurant-photo-credits .google-maps-credit { color: #1f1f1f; font-size: 12px; font-style: normal; font-weight: 400; letter-spacing: normal; white-space: nowrap; }
+.restaurant-photos .photo-contributor { display: flex; min-width: 0; align-items: center; gap: 5px; }
+.restaurant-photos .photo-contributor > img { width: 24px; height: 24px; flex: 0 0 24px; border-radius: 50%; object-fit: cover; }
+.restaurant-photos .photo-contributor > img[hidden] { display: none; }
+.restaurant-photos .photo-contributor > span { margin: 0; color: inherit; font-size: inherit; line-height: inherit; }
+.suggestion-photo .restaurant-photo-frame { min-height: 128px; }
+.suggestion-card { flex: 0 0 auto; }
+.restaurant-map-popup .restaurant-photos, .chat-recommendations .restaurant-photos { margin-bottom: 8px; overflow: hidden; border-radius: 10px; }
+.restaurant-map-popup { width: 260px; }
+.legacy-save .restaurant-photos { margin-bottom: 16px; border-radius: 10px; overflow: hidden; }
+.photo-dialog-backdrop { position: fixed; inset: 0; z-index: 10000; display: grid; place-items: center; overflow-y: auto; padding: 18px; background: #10170dcc; }
+.photo-dialog { width: min(760px, 100%); max-height: calc(100dvh - 36px); overflow-y: auto; border-radius: 18px; color: #283423; background: #f4f7f0; box-shadow: 0 20px 80px #0005; }
+.photo-dialog > header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; }
+.photo-dialog h2 { min-width: 0; margin: 0; overflow-wrap: anywhere; font-size: 18px; }
+.photo-dialog button { min-width: 44px; min-height: 44px; border: 1px solid #c3cfbb; border-radius: 10px; color: inherit; background: #fff; cursor: pointer; font-size: 20px; }
+.photo-dialog button:disabled { cursor: default; opacity: .4; }
+.photo-dialog .restaurant-photo-frame { height: min(52dvh, 520px); aspect-ratio: auto; background: #172311; }
+.photo-dialog .restaurant-photo-image { object-fit: contain; }
+.photo-dialog .restaurant-photo-credits { padding: 12px 16px; }
+.photo-gallery-controls { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 16px 16px; font-size: 14px; }
+.restaurant-photos button:focus-visible, .photo-dialog button:focus-visible, .restaurant-photos a:focus-visible { outline: 3px solid #447c37; outline-offset: 3px; }
+.dark .restaurant-photos, .dark .photo-dialog { color: #edf2e8; background: #263122; }
+.dark .restaurant-photos .restaurant-photo-credits a { color: #d2e0c8; }
+.dark .restaurant-photos .restaurant-photo-credits .google-maps-credit { color: #fff; }
+.dark .photo-dialog button { color: #edf2e8; background: #34402e; border-color: #5d6b55; }
 .suggestion-card-body { display: flex; min-width: 0; flex-direction: column; padding: 13px 11px; }
 .suggestion-card-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
 .suggestion-card-heading h3 { margin: 0; overflow: hidden; font-size: 14px; line-height: 1.35; text-overflow: ellipsis; white-space: nowrap; }
@@ -977,8 +1008,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .discovery-intro { max-width: 720px; margin: 10px 0 24px; color: #696c66; font-size: 14px; line-height: 1.55; }
 .discovery-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 22px; }
 .discovery-grid .suggestion-card { display: flex; min-height: 365px; flex-direction: column; }
-.discovery-grid .suggestion-photo { width: 100%; height: 220px; min-height: 220px; }
-.discovery-grid .suggestion-photo-fallback { min-height: 220px; }
+.discovery-grid .suggestion-photo { width: 100%; }
+.discovery-grid .restaurant-photo-frame { height: 220px; aspect-ratio: auto; }
 .discovery-grid .suggestion-card-body { min-height: 145px; padding: 15px; }
 .discovery-grid .suggestion-card-heading h3 { font-size: 16px; }
 .discovery-grid .suggestion-card-heading span, .discovery-grid .suggestion-address { font-size: 13px; }
@@ -1111,14 +1142,14 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   .discovery-heading > a { font-size: 9px; }
   .discovery-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px; }
   .discovery-grid .suggestion-card { min-height: 330px; }
-  .discovery-grid .suggestion-photo, .discovery-grid .suggestion-photo-fallback { height: 180px; min-height: 180px; }
+  .discovery-grid .restaurant-photo-frame { height: 180px; }
   .placeholder-page { min-height: 100%; }
 }
 
 @media (max-width: 620px) {
   .discovery-grid { grid-template-columns: 1fr; }
   .discovery-grid .suggestion-card { min-height: 380px; }
-  .discovery-grid .suggestion-photo, .discovery-grid .suggestion-photo-fallback { height: 230px; min-height: 230px; }
+  .discovery-grid .restaurant-photo-frame { height: 230px; }
   .discovery-heading > a { display: none; }
   .discovery-intro { font-size: 13px; }
 }
@@ -1160,7 +1191,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .collection-toolbar form input { min-height: 38px; }
 .saved-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 18px; }
 .saved-item { min-width: 0; padding: 12px; border: 1px solid #dfe2dc; border-radius: 17px; background: #fff; }
-.saved-item .suggestion-card { min-height: 320px; }
+.saved-item .suggestion-card { display: flex; min-height: 320px; flex-direction: column; }
+.saved-item .restaurant-photo-frame { height: 200px; aspect-ratio: auto; }
+.saved-item .suggestion-card-body { min-height: 145px; padding: 15px; }
 .saved-item > label { display: block; margin-top: 12px; font-size: 12px; font-weight: 700; }
 .saved-item textarea { display: block; min-height: 76px; margin-top: 6px; resize: vertical; }
 .legacy-save { min-height: 170px; padding: 20px; border-radius: 13px; background: #eef4eb; }

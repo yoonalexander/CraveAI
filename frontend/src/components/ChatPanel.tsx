@@ -19,6 +19,7 @@ import type { Suggestion } from "../api/places";
 import { saveConversationMessages, submitFeedback, transcribeAudio } from "../api/product";
 import { useAuth } from "../context/AuthContext";
 import { ArrowUpIcon, CopyIcon, MicIcon, ShareIcon } from "./Icons";
+import { RestaurantPhotos } from "./RestaurantPhotos";
 
 type Message = {
   id: string;
@@ -376,6 +377,7 @@ export function ChatPanel({
                       const sources = getRecommendationSources(recommendation);
                       return (
                       <div key={`${message.id}-${recommendation.place_id || recommendation.name}-${index}`}>
+                        <RestaurantPhotos placeId={recommendation.place_id} title={recommendation.name} />
                         <strong>{recommendation.name}</strong>
                         <span>
                           {typeof recommendation.rating === "number" ? `★ ${recommendation.rating.toFixed(1)}` : ""}

@@ -45,6 +45,7 @@ export function SuggestionsPanel({
         ) : suggestions.length ? (
           suggestions.map((suggestion) => (
             <SuggestionCard
+              compactPhoto
               description={suggestion.address || suggestion.reason}
               distance={
                 userLocation

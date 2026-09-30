@@ -1,82 +1,27 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-
 import { SuggestionCard } from "./SuggestionCard";
+import { fetchPlacePhoto } from "../api/photos";
 
-vi.mock("../context/AuthContext", () => ({
-  useAuth: () => ({ user: null, loading: false }),
-}));
-
-vi.mock("../context/GoogleMapsContext", () => ({
-  useGoogleMaps: () => mapsState,
-}));
-
-const { mapsState } = vi.hoisted(() => ({
-  mapsState: { isLoaded: false, hasApiKey: false },
-}));
-
-beforeEach(() => {
-  mapsState.isLoaded = false;
-  mapsState.hasApiKey = false;
-});
-
+vi.mock("../context/AuthContext", () => ({ useAuth: () => ({ user: null, loading: false }) }));
+vi.mock("../api/photos", () => ({ fetchPlacePhoto: vi.fn(), PhotoLimitError: class extends Error {} }));
+beforeEach(() => vi.mocked(fetchPlacePhoto).mockResolvedValue({ place_id: "place-1", index: 0, total: 0, photo: null }));
 describe("SuggestionCard", () => {
-  it("shows a branded photo fallback and preserves signed-out save behavior", () => {
-    render(
-      <SuggestionCard
-        description="10 Main Street"
-        distance="1.2 km"
-        placeId="place-1"
-        rating={4.6}
-        tags={["Thai"]}
-        title="Green Basil"
-      />,
-    );
-
-    expect(screen.getByRole("img", { name: "No photo available for Green Basil" })).toBeInTheDocument();
+  it("shows a branded photo fallback and preserves signed-out save behavior", async () => {
+    render(<SuggestionCard description="10 Main Street" distance="1.2 km" placeId="place-1" rating={4.6} tags={["Thai"]} title="Green Basil" />);
+    expect(await screen.findByRole("img", { name: "No photo available for Green Basil" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Sign in to save" })).toHaveAttribute("href", "/login");
     expect(screen.getByLabelText("4.6 out of 5 stars")).toBeInTheDocument();
   });
-
-  it("loads the first Google photo and displays its author attribution", async () => {
-    mapsState.isLoaded = true;
-    mapsState.hasApiKey = true;
-    const getURI = vi.fn(() => "https://example.test/photo.jpg");
-    class MockPlace {
-      photos = [
-        {
-          getURI,
-          googleMapsURI: "https://maps.google.com/photo",
-          authorAttributions: [
-            { displayName: "Photo Owner", uri: "https://maps.google.com/owner" },
-          ],
-        },
-      ];
-
-      async fetchFields(): Promise<void> {}
-    }
-    Object.defineProperty(globalThis, "google", {
-      configurable: true,
-      value: {
-        maps: {
-          importLibrary: vi.fn().mockResolvedValue({ Place: MockPlace }),
-        },
-      },
-    });
-
-    render(
-      <SuggestionCard
-        description="10 Main Street"
-        placeId="google-place-1"
-        title="Photo Cafe"
-      />,
-    );
-
-    await waitFor(() => expect(screen.getByRole("img", { name: "Google Maps photo of Photo Cafe" })).toHaveAttribute("src", "https://example.test/photo.jpg"));
-    expect(screen.getByRole("link", { name: "Photo: Photo Owner" })).toHaveAttribute(
-      "href",
-      "https://maps.google.com/owner",
-    );
-    expect(getURI).toHaveBeenCalledWith({ maxHeight: 280, maxWidth: 320 });
+  it("loads photos without a map SDK and credits every contributor", async () => {
+    vi.mocked(fetchPlacePhoto).mockResolvedValue({ place_id: "place-1", index: 0, total: 2, photo: {
+      uri: "https://lh3.googleusercontent.com/photo", source_uri: "https://maps.google.com/photo", report_uri: null,
+      authors: [{ name: "Photo Owner", uri: "https://maps.google.com/owner", avatar_uri: null }, { name: "Coauthor", uri: null, avatar_uri: null }],
+    } });
+    render(<SuggestionCard description="10 Main Street" placeId="place-1" title="Photo Cafe" />);
+    expect(await screen.findByRole("img", { name: "Google Maps photo of Photo Cafe" })).toHaveAttribute("src", "https://lh3.googleusercontent.com/photo");
+    expect(screen.getByRole("link", { name: "Photo: Photo Owner" })).toHaveAttribute("href", "https://maps.google.com/owner");
+    expect(screen.getByText("Photo: Coauthor")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Google Maps" })).toHaveAttribute("href", "https://maps.google.com/photo");
   });
 });

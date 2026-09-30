@@ -365,6 +365,12 @@ one conversation. Stored recommendation snapshots contain narrative and Place
 IDs, never durable Google names, addresses, ratings, tags, photos, or photo
 references.
 
+Restaurant photos in map popups, chat, Discovery and Likes load on demand through
+the backend, with contributor credits and a shared gallery. Photo metadata and
+image resolution each consume the existing Places quota; server keys and
+expiring photo references stay on the server. See
+[photo behavior, costs and release requirements](docs/issue-23-restaurant-photos.md).
+
 The current prompt, bounded recent context, and confirmed map context are sent
 to OpenAI for evidence-grounded recommendation processing; derived searches go
 to Google Places, and selected public official restaurant sites may receive

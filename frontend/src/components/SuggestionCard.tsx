@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 import { addFavorite, listSavedPlaces } from "../api/favorites";
 import { useAuth } from "../context/AuthContext";
-import { useGoogleMaps } from "../context/GoogleMapsContext";
+import { RestaurantPhotos } from "./RestaurantPhotos";
 import { BookmarkIcon, PinIcon } from "./Icons";
 import { FilterEvidence } from "./FilterEvidence";
 import type { FilterLabel } from "../api/places";
@@ -15,15 +15,7 @@ type SuggestionCardProps = {
   distance?: string;
   rating?: number | null;
   filterLabels?: FilterLabel[];
-};
-
-type PhotoData = {
-  uri: string;
-  sourceUri?: string;
-  attribution?: {
-    name: string;
-    uri?: string;
-  };
+  compactPhoto?: boolean;
 };
 
 let savedPlaceIdsPromise: Promise<Set<string>> | null = null;
@@ -46,13 +38,11 @@ export function SuggestionCard({
   distance,
   rating,
   filterLabels,
+  compactPhoto = false,
 }: SuggestionCardProps): JSX.Element {
   const { user } = useAuth();
-  const { isLoaded } = useGoogleMaps();
   const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
-  const [photo, setPhoto] = useState<PhotoData | null>(null);
-  const [photoUnavailable, setPhotoUnavailable] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -75,50 +65,6 @@ export function SuggestionCard({
     return () => window.removeEventListener("craveai-favorites-changed", refresh);
   }, [placeId, user]);
 
-  useEffect(() => {
-    if (!isLoaded || !placeId || placeId.startsWith("placeholder-")) {
-      setPhotoUnavailable(true);
-      return;
-    }
-    let active = true;
-    setPhoto(null);
-    setPhotoUnavailable(false);
-
-    const loadPhoto = async () => {
-      try {
-        const { Place } = (await google.maps.importLibrary(
-          "places",
-        )) as google.maps.PlacesLibrary;
-        const place = new Place({ id: placeId });
-        await place.fetchFields({ fields: ["photos"] });
-        const firstPhoto = place.photos?.[0];
-        if (!firstPhoto) {
-          if (active) setPhotoUnavailable(true);
-          return;
-        }
-        const firstAttribution = firstPhoto.authorAttributions?.[0];
-        if (active) {
-          setPhoto({
-            uri: firstPhoto.getURI({ maxHeight: 280, maxWidth: 320 }),
-            sourceUri: firstPhoto.googleMapsURI || undefined,
-            attribution: firstAttribution
-              ? {
-                  name: firstAttribution.displayName,
-                  uri: firstAttribution.uri || undefined,
-                }
-              : undefined,
-          });
-        }
-      } catch {
-        if (active) setPhotoUnavailable(true);
-      }
-    };
-    void loadPhoto();
-    return () => {
-      active = false;
-    };
-  }, [isLoaded, placeId]);
-
   async function save(): Promise<void> {
     try {
       await addFavorite(placeId);
@@ -136,46 +82,7 @@ export function SuggestionCard({
 
   return (
     <article className="suggestion-card">
-      <div className="suggestion-photo">
-        {photo ? (
-          <img
-            alt={`Google Maps photo of ${title}`}
-            loading="lazy"
-            onError={() => {
-              setPhoto(null);
-              setPhotoUnavailable(true);
-            }}
-            src={photo.uri}
-          />
-        ) : (
-          <div
-            aria-label={photoUnavailable ? `No photo available for ${title}` : `Loading photo for ${title}`}
-            className="suggestion-photo-fallback"
-            role="img"
-          >
-            <img alt="" src="/craveai-pin.svg" />
-          </div>
-        )}
-        {photo?.attribution ? (
-          <a
-            className="photo-attribution"
-            href={photo.attribution.uri || photo.sourceUri}
-            rel="noreferrer"
-            target="_blank"
-          >
-            Photo: {photo.attribution.name}
-          </a>
-        ) : photo?.sourceUri ? (
-          <a
-            className="photo-attribution"
-            href={photo.sourceUri}
-            rel="noreferrer"
-            target="_blank"
-          >
-            Google Maps photo
-          </a>
-        ) : null}
-      </div>
+      <div className="suggestion-photo"><RestaurantPhotos placeId={placeId} title={title} compact={compactPhoto} /></div>
 
       <div className="suggestion-card-body">
         <div className="suggestion-card-heading">

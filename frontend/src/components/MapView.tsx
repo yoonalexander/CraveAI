@@ -10,6 +10,7 @@ import { calculateDistanceKm } from "../utils/suggestionPool";
 import { recordStartupTiming } from "../utils/startupTelemetry";
 import { PinIcon, SearchIcon } from "./Icons";
 import { LocationLoader } from "./LoadingIndicators";
+import { RestaurantPhotos } from "./RestaurantPhotos";
 
 type MapViewProps = {
   originLocation: Coordinates | null;
@@ -205,6 +206,7 @@ export function MapView({
             position={{ lat: selectedPlace.lat, lng: selectedPlace.lng }}
           >
             <div className="restaurant-map-popup">
+              <RestaurantPhotos placeId={selectedPlace.place_id} title={selectedPlace.name} />
               <strong>{selectedPlace.name}</strong>
               {typeof selectedPlace.rating === "number" ? <span>★ {selectedPlace.rating.toFixed(1)}</span> : null}
               {selectedPlace.address ? <p>{selectedPlace.address}</p> : null}
