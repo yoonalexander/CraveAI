@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type { ChatRecommendation } from "./api/chat";
-import { fetchSuggestions, PlacesQuotaError, Suggestion, verifyDietaryEvidence } from "./api/places";
+import { fetchSuggestions, fetchFilterData, FilterData, PlacesQuotaError, Suggestion } from "./api/places";
 import { listSavedPlaces } from "./api/favorites";
 import { fetchCurrentWeather, CurrentWeather } from "./api/weather";
 import { fetchPreferences, Preferences } from "./api/product";
@@ -95,10 +95,10 @@ function CraveApplication(): JSX.Element {
   const [preferences, setPreferences] = useState<Preferences | null>(null);
   const [preferencesLoaded, setPreferencesLoaded] = useState(false);
   const [savedPlaceIds, setSavedPlaceIds] = useState<Set<string>>(new Set());
-  const [dietaryEvidence, setDietaryEvidence] = useState<{
-    key: string; loading: boolean; error: string | null; matches: Map<string, string[]>;
-  }>({ key: "", loading: false, error: null, matches: new Map() });
-  const [dietaryRetry, setDietaryRetry] = useState(0);
+  const [filterData, setFilterData] = useState<Map<string, FilterData>>(new Map());
+  const [filterDataLoading, setFilterDataLoading] = useState(false);
+  const [filterDataError, setFilterDataError] = useState<string | null>(null);
+  const filterDataRequest = useRef<AbortController | null>(null);
   const locationSourceRef = useRef<LocationSource | null>(null);
 
   useEffect(() => {
@@ -328,49 +328,63 @@ function CraveApplication(): JSX.Element {
     return () => controller.abort();
   }, [searchArea]);
 
-  const dietaryEvidenceKey = `${advancedFilters.dietary.slice().sort().join("|")}::${suggestions.map((item) => item.place_id).sort().join("|")}`;
   useEffect(() => {
-    if (!advancedFilters.dietary.length || !suggestions.length) {
-      setDietaryEvidence({ key: dietaryEvidenceKey, loading: false, error: null, matches: new Map() });
-      return;
-    }
-    const controller = new AbortController();
-    setDietaryEvidence((current) => ({ ...current, key: dietaryEvidenceKey, loading: true, error: null }));
-    void verifyDietaryEvidence(
-      suggestions.map((item) => item.place_id), advancedFilters.dietary, controller.signal,
-    ).then((matches) => {
-      if (controller.signal.aborted) return;
-      setDietaryEvidence({
-        key: dietaryEvidenceKey,
-        loading: false,
-        error: null,
-        matches: new Map(matches.map((item) => [item.place_id, item.dietary_matches])),
-      });
-    }).catch((reason) => {
-      if (controller.signal.aborted) return;
-      const message = reason instanceof PlacesQuotaError
-        ? "The Places limit prevented menu verification. Current results remain visible."
-        : "Official-menu verification is unavailable. Current results remain visible.";
-      setDietaryEvidence((current) => ({ ...current, key: dietaryEvidenceKey, loading: false, error: message }));
+    filterDataRequest.current?.abort();
+    filterDataRequest.current = null;
+    setFilterData(new Map());
+    setFilterDataLoading(false);
+    setFilterDataError(null);
+    return () => { filterDataRequest.current?.abort(); filterDataRequest.current = null; };
+  }, [suggestions]);
+
+  const checkFilterData = useCallback(async () => {
+    if (filterDataRequest.current || isLoadingSuggestions) return;
+    const remaining = suggestions.filter((place) => !filterData.has(place.place_id));
+    const candidates = remaining.length ? remaining : suggestions.filter((place) => {
+      const data = filterData.get(place.place_id);
+      return data?.enrichment_status === "unavailable" || data?.menu_status === "unavailable";
     });
-    return () => controller.abort();
-  }, [advancedFilters.dietary, dietaryEvidenceKey, dietaryRetry, suggestions]);
+    const ids = candidates.slice(0, 10).map((place) => place.place_id);
+    if (!ids.length) return;
+    const controller = new AbortController();
+    filterDataRequest.current = controller;
+    setFilterDataLoading(true);
+    setFilterDataError(null);
+    try {
+      const data = await fetchFilterData(ids, controller.signal);
+      if (controller.signal.aborted) return;
+      setFilterData((current) => {
+        const next = new Map(current);
+        for (const item of data) if (ids.includes(item.place_id)) next.set(item.place_id, item);
+        return next;
+      });
+    } catch (reason) {
+      if (controller.signal.aborted) return;
+      setFilterDataError(reason instanceof PlacesQuotaError
+        ? "The Places limit prevented this details check. Filtered results still use only known data."
+        : "Restaurant details could not be checked. Try again; missing evidence remains unknown.");
+    } finally {
+      if (!controller.signal.aborted) {
+        filterDataRequest.current = null;
+        setFilterDataLoading(false);
+      }
+    }
+  }, [filterData, isLoadingSuggestions, suggestions]);
+
+  const annotatedSuggestions = useMemo(() => suggestions.map((place) => {
+    const data = filterData.get(place.place_id);
+    // Missing Details fields do not erase fresh Nearby data; explicit false does.
+    return data ? { ...place, ...Object.fromEntries(Object.entries(data).filter(([, value]) => value !== null)) } : place;
+  }), [filterData, suggestions]);
 
   const filteredSuggestions = useMemo(() => {
-    const verificationReady = Boolean(advancedFilters.dietary.length) && dietaryEvidence.key === dietaryEvidenceKey && !dietaryEvidence.loading && !dietaryEvidence.error;
-    const annotated = suggestions.map((place) => ({
-      ...place,
-      dietary_matches: verificationReady ? dietaryEvidence.matches.get(place.place_id) : place.dietary_matches,
-    }));
-    const effectiveAdvanced = verificationReady || !advancedFilters.dietary.length
-      ? advancedFilters
-      : { ...advancedFilters, dietary: [] };
-    const filtered = filterSuggestions(annotated, activeFilters, effectiveAdvanced, originLocation);
+    const filtered = filterSuggestions(annotatedSuggestions, activeFilters, advancedFilters, originLocation);
     if (!preferences?.personalization_enabled) return filtered;
     const disliked = preferences.disliked_foods.map((value) => value.toLowerCase());
     const favourites = preferences.favorite_cuisines.map((value) => value.toLowerCase());
-    return filtered
-      .filter((place) => !disliked.some((value) => suggestionText(place).includes(value)))
+    const allowed = filtered.filter((place) => !disliked.some((value) => suggestionText(place).includes(value)));
+    if (advancedFilters.sort !== "relevance") return allowed;
+    return allowed
       .map((place, index) => ({
         place,
         index,
@@ -378,7 +392,7 @@ function CraveApplication(): JSX.Element {
       }))
       .sort((a, b) => b.preferenceScore - a.preferenceScore || a.index - b.index)
       .map(({ place }) => place);
-  }, [activeFilters, advancedFilters, dietaryEvidence, dietaryEvidenceKey, originLocation, preferences, savedPlaceIds, suggestions]);
+  }, [activeFilters, advancedFilters, annotatedSuggestions, originLocation, preferences, savedPlaceIds]);
 
   const navigate = useCallback((path: string, resetChat = false) => {
     const normalized = normalizePath(path);
@@ -427,6 +441,9 @@ function CraveApplication(): JSX.Element {
   };
 
   const toggleFilter = (filter: SuggestionFilter) => {
+    if (filter === "budget" && !activeFilters.has("budget")) {
+      setAdvancedFilters((current) => ({ ...current, priceLevels: [] }));
+    }
     setActiveFilters((current) => {
       const next = new Set(current);
       if (next.has(filter)) next.delete(filter);
@@ -470,12 +487,19 @@ function CraveApplication(): JSX.Element {
       }}
       onRetry={retrySearch}
       onToggleFilter={toggleFilter}
-      onAdvancedFiltersChange={setAdvancedFilters}
-      dietaryVerification={{
-        loading: advancedFilters.dietary.length > 0 && (dietaryEvidence.key !== dietaryEvidenceKey || dietaryEvidence.loading),
-        error: dietaryEvidence.key === dietaryEvidenceKey ? dietaryEvidence.error : null,
+      onAdvancedFiltersChange={(filters) => {
+        if (filters.priceLevels.length) setActiveFilters((current) => new Set([...current].filter((item) => item !== "budget")));
+        setAdvancedFilters(filters);
       }}
-      onRetryDietaryVerification={() => setDietaryRetry((value) => value + 1)}
+      filterDataPlaces={annotatedSuggestions}
+      filterDataStatus={{
+        loading: filterDataLoading, error: filterDataError,
+        checked: annotatedSuggestions.filter((place) => place.enrichment_status === "checked").length,
+        menus: annotatedSuggestions.filter((place) => place.menu_status === "assessed").length,
+        remaining: suggestions.filter((place) => !filterData.has(place.place_id)).length,
+        unavailable: annotatedSuggestions.filter((place) => place.enrichment_status === "unavailable" || place.menu_status === "unavailable").length,
+      }}
+      onCheckFilterData={() => void checkFilterData()}
     />
   );
 

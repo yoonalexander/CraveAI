@@ -13,6 +13,7 @@ from backend.config import get_settings
 from backend.services.menu_evidence import enrich_candidates_with_menu_evidence
 from backend.services.recommendation_models import CravingIntent, IntentConstraint, SearchQuerySpec
 from backend.services.usage_limits import DailyQuotaExceeded
+from backend.services.filter_enrichment import classify_menu_labels, provider_cuisines, provider_dietary
 
 logger = logging.getLogger(__name__)
 
@@ -271,25 +272,22 @@ async def verify_dietary_place_ids(
         ],
     )
     await enrich_candidates_with_menu_evidence(candidates, intent)
+    await classify_menu_labels(candidates)
     verified: List[Dict[str, Any]] = []
     for candidate in candidates:
-        evidence = [
-            item for item in candidate.get("evidence") or []
-            if item.get("kind") in {"official_menu", "official_website"}
-            and item.get("source_url")
-        ]
-        combined = " ".join(
-            f"{item.get('label', '')} {item.get('detail', '')}" for item in evidence
-        ).lower().replace("-", " ")
-        matched = [
-            requirement for requirement in normalized_requirements
-            if requirement.replace("-", " ") in combined
-        ]
-        if len(matched) != len(normalized_requirements):
+        labels = {item["value"]: item for item in candidate.get("dietary_labels", [])}
+        if not all(requirement in labels for requirement in normalized_requirements):
             continue
+        shared_ids = set.intersection(*[
+            {item["id"] for item in labels[requirement]["evidence"]}
+            for requirement in normalized_requirements
+        ])
+        if not shared_ids:
+            continue
+        evidence = [item for item in candidate.get("evidence", []) if item["id"] in shared_ids]
         verified.append({
             "place_id": candidate["place_id"],
-            "dietary_matches": matched,
+            "dietary_matches": normalized_requirements,
             "evidence": [
                 {"type": item["kind"], "label": item["label"], "source_url": item["source_url"]}
                 for item in evidence[:8]
@@ -461,7 +459,7 @@ def _parse_place_item(item: Dict[str, Any], reason_hint: Optional[str] = None) -
         reason_parts.append(vicinity)
     reason = " · ".join(reason_parts) if reason_parts else "Nearby restaurant"
 
-    tags = _clean_tags(item.get("types", []) or [], item.get("name", ""))
+    tags = _clean_tags(item.get("types", []) or [], "")
 
     return {
         "name": item.get("name"),
@@ -472,6 +470,8 @@ def _parse_place_item(item: Dict[str, Any], reason_hint: Optional[str] = None) -
         "lat": coordinates.get("lat") if isinstance(coordinates, dict) else None,
         "lng": coordinates.get("lng") if isinstance(coordinates, dict) else None,
         "tags": tags,
+        "cuisine_labels": provider_cuisines(item.get("types") or []),
+        "dietary_labels": provider_dietary(item.get("types") or [], str(item.get("place_id") or "")),
         "user_ratings_total": total_reviews,
         "price_level": item.get("price_level"),
         "open_now": (item.get("opening_hours") or {}).get("open_now"),

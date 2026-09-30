@@ -124,6 +124,7 @@ class _MenuHTMLParser(HTMLParser):
 async def enrich_candidates_with_menu_evidence(
     candidates: list[dict[str, Any]],
     intent: CravingIntent,
+    *, include_all_items: bool = False,
 ) -> list[dict[str, Any]]:
     """Fetch official sites ephemerally and attach bounded dish/menu evidence."""
     crawlable = [item for item in candidates if item.get("website")][:MAX_WEBSITES]
@@ -140,7 +141,7 @@ async def enrich_candidates_with_menu_evidence(
         },
     ) as client:
         tasks = [
-            _enrich_one(client, semaphore, candidate, intent)
+            _enrich_one(client, semaphore, candidate, intent, include_all_items=include_all_items)
             for candidate in crawlable
         ]
         await asyncio.gather(*tasks)
@@ -152,6 +153,7 @@ async def _enrich_one(
     semaphore: asyncio.Semaphore,
     candidate: dict[str, Any],
     intent: CravingIntent,
+    *, include_all_items: bool = False,
 ) -> None:
     website = str(candidate.get("website") or "").strip()
     if not website:
@@ -188,10 +190,10 @@ async def _enrich_one(
     all_blocks: list[tuple[str, str]] = []
     for page_url, page, is_menu_context in pages:
         all_menu_items.extend((name, description, page_url) for name, description in page.menu_items)
-        if is_menu_context:
+        if is_menu_context or include_all_items:
             all_blocks.extend((block, page_url) for block in page.visible_blocks)
 
-    selected_items = _select_relevant_items(all_menu_items, intent)
+    selected_items = all_menu_items[:6] if include_all_items else _select_relevant_items(all_menu_items, intent)
     evidence: list[dict[str, Any]] = list(candidate.get("evidence") or [])
     for name, description, source_url in selected_items:
         evidence.append(
@@ -205,8 +207,9 @@ async def _enrich_one(
             ).model_dump()
         )
 
-    if not selected_items:
-        for block, source_url in _select_relevant_blocks(all_blocks, intent)[:6]:
+    if not selected_items or include_all_items:
+        blocks = all_blocks[:4] if include_all_items else _select_relevant_blocks(all_blocks, intent)[:6]
+        for block, source_url in blocks:
             evidence.append(
                 EvidenceItem(
                     id="pending",

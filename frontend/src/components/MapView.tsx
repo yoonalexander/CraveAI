@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { GoogleMap, InfoWindow, Marker, OverlayView } from "@react-google-maps/api";
+import { FilterEvidence } from "./FilterEvidence";
 
 import type { ChatRecommendation } from "../api/chat";
 import type { Suggestion } from "../api/places";
@@ -207,6 +208,7 @@ export function MapView({
               <strong>{selectedPlace.name}</strong>
               {typeof selectedPlace.rating === "number" ? <span>★ {selectedPlace.rating.toFixed(1)}</span> : null}
               {selectedPlace.address ? <p>{selectedPlace.address}</p> : null}
+              {"cuisine_labels" in selectedPlace ? <FilterEvidence labels={[...(selectedPlace.cuisine_labels || []), ...(selectedPlace.dietary_labels || [])]} /> : null}
               {selectedPlace.place_id ? (
                 <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selectedPlace.name)}&query_place_id=${encodeURIComponent(selectedPlace.place_id)}`} rel="noreferrer" target="_blank">
                   Open in Google Maps

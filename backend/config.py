@@ -57,6 +57,7 @@ class Config:
     OPENAI_API_KEY: str = field(default_factory=lambda: os.getenv("OPENAI_API_KEY", ""))
     GOOGLE_API_KEY: str = field(default_factory=lambda: os.getenv("GOOGLE_API_KEY", ""))
     MODEL_NAME: str = field(default_factory=lambda: os.getenv("MODEL_NAME", "gpt-5-nano"))
+    FILTER_LABEL_MODEL: str = field(default_factory=lambda: os.getenv("FILTER_LABEL_MODEL", ""))
     ENVIRONMENT: str = field(default_factory=lambda: os.getenv("APP_ENV", "development"))
 
     DATABASE_URL: str = field(default_factory=lambda: os.getenv("DATABASE_URL", ""))

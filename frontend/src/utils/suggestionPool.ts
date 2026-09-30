@@ -1,4 +1,4 @@
-import { Suggestion } from "../api/places";
+import { Suggestion, FilterLabel } from "../api/places";
 import type { ViewportBounds } from "../types/searchArea";
 
 export const SUGGESTIONS_PER_ROTATION = 3;
@@ -7,6 +7,7 @@ export const SUGGESTION_POOL_LIMIT = 60;
 export type SuggestionFilter = "budget" | "open";
 export type AdvancedFilters = {
   cuisine: string;
+  includeMenuLabels: boolean;
   minimumRating: number;
   maximumDistanceKm: number;
   priceLevels: number[];
@@ -20,6 +21,7 @@ export type AdvancedFilters = {
 
 export const DEFAULT_ADVANCED_FILTERS: AdvancedFilters = {
   cuisine: "",
+  includeMenuLabels: true,
   minimumRating: 0,
   maximumDistanceKm: 20,
   priceLevels: [],
@@ -31,6 +33,31 @@ export const DEFAULT_ADVANCED_FILTERS: AdvancedFilters = {
   sort: "relevance",
 };
 
+export const CUISINE_OPTIONS = ["American", "Brazilian", "Chinese", "French", "Greek", "Indian", "Indonesian", "Italian", "Japanese", "Korean", "Lebanese", "Mediterranean", "Mexican", "Middle Eastern", "Spanish", "Thai", "Turkish", "Vietnamese"];
+
+export function matchesDietaryLabels(labels: FilterLabel[] = [], requirements: string[], includeMenuLabels: boolean): boolean {
+  if (!requirements.length) return true;
+  const evidence = requirements.map((diet) => new Set(labels.filter((label) =>
+    label.value === diet && (includeMenuLabels || label.source === "google")
+  ).flatMap((label) => label.evidence.map((item) => item.id))));
+  return [...evidence[0]].some((id) => evidence.every((items) => items.has(id)));
+}
+
+export function advancedFilterSummary(filters: AdvancedFilters): Array<{ key: keyof AdvancedFilters; label: string }> {
+  const labels: Array<{ key: keyof AdvancedFilters; label: string }> = [];
+  if (filters.cuisine) labels.push({ key: "cuisine", label: filters.cuisine });
+  if (filters.minimumRating) labels.push({ key: "minimumRating", label: `${filters.minimumRating}+ stars` });
+  if (filters.maximumDistanceKm < 20) labels.push({ key: "maximumDistanceKm", label: `Within ${filters.maximumDistanceKm} km` });
+  if (filters.priceLevels.length) labels.push({ key: "priceLevels", label: filters.priceLevels.map((level) => level ? "$".repeat(level) : "Free").join(" / ") });
+  for (const [key, label] of [["takeout", "Takeout"], ["delivery", "Delivery"], ["reservations", "Reservations"], ["accessibility", "Accessible entrance"]] as const) {
+    if (filters[key]) labels.push({ key, label });
+  }
+  if (filters.dietary.length) labels.push({ key: "dietary", label: filters.dietary.join(" + ") });
+  if (!filters.includeMenuLabels) labels.push({ key: "includeMenuLabels", label: "Google labels only" });
+  if (filters.sort !== "relevance") labels.push({ key: "sort", label: `Sort: ${filters.sort}` });
+  return labels;
+}
+
 export function filterSuggestions(
   suggestions: Suggestion[],
   filters: Set<SuggestionFilter>,
@@ -40,19 +67,20 @@ export function filterSuggestions(
   const filtered = suggestions.filter((suggestion) => {
     if (
       filters.has("budget") &&
-      (typeof suggestion.price_level !== "number" || suggestion.price_level > 1)
+      (suggestion.price_level !== 0 && suggestion.price_level !== 1)
     ) {
       return false;
     }
     if (filters.has("open") && suggestion.open_now !== true) return false;
-    if (advanced.cuisine && !(suggestion.tags || []).some((tag) => tag.toLowerCase().includes(advanced.cuisine.toLowerCase()))) return false;
+    if (advanced.cuisine.trim() && !(suggestion.cuisine_labels || []).some((label) =>
+      label.value.toLowerCase() === advanced.cuisine.trim().toLowerCase() && (advanced.includeMenuLabels || label.source === "google"))) return false;
     if (advanced.minimumRating && (typeof suggestion.rating !== "number" || suggestion.rating < advanced.minimumRating)) return false;
     if (advanced.priceLevels.length && (typeof suggestion.price_level !== "number" || !advanced.priceLevels.includes(suggestion.price_level))) return false;
     if (advanced.takeout && suggestion.takeout !== true) return false;
     if (advanced.delivery && suggestion.delivery !== true) return false;
     if (advanced.reservations && suggestion.reservable !== true) return false;
     if (advanced.accessibility && suggestion.wheelchair_accessible_entrance !== true) return false;
-    if (advanced.dietary.length && !advanced.dietary.every((item) => suggestion.dietary_matches?.includes(item))) return false;
+    if (!matchesDietaryLabels(suggestion.dietary_labels, advanced.dietary, advanced.includeMenuLabels)) return false;
     if (origin && advanced.maximumDistanceKm < 20 && calculateDistanceKm(origin.lat, origin.lng, suggestion.lat, suggestion.lng) > advanced.maximumDistanceKm) return false;
     return true;
   });

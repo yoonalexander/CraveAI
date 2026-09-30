@@ -23,20 +23,10 @@ export function DiscoveryPage({
   onRetry,
 }: DiscoveryPageProps): JSX.Element {
   const [query, setQuery] = useState("");
-  const [collection, setCollection] = useState("all");
-  const cuisineGroups = useMemo(
-    () => Array.from(new Set(suggestions.flatMap((item) => item.tags || []))).sort().slice(0, 8),
-    [suggestions],
-  );
   const visible = useMemo(() => suggestions.filter((item) => {
-    const haystack = `${item.name} ${item.address} ${(item.tags || []).join(" ")}`.toLowerCase();
-    if (query && !haystack.includes(query.toLowerCase())) return false;
-    if (collection === "top" && (typeof item.rating !== "number" || item.rating < 4.5)) return false;
-    if (collection === "budget" && (typeof item.price_level !== "number" || item.price_level > 1)) return false;
-    if (collection === "open" && item.open_now !== true) return false;
-    if (collection.startsWith("cuisine:")) return (item.tags || []).includes(collection.slice(8));
-    return true;
-  }), [collection, query, suggestions]);
+    const haystack = `${item.name} ${item.address} ${(item.tags || []).join(" ")} ${(item.cuisine_labels || []).map((label) => label.value).join(" ")}`.toLowerCase();
+    return !query.trim() || haystack.includes(query.trim().toLowerCase());
+  }), [query, suggestions]);
   return (
     <section className="discovery-page" aria-labelledby="discovery-title">
       <header className="discovery-heading">
@@ -47,14 +37,13 @@ export function DiscoveryPage({
         <a href="https://maps.google.com/" rel="noreferrer" target="_blank">Restaurant data by Google Maps</a>
       </header>
       <p className="discovery-intro">
-        Explore every restaurant in your confirmed map area. Move the map on Home and choose Search this area to refresh this collection.
+        Explore restaurants in your confirmed map area. Filters and sorting above also apply on Home. Move the map on Home and choose Search this area to refresh this collection.
       </p>
 
       <div className="discovery-controls">
-        <label><span>Search restaurants</span><input onChange={(event) => setQuery(event.target.value)} placeholder="Name, cuisine, or address" value={query} /></label>
-        <div className="discovery-collections" aria-label="Data-driven collections">
-          {[["all", "All"], ["top", "Top Rated"], ["budget", "Budget-Friendly"], ["open", "Open Now"], ...cuisineGroups.map((item) => [`cuisine:${item}`, item])].map(([value, label]) => <button aria-pressed={collection === value} className={collection === value ? "is-active" : ""} key={value} onClick={() => setCollection(value)}>{label}</button>)}
-        </div>
+        <label><span>Search this collection</span><input onChange={(event) => setQuery(event.target.value)} placeholder="Name, cuisine, or address" value={query} /></label>
+        {query ? <button onClick={() => setQuery("")} type="button">Clear search</button> : null}
+        <p role="status">{visible.length} of {suggestions.length} filtered restaurants in this collection</p>
       </div>
 
       {visible.length ? (
@@ -69,6 +58,7 @@ export function DiscoveryPage({
               placeId={suggestion.place_id}
               rating={suggestion.rating}
               tags={suggestion.tags}
+              filterLabels={[...(suggestion.cuisine_labels || []), ...(suggestion.dietary_labels || [])]}
               title={suggestion.name}
             />
           ))}

@@ -49,7 +49,7 @@ it("keeps selected filters, counts, and actual restaurant markers in sync across
   render(<App />);
   await screen.findByText("Finding restaurants…");
   const open = screen.getByRole("button", { name: "Open Now" });
-  const budget = screen.getByRole("button", { name: "Under $20" });
+  const budget = screen.getByRole("button", { name: "Budget-friendly" });
   fireEvent.click(open);
   fireEvent.click(budget);
   fireEvent.click(budget);
@@ -78,4 +78,67 @@ it("keeps selected filters, counts, and actual restaurant markers in sync across
   expect(budget).toHaveAttribute("aria-pressed", "false");
   expect(screen.getByText("4 restaurants in this area")).toBeInTheDocument();
   expect(markerNames()).toEqual(["Show Cheap Open on map", "Show Cheap Closed on map", "Show Costly Open on map", "Show Unknown Data on map"]);
+  fireEvent.click(budget);
+  fireEvent.click(screen.getByRole("button", { name: "Filters" }));
+  fireEvent.click(screen.getByRole("checkbox", { name: "$$$" }));
+  fireEvent.click(screen.getByRole("button", { name: "Show results" }));
+  expect(budget).toHaveAttribute("aria-pressed", "false");
+  expect(markerNames()).toEqual(["Show Costly Open on map"]);
+  fireEvent.click(budget);
+  expect(markerNames()).toEqual(["Show Cheap Open on map", "Show Cheap Closed on map"]);
+  fireEvent.click(screen.getByRole("button", { name: /^Filters/ }));
+  expect(screen.getByRole("checkbox", { name: "$$$" })).not.toBeChecked();
+});
+
+it("checks details on demand and keeps unknown service data excluded across map and Discovery", async () => {
+  vi.stubEnv("VITE_GOOGLE_MAPS_API_KEY", "fake-test-key");
+  window.history.replaceState({}, "", "/");
+  window.localStorage.clear();
+  window.sessionStorage.clear();
+  const places = ["Ramen Spot", "Unknown Spot"].map((name, index) => ({ name, place_id: `place-${index}`, rating: 4.2, address: "Test Street", reason: "Nearby", lat: 43.65, lng: -79.38 }));
+  let detailCalls = 0;
+  vi.stubGlobal("fetch", vi.fn(async (input: string | URL | Request) => {
+    const url = new URL(typeof input === "string" ? input : input instanceof URL ? input.href : input.url, "http://test");
+    let data: unknown = {};
+    if (url.pathname === "/api/places/suggestions") data = places;
+    if (url.pathname === "/api/chat/status") data = { usage: { limit: 3, used: 0, remaining: 3 } };
+    if (url.hostname === "api.open-meteo.com") data = { current: { temperature_2m: 20, weather_code: 0, is_day: 1 } };
+    if (url.pathname === "/api/places/filter-data") {
+      detailCalls++;
+      if (detailCalls === 1) return new Response("{}", { status: 503 });
+      data = { places: [
+        { place_id: "place-0", takeout: true, enrichment_status: "checked", cuisine_labels: [{ value: "Japanese", source: "google", evidence: [] }], menu_status: "assessed", dietary_labels: [{ value: "vegan", source: "inferred_menu", evidence: [{ id: "dish", label: "Vegan ramen", source_url: "https://restaurant.example/menu" }] }] },
+        { place_id: "place-1", takeout: null, enrichment_status: "checked", menu_status: "no_evidence" },
+      ] };
+    }
+    return new Response(JSON.stringify(data), { headers: { "Content-Type": "application/json" } });
+  }));
+  render(<App />);
+  await screen.findByText("2 restaurants in this area");
+  fireEvent.click(screen.getByRole("button", { name: "Filters" }));
+  fireEvent.click(screen.getByLabelText(/^Takeout/));
+  fireEvent.click(screen.getByLabelText("vegan"));
+  fireEvent.click(screen.getByRole("button", { name: "Show results" }));
+  const markers = () => screen.queryAllByRole("button", { name: /^Show .+ on map$/ });
+  expect(markers()).toHaveLength(0);
+  expect(detailCalls).toBe(0);
+  fireEvent.click(screen.getByRole("button", { name: "Check next 2 restaurants" }));
+  await screen.findByRole("alert");
+  expect(markers()).toHaveLength(0);
+  fireEvent.click(screen.getByRole("button", { name: "Check next 2 restaurants" }));
+  await screen.findByRole("button", { name: "Show Ramen Spot on map" });
+  expect(markers()).toHaveLength(1);
+  expect(screen.getByText("1 of 2 loaded restaurants shown")).toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: /^Filters/ }));
+  fireEvent.click(screen.getByLabelText("Include labels inferred from official menus"));
+  fireEvent.click(screen.getByRole("button", { name: "Show results" }));
+  expect(markers()).toHaveLength(0);
+  fireEvent.click(screen.getByRole("button", { name: "Remove Google labels only filter" }));
+  expect(markers()).toHaveLength(1);
+  fireEvent.click(screen.getByRole("link", { name: "Discovery" }));
+  await screen.findByRole("heading", { name: "Ramen Spot" });
+  expect(screen.queryByRole("heading", { name: "Unknown Spot" })).not.toBeInTheDocument();
+  fireEvent.click(screen.getByText("Label sources"));
+  expect(screen.getByRole("link", { name: "Vegan ramen" })).toHaveAttribute("href", "https://restaurant.example/menu");
+  expect(screen.getByText("1 of 1 filtered restaurants in this collection")).toBeInTheDocument();
 });

@@ -1,4 +1,5 @@
 from typing import List
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
 
@@ -7,7 +8,8 @@ from backend.services.identity import resolve_request_usage_identities
 from backend.services.entitlements import has_unlimited_usage_access, resolve_entitlements
 from backend.services.rate_limit import burst_limiter
 from backend.services.sessions import SessionContext, optional_session
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, StringConstraints
+from backend.services.filter_enrichment import enrich_filter_places
 
 from backend.services.places import DiscoveryCoverage, get_top_rated_nearby, resolve_place_ids, verify_dietary_place_ids
 from backend.services.usage_limits import (
@@ -19,6 +21,7 @@ from backend.services.usage_limits import (
 )
 
 router = APIRouter(prefix="/places", tags=["places"])
+PlaceId = Annotated[str, StringConstraints(strip_whitespace=True, pattern=r"^[A-Za-z0-9_-]{1,256}$")]
 
 
 class PlaceResolveRequest(BaseModel):
@@ -28,8 +31,44 @@ class PlaceResolveRequest(BaseModel):
 
 class DietaryEvidenceRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    place_ids: list[str] = Field(min_length=1, max_length=20)
+    place_ids: list[PlaceId] = Field(min_length=1, max_length=10)
     requirements: list[str] = Field(min_length=1, max_length=5)
+
+
+class FilterEnrichmentRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    place_ids: list[PlaceId] = Field(min_length=1, max_length=10)
+
+
+@router.post("/filter-data")
+async def filter_data(
+    payload: FilterEnrichmentRequest, request: Request, response: Response,
+    session: SessionContext | None = Depends(optional_session),
+) -> dict:
+    settings = get_settings()
+    if not settings.GOOGLE_API_KEY:
+        raise HTTPException(status_code=503, detail={"code": "places_provider_unavailable"})
+    ids = list(dict.fromkeys(payload.place_ids))
+    identities = resolve_request_usage_identities("places", request, response, session.user_id if session else None)
+    await burst_limiter.enforce(f"places-filter:{identities[0]}", limit=5, window_seconds=60, code="places_filter_rate_limited")
+    enforce_actor_limit = not has_unlimited_usage_access(session)
+    try:
+        # Reserve one unit for every actual Details call, before any paid work.
+        usage = await reserve_daily_quota(
+            user_id=identities[0], token_cost=len(ids),
+            daily_limit=resolve_entitlements(bool(session))["limits"]["places_per_day"],
+            global_daily_limit=settings.GLOBAL_DAILY_PLACES_LIMIT,
+            global_user_id=PLACES_GLOBAL_USAGE_USER_ID, namespace="places",
+            enforce_actor_limit=enforce_actor_limit, additional_user_ids=identities[1:],
+        )
+    except DailyQuotaExceeded as exc:
+        raise HTTPException(status_code=429, detail={"code": "daily_places_request_quota_exceeded"},
+                            headers=rate_limit_headers(exc.usage, include_retry_after=True)) from exc
+    if enforce_actor_limit:
+        for header, value in rate_limit_headers(usage).items():
+            response.headers[header] = value
+    response.headers["Cache-Control"] = "no-store"
+    return {"places": await enrich_filter_places(ids)}
 
 
 @router.get("/suggestions")
@@ -201,7 +240,7 @@ async def verify_dietary_evidence(
     try:
         usage = await reserve_daily_quota(
             user_id=usage_user_id,
-            token_cost=1,
+            token_cost=len(set(item.strip() for item in payload.place_ids if item.strip())),
             daily_limit=resolve_entitlements(bool(session))["limits"]["places_per_day"],
             global_daily_limit=settings.GLOBAL_DAILY_PLACES_LIMIT,
             global_user_id=PLACES_GLOBAL_USAGE_USER_ID,
@@ -218,4 +257,5 @@ async def verify_dietary_evidence(
     if enforce_actor_limit:
         for header, value in rate_limit_headers(usage).items():
             response.headers[header] = value
+    response.headers["Cache-Control"] = "no-store"
     return {"matches": await verify_dietary_place_ids(payload.place_ids, payload.requirements)}

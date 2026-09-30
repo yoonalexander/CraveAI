@@ -84,11 +84,23 @@ describe("suggestion pool rotation", () => {
     ]);
   });
 
+  it("matches exact cuisine labels and lets users exclude inferred menu labels", () => {
+    const suggestions = makeSuggestions(3).map((item, index) => ({
+      ...item,
+      tags: ["Japanese"],
+      cuisine_labels: index === 0 ? [{ value: "Japanese", source: "google" as const, evidence: [] }]
+        : index === 1 ? [{ value: "Japanese", source: "inferred_menu" as const, evidence: [] }] : [],
+    }));
+    expect(filterSuggestions(suggestions, new Set(), { ...DEFAULT_ADVANCED_FILTERS, cuisine: " Japanese " })).toEqual(suggestions.slice(0, 2));
+    expect(filterSuggestions(suggestions, new Set(), { ...DEFAULT_ADVANCED_FILTERS, cuisine: "Japanese", includeMenuLabels: false })).toEqual([suggestions[0]]);
+    expect(filterSuggestions(suggestions, new Set(), { ...DEFAULT_ADVANCED_FILTERS, cuisine: "Japan" })).toEqual([]);
+  });
+
   it("requires explicit provider and dietary evidence for advanced filters", () => {
     const suggestions = makeSuggestions(3).map((suggestion, index) => ({
       ...suggestion,
       takeout: index === 0 ? true : index === 1 ? false : undefined,
-      dietary_matches: index === 0 ? ["vegan", "halal"] : index === 1 ? ["vegan"] : undefined,
+      dietary_labels: (index === 0 ? ["vegan", "halal"] : index === 1 ? ["vegan"] : []).map((value) => ({ value, source: "inferred_menu" as const, evidence: [{ id: "dish", label: "Vegan halal bowl", source_url: "https://example.com/menu" }] })),
     }));
     const filtered = filterSuggestions(suggestions, new Set(), {
       ...DEFAULT_ADVANCED_FILTERS,
@@ -136,6 +148,23 @@ describe("suggestion pool rotation", () => {
       east: -79.37,
       west: -79.39,
     })).toEqual([places[0]]);
+  });
+
+  it("requires one complete dish to support combined dietary selections", () => {
+    const suggestions = makeSuggestions(2).map((item, index) => ({ ...item,
+      dietary_labels: [
+        { value: "vegan", source: "inferred_menu" as const, evidence: [{ id: "a", label: "Vegan halal bowl", source_url: "https://example.com/menu" }] },
+        { value: "halal", source: "inferred_menu" as const, evidence: [{ id: index ? "b" : "a", label: "Halal bowl", source_url: "https://example.com/menu" }] },
+      ],
+    }));
+    expect(filterSuggestions(suggestions, new Set(), { ...DEFAULT_ADVANCED_FILTERS, dietary: ["vegan", "halal"] })).toEqual([suggestions[0]]);
+    expect(filterSuggestions(suggestions, new Set(), { ...DEFAULT_ADVANCED_FILTERS, dietary: ["vegan"], includeMenuLabels: false })).toEqual([]);
+  });
+
+  it("uses native Google dietary support when menu inference is excluded", () => {
+    const suggestion = { ...makeSuggestions(1)[0], dietary_labels: [{ value: "vegetarian", source: "google" as const, evidence: [{ id: "google-vegetarian-options", label: "Google reports vegetarian options", source_url: "https://maps.google.com" }] }] };
+    expect(filterSuggestions([suggestion], new Set(), { ...DEFAULT_ADVANCED_FILTERS, dietary: ["vegetarian"], includeMenuLabels: false })).toEqual([suggestion]);
+    expect(filterSuggestions([suggestion], new Set(), { ...DEFAULT_ADVANCED_FILTERS, dietary: ["vegan"], includeMenuLabels: false })).toEqual([]);
   });
 
   it("prioritizes fresh results when old pins would fill the enlarged pool", () => {

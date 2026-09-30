@@ -11,13 +11,34 @@ export interface Suggestion {
   lng: number;
   tags?: string[];
   user_ratings_total?: number;
-  price_level?: number;
-  open_now?: boolean;
-  takeout?: boolean;
-  delivery?: boolean;
-  reservable?: boolean;
-  wheelchair_accessible_entrance?: boolean;
+  price_level?: number | null;
+  open_now?: boolean | null;
+  takeout?: boolean | null;
+  delivery?: boolean | null;
+  reservable?: boolean | null;
+  wheelchair_accessible_entrance?: boolean | null;
   dietary_matches?: string[];
+  cuisine_labels?: FilterLabel[];
+  dietary_labels?: FilterLabel[];
+  enrichment_status?: "checked" | "unavailable";
+  menu_status?: "assessed" | "no_evidence" | "not_checked" | "unavailable";
+}
+
+export type FilterLabel = {
+  value: string;
+  source: "google" | "inferred_menu";
+  evidence: Array<{ id: string; label: string; source_url: string }>;
+};
+export type FilterData = Partial<Suggestion> & { place_id: string };
+
+export async function fetchFilterData(placeIds: string[], signal?: AbortSignal): Promise<FilterData[]> {
+  const response = await apiFetch("/places/filter-data", {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ place_ids: [...new Set(placeIds)].slice(0, 10) }), signal,
+  }, { csrf: false });
+  if (response.status === 429) throw new PlacesQuotaError(response.headers.get("x-ratelimit-reset"));
+  if (!response.ok) throw new Error("Restaurant details could not be checked.");
+  return ((await response.json()) as { places: FilterData[] }).places;
 }
 
 export class PlacesQuotaError extends Error {
@@ -86,7 +107,7 @@ export async function verifyDietaryEvidence(
   const response = await apiFetch("/places/dietary-evidence", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ place_ids: placeIds.slice(0, 20), requirements: requirements.slice(0, 5) }),
+    body: JSON.stringify({ place_ids: placeIds.slice(0, 10), requirements: requirements.slice(0, 5) }),
     signal,
   }, { csrf: false });
   if (!response.ok) {

@@ -4,6 +4,8 @@ import { addFavorite, listSavedPlaces } from "../api/favorites";
 import { useAuth } from "../context/AuthContext";
 import { useGoogleMaps } from "../context/GoogleMapsContext";
 import { BookmarkIcon, PinIcon } from "./Icons";
+import { FilterEvidence } from "./FilterEvidence";
+import type { FilterLabel } from "../api/places";
 
 type SuggestionCardProps = {
   placeId: string;
@@ -12,6 +14,7 @@ type SuggestionCardProps = {
   tags?: string[];
   distance?: string;
   rating?: number | null;
+  filterLabels?: FilterLabel[];
 };
 
 type PhotoData = {
@@ -42,6 +45,7 @@ export function SuggestionCard({
   tags = [],
   distance,
   rating,
+  filterLabels,
 }: SuggestionCardProps): JSX.Element {
   const { user } = useAuth();
   const { isLoaded } = useGoogleMaps();
@@ -183,6 +187,7 @@ export function SuggestionCard({
           ) : null}
         </div>
         <p className="suggestion-address">{description}</p>
+        <FilterEvidence labels={filterLabels} />
         {!placeId.startsWith("placeholder-") ? (
           <a
             className="suggestion-google-source"

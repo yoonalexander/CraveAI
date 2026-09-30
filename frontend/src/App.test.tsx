@@ -448,7 +448,7 @@ describe("Airbnb-style application shell", () => {
     render(<App />);
     await flushEffects();
 
-    fireEvent.click(screen.getByRole("button", { name: /Under \$20/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Budget-friendly/i }));
     expect(screen.getByTestId("chat-pool-size")).toHaveTextContent("1");
     fireEvent.click(screen.getByRole("button", { name: "Discovery" }));
     expect(screen.getByText("Place 0")).toBeInTheDocument();
@@ -515,7 +515,25 @@ describe("Airbnb-style application shell", () => {
     expect(screen.getByTestId("map-focus")).toHaveTextContent("None");
   });
 
-  it("shows lower-rated and unrated restaurants until Top Rated is selected", async () => {
+  it("preserves an explicit rating sort when a favourite cuisine would rank a lower-rated restaurant first", async () => {
+    authState.user = { user_id: "user-1", email: "test@example.com", email_verified: true };
+    mockedFetchPreferences.mockResolvedValue({ ...defaultPreferences, personalization_enabled: true, favorite_cuisines: ["Indian"] });
+    const suggestions = makeSuggestions(2);
+    suggestions[0].rating = 4.8;
+    suggestions[1] = { ...suggestions[1], name: "Indian Place", rating: 4.1 };
+    mockedFetchSuggestions.mockResolvedValue(suggestions);
+    render(<App />);
+    await flushEffects();
+    fireEvent.click(screen.getByRole("button", { name: "Discovery" }));
+    const titles = () => screen.getAllByRole("article").map((element) => element.textContent);
+    expect(titles()).toEqual(["Indian Place", "Place 0"]);
+    fireEvent.click(screen.getByRole("button", { name: "Filters" }));
+    fireEvent.change(screen.getByLabelText("Sort by"), { target: { value: "rating" } });
+    fireEvent.click(screen.getByRole("button", { name: "Show results" }));
+    expect(titles()).toEqual(["Place 0", "Indian Place"]);
+  });
+
+  it("shows lower-rated and unrated restaurants until the shared minimum rating is selected", async () => {
     const suggestions = makeSuggestions(3);
     suggestions[1].rating = 3.6;
     suggestions[2].rating = null;
@@ -525,7 +543,9 @@ describe("Airbnb-style application shell", () => {
     fireEvent.click(screen.getByRole("button", { name: "Discovery" }));
     expect(screen.getByText("Place 1")).toBeInTheDocument();
     expect(screen.getByText("Place 2")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Top Rated" }));
+    fireEvent.click(screen.getByRole("button", { name: "Filters" }));
+    fireEvent.change(screen.getByLabelText("Minimum rating"), { target: { value: "4.5" } });
+    fireEvent.click(screen.getByRole("button", { name: "Show results" }));
     expect(screen.getByText("Place 0")).toBeInTheDocument();
     expect(screen.queryByText("Place 1")).not.toBeInTheDocument();
     expect(screen.queryByText("Place 2")).not.toBeInTheDocument();
