@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import asyncio
 import time
 import uuid
 from contextlib import asynccontextmanager
@@ -23,6 +24,7 @@ from backend.routers import (
     plans,
     preferences,
     telemetry,
+    discovery,
 )
 from backend.services.storage import init_storage, purge_expired_operational_data
 
@@ -32,7 +34,19 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def _lifespan(_: FastAPI):
     await purge_expired_operational_data()
-    yield
+    task = None
+    if get_settings().DISCOVERY_REFRESH_ENABLED:
+        from backend.services.discovery import discovery_worker
+        task = asyncio.create_task(discovery_worker())
+    try:
+        yield
+    finally:
+        if task:
+            task.cancel()
+            try:
+                await task
+            except asyncio.CancelledError:
+                pass
 
 
 def create_app() -> FastAPI:
@@ -132,7 +146,7 @@ def create_app() -> FastAPI:
     api_routers = (
         auth.router, account.router, legal.router, preferences.router, audio.router,
         conversations.router, plans.router, chat.router, places.router,
-        favorites.router, feedback.router, telemetry.router,
+        favorites.router, feedback.router, telemetry.router, discovery.router,
     )
     for router in api_routers:
         app.include_router(router, prefix="/api")

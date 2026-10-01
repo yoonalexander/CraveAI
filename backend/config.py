@@ -58,6 +58,11 @@ class Config:
     GOOGLE_API_KEY: str = field(default_factory=lambda: os.getenv("GOOGLE_API_KEY", ""))
     MODEL_NAME: str = field(default_factory=lambda: os.getenv("MODEL_NAME", "gpt-5-nano"))
     FILTER_LABEL_MODEL: str = field(default_factory=lambda: os.getenv("FILTER_LABEL_MODEL", ""))
+    DISCOVERY_MODEL: str = field(default_factory=lambda: os.getenv("DISCOVERY_MODEL", ""))
+    DISCOVERY_REFRESH_ENABLED: bool = field(default_factory=lambda: _env_bool("DISCOVERY_REFRESH_ENABLED", False))
+    DISCOVERY_REFRESH_MINUTES: int = field(default_factory=lambda: _env_int("DISCOVERY_REFRESH_MINUTES", 360))
+    DISCOVERY_DAILY_MODEL_CALLS: int = field(default_factory=lambda: _env_int("DISCOVERY_DAILY_MODEL_CALLS", 4))
+    DISCOVERY_DAILY_PLACE_MATCHES: int = field(default_factory=lambda: _env_int("DISCOVERY_DAILY_PLACE_MATCHES", 40))
     ENVIRONMENT: str = field(default_factory=lambda: os.getenv("APP_ENV", "development"))
 
     DATABASE_URL: str = field(default_factory=lambda: os.getenv("DATABASE_URL", ""))

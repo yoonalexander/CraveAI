@@ -33,6 +33,7 @@ const test = base.extend({
 });
 
 test.beforeEach(async ({ page, context }) => {
+  await page.route("**/api/discovery/signals?**", (route) => route.fulfill({ json: { status: "pending", items: [], region: "Toronto & GTA", coverage: ["Toronto & GTA"], expires_at: null } }));
   await context.grantPermissions(["geolocation"]);
   await context.setGeolocation({ latitude: 43.65, longitude: -79.38 });
   await page.addInitScript(() => sessionStorage.setItem("craveai-age-18", "true"));

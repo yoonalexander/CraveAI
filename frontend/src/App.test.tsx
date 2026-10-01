@@ -6,7 +6,8 @@ import type { ChatRecommendation } from "./api/chat";
 import App from "./App";
 import { listSavedPlaces } from "./api/favorites";
 import { fetchSuggestions, PlacesQuotaError } from "./api/places";
-import { fetchPreferences } from "./api/product";
+import { fetchPreferences, resolvePlaces } from "./api/product";
+import { fetchDiscoveryNews } from "./api/discovery";
 import type { SearchArea } from "./types/searchArea";
 
 const { authState } = vi.hoisted(() => ({
@@ -96,11 +97,13 @@ vi.mock("./api/weather", () => ({
     isDay: true,
   }),
 }));
+vi.mock("./api/discovery", () => ({ fetchDiscoveryNews: vi.fn() }));
 vi.mock("./api/product", async () => {
   const actual = await vi.importActual<typeof import("./api/product")>("./api/product");
   return {
     ...actual,
     fetchPreferences: vi.fn(),
+    resolvePlaces: vi.fn(),
     fetchLegalCurrent: vi.fn().mockResolvedValue({
       terms: { version: "test", effective_date: "2026-08-13", path: "/terms" },
       privacy: { version: "test", effective_date: "2026-08-13", path: "/privacy" },
@@ -169,6 +172,10 @@ beforeEach(() => {
   mockedFetchSuggestions.mockReset();
   mockedFetchPreferences.mockReset();
   mockedFetchPreferences.mockResolvedValue(defaultPreferences);
+  vi.mocked(resolvePlaces).mockReset();
+  vi.mocked(resolvePlaces).mockResolvedValue([]);
+  vi.mocked(fetchDiscoveryNews).mockReset();
+  vi.mocked(fetchDiscoveryNews).mockResolvedValue({ status: "pending", items: [], region: "Toronto & GTA", coverage: ["Toronto & GTA"], checked_at: null, refresh_due_at: null, expires_at: null });
   mockedListSavedPlaces.mockReset();
   mockedListSavedPlaces.mockResolvedValue([]);
   chatMount = 0;
@@ -196,6 +203,26 @@ beforeEach(() => {
 });
 
 describe("Airbnb-style application shell", () => {
+  it("opens a news-only restaurant on the home map without replacing the nearby pool or going through chat", async () => {
+    mockedFetchSuggestions.mockResolvedValue(makeSuggestions(4));
+    const place = { place_id: "news-only", name: "News Restaurant", lat: 43.66, lng: -79.39, rating: null, address: "10 Main Street", reason: "News" };
+    vi.mocked(resolvePlaces).mockResolvedValue([place]);
+    const future = new Date(Date.now() + 86400000).toISOString();
+    vi.mocked(fetchDiscoveryNews).mockResolvedValue({ status: "ready", region: "Toronto & GTA", coverage: ["Toronto & GTA"], checked_at: new Date().toISOString(), refresh_due_at: future, expires_at: future,
+      items: [{ place_id: place.place_id, name: place.name, city: "Toronto", address: null, label: "recently_spotted", opening_date: null, publisher_count: 1, sources: [], expires_at: future }] });
+    render(<App />); await flushEffects();
+    fireEvent.click(screen.getByRole("button", { name: "Discovery" })); await flushEffects();
+    expect(fetchDiscoveryNews).toHaveBeenCalledWith({ lat: 43.65, lng: -79.38 }, expect.any(AbortSignal));
+    fireEvent.click(screen.getByRole("button", { name: "Show on map News Restaurant" })); await flushEffects();
+    expect(window.location.pathname).toBe("/");
+    expect(screen.getByTestId("map-focus")).toHaveTextContent("News Restaurant:1");
+    expect(screen.getByTestId("chat-pool-size")).toHaveTextContent("4");
+    expect(resolvePlaces).toHaveBeenCalledWith(["news-only"], expect.any(AbortSignal));
+    fireEvent.click(screen.getByRole("button", { name: "Discovery" })); await flushEffects();
+    fireEvent.click(screen.getByRole("button", { name: "Show on map News Restaurant" })); await flushEffects();
+    expect(screen.getByTestId("map-focus")).toHaveTextContent("News Restaurant:2");
+    expect(mockedFetchSuggestions).toHaveBeenCalledTimes(1);
+  });
   it("keeps weather loading while waiting for location, then settles after the forecast", async () => {
     const resolveDeviceLocation = vi.mocked(navigator.geolocation.getCurrentPosition).getMockImplementation()!;
     const pendingLocation = vi.spyOn(navigator.geolocation, "getCurrentPosition").mockImplementation(() => undefined);

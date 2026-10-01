@@ -5,6 +5,7 @@ import type { Coordinates } from "../types/searchArea";
 import { calculateDistanceKm } from "../utils/suggestionPool";
 import { SuggestionCard } from "./SuggestionCard";
 import { CuisineIcon } from "./CuisineIcon";
+import { NewsDiscoveries } from "./NewsDiscoveries";
 
 type DiscoveryPageProps = {
   suggestions: Suggestion[];
@@ -13,6 +14,8 @@ type DiscoveryPageProps = {
   error: string | null;
   canRetry: boolean;
   onRetry: () => void;
+  newsArea?: Coordinates | null;
+  onShowOnMap?: (place: Suggestion) => void;
 };
 
 export function DiscoveryPage({
@@ -22,6 +25,8 @@ export function DiscoveryPage({
   error,
   canRetry,
   onRetry,
+  newsArea = null,
+  onShowOnMap,
 }: DiscoveryPageProps): JSX.Element {
   const [query, setQuery] = useState("");
   const visible = useMemo(() => suggestions.filter((item) => {
@@ -30,6 +35,7 @@ export function DiscoveryPage({
   }), [query, suggestions]);
   return (
     <section className="discovery-page" aria-labelledby="discovery-title">
+      {onShowOnMap ? <NewsDiscoveries area={newsArea} onShowOnMap={onShowOnMap} /> : null}
       <header className="discovery-heading">
         <div>
           <p>Discovery</p>

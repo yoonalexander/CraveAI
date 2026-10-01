@@ -6,6 +6,7 @@ const restaurants = Array.from({ length: 30 }, (_, i) => ({ place_id: `venue-${i
   cuisine_labels: i === 0 ? [{ value: "Japanese", source: "google", evidence: [] }] : [],
 }));
 test.beforeEach(async ({ page, context }) => {
+  await page.route("**/api/discovery/signals?**", (route) => route.fulfill({ json: { status: "pending", items: [], region: "Toronto & GTA", coverage: ["Toronto & GTA"], expires_at: null } }));
   await context.grantPermissions(["geolocation"]);
   await context.setGeolocation({ latitude: 43.65, longitude: -79.38 });
   await page.route("**/api/auth/me", (route) => route.fulfill({ json: { user: { user_id: "test-user", email: "test@example.com", email_verified: true, username: "food_explorer" } } }));
@@ -48,6 +49,7 @@ for (const theme of ["light", "dark"]) {
     await page.goto("/discovery");
     await page.evaluate((theme) => document.documentElement.classList.add(theme), theme);
     const first = page.locator(".discovery-grid .suggestion-card").first();
+    await first.scrollIntoViewIfNeeded();
     await expect(first.getByAltText("Google Maps photo of Restaurant 0")).toBeVisible();
     await expect(first.getByRole("link", { name: "Photo: Contributor 0" })).toBeVisible();
     await expect(first.getByText("Photo: Second contributor", { exact: true })).toBeVisible();
@@ -97,6 +99,7 @@ test("missing, broken and quota-limited photos stay usable without automatic ret
   await page.route("https://lh3.googleusercontent.com/broken", (route) => route.fulfill({ status: 404, body: "missing" }));
   await page.goto("/discovery");
   const cards = page.locator(".discovery-grid .suggestion-card");
+  await cards.nth(0).scrollIntoViewIfNeeded();
   await expect(cards.nth(0).getByText("No photos available yet")).toBeVisible();
   await cards.nth(1).scrollIntoViewIfNeeded();
   await expect(cards.nth(1).getByText("This photo could not be loaded.")).toBeVisible();

@@ -604,6 +604,12 @@ function CraveApplication(): JSX.Element {
                 onRetry={retrySearch}
                 origin={originLocation}
                 suggestions={filteredSuggestions}
+                newsArea={searchArea?.center || null}
+                onShowOnMap={(place) => {
+                  setMapFocusRequest({ requestId: ++mapFocusSequence.current, place });
+                  setMobileChatExpanded(false);
+                  navigate("/");
+                }}
               />
             </div>
           ) : currentPath === "/likes" ? <LikesPage />

@@ -987,6 +987,45 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 }
 .mobile-location-pill { display: none; }
 
+/* Editorial discoveries carry their dates and citations with the venue. */
+.news-discoveries { margin-bottom: 32px; padding: 22px; border: 1px solid #dce5d6; border-radius: 18px; color: #303d2a; background: #f3f7ef; }
+.news-discoveries > header { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.news-discoveries > header p { margin: 0 0 6px; color: #497342; font-size: 11px; font-weight: 750; }
+.news-discoveries h2 { margin: 0; font-size: clamp(21px, 2vw, 28px); line-height: 1.2; }
+.news-discoveries > header a, .news-discoveries-freshness { font-size: 11px; }
+.news-discoveries a { color: #396632; text-decoration: underline; text-underline-offset: 3px; overflow-wrap: anywhere; }
+.news-discoveries-intro, .news-discoveries > p[role="status"], .news-discovery-criteria { font-size: 12px; line-height: 1.55; }
+.news-discovery-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 12px; margin-top: 18px; }
+.news-discovery-card { display: flex; min-width: 0; flex-direction: column; padding: 17px; overflow: hidden; border: 1px solid #dce5d6; border-radius: 12px; color: #303d2a; background: #fff; }
+.news-discovery-photo { margin: -17px -17px 14px; }
+.news-discovery-photo .restaurant-photo-frame { height: 160px; aspect-ratio: auto; }
+.news-discovery-label { align-self: flex-start; padding: 5px 8px; border-radius: 6px; color: #315b2a; background: #e6f0df; font-size: 11px; font-weight: 750; }
+.news-discovery-label.is-trending { color: #784819; background: #fff0d8; }
+.news-discovery-label.is-recently_spotted { color: #4e554a; background: #edf0e9; }
+.news-discovery-card h3 { margin: 12px 0 5px; font-size: 18px; overflow-wrap: anywhere; }
+.news-discovery-card > p { margin: 0 0 9px; font-size: 12px; line-height: 1.5; }
+.news-discovery-card .news-discovery-reason { font-weight: 600; }
+.news-discovery-card ul { padding: 0; margin: 0 0 16px; list-style: none; }
+.news-discovery-card li { display: flex; flex-direction: column; gap: 3px; margin-top: 9px; font-size: 12px; line-height: 1.5; }
+.news-discovery-card li span { color: #6a7264; font-size: 11px; }
+.news-discovery-card q { overflow-wrap: anywhere; font-style: italic; }
+.news-discovery-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 9px; margin-top: auto; font-size: 12px; }
+.news-discoveries button { display: inline-flex; min-height: 44px; align-items: center; gap: 5px; padding: 7px 10px; border: 1px solid #a7bf9c; border-radius: 9px; color: #315b2a; background: #edf4e8; font-size: 12px; font-weight: 650; cursor: pointer; }
+.news-discoveries button svg { width: 16px; height: 16px; }
+.news-discoveries button:disabled { opacity: .5; cursor: wait; }
+.news-discovery-criteria summary { padding-block: 7px; cursor: pointer; }
+.news-discovery-criteria p { margin: 4px 0 0; }
+.news-discoveries > p[role="status"] button { margin-left: 8px; }
+.dark .news-discoveries { color: #e1ebd9; background: #202d1b; border-color: #4a603d; }
+.dark .news-discoveries > header p, .dark .news-discoveries a { color: #c2deb0; }
+.dark .news-discovery-card { color: #e1ebd9; background: #2b3825; border-color: #536c45; }
+.dark .news-discovery-card li span { color: #bfceb5; }
+.dark .news-discovery-label, .dark .news-discoveries button { color: #e2f2d5; background: #405734; border-color: #869f76; }
+.dark .news-discovery-label.is-trending { color: #ffe4bc; background: #644725; }
+.dark .news-discovery-label.is-recently_spotted { color: #dce7d4; background: #465440; }
+@media (max-width: 1120px) { .news-discovery-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media (max-width: 620px) { .news-discoveries { padding: 15px; }.news-discovery-grid { grid-template-columns: 1fr; }.news-discoveries > header { gap: 8px; } }
+
 .home-split { display: grid; min-height: 0; grid-template-columns: minmax(0,1fr) minmax(0,1fr); overflow: hidden; }
 .home-chat, .home-map { min-width: 0; min-height: 0; }
 .home-chat { padding: 24px 26px 18px; border-right: 1px solid #e2e3df; }

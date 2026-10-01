@@ -117,10 +117,10 @@ export async function deleteConversation(id: string): Promise<void> {
   if (!response.ok) throw new Error(await readApiError(response));
 }
 
-export async function resolvePlaces(placeIds: string[]): Promise<Suggestion[]> {
+export async function resolvePlaces(placeIds: string[], signal?: AbortSignal): Promise<Suggestion[]> {
   if (!placeIds.length) return [];
   const response = await apiFetch("/places/resolve", {
-    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ place_ids: placeIds.slice(0, 20) }),
+    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ place_ids: placeIds.slice(0, 20) }), signal,
   }, { csrf: false });
   if (!response.ok) throw new Error(await readApiError(response));
   return ((await response.json()) as { places: Suggestion[] }).places;

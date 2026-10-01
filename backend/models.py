@@ -267,3 +267,43 @@ class AbuseEvent(Base):
     namespace: Mapped[str] = mapped_column(String(40), nullable=False, index=True)
     actor_hash: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
     occurred_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+class DiscoveryRefresh(Base):
+    __tablename__ = "discovery_refreshes"
+
+    source_id: Mapped[str] = mapped_column(String(80), primary_key=True)
+    status: Mapped[str] = mapped_column(String(24), nullable=False, default="pending")
+    last_attempt_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    last_success_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    next_refresh_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    lease_until: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    lease_token: Mapped[str | None] = mapped_column(String(36))
+    error_code: Mapped[str | None] = mapped_column(String(40))
+
+
+class DiscoverySignal(Base):
+    __tablename__ = "discovery_signals"
+    __table_args__ = (Index("ix_discovery_signals_region_expiry", "region", "expires_at"),)
+
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    source_id: Mapped[str] = mapped_column(String(80), nullable=False)
+    region: Mapped[str] = mapped_column(String(40), nullable=False)
+    article_key: Mapped[str] = mapped_column(String(64), nullable=False)
+    headline_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    source_url: Mapped[str] = mapped_column(String(2048), nullable=False)
+    publisher: Mapped[str] = mapped_column(String(200), nullable=False)
+    publisher_group: Mapped[str | None] = mapped_column(String(80))
+    restaurant_name: Mapped[str] = mapped_column(String(160), nullable=False)
+    city: Mapped[str] = mapped_column(String(80), nullable=False)
+    source_address: Mapped[str | None] = mapped_column(String(240))
+    evidence: Mapped[str] = mapped_column(String(160), nullable=False)
+    published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    observed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    ingested_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    opening_date: Mapped[date | None] = mapped_column(Date)
+    opening_evidence: Mapped[str | None] = mapped_column(String(160))
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    place_id: Mapped[str | None] = mapped_column(String(256))
+    match_status: Mapped[str] = mapped_column(String(24), nullable=False, default="pending")
+    matched_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

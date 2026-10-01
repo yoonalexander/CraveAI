@@ -10,6 +10,7 @@ const restaurants = [
 ].map((place) => ({ ...place, rating: 4.2, address: "Test Street", reason: "Nearby", lat: 43.65, lng: -79.38 }));
 
 test.beforeEach(async ({ page, context }) => {
+  await page.route("**/api/discovery/signals?**", (route) => route.fulfill({ json: { status: "pending", items: [], region: "Toronto & GTA", coverage: ["Toronto & GTA"], expires_at: null } }));
   await context.grantPermissions(["geolocation"]);
   await context.setGeolocation({ latitude: 43.65, longitude: -79.38 });
   await page.route("**/api/auth/me", (route) => route.fulfill({ json: { user: null } }));
