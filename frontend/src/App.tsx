@@ -65,6 +65,7 @@ function CraveApplication(): JSX.Element {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(readSidebarPreference);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileChatExpanded, setMobileChatExpanded] = useState(false);
+  const [mapListOpen, setMapListOpen] = useState(false);
   const [locationDialogOpen, setLocationDialogOpen] = useState(false);
 
   const [originLocation, setOriginLocation] = useState<Coordinates | null>(null);
@@ -77,6 +78,7 @@ function CraveApplication(): JSX.Element {
   const [recenterVersion, setRecenterVersion] = useState(0);
 
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const [resultsArea, setResultsArea] = useState<SearchArea | null>(null);
   const suggestionsRef = useRef<Suggestion[]>([]);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const [isResolvingArea, setIsResolvingArea] = useState(false);
@@ -278,6 +280,7 @@ function CraveApplication(): JSX.Element {
         );
         suggestionsRef.current = mergedPlaces;
         setSuggestions(mergedPlaces);
+        setResultsArea(requestedArea);
         setSearchArea(requestedArea);
         setLastFailedArea(null);
         setMapRecommendations([]);
@@ -407,6 +410,7 @@ function CraveApplication(): JSX.Element {
       setMapRecommendations([]);
       setMapFocusRequest(null);
       setMobileChatExpanded(false);
+      setMapListOpen(false);
     }
   }, []);
 
@@ -561,24 +565,32 @@ function CraveApplication(): JSX.Element {
           {homeVisible ? (
             <div className="search-view home-view">
               {toolbar}
-              <div className="home-split">
+              <div className={`home-split${mapListOpen ? " is-list-open" : ""}`}>
                 <section className="home-chat" aria-label="Chat">
-                  <MobileChatSheet expanded={mobileChatExpanded} onExpandedChange={setMobileChatExpanded}>
+                  <MobileChatSheet expanded={mobileChatExpanded} onExpandedChange={(expanded) => { setMobileChatExpanded(expanded); if (expanded) setMapListOpen(false); }}>
                     <ChatPanel
                       candidatePlaces={filteredSuggestions}
                       key={chatSession}
                       location={chatLocation}
-                      onConversationStart={() => setMobileChatExpanded(true)}
+                      onConversationStart={() => { setMobileChatExpanded(true); setMapListOpen(false); }}
                       onRecommendations={setMapRecommendations}
                       onShowOnMap={(place) => {
                         setMapFocusRequest({ requestId: ++mapFocusSequence.current, place });
                         setMobileChatExpanded(false);
+                        setMapListOpen(false);
                       }}
                     />
                   </MobileChatSheet>
                 </section>
                 <section className="home-map">
                   <MapView
+                    listOpen={mapListOpen}
+                    resultsAreaLabel={resultsArea?.label}
+                    onListOpenChange={(open) => { setMapListOpen(open); if (open) setMobileChatExpanded(false); }}
+                    error={suggestionError}
+                    coverageNotice={coverageNotice}
+                    canRetry={!suggestionQuotaResetAt}
+                    onRetry={retrySearch}
                     focusRequest={mapFocusRequest}
                     confirmedArea={searchArea}
                     isLocating={!locationReady}
@@ -608,6 +620,7 @@ function CraveApplication(): JSX.Element {
                 onShowOnMap={(place) => {
                   setMapFocusRequest({ requestId: ++mapFocusSequence.current, place });
                   setMobileChatExpanded(false);
+                  setMapListOpen(false);
                   navigate("/");
                 }}
               />

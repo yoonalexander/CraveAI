@@ -11,6 +11,8 @@ import { recordStartupTiming } from "../utils/startupTelemetry";
 import { PinIcon, SearchIcon } from "./Icons";
 import { LocationLoader } from "./LoadingIndicators";
 import { RestaurantPhotos } from "./RestaurantPhotos";
+import { MapRestaurantList } from "./MapRestaurantList";
+import { getMapRestaurants, hasMapCoordinates as hasCoordinates, sameMapRestaurant } from "../utils/mapRestaurants";
 
 type MapViewProps = {
   originLocation: Coordinates | null;
@@ -24,6 +26,13 @@ type MapViewProps = {
   isSearching: boolean;
   recenterVersion: number;
   onSearchArea: (area: SearchArea) => void;
+  listOpen?: boolean;
+  resultsAreaLabel?: string;
+  onListOpenChange?: (open: boolean) => void;
+  error?: string | null;
+  coverageNotice?: string | null;
+  canRetry?: boolean;
+  onRetry?: () => void;
 };
 
 const MAX_VIEWPORT_RADIUS_METERS = 20_000;
@@ -55,6 +64,13 @@ export function MapView({
   isSearching,
   recenterVersion,
   onSearchArea,
+  listOpen,
+  resultsAreaLabel,
+  onListOpenChange,
+  error = null,
+  coverageNotice = null,
+  canRetry = false,
+  onRetry,
 }: MapViewProps): JSX.Element {
   const { isLoaded, loadError, hasApiKey } = useGoogleMaps();
   const mapRef = useRef<google.maps.Map | null>(null);
@@ -64,23 +80,31 @@ export function MapView({
   const [draftArea, setDraftArea] = useState<SearchArea | null>(null);
   const [mapReady, setMapReady] = useState(false);
   const [selectedPlace, setSelectedPlace] = useState<Suggestion | ChatRecommendation | null>(null);
+  const [selectedKey, setSelectedKey] = useState<string | null>(null);
+  const [localListOpen, setLocalListOpen] = useState(false);
+  const mapButton = useRef<HTMLButtonElement>(null);
+  const showList = listOpen ?? localListOpen;
+  const entries = useMemo(() => getMapRestaurants(suggestions, recommendations), [suggestions, recommendations]);
+  const entriesRef = useRef(entries);
+  entriesRef.current = entries;
+  const changeListOpen = (open: boolean) => { setLocalListOpen(open); onListOpenChange?.(open); };
 
-  const recommendationIndexes = useMemo(() => {
-    const indexes = new Map<string, number>();
-    recommendations.forEach((place, index) => {
-      if (place.place_id) indexes.set(`id:${place.place_id}`, index + 1);
-      else indexes.set(`name:${place.name.toLowerCase()}`, index + 1);
-    });
-    return indexes;
-  }, [recommendations]);
+  useEffect(() => {
+    if (selectedKey) {
+      const entry = entries.find((entry) => entry.key === selectedKey);
+      if (entry) setSelectedPlace(entry.place);
+      else { setSelectedKey(null); setSelectedPlace(null); }
+    }
+  }, [entries, selectedKey]);
 
-  const selectPlace = useCallback((place: Suggestion | ChatRecommendation) => {
+  const selectPlace = useCallback((place: Suggestion | ChatRecommendation, key?: string) => {
     const map = mapRef.current;
     if (!map || !hasCoordinates(place)) return;
     programmaticMove.current = true;
     interactionArmed.current = false;
     setDraftArea(null);
     setSelectedPlace(place);
+    setSelectedKey(key || null);
     map.panTo({ lat: place.lat, lng: place.lng });
   }, []);
 
@@ -91,6 +115,7 @@ export function MapView({
     interactionArmed.current = false;
     setDraftArea(null);
     setSelectedPlace(null);
+    setSelectedKey(null);
     if (confirmedArea.bounds) {
       map.fitBounds(confirmedArea.bounds, 32);
     } else {
@@ -112,7 +137,9 @@ export function MapView({
 
   useEffect(() => {
     if (!mapReady || !focusRequest || !hasCoordinates(focusRequest.place)) return;
-    selectPlace(focusRequest.place);
+    const focusedPlace = focusRequest.place;
+    const entry = entriesRef.current.find((entry) => sameMapRestaurant(entry.place, focusedPlace));
+    selectPlace(entry?.place || focusedPlace, entry?.key);
     const map = mapRef.current;
     if (map && (map.getZoom() ?? 13) < 16) map.setZoom(16);
   }, [focusRequest, mapReady, selectPlace]);
@@ -179,30 +206,17 @@ export function MapView({
           title={originIsDevice ? "You are here" : `Selected location: ${locationLabel}`}
           zIndex={1000}
         />
-        {suggestions.filter(hasCoordinates).map((place) => (
+        {entries.map((entry) => (
           <RestaurantMarker
-            key={place.place_id}
-            number={recommendationIndexes.get(`id:${place.place_id}`) || recommendationIndexes.get(`name:${place.name.toLowerCase()}`)}
-            onSelect={() => selectPlace(place)}
-            place={place}
+            key={entry.key}
+            number={entry.recommendationNumber}
+            onSelect={() => selectPlace(entry.place, entry.key)}
+            place={entry.place}
           />
         ))}
-        {recommendations
-          .filter((place) => hasCoordinates(place) && !suggestions.some((suggestion) =>
-            place.place_id ? suggestion.place_id === place.place_id : suggestion.name.toLowerCase() === place.name.toLowerCase(),
-          ))
-          .filter(hasCoordinates)
-          .map((place) => (
-            <RestaurantMarker
-              key={`chat-${place.place_id || place.name}`}
-              number={recommendationIndexes.get(`id:${place.place_id}`) || recommendationIndexes.get(`name:${place.name.toLowerCase()}`)}
-              onSelect={() => selectPlace(place)}
-              place={place}
-            />
-          ))}
         {selectedPlace && hasCoordinates(selectedPlace) ? (
           <InfoWindow
-            onCloseClick={() => setSelectedPlace(null)}
+            onCloseClick={() => { setSelectedPlace(null); setSelectedKey(null); }}
             position={{ lat: selectedPlace.lat, lng: selectedPlace.lng }}
           >
             <div className="restaurant-map-popup">
@@ -228,12 +242,31 @@ export function MapView({
   return (
     <section
       aria-label="Interactive restaurant map"
-      className="map-surface"
-      onPointerDown={() => { interactionArmed.current = true; }}
-      onWheel={() => { interactionArmed.current = true; }}
+      className={`map-surface${showList ? " is-list-open" : ""}`}
+      onKeyDown={(event) => {
+        if (showList && event.key === "Escape" && !(event.target as HTMLElement).closest("[role='dialog']")) {
+          changeListOpen(false); mapButton.current?.focus();
+        }
+      }}
+      onPointerDown={(event) => { if (!showList && (event.target as HTMLElement).closest(".map-canvas")) interactionArmed.current = true; }}
+      onWheel={(event) => { if (!showList && (event.target as HTMLElement).closest(".map-canvas")) interactionArmed.current = true; }}
     >
-      <div className="map-canvas">{content}</div>
-      {draftArea ? (
+      <div className="map-view-control" role="group" aria-label="Restaurant view">
+        <button ref={mapButton} type="button" aria-pressed={!showList} aria-controls="restaurant-map-canvas" onClick={() => changeListOpen(false)}><PinIcon />Map</button>
+        <button type="button" aria-pressed={showList} aria-controls="map-restaurant-results" onClick={() => changeListOpen(true)}>List <span>{entries.length}</span></button>
+      </div>
+      <div className="map-canvas" id="restaurant-map-canvas" aria-hidden={showList}>{content}</div>
+      {showList ? <div id="map-restaurant-results" className="map-list-surface"><MapRestaurantList
+        entries={entries} selectedKey={selectedKey} origin={originLocation} areaLabel={resultsAreaLabel || confirmedArea?.label || locationLabel}
+        isLoading={isSearching || isLocating} error={error} coverageNotice={coverageNotice} canRetry={canRetry} onRetry={onRetry}
+        mapAvailable={mapReady && isLoaded && !loadError && hasApiKey}
+        onSelect={(entry) => {
+          selectPlace(entry.place, entry.key);
+          if (mapRef.current && (mapRef.current.getZoom() ?? 13) < 16) mapRef.current.setZoom(16);
+          changeListOpen(false); mapButton.current?.focus();
+        }} />
+      </div> : null}
+      {!showList && draftArea ? (
         <button
           className={`search-this-area-button${tooWide ? " is-warning" : ""}`}
           disabled={isSearching || tooWide}
@@ -244,7 +277,7 @@ export function MapView({
           {tooWide ? "Zoom in to search this area" : isSearching ? "Searching…" : "Search this area"}
         </button>
       ) : null}
-      {isSearching ? <div className="map-searching-badge" role="status">Updating this map area…</div> : null}
+      {!showList && isSearching ? <div className="map-searching-badge" role="status">Updating this map area…</div> : null}
     </section>
   );
 }
@@ -275,11 +308,6 @@ function RestaurantMarker({
       </button>
     </OverlayView>
   );
-}
-
-function hasCoordinates(place: Suggestion | ChatRecommendation): place is (Suggestion | ChatRecommendation) & Coordinates {
-  return typeof place.lat === "number" && Number.isFinite(place.lat)
-    && typeof place.lng === "number" && Number.isFinite(place.lng);
 }
 
 function MapState({ title, children, loading = false }: { title: string; children: React.ReactNode; loading?: boolean }): JSX.Element {
