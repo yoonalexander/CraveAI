@@ -1230,13 +1230,14 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   .home-chat { position: absolute; z-index: 10; inset: 0; padding: 0; border: 0; pointer-events: none; }
   .mobile-chat-sheet {
     --sheet-drag: 0px;
+    --sheet-collapsed-height: min(max(44%, 300px), calc(100% - 8px));
+    --sheet-height: var(--sheet-collapsed-height);
     position: absolute;
-    top: 56%;
     right: 0;
     bottom: 0;
     left: 0;
     display: flex;
-    height: auto;
+    height: clamp(var(--sheet-collapsed-height), calc(var(--sheet-height) - var(--sheet-drag)), calc(100% - 8px));
     min-height: 0;
     flex-direction: column;
     overflow: hidden;
@@ -1245,24 +1246,29 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
     border-radius: 28px 28px 0 0;
     background: #fff;
     box-shadow: 0 -6px 26px rgba(28,34,26,.16);
-    transform: translateY(var(--sheet-drag));
-    transition: top 280ms cubic-bezier(.2,.75,.25,1),transform 80ms linear;
+    transition: height 280ms cubic-bezier(.2,.75,.25,1);
     pointer-events: auto;
   }
-  .mobile-chat-sheet.is-expanded { top: 8px; }
+  .mobile-chat-sheet.is-expanded { --sheet-height: calc(100% - 8px); }
+  .mobile-chat-sheet.is-dragging { transition: none; }
   .mobile-sheet-grabber { display: flex; position: relative; height: 39px; flex: 0 0 39px; align-items: center; justify-content: center; touch-action: none; cursor: grab; }
   .mobile-sheet-grabber > span { width: 46px; height: 5px; border-radius: 999px; background: #91938f; }
   .mobile-sheet-grabber > button { position: absolute; top: 5px; right: 13px; display: grid; width: 30px; height: 30px; place-items: center; border: 0; border-radius: 50%; color: #636660; background: #f0f1ee; }
   .mobile-sheet-grabber > button svg { width: 16px; transform: rotate(180deg); }
   .mobile-chat-sheet.is-expanded .mobile-sheet-grabber > button svg { transform: none; }
-  .mobile-sheet-content { min-height: 0; flex: 1; }
-  .mobile-sheet-content .chat-panel { height: 100%; }
-  .mobile-sheet-content .chat-idle-heading { top: 14px; transform: none; }
+  .mobile-sheet-content { height: auto; min-height: 0; flex: 1; overflow-y: auto; overscroll-behavior: contain; }
+  .mobile-sheet-content .chat-panel { display: grid; height: auto; min-height: 100%; grid-template-rows: minmax(min-content, 1fr) auto auto; gap: 8px; padding: 0 14px max(8px, env(safe-area-inset-bottom)); }
+  .mobile-sheet-content .chat-idle-heading { position: static; grid-row: 1; align-self: start; margin: 14px 0 16px; transform: none; }
   .mobile-sheet-content .chat-idle-heading h1 { font-size: clamp(21px,6vw,27px); }
-  .mobile-sheet-content .chat-composer { top: 72px; bottom: auto; width: calc(100% - 28px); transform: none; }
-  .mobile-sheet-content .chat-panel.has-conversation .chat-composer { top: auto; bottom: 24px; }
-  .mobile-sheet-content .chat-conversation { inset: 38px 0 101px; }
-  .mobile-sheet-content .chat-disclaimer, .mobile-sheet-content .chat-legal-notice { bottom: 3px; font-size: 10px; }
+  .mobile-sheet-content .chat-composer,
+  .mobile-sheet-content .chat-panel.has-conversation .chat-composer { position: static; grid-row: 2; width: 100%; margin: 0; transform: none; transition: none; }
+  .mobile-sheet-content .chat-composer-meta { flex-wrap: wrap; gap: 4px 8px; text-align: center; }
+  .mobile-sheet-content .chat-error { margin-left: 0; }
+  .mobile-sheet-content .chat-conversation { position: static; grid-row: 1; min-height: 0; margin-top: 38px; }
+  .mobile-sheet-content .chat-panel.has-conversation { height: 100%; grid-template-rows: minmax(0, 1fr) auto auto; }
+  .mobile-sheet-content .chat-panel.has-conversation .chat-idle-heading,
+  .mobile-sheet-content .chat-panel:not(.has-conversation) .chat-conversation { display: none; }
+  .mobile-sheet-content .chat-disclaimer, .mobile-sheet-content .chat-legal-notice { position: static; grid-row: 3; margin: 0; font-size: 10px; }
   .mobile-chat-sheet:not(.is-expanded) .chat-active-toolbar,
   .mobile-chat-sheet:not(.is-expanded) .chat-conversation,
   .mobile-chat-sheet:not(.is-expanded) .chat-disclaimer { visibility: hidden; }

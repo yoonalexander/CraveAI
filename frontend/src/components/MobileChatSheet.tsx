@@ -13,30 +13,38 @@ export function MobileChatSheet({
   onExpandedChange,
 }: MobileChatSheetProps): JSX.Element {
   const [dragOffset, setDragOffset] = useState(0);
-  const dragStart = useRef<number | null>(null);
+  const dragStart = useRef<{ y: number; pointerId: number } | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   useEffect(() => setDragOffset(0), [expanded]);
 
   const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
-    dragStart.current = event.clientY;
+    if (event.button !== 0 || dragStart.current) return;
+    dragStart.current = { y: event.clientY, pointerId: event.pointerId };
+    setIsDragging(true);
     event.currentTarget.setPointerCapture(event.pointerId);
   };
   const handlePointerMove = (event: PointerEvent<HTMLDivElement>) => {
-    if (dragStart.current === null) return;
-    setDragOffset(Math.max(-180, Math.min(180, event.clientY - dragStart.current)));
+    if (dragStart.current?.pointerId !== event.pointerId) return;
+    setDragOffset(event.clientY - dragStart.current.y);
+  };
+  const endDrag = () => {
+    dragStart.current = null;
+    setIsDragging(false);
+    setDragOffset(0);
   };
   const handlePointerUp = (event: PointerEvent<HTMLDivElement>) => {
-    if (dragStart.current === null) return;
+    if (dragStart.current?.pointerId !== event.pointerId) return;
+    const offset = event.clientY - dragStart.current.y;
+    endDrag();
     event.currentTarget.releasePointerCapture(event.pointerId);
-    if (dragOffset < -48) onExpandedChange(true);
-    if (dragOffset > 48) onExpandedChange(false);
-    dragStart.current = null;
-    setDragOffset(0);
+    if (offset < -48) onExpandedChange(true);
+    if (offset > 48) onExpandedChange(false);
   };
 
   return (
     <section
-      className={`mobile-chat-sheet${expanded ? " is-expanded" : ""}`}
+      className={`mobile-chat-sheet${expanded ? " is-expanded" : ""}${isDragging ? " is-dragging" : ""}`}
       style={{ "--sheet-drag": `${dragOffset}px` } as React.CSSProperties}
     >
       <div
@@ -44,12 +52,15 @@ export function MobileChatSheet({
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
+        onPointerCancel={endDrag}
+        onLostPointerCapture={endDrag}
       >
         <span aria-hidden="true" />
         <button
           aria-expanded={expanded}
           aria-label={expanded ? "Collapse chat" : "Expand chat"}
           onClick={() => onExpandedChange(!expanded)}
+          onPointerDown={(event) => event.stopPropagation()}
           type="button"
         >
           <ChevronDownIcon />
