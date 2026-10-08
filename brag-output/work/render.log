@@ -1,0 +1,140 @@
+
+◆  Rendering work → C:\Users\Admin\Documents\Projects\CraveAI\brag-output\work\launch-render.mp4
+   30fps · high · 1 workers
+   GPU: browser GPU (auto-detect)
+
+[?25l|
+•  Checking browser[1G[Jo  Checking browser[1G[Jo  Browser: cache
+[?25h
+  Lint: 0 error(s), 7 warning(s) — run with --lint-verbose for full output.
+  Continuing render despite lint warnings. Use --strict-all to block warnings.
+
+[INFO] [Render] Pipeline started {"renderJobId":"73318f5d-07d6-4bb2-b7e3-13d41ef04dc1","platform":"win32","arch":"x64","nodeVersion":"v24.13.0","fps":{"num":30,"den":1},"format":"mp4","quality":"high","browserGpuMode":"auto","forceScreenshot":false,"protocolTimeout":300000,"browserTimeout":120000,"pageNavigationTimeout":60000,"playerReadyTimeout":45000}
+[INFO] [Render:trace] {"renderJobId":"73318f5d-07d6-4bb2-b7e3-13d41ef04dc1","phase":"pipeline","status":"checkpoint","elapsedMs":5,"message":"started","format":"mp4","quality":"high","browserGpuMode":"auto","forceScreenshot":false,"protocolTimeoutMs":300000,"pageNavigationTimeoutMs":60000,"playerReadyTimeoutMs":45000,"requestedWorkers":1}
+[INFO] [Render:trace] {"renderJobId":"73318f5d-07d6-4bb2-b7e3-13d41ef04dc1","phase":"compile","status":"start","elapsedMs":6,"needsAlpha":false}
+  █░░░░░░░░░░░░░░░░░░░░░░░░  5%  Compiling composition
+[INFO] [Compiler] Embedded local font file: fonts/InterVariable.woff2 (344 KB → data URI)
+[INFO] [Compiler] Embedded local font file: fonts/InterVariable-Italic.woff2 (379 KB → data URI)
+[INFO] Compiled composition metadata {"renderJobId":"73318f5d-07d6-4bb2-b7e3-13d41ef04dc1","entryFile":"index.html","staticDuration":20,"width":1920,"height":1080,"videoCount":0,"audioCount":1,"renderModeHints":{"recommendScreenshot":false,"reasons":[]}}
+[INFO] [Render:trace] {"renderJobId":"73318f5d-07d6-4bb2-b7e3-13d41ef04dc1","phase":"compile","status":"end","elapsedMs":313,"durationMs":306,"needsAlpha":false}
+[INFO] [Render:trace] {"renderJobId":"73318f5d-07d6-4bb2-b7e3-13d41ef04dc1","phase":"compile","status":"checkpoint","elapsedMs":316,"message":"composition metadata resolved","width":1920,"height":1080,"videoCount":0,"audioCount":1,"imageCount":9,"deviceScaleFactor":1,"forceScreenshot":false,"compositionHash":"7abcff9888ffb9c2"}
+[INFO] [Render] Low-memory render profile active — screenshot capture, auto-worker calibration skipped. Override with --no-low-memory-mode or PRODUCER_LOW_MEMORY_MODE=false. {"renderJobId":"73318f5d-07d6-4bb2-b7e3-13d41ef04dc1","totalMemMb":32692,"thresholdMb":8192}
+[INFO] [Render:trace] {"renderJobId":"73318f5d-07d6-4bb2-b7e3-13d41ef04dc1","phase":"browser_probe","status":"start","elapsedMs":316,"forceScreenshot":true,"stagePhase":"calibrating"}
+[INFO] [Render:trace] {"renderJobId":"73318f5d-07d6-4bb2-b7e3-13d41ef04dc1","phase":"browser_probe","status":"end","elapsedMs":429,"durationMs":113,"forceScreenshot":true,"stagePhase":"calibrating"}
+[INFO] [Render:trace] {"renderJobId":"73318f5d-07d6-4bb2-b7e3-13d41ef04dc1","phase":"browser_probe","status":"checkpoint","elapsedMs":432,"message":"duration resolved","durationSeconds":20,"totalFrames":600,"compositionHash":"7abcff9888ffb9c2","beginFrameStalled":false}
+[INFO] [Render:trace] {"renderJobId":"73318f5d-07d6-4bb2-b7e3-13d41ef04dc1","phase":"video_extract","status":"start","elapsedMs":432,"videoCount":0}
+  ██░░░░░░░░░░░░░░░░░░░░░░░  10%  Extracting video frames
+[INFO] [Render:trace] {"renderJobId":"73318f5d-07d6-4bb2-b7e3-13d41ef04dc1","phase":"video_extract","status":"end","elapsedMs":438,"durationMs":6,"videoCount":0}
+[INFO] [Render:trace] {"renderJobId":"73318f5d-07d6-4bb2-b7e3-13d41ef04dc1","phase":"video_extract","status":"checkpoint","elapsedMs":443,"message":"frames resolved","videoCount":0,"extractedVideoCount":0,"totalFramesExtracted":0,"maxFramesPerVideo":0,"avgFramesPerExtractedVideo":null,"vfrPreflightCount":null,"vfrPreflightMs":null,"cacheHits":null,"cacheMisses":null,"transientRetries":null,"minVideoFrameCoverageRatio":null,"authoredTimedClipCount":7}
+[INFO] [Render] No HDR sources detected — rendering SDR {"renderJobId":"73318f5d-07d6-4bb2-b7e3-13d41ef04dc1"}
+[INFO] [Render:trace] {"renderJobId":"73318f5d-07d6-4bb2-b7e3-13d41ef04dc1","phase":"hdr_detection","status":"checkpoint","elapsedMs":444,"message":"resolved","requestedHdrMode":"auto","effectiveHdr":"sdr","nativeHdrVideoCount":0,"nativeHdrImageCount":0}
+[INFO] [Render:trace] {"renderJobId":"73318f5d-07d6-4bb2-b7e3-13d41ef04dc1","phase":"audio_process","status":"start","elapsedMs":444,"audioCount":1}
+  █████░░░░░░░░░░░░░░░░░░░░  20%  Processing audio tracks
+[INFO] [Render:trace] {"renderJobId":"73318f5d-07d6-4bb2-b7e3-13d41ef04dc1","phase":"audio_process","status":"end","elapsedMs":1318,"durationMs":874,"audioCount":1}
+[INFO] [Render:trace] {"renderJobId":"73318f5d-07d6-4bb2-b7e3-13d41ef04dc1","phase":"file_server","status":"start","elapsedMs":1318,"reused":false}
+  ██████░░░░░░░░░░░░░░░░░░░  25%  Starting frame capture
+[INFO] [Render:trace] {"renderJobId":"73318f5d-07d6-4bb2-b7e3-13d41ef04dc1","phase":"file_server","status":"end","elapsedMs":1328,"durationMs":10}
+  ██████░░░░░░░░░░░░░░░░░░░  25%  Checking browser GPU
+[hyperframes] browserGpuMode probe → hardware (WebGL renderer vendor="Google Inc. (NVIDIA)" renderer="ANGLE (NVIDIA, NVIDIA GeForce RTX 5060 (0x00002D05) Direct3D11 vs_5_0 ps_5_0, D3D11)")
+[INFO] [Render:trace] {"renderJobId":"73318f5d-07d6-4bb2-b7e3-13d41ef04dc1","phase":"capture_calibration","status":"checkpoint","elapsedMs":2302,"message":"skipped","requestedWorkers":1,"totalFrames":600,"htmlInCanvasDetected":false,"lowMemoryMode":true,"deInversionEligible":false,"deParallelRouterEligible":false}
+[INFO] [Render:trace] {"renderJobId":"73318f5d-07d6-4bb2-b7e3-13d41ef04dc1","phase":"worker_resolution","status":"checkpoint","elapsedMs":2303,"message":"resolved","workerCount":1}
+[INFO] streaming-encode gate {"renderJobId":"73318f5d-07d6-4bb2-b7e3-13d41ef04dc1","enabled":true,"reason":"single_worker","configFlag":true,"durationCapEnabled":false,"outputFormat":"mp4","workerCount":1,"durationSeconds":20,"maxDurationSeconds":240}
+[INFO] [Render:trace] {"renderJobId":"73318f5d-07d6-4bb2-b7e3-13d41ef04dc1","phase":"capture_strategy","status":"checkpoint","elapsedMs":2304,"message":"resolved","workerCount":1,"forceScreenshot":true,"captureBeyondViewport":null,"useStreamingEncode":true,"useLayeredComposite":false,"usePageSideCompositing":false,"hasHdrContent":false,"hasShaderTransitions":false,"isPngSequence":false}
+[INFO] [Render:trace] {"renderJobId":"73318f5d-07d6-4bb2-b7e3-13d41ef04dc1","phase":"capture_streaming","status":"start","elapsedMs":2304,"stagePhase":"capturing","workerCount":1,"forceScreenshot":true,"totalFrames":600,"framesCompleted":0,"captureMode":"screenshot","captureOperation":"captureScreenshot"}
+[BrowserManager] Browser launched (HeadlessChrome/152.0.7977.30, screenshot, gl=--use-gl=angle --use-angle=d3d11, headlessShell=true, platform=win32)
+[initSession:screenshot] page.goto start (0ms)
+[HyperFrames] render runtime fps {"canonicalFps":30,"source":"render-options","rawFpsSource":"render-options","rawFps":30}
+[initSession:screenshot] page.goto complete (647ms)
+[initSession:screenshot] GSAP proxy flush complete (720ms)
+[initSession:screenshot] pollHfReady complete (722ms)
+[initSession:screenshot] pollSubCompositionTimelines complete (ready) (727ms)
+[initSession:screenshot] applyVideoMetadataHints complete (727ms)
+[initSession:screenshot] media + fonts + tailwind ready (737ms)
+[engine] fast capture: falling back to screenshot — render-mode compatibility hint forced screenshot capture (e.g. raw requestAnimationFrame composition).
+[initSession:screenshot] static-frame dedup: 366/366 predicted frame(s) reusable (outcome=verified, runs=7/7, screenshots=31, seeks=32, elapsedMs=2066) (3292ms)
+  ██████░░░░░░░░░░░░░░░░░░░  25%  Streaming frame 1/600
+  ███████░░░░░░░░░░░░░░░░░░  29%  Streaming frame 46/600
+  ████████░░░░░░░░░░░░░░░░░  32%  Streaming frame 76/600
+  ████████░░░░░░░░░░░░░░░░░  33%  Streaming frame 86/600
+  ████████░░░░░░░░░░░░░░░░░  33%  Streaming frame 90/600
+  ████████░░░░░░░░░░░░░░░░░  34%  Streaming frame 94/600
+  ████████░░░░░░░░░░░░░░░░░  34%  Streaming frame 98/600
+  ████████░░░░░░░░░░░░░░░░░  34%  Streaming frame 102/600
+  ████████░░░░░░░░░░░░░░░░░  35%  Streaming frame 106/600
+  ████████░░░░░░░░░░░░░░░░░  35%  Streaming frame 110/600
+  ████████░░░░░░░░░░░░░░░░░  35%  Streaming frame 114/600
+  █████████░░░░░░░░░░░░░░░░  36%  Streaming frame 118/600
+  █████████░░░░░░░░░░░░░░░░  37%  Streaming frame 134/600
+  █████████░░░░░░░░░░░░░░░░  39%  Streaming frame 154/600
+  ██████████░░░░░░░░░░░░░░░  40%  Streaming frame 169/600
+  ██████████░░░░░░░░░░░░░░░  41%  Streaming frame 171/600
+  ██████████░░░░░░░░░░░░░░░  41%  Streaming frame 174/600
+  ██████████░░░░░░░░░░░░░░░  41%  Streaming frame 177/600
+  ██████████░░░░░░░░░░░░░░░  42%  Streaming frame 181/600
+  ██████████░░░░░░░░░░░░░░░  42%  Streaming frame 185/600
+  ██████████░░░░░░░░░░░░░░░  42%  Streaming frame 189/600
+  ██████████░░░░░░░░░░░░░░░  43%  Streaming frame 193/600
+  ███████████░░░░░░░░░░░░░░  44%  Streaming frame 202/600
+  ███████████░░░░░░░░░░░░░░  44%  Streaming frame 206/600
+  ███████████░░░░░░░░░░░░░░  44%  Streaming frame 210/600
+  ███████████░░░░░░░░░░░░░░  45%  Streaming frame 215/600
+  ███████████░░░░░░░░░░░░░░  45%  Streaming frame 219/600
+  ███████████░░░░░░░░░░░░░░  45%  Streaming frame 223/600
+  ███████████░░░░░░░░░░░░░░  46%  Streaming frame 227/600
+  ███████████░░░░░░░░░░░░░░  46%  Streaming frame 231/600
+  ███████████░░░░░░░░░░░░░░  47%  Streaming frame 235/600
+  ███████████░░░░░░░░░░░░░░  47%  Streaming frame 239/600
+  ███████████░░░░░░░░░░░░░░  47%  Streaming frame 243/600
+  ████████████░░░░░░░░░░░░░  48%  Streaming frame 247/600
+  ████████████░░░░░░░░░░░░░  50%  Streaming frame 275/600
+  █████████████░░░░░░░░░░░░  52%  Streaming frame 292/600
+  █████████████░░░░░░░░░░░░  54%  Streaming frame 311/600
+  █████████████░░░░░░░░░░░░  54%  Streaming frame 315/600
+  █████████████░░░░░░░░░░░░  54%  Streaming frame 318/600
+  █████████████░░░░░░░░░░░░  55%  Streaming frame 322/600
+  █████████████░░░░░░░░░░░░  55%  Streaming frame 326/600
+  █████████████░░░░░░░░░░░░  55%  Streaming frame 330/600
+  ██████████████░░░░░░░░░░░  56%  Streaming frame 334/600
+  ██████████████░░░░░░░░░░░  56%  Streaming frame 338/600
+  ██████████████░░░░░░░░░░░  57%  Streaming frame 351/600
+  ██████████████░░░░░░░░░░░  58%  Streaming frame 355/600
+  ██████████████░░░░░░░░░░░  58%  Streaming frame 359/600
+  ██████████████░░░░░░░░░░░  58%  Streaming frame 363/600
+  ██████████████░░░░░░░░░░░  59%  Streaming frame 367/600
+  ██████████████░░░░░░░░░░░  59%  Streaming frame 371/600
+  ██████████████░░░░░░░░░░░  59%  Streaming frame 375/600
+  ███████████████░░░░░░░░░░  60%  Streaming frame 379/600
+  ███████████████░░░░░░░░░░  60%  Streaming frame 383/600
+  ███████████████░░░░░░░░░░  60%  Streaming frame 387/600
+  ███████████████░░░░░░░░░░  61%  Streaming frame 391/600
+  ███████████████░░░░░░░░░░  61%  Streaming frame 395/600
+  ███████████████░░░░░░░░░░  63%  Streaming frame 415/600
+  ████████████████░░░░░░░░░  65%  Streaming frame 437/600
+  ████████████████░░░░░░░░░  67%  Streaming frame 457/600
+  █████████████████░░░░░░░░  68%  Streaming frame 470/600
+  █████████████████░░░░░░░░  69%  Streaming frame 476/600
+  █████████████████░░░░░░░░  69%  Streaming frame 480/600
+  █████████████████░░░░░░░░  69%  Streaming frame 484/600
+  █████████████████░░░░░░░░  70%  Streaming frame 488/600
+  █████████████████░░░░░░░░  70%  Streaming frame 492/600
+  █████████████████░░░░░░░░  70%  Streaming frame 496/600
+  █████████████████░░░░░░░░  71%  Streaming frame 500/600
+  █████████████████░░░░░░░░  71%  Streaming frame 504/600
+  ██████████████████░░░░░░░  72%  Streaming frame 509/600
+  ██████████████████░░░░░░░  72%  Streaming frame 513/600
+  ██████████████████░░░░░░░  72%  Streaming frame 516/600
+  ██████████████████░░░░░░░  75%  Streaming frame 540/600
+  ███████████████████░░░░░░  76%  Streaming frame 561/600
+  ███████████████████░░░░░░  78%  Streaming frame 581/600
+  ████████████████████░░░░░  80%  Streaming frame 600/600
+[static-dedup] reused 366/600 frame(s) (61%), est. ~27084ms saved (avg 74ms/frame)
+[INFO] [Render:trace] {"renderJobId":"73318f5d-07d6-4bb2-b7e3-13d41ef04dc1","phase":"capture_streaming","status":"end","elapsedMs":28646,"durationMs":26341,"stagePhase":"capturing","workerCount":1,"forceScreenshot":true,"totalFrames":600,"framesCompleted":600,"captureMode":"screenshot","captureOperation":"encode"}
+[INFO] [Render:trace] {"renderJobId":"73318f5d-07d6-4bb2-b7e3-13d41ef04dc1","phase":"assemble","status":"start","elapsedMs":28647,"stagePhase":"capturing","hasAudio":true,"workerCount":1,"forceScreenshot":true,"totalFrames":600,"framesCompleted":600,"captureMode":"screenshot","captureOperation":"encode"}
+  ██████████████████████░░░  90%  Assembling final video
+[INFO] [Render:trace] {"renderJobId":"73318f5d-07d6-4bb2-b7e3-13d41ef04dc1","phase":"assemble","status":"end","elapsedMs":29743,"durationMs":1095,"stagePhase":"capturing","hasAudio":true,"workerCount":1,"forceScreenshot":true,"totalFrames":600,"framesCompleted":600,"captureMode":"screenshot","captureOperation":"encode"}
+[INFO] [Render:trace] {"renderJobId":"73318f5d-07d6-4bb2-b7e3-13d41ef04dc1","phase":"pipeline","status":"checkpoint","elapsedMs":29844,"message":"artifact validated","totalElapsedMs":29842}
+  █████████████████████████  100%  Render complete
+
+◇  C:\Users\Admin\Documents\Projects\CraveAI\brag-output\work\launch-render.mp4
+   2.5 MB · 20.0s video · rendered in 29.9s
+   screenshot capture · hardware gpu · compile 0.4s · extract 0.0s · audio 0.9s · probe 0.1s · setup 1.0s · capture 26.3s · encode (during capture) 26.3s · assemble 1.1s

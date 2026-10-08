@@ -1,0 +1,53 @@
+
+> check
+> npx --yes hyperframes@0.8.106 check
+
+◆  Checking work
+[INFO] [Compiler] Fetched 11 font face(s) for "Roboto" from Google Fonts (cached to C:\Users\Admin\.cache\hyperframes\fonts\roboto)
+[INFO] [Compiler] Injected deterministic @font-face rules for 1 requested font families
+[hyperframes] browserGpuMode probe → hardware (WebGL renderer vendor="Google Inc. (NVIDIA)" renderer="ANGLE (NVIDIA, NVIDIA GeForce RTX 5060 (0x00002D05) Direct3D11 vs_5_0 ps_5_0, D3D11)")
+
+Lint
+  ⚠ duplicate_media_discovery_risk: Detected 9 matching img entries with the same source/start/duration.
+    C:\Users\Admin\Documents\Projects\CraveAI\brag-output\work\index.html [data-composition-id] t=0s
+    Fix: Avoid duplicated media nodes that can be discovered twice during compilation.
+  ⚠ timeline_track_too_dense: Track 0 has 5 timed elements in this HTML file. Smaller sub-compositions keep timelines easier to read, iterate on, and diff.
+    C:\Users\Admin\Documents\Projects\CraveAI\brag-output\work\index.html [data-composition-id] t=0s
+    Fix: Move coherent scene groups into separate .html files under compositions/ and mount them from the parent with data-composition-src so the timeline stays easier to inspect, revise, and validate.
+  ⚠ nested_structure_needs_subcomposition: <section id="hook"> is a timeline element that contains nested <div>. The timeline shows one row per top-level element, and the root composition is built only from sub-compositions.
+    C:\Users\Admin\Documents\Projects\CraveAI\brag-output\work\index.html #hook t=0s
+    Fix: Move <section id="hook"> and its contents into a sub-composition file and mount it with data-composition-src.
+  ⚠ nested_structure_needs_subcomposition: <section id="ask"> is a timeline element that contains nested <div>. The timeline shows one row per top-level element, and the root composition is built only from sub-compositions.
+    C:\Users\Admin\Documents\Projects\CraveAI\brag-output\work\index.html #ask t=0s
+    Fix: Move <section id="ask"> and its contents into a sub-composition file and mount it with data-composition-src.
+  ⚠ nested_structure_needs_subcomposition: <section id="evidence"> is a timeline element that contains nested <div>. The timeline shows one row per top-level element, and the root composition is built only from sub-compositions.
+    C:\Users\Admin\Documents\Projects\CraveAI\brag-output\work\index.html #evidence t=0s
+    Fix: Move <section id="evidence"> and its contents into a sub-composition file and mount it with data-composition-src.
+  ⚠ nested_structure_needs_subcomposition: <section id="nearby"> is a timeline element that contains nested <div>. The timeline shows one row per top-level element, and the root composition is built only from sub-compositions.
+    C:\Users\Admin\Documents\Projects\CraveAI\brag-output\work\index.html #nearby t=0s
+    Fix: Move <section id="nearby"> and its contents into a sub-composition file and mount it with data-composition-src.
+  ⚠ nested_structure_needs_subcomposition: <section id="outro"> is a timeline element that contains nested <div>. The timeline shows one row per top-level element, and the root composition is built only from sub-compositions.
+    C:\Users\Admin\Documents\Projects\CraveAI\brag-output\work\index.html #outro t=0s
+    Fix: Move <section id="outro"> and its contents into a sub-composition file and mount it with data-composition-src.
+  0 error(s), 7 warning(s), 0 info(s)
+
+Runtime
+  ◇ 0 errors, 0 warnings
+
+Layout
+  ℹ t=3.33s container_overflow div.scene-inner inside #ask overflowed bottom 5.87px — Element extends outside a clipping layout container.
+        Fix: Resize/reposition the child or container, or mark intentional overflow with data-layout-allow-overflow.
+  ℹ t=12.22s container_overflow div.scene-inner inside #nearby overflowed bottom 17.43px — Element extends outside a clipping layout container.
+        Fix: Resize/reposition the child or container, or mark intentional overflow with data-layout-allow-overflow.
+  0 error(s), 0 warning(s), 2 info(s)
+
+Motion
+  ◇ 0 errors, 0 warnings
+
+Contrast
+  ◇ 70/70 text checks pass WCAG AA
+
+Snapshots
+  ◇ disabled
+
+◇  Check passed

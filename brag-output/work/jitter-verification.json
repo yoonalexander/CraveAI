@@ -1,0 +1,76 @@
+{
+  "video": "brag.mp4",
+  "frame_count": 600,
+  "opening_adjacent_frame_change": 0.2594,
+  "opening_edge_overlap": 0.9914,
+  "opening_passed": true,
+  "scene_entrances": [
+    {
+      "cut_seconds": 3,
+      "initial_visibility_max": 0.0,
+      "largest_visibility_drop": 0.017,
+      "passed": true
+    },
+    {
+      "cut_seconds": 7,
+      "initial_visibility_max": 0.0,
+      "largest_visibility_drop": 0.0018,
+      "passed": true
+    },
+    {
+      "cut_seconds": 12,
+      "initial_visibility_max": 0.0,
+      "largest_visibility_drop": 0.0014,
+      "passed": true
+    },
+    {
+      "cut_seconds": 16,
+      "initial_visibility_max": 0.0,
+      "largest_visibility_drop": 0.0117,
+      "passed": true
+    }
+  ],
+  "settled_holds": [
+    {
+      "seconds": [
+        1,
+        2.7
+      ],
+      "maximum_mean_pixel_change": 0.0034,
+      "passed": true
+    },
+    {
+      "seconds": [
+        4.2,
+        5.5
+      ],
+      "maximum_mean_pixel_change": 0.0016,
+      "passed": true
+    },
+    {
+      "seconds": [
+        8.5,
+        10
+      ],
+      "maximum_mean_pixel_change": 0.0003,
+      "passed": true
+    },
+    {
+      "seconds": [
+        13.3,
+        15.5
+      ],
+      "maximum_mean_pixel_change": 0.0086,
+      "passed": true
+    },
+    {
+      "seconds": [
+        17.3,
+        19.8
+      ],
+      "maximum_mean_pixel_change": 0.001,
+      "passed": true
+    }
+  ],
+  "passed": true
+}
