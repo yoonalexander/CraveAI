@@ -66,7 +66,7 @@ for (const theme of ["light", "dark"]) {
     await expect(japanese).toHaveCSS("outline-style", "solid");
     await expect(japanese).toHaveCSS("outline-width", "2px");
     const icon = await japanese.locator("svg").boundingBox();
-    expect(icon.width).toBe(28); expect(icon.height).toBe(28);
+    expect(icon.width).toBe(21); expect(icon.height).toBe(21);
     await capture(page, testInfo, theme, "selected");
     await activate(toolbar.getByRole("button", { name: /^Filters/ }), hasTouch);
     const dialog = page.getByRole("dialog", { name: "Find the right restaurant" });

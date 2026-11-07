@@ -2,15 +2,16 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 import { fetchPlacePhoto, PhotoLimitError, type PlacePhoto } from "../api/photos";
+import { ChevronLeftIcon, ChevronRightIcon } from "./Icons";
 
 // Key the entire session by venue: old images, requests and gallery indexes cannot
 // survive a map selection change. Provider data stays in component memory only.
-type PhotoProps = { placeId?: string | null; title: string; compact?: boolean };
-export function RestaurantPhotos({ placeId, title, compact = false }: PhotoProps): JSX.Element {
-  return <PhotoSession key={placeId || "missing"} placeId={placeId} title={title} compact={compact} />;
+type PhotoProps = { placeId?: string | null; title: string; compact?: boolean; inlineNav?: boolean };
+export function RestaurantPhotos({ placeId, title, compact = false, inlineNav = false }: PhotoProps): JSX.Element {
+  return <PhotoSession key={placeId || "missing"} placeId={placeId} title={title} compact={compact} inlineNav={inlineNav} />;
 }
 
-function PhotoSession({ placeId, title, compact }: PhotoProps): JSX.Element {
+function PhotoSession({ placeId, title, compact, inlineNav }: PhotoProps): JSX.Element {
   const container = useRef<HTMLElement>(null);
   const [visible, setVisible] = useState(false);
   const [data, setData] = useState<PlacePhoto | null>(null);
@@ -50,6 +51,7 @@ function PhotoSession({ placeId, title, compact }: PhotoProps): JSX.Element {
   const photo = data?.photo;
   const unavailable = !validId || Boolean(data && !photo);
   const photoVisible = photo && !loading && !error && !imageFailed;
+  const canBrowse = Boolean(inlineNav && data && data.total > 1 && !limited);
   function image(): JSX.Element {
     return photoVisible ? <img className="restaurant-photo-image" alt={`Google Maps photo of ${title}`} src={photo.uri} loading="lazy" decoding="async" referrerPolicy="no-referrer" onError={() => setImageFailed(true)} /> : (
       <div className="restaurant-photo-fallback" role="img" aria-label={unavailable || error || imageFailed ? `No photo available for ${title}` : `Loading photo for ${title}`}>
@@ -73,6 +75,22 @@ function PhotoSession({ placeId, title, compact }: PhotoProps): JSX.Element {
   return <figure ref={container} className="restaurant-photos" aria-label={`Photos of ${title}`}>
     <div className="restaurant-photo-frame">
       {image()}
+      {canBrowse ? <>
+        <button
+          className="photo-inline-arrow is-prev"
+          type="button"
+          aria-label={`Previous photo of ${title}`}
+          disabled={loading || !data || data.index === 0}
+          onClick={() => setIndex((data?.index || 0) - 1)}
+        ><ChevronLeftIcon /></button>
+        <button
+          className="photo-inline-arrow is-next"
+          type="button"
+          aria-label={`Next photo of ${title}`}
+          disabled={loading || !data || data.index >= data.total - 1}
+          onClick={() => setIndex((data?.index || 0) + 1)}
+        ><ChevronRightIcon /></button>
+      </> : null}
       {photo ? <button className="photo-expand" aria-label={`View photos of ${title}`} type="button" onClick={() => setExpanded(true)}>⛶</button> : null}
     </div>
     {credits()}

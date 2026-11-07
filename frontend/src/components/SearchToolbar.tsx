@@ -86,7 +86,7 @@ export function SearchToolbar({
 
   const summary = advancedFilterSummary(advancedFilters);
   const hasFilters = activeFilters.size > 0 || summary.length > 0;
-  const needsData = Boolean(advancedFilters.cuisine || advancedFilters.dietary.length || advancedFilters.takeout || advancedFilters.delivery || advancedFilters.reservations || advancedFilters.accessibility);
+  const draftNeedsData = Boolean(draftFilters.cuisine || draftFilters.dietary.length || draftFilters.takeout || draftFilters.delivery || draftFilters.reservations || draftFilters.accessibility);
   const status = isLoading
     ? count
       ? `Updating ${count} restaurant${count === 1 ? "" : "s"}…`
@@ -102,72 +102,67 @@ export function SearchToolbar({
       className={`search-toolbar${error ? " has-error" : ""}${isLoading ? " is-loading" : ""}${hasFilters || count !== totalCount ? " has-filtered-results" : ""}`}
       aria-label="Restaurant search controls"
     >
-      <div className="search-toolbar-location">
-        <span className="search-toolbar-pin">{area ? <PinIcon /> : <LocationLoader />}</span>
-        <div role="status">
-          <span>Search area</span>
-          <strong>{area?.label || "Finding your location…"}</strong>
+      <div className="search-toolbar-head">
+        <div className="search-toolbar-location">
+          <span className="search-toolbar-pin">{area ? <PinIcon /> : <LocationLoader />}</span>
+          <div role="status">
+            <span>Search area</span>
+            <strong>{area?.label || "Finding your location…"}</strong>
+          </div>
+          <button onClick={onChangeLocation} type="button">Change location</button>
         </div>
-        <button onClick={onChangeLocation} type="button">Change location</button>
+
+        <div className="search-toolbar-status" aria-live="polite">
+          <span className={error ? "is-error" : ""}>{status}</span>
+          {error && canRetry ? <button onClick={onRetry} type="button">Try again</button> : null}
+          {!isLoading && hasFilters ? <button onClick={onClearFilters} type="button">Clear filters</button> : null}
+        </div>
       </div>
 
-      <div className="search-toolbar-status" aria-live="polite">
-        <span className={error ? "is-error" : ""}>{status}</span>
-        {error && canRetry ? <button onClick={onRetry} type="button">Try again</button> : null}
-        {!isLoading && hasFilters ? <button onClick={onClearFilters} type="button">Clear filters</button> : null}
-      </div>
-
-      <div className="search-filter-scroll" aria-label="Restaurant filters">
-        <button
-          aria-pressed={!hasFilters}
-          className={!hasFilters ? "is-active" : ""}
-          onClick={onClearFilters}
-          type="button"
-        >
-          <SlidersIcon /> All
-        </button>
-        <button
-          aria-describedby="budget-filter-explanation"
-          aria-pressed={activeFilters.has("budget")}
-          className={activeFilters.has("budget") ? "is-active" : ""}
-          onClick={() => onToggleFilter("budget")}
-          type="button"
-        >
-          <DollarIcon /> Budget-friendly
-        </button>
-        <button
-          aria-pressed={activeFilters.has("open")}
-          className={activeFilters.has("open") ? "is-active" : ""}
-          onClick={() => onToggleFilter("open")}
-          type="button"
-        >
-          <ClockIcon /> Open Now
-        </button>
-        <div className="toolbar-more-filter" ref={moreRef}>
+      <div className="search-toolbar-filters">
+        <div className="search-filter-scroll" role="group" aria-label="Restaurant filters">
           <button
-            aria-expanded={showMore}
-            onClick={() => { setDraftFilters(advancedFilters); setShowMore((open) => !open); }}
+            aria-pressed={!hasFilters}
+            className={!hasFilters ? "is-active" : ""}
+            onClick={onClearFilters}
             type="button"
           >
-            <SlidersIcon /> Filters{summary.length ? ` (${summary.length})` : ""}
+            <SlidersIcon /> All
           </button>
+          <button
+            aria-describedby="budget-filter-explanation"
+            aria-pressed={activeFilters.has("budget")}
+            className={activeFilters.has("budget") ? "is-active" : ""}
+            onClick={() => onToggleFilter("budget")}
+            type="button"
+          >
+            <DollarIcon /> Budget-friendly
+          </button>
+          <button
+            aria-pressed={activeFilters.has("open")}
+            className={activeFilters.has("open") ? "is-active" : ""}
+            onClick={() => onToggleFilter("open")}
+            type="button"
+          >
+            <ClockIcon /> Open Now
+          </button>
+          <div className="toolbar-more-filter" ref={moreRef}>
+            <button
+              aria-expanded={showMore}
+              onClick={() => { setDraftFilters(advancedFilters); setShowMore((open) => !open); }}
+              type="button"
+            >
+              <SlidersIcon /> Filters{summary.length ? ` (${summary.length})` : ""}
+            </button>
+          </div>
         </div>
+        <CuisineFilters cuisine={advancedFilters.cuisine} disabled={isLoading} onChange={onCuisineChange} />
       </div>
-      <CuisineFilters cuisine={advancedFilters.cuisine} disabled={isLoading} onChange={onCuisineChange} />
       {!isLoading && coverageNotice ? <p className="discovery-coverage-notice" role="status">{coverageNotice}</p> : null}
       <span className="sr-only" id="budget-filter-explanation">
         Budget-friendly includes Google price levels free and inexpensive. It does not guarantee a meal under a dollar amount.
       </span>
       {summary.length ? <div className="active-filter-summary" aria-label="Selected advanced filters">{summary.map(({ key, label }) => <button key={key} aria-label={`Remove ${label} filter`} onClick={() => onAdvancedFiltersChange({ ...advancedFilters, [key]: DEFAULT_ADVANCED_FILTERS[key] })}>{label} ×</button>)}</div> : null}
-      <details className="filter-data-coverage" open={needsData || undefined}>
-        <summary>Restaurant data: {filterDataStatus.checked} of {totalCount} details checked</summary>
-        <p>Unknown attributes are excluded by selected filters. Cuisine labels come from Google types or menu inference; restaurant-name guesses do not qualify. {filterDataStatus.menus} official menus assessed.</p>
-        <p>{filterDataPlaces.filter((place) => place.cuisine_labels?.length).length} with cuisine labels. Menu labels use GPT to interpret official sources and can be excluded in Filters.</p>
-        {filterDataStatus.unavailable ? <p>{filterDataStatus.unavailable} restaurant checks have unavailable details or menu labeling. Missing evidence does not mean the restaurant lacks an option.</p> : null}
-        {filterDataStatus.error ? <p role="alert">{filterDataStatus.error}</p> : null}
-        <div aria-live="polite">{filterDataStatus.loading ? "Checking Google details and official menus…" : null}</div>
-        {filterDataStatus.remaining || filterDataStatus.unavailable ? <button disabled={filterDataStatus.loading || isLoading} onClick={onCheckFilterData} type="button">{filterDataStatus.remaining ? `Check next ${Math.min(10, filterDataStatus.remaining)} restaurants` : "Retry unavailable details"}</button> : null}
-      </details>
       {showMore ? (
         <div className="advanced-filter-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setShowMore(false); }}>
           <section aria-labelledby="advanced-filter-title" aria-modal="true" className="advanced-filter-dialog" ref={dialogRef} role="dialog">
@@ -182,6 +177,12 @@ export function SearchToolbar({
             <fieldset><legend>Google service attributes</legend><div className="filter-checkbox-grid">{[["takeout", "Takeout", "takeout"], ["delivery", "Delivery", "delivery"], ["reservations", "Reservations", "reservable"], ["accessibility", "Accessible entrance", "wheelchair_accessible_entrance"]].map(([key, label, field]) => <label key={key}><input checked={draftFilters[key as keyof AdvancedFilters] === true} onChange={(event) => setDraftFilters({ ...draftFilters, [key]: event.target.checked })} type="checkbox" />{label} ({filterDataPlaces.filter((place) => place[field as keyof Suggestion] === true).length} yes; {filterDataPlaces.filter((place) => typeof place[field as keyof Suggestion] !== "boolean").length} unknown)</label>)}</div><small>Only explicit Google yes values qualify. Accessible entrance does not imply full venue accessibility. Use Restaurant data to check more places.</small></fieldset>
             <fieldset><legend>Dietary options</legend><div className="filter-checkbox-grid">{["vegetarian", "vegan", "gluten-free", "halal"].map((item) => <label key={item}><input checked={draftFilters.dietary.includes(item)} onChange={(event) => setDraftFilters({ ...draftFilters, dietary: event.target.checked ? [...draftFilters.dietary, item] : draftFilters.dietary.filter((entry) => entry !== item) })} type="checkbox" />{item}</label>)}</div><small>Google categories or vegetarian offerings qualify. Menu inference requires explicit evidence for a complete dish; combined selections must share supporting evidence. Limited coverage, no certification or allergen safety guarantee.</small></fieldset>
             <label className="menu-label-toggle"><input checked={draftFilters.includeMenuLabels} onChange={(event) => setDraftFilters({ ...draftFilters, includeMenuLabels: event.target.checked })} type="checkbox" />Include labels inferred from official menus</label>
+            {draftNeedsData ? <div className="filter-data-status" aria-label="Restaurant data coverage">
+              <p>{filterDataStatus.checked} of {totalCount} restaurant details checked{filterDataStatus.menus ? ` · ${filterDataStatus.menus} menu${filterDataStatus.menus === 1 ? "" : "s"} assessed` : ""}</p>
+              {filterDataStatus.error ? <p role="alert">{filterDataStatus.error}</p> : null}
+              {filterDataStatus.loading ? <p role="status">Checking restaurant details…</p> : null}
+              {filterDataStatus.remaining || filterDataStatus.unavailable ? <button disabled={filterDataStatus.loading || isLoading} onClick={onCheckFilterData} type="button">{filterDataStatus.remaining ? `Check next ${Math.min(10, filterDataStatus.remaining)} restaurants` : "Retry unavailable details"}</button> : null}
+            </div> : null}
             <footer><button onClick={() => setDraftFilters({ ...DEFAULT_ADVANCED_FILTERS })}>Reset advanced filters</button><button className="primary-action" onClick={() => { onAdvancedFiltersChange(draftFilters); setShowMore(false); }}>Show results</button></footer>
           </section>
         </div>

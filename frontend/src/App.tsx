@@ -564,7 +564,6 @@ function CraveApplication(): JSX.Element {
         <main className="crave-content">
           {homeVisible ? (
             <div className="search-view home-view">
-              {toolbar}
               <div className={`home-split${mapListOpen ? " is-list-open" : ""}`}>
                 <section className="home-chat" aria-label="Chat">
                   <MobileChatSheet expanded={mobileChatExpanded} onExpandedChange={(expanded) => { setMobileChatExpanded(expanded); if (expanded) setMapListOpen(false); }}>
@@ -583,6 +582,7 @@ function CraveApplication(): JSX.Element {
                   </MobileChatSheet>
                 </section>
                 <section className="home-map">
+                  {toolbar}
                   <MapView
                     listOpen={mapListOpen}
                     resultsAreaLabel={resultsArea?.label}

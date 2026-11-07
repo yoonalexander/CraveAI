@@ -96,6 +96,39 @@ for (const theme of ["light", "dark"]) for (const reduced of [false, true]) {
   });
 }
 
+test("recommendation photos can be browsed from arrows in the chat without opening the gallery", async ({ page, stream }) => {
+  await page.route("**/api/places/photo", (route) => {
+    const { place_id, index } = route.request().postDataJSON();
+    return route.fulfill({ json: { place_id, index, total: 3, photo: {
+      uri: `https://lh3.googleusercontent.com/${place_id}-${index}`,
+      source_uri: `https://maps.google.com/photo/${place_id}/${index}`,
+      report_uri: null,
+      authors: [{ name: `Contributor ${index}`, uri: null, avatar_uri: null }],
+    } } });
+  });
+  await page.route("https://lh3.googleusercontent.com/**", (route) => route.fulfill({ contentType: "image/svg+xml", body: `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600"><rect width="800" height="600" fill="#567e40"/><circle cx="400" cy="300" r="150" fill="#ece1c6"/></svg>` }));
+  await page.goto("/");
+  await ask(page, stream, "Find a noodle spot");
+  stream.send("recommendation", { name: "Noodle House", place_id: "chat-venue", rating: 4.6, address: "123 Test Street", reason: "Cozy noodles" });
+  stream.send("reply", { reply: "Try Noodle House." });
+  stream.finish();
+  await expect(page.getByText("Try Noodle House.")).toBeVisible();
+  const card = page.locator(".chat-recommendations");
+  const previous = card.getByRole("button", { name: "Previous photo of Noodle House" });
+  const next = card.getByRole("button", { name: "Next photo of Noodle House" });
+  const image = card.getByAltText("Google Maps photo of Noodle House");
+  await expect(image).toHaveAttribute("src", "https://lh3.googleusercontent.com/chat-venue-0");
+  await expect(previous).toBeDisabled();
+  await next.click();
+  await expect(image).toHaveAttribute("src", "https://lh3.googleusercontent.com/chat-venue-1");
+  await expect(previous).toBeEnabled();
+  await next.click();
+  await expect(image).toHaveAttribute("src", "https://lh3.googleusercontent.com/chat-venue-2");
+  await expect(next).toBeDisabled();
+  await expect(previous).toBeEnabled();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+});
+
 test("stopping a stream and retrying after an error clears and resets progress", async ({ page, stream }) => {
   await page.goto("/");
   await ask(page, stream, "First request");

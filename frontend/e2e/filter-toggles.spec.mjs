@@ -51,10 +51,12 @@ for (const theme of ["light", "dark"]) {
     await dialog.getByRole("button", { name: "Show results" }).click();
     await expect(toolbar).toContainText("0 of 4 loaded restaurants shown");
     expect(detailsCalls).toBe(0);
-    await activate(toolbar.getByRole("button", { name: "Check next 4 restaurants" }), hasTouch);
+    await activate(toolbar.getByRole("button", { name: /^Filters/ }), hasTouch);
+    await activate(dialog.getByRole("button", { name: "Check next 4 restaurants" }), hasTouch);
+    await expect(dialog).toContainText("4 of 4 restaurant details checked");
+    await expect(dialog).toContainText("1 menu assessed");
+    await activate(dialog.getByRole("button", { name: "Close filters" }), hasTouch);
     await expect(toolbar).toContainText("1 of 4 loaded restaurants shown");
-    await expect(toolbar).toContainText("4 of 4 details checked");
-    await expect(toolbar).toContainText("1 official menus assessed");
     await activate(toolbar.getByRole("button", { name: /^Filters/ }), hasTouch);
     await expect(dialog.getByLabel(/^Takeout/)).toBeChecked();
     await expect(dialog.getByLabel(/^Takeout/)).toHaveCount(1);

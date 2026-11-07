@@ -96,6 +96,8 @@ export function ChatPanel({
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [usage, setUsage] = useState<UsageMetadata | null>(() => readCachedUsage(usageActorId));
   const conversationRef = useRef<HTMLDivElement>(null);
+  const previousMessageCount = useRef(messages.length);
+  const hasScrolledOnce = useRef(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const noticeTimer = useRef<number | null>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
@@ -125,12 +127,43 @@ export function ChatPanel({
   useEffect(() => {
     const conversation = conversationRef.current;
     if (!conversation || !hasConversation) return;
-    if (typeof conversation.scrollTo === "function") {
-      const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-      conversation.scrollTo({ top: conversation.scrollHeight, behavior: reducedMotion ? "auto" : "smooth" });
-    } else {
-      conversation.scrollTop = conversation.scrollHeight;
+    const isFirstScroll = !hasScrolledOnce.current;
+    hasScrolledOnce.current = true;
+    const newMessages = messages.slice(previousMessageCount.current);
+    previousMessageCount.current = messages.length;
+    if (!isFirstScroll && !newMessages.length) return;
+
+    const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    const behavior = reducedMotion ? "auto" : "smooth";
+    const scrollToTop = (top: number) => {
+      const target = Math.max(0, top);
+      if (typeof conversation.scrollTo === "function") {
+        conversation.scrollTo({ top: target, behavior });
+      } else {
+        conversation.scrollTop = target;
+      }
+    };
+
+    // A reply with recommendations can be much taller than the viewport, so
+    // anchor its start near the top instead of leaving the user at the bottom.
+    const anchoredMessage = newMessages.find(
+      (message) => message.role === "assistant" && message.recommendations?.length,
+    );
+    const anchoredElement = anchoredMessage
+      ? Array.from(conversation.querySelectorAll<HTMLElement>(".chat-message")).find(
+          (element) => element.dataset.messageId === anchoredMessage.id,
+        )
+      : undefined;
+    if (anchoredElement) {
+      const top = anchoredElement.getBoundingClientRect().top
+        - conversation.getBoundingClientRect().top
+        + conversation.scrollTop
+        - 12;
+      scrollToTop(top);
+      return;
     }
+
+    scrollToTop(conversation.scrollHeight);
   }, [hasConversation, isLoading, messages]);
 
   useEffect(() => {
@@ -395,7 +428,7 @@ export function ChatPanel({
       <div className="chat-conversation" ref={conversationRef}>
         <div className="chat-thread">
           {messages.map((message) => (
-            <article className={`chat-message is-${message.role}`} key={message.id}>
+            <article className={`chat-message is-${message.role}`} data-message-id={message.id} key={message.id}>
               <div className="chat-message-content">
                 <p>{message.content}</p>
                 {message.recommendations?.length ? (
@@ -404,7 +437,7 @@ export function ChatPanel({
                       const sources = getRecommendationSources(recommendation);
                       return (
                       <div key={`${message.id}-${recommendation.place_id || recommendation.name}-${index}`}>
-                        <RestaurantPhotos placeId={recommendation.place_id} title={recommendation.name} />
+                        <RestaurantPhotos inlineNav placeId={recommendation.place_id} title={recommendation.name} />
                         <strong>{recommendation.name}</strong>
                         <span>
                           {typeof recommendation.rating === "number" ? `★ ${recommendation.rating.toFixed(1)}` : ""}

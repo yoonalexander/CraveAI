@@ -176,6 +176,38 @@ describe("ChatPanel", () => {
     expect(screen.queryByRole("link", { name: "View source" })).not.toBeInTheDocument();
   });
 
+  it("anchors a reply with recommendations at its start instead of jumping to the bottom", async () => {
+    mockedSendChat.mockResolvedValue({
+      reply: "Here are three spots.",
+      messages: [],
+      recommendations: [
+        { name: "First spot", place_id: "first" },
+        { name: "Second spot", place_id: "second" },
+        { name: "Third spot", place_id: "third" },
+      ],
+    });
+    const { container } = render(<ChatPanel />);
+    const conversation = container.querySelector(".chat-conversation") as HTMLElement;
+    const scrollTo = vi.fn();
+    Object.defineProperty(conversation, "scrollTo", { configurable: true, value: scrollTo });
+    Object.defineProperty(conversation, "scrollHeight", { configurable: true, value: 2400 });
+    vi.spyOn(Element.prototype, "getBoundingClientRect").mockImplementation(function (this: Element) {
+      const top = this.classList.contains("chat-conversation")
+        ? 100
+        : this.classList.contains("is-assistant")
+          ? 640
+          : 0;
+      return { top } as unknown as DOMRect;
+    });
+
+    const composer = screen.getByRole("textbox", { name: "Ask CraveAI" });
+    fireEvent.change(composer, { target: { value: "Three spots" } });
+    fireEvent.keyDown(composer, { key: "Enter" });
+
+    await screen.findByText("Here are three spots.");
+    await waitFor(() => expect(scrollTo).toHaveBeenLastCalledWith({ top: 528, behavior: "smooth" }));
+  });
+
   it("shows the published guest daily chat allowance", () => {
     render(<ChatPanel />);
     expect(screen.getByText("9 messages left today")).toBeInTheDocument();

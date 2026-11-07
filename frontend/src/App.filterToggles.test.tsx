@@ -122,12 +122,14 @@ it("checks details on demand and keeps unknown service data excluded across map 
   const markers = () => screen.queryAllByRole("button", { name: /^Show .+ on map$/ });
   expect(markers()).toHaveLength(0);
   expect(detailCalls).toBe(0);
+  fireEvent.click(screen.getByRole("button", { name: /^Filters/ }));
   fireEvent.click(screen.getByRole("button", { name: "Check next 2 restaurants" }));
   await screen.findByRole("alert");
   expect(markers()).toHaveLength(0);
   fireEvent.click(screen.getByRole("button", { name: "Check next 2 restaurants" }));
   await screen.findByRole("button", { name: "Show Ramen Spot on map" });
   expect(markers()).toHaveLength(1);
+  fireEvent.click(screen.getByRole("button", { name: "Close filters" }));
   expect(screen.getByText("1 of 2 loaded restaurants shown")).toBeInTheDocument();
   const japanese = screen.getByRole("button", { name: "Japanese" });
   fireEvent.click(japanese);

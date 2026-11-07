@@ -64,6 +64,9 @@ export const MicIcon = (props: IconProps) => (
 export const ArrowUpIcon = (props: IconProps) => (
   <IconBase {...props}><path d="m6 11 6-6 6 6M12 5v14" /></IconBase>
 );
+export const ChevronLeftIcon = (props: IconProps) => (
+  <IconBase {...props}><path d="m15 18-6-6 6-6" /></IconBase>
+);
 export const ChevronRightIcon = (props: IconProps) => (
   <IconBase {...props}><path d="m9 18 6-6-6-6" /></IconBase>
 );

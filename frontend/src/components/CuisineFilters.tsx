@@ -7,7 +7,6 @@ export function CuisineFilters({ cuisine, disabled, onChange }: {
   onChange: (cuisine: string) => void;
 }): JSX.Element {
   return <div className="cuisine-filters">
-    <div className="cuisine-filter-heading"><span>Cuisines</span><span>Scroll to explore</span></div>
     <div className="cuisine-filter-scroll" role="group" aria-label="Cuisine filters">
       {["", ...CUISINE_OPTIONS].map((choice) => <button key={choice} type="button"
         aria-pressed={cuisine === choice} disabled={disabled} onClick={() => onChange(choice)}>

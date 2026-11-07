@@ -25,8 +25,25 @@ describe("RestaurantPhotos", () => {
     expect(fetchPlacePhoto).not.toHaveBeenCalled();
     await act(async () => intersect([{ isIntersecting: true }] as IntersectionObserverEntry[], {} as IntersectionObserver));
     expect(await screen.findByAltText("Google Maps photo of Cafe")).toHaveAttribute("loading", "lazy");
+    expect(screen.queryByRole("button", { name: "Next photo of Cafe" })).not.toBeInTheDocument();
     expect(fetchPlacePhoto).toHaveBeenCalledTimes(1);
     expect(disconnect).toHaveBeenCalled();
+  });
+  it("browses photos from arrows on the preview when inline navigation is enabled", async () => {
+    render(<RestaurantPhotos inlineNav placeId="cafe" title="Cafe" />);
+    const previous = await screen.findByRole("button", { name: "Previous photo of Cafe" });
+    const next = screen.getByRole("button", { name: "Next photo of Cafe" });
+    expect(previous).toBeDisabled();
+    expect(next).toBeEnabled();
+    fireEvent.click(next);
+    expect(await screen.findByAltText("Google Maps photo of Cafe")).toHaveAttribute("src", photo("cafe", 1).photo!.uri);
+    expect(fetchPlacePhoto).toHaveBeenLastCalledWith("cafe", 1, expect.any(AbortSignal));
+    expect(previous).toBeEnabled();
+    fireEvent.click(next);
+    expect(await screen.findByAltText("Google Maps photo of Cafe")).toHaveAttribute("src", photo("cafe", 2).photo!.uri);
+    expect(fetchPlacePhoto).toHaveBeenLastCalledWith("cafe", 2, expect.any(AbortSignal));
+    expect(screen.getByRole("button", { name: "Next photo of Cafe" })).toBeDisabled();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
   it("browses one photo at a time in an accessible gallery and restores focus", async () => {
     render(<RestaurantPhotos placeId="cafe" title="Cafe" compact />);
