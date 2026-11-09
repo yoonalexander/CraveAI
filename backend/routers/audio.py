@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import base64
 import hmac
 import math
 
@@ -7,6 +8,7 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, Resp
 from openai import AsyncOpenAI
 
 from backend.config import get_settings
+from backend.services import llm
 from backend.services.identity import resolve_request_usage_identities
 from backend.services.entitlements import has_unlimited_usage_access, resolve_entitlements
 from backend.services.product_data import has_current_policy_acceptance
@@ -80,13 +82,63 @@ async def transcribe_audio(
         data = b""
         raise HTTPException(status_code=429, detail={"code": "daily_voice_quota_exceeded"}) from exc
     try:
-        transcription = await AsyncOpenAI(api_key=settings.OPENAI_API_KEY).audio.transcriptions.create(
-            model="whisper-1",
-            file=(file.filename or "recording.webm", data, content_type),
-            response_format="json",
-        )
-        return {"text": str(transcription.text).strip()}
+        if llm.resolve_provider(settings) == "gemini":
+            transcript = await _transcribe_with_gemini(
+                settings, data, content_type
+            )
+        else:
+            transcription = await AsyncOpenAI(
+                api_key=settings.OPENAI_API_KEY
+            ).audio.transcriptions.create(
+                model="whisper-1",
+                file=(file.filename or "recording.webm", data, content_type),
+                response_format="json",
+            )
+            transcript = str(transcription.text)
+        return {"text": transcript.strip()}
     except Exception as exc:
         raise HTTPException(status_code=502, detail={"code": "transcription_unavailable"}) from exc
     finally:
         data = b""
+
+
+GEMINI_AUDIO_FORMATS = {
+    "audio/webm": "webm",
+    "audio/mp4": "m4a",
+    "audio/mpeg": "mp3",
+    "audio/wav": "wav",
+    "audio/x-wav": "wav",
+    "audio/ogg": "ogg",
+}
+
+
+async def _transcribe_with_gemini(settings, data: bytes, content_type: str) -> str:
+    """Gemini accepts inline audio through the OpenAI-compatible chat endpoint."""
+    client = AsyncOpenAI(**llm.client_options(settings, timeout=60))
+    completion = await client.chat.completions.create(
+        model=llm.model_name(settings),
+        messages=[{
+            "role": "user",
+            "content": [
+                {
+                    "type": "text",
+                    "text": (
+                        "Generate a verbatim transcript of the speech in this "
+                        "audio. Return only the transcript text with no commentary. "
+                        "If there is no speech, return an empty string."
+                    ),
+                },
+                {
+                    "type": "input_audio",
+                    "input_audio": {
+                        "data": base64.b64encode(data).decode("ascii"),
+                        "format": GEMINI_AUDIO_FORMATS[content_type],
+                    },
+                },
+            ],
+        }],
+        **llm.completion_options(
+            settings, max_completion_tokens=1500, reasoning_effort="minimal"
+        ),
+    )
+    return completion.choices[0].message.content or ""

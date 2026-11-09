@@ -55,8 +55,20 @@ class Config:
     """Central application settings. Secrets must be supplied by the runtime."""
 
     OPENAI_API_KEY: str = field(default_factory=lambda: os.getenv("OPENAI_API_KEY", ""))
+    # "auto" uses Gemini when only GEMINI_API_KEY is configured, otherwise OpenAI.
+    LLM_PROVIDER: str = field(
+        default_factory=lambda: os.getenv("LLM_PROVIDER", "auto").strip().lower()
+    )
+    GEMINI_API_KEY: str = field(default_factory=lambda: os.getenv("GEMINI_API_KEY", ""))
+    GEMINI_BASE_URL: str = field(
+        default_factory=lambda: os.getenv(
+            "GEMINI_BASE_URL",
+            "https://generativelanguage.googleapis.com/v1beta/openai/",
+        )
+    )
     GOOGLE_API_KEY: str = field(default_factory=lambda: os.getenv("GOOGLE_API_KEY", ""))
-    MODEL_NAME: str = field(default_factory=lambda: os.getenv("MODEL_NAME", "gpt-5-nano"))
+    # Blank selects gpt-5-nano for OpenAI or gemini-3.8-flash for Gemini.
+    MODEL_NAME: str = field(default_factory=lambda: os.getenv("MODEL_NAME", ""))
     FILTER_LABEL_MODEL: str = field(default_factory=lambda: os.getenv("FILTER_LABEL_MODEL", ""))
     DISCOVERY_MODEL: str = field(default_factory=lambda: os.getenv("DISCOVERY_MODEL", ""))
     DISCOVERY_REFRESH_ENABLED: bool = field(default_factory=lambda: _env_bool("DISCOVERY_REFRESH_ENABLED", False))
@@ -220,8 +232,17 @@ class Config:
         return "__Host-craveai_guest" if self.is_production else "craveai_guest"
 
     def validate(self) -> None:
-        if not self.OPENAI_API_KEY:
+        provider = (self.LLM_PROVIDER or "auto").strip().lower()
+        if provider not in {"auto", "openai", "gemini"}:
+            raise RuntimeError("LLM_PROVIDER must be one of: auto, openai, gemini")
+        if provider == "openai" and not self.OPENAI_API_KEY:
             raise RuntimeError("Missing required configuration value: OPENAI_API_KEY")
+        if provider == "gemini" and not self.GEMINI_API_KEY:
+            raise RuntimeError("Missing required configuration value: GEMINI_API_KEY")
+        if not (self.OPENAI_API_KEY or self.GEMINI_API_KEY):
+            raise RuntimeError(
+                "Missing required configuration value: OPENAI_API_KEY or GEMINI_API_KEY"
+            )
         if not self.DATABASE_URL:
             raise RuntimeError("Missing required configuration value: DATABASE_URL")
         if not self.GOOGLE_API_KEY:

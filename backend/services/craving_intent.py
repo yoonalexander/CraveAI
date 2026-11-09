@@ -7,6 +7,7 @@ from typing import Any
 from openai import AsyncOpenAI
 
 from backend.config import get_settings
+from backend.services import llm
 from backend.services.recommendation_models import (
     CravingIntent,
     IntentConstraint,
@@ -55,26 +56,28 @@ soup", and "spicy noodle soup".
 async def extract_craving_intent(user_query: str) -> CravingIntent:
     """Use schema-constrained extraction, with a safe local fallback."""
     settings = get_settings()
-    if not settings.OPENAI_API_KEY:
+    if not llm.is_configured(settings):
         return fallback_intent(user_query)
 
     client = AsyncOpenAI(
-        api_key=settings.OPENAI_API_KEY,
-        max_retries=0,
-        timeout=min(settings.CHAT_RANKING_TIMEOUT_SECONDS, 8),
+        **llm.client_options(
+            settings, timeout=min(settings.CHAT_RANKING_TIMEOUT_SECONDS, 8)
+        )
     )
     try:
         completion = await client.chat.completions.parse(
-            model=settings.MODEL_NAME,
+            model=llm.model_name(settings),
             messages=[
                 {"role": "system", "content": INTENT_SYSTEM_PROMPT},
                 {"role": "user", "content": user_query},
             ],
             response_format=CravingIntent,
-            max_completion_tokens=900,
-            reasoning_effort="minimal",
-            verbosity="low",
-            store=False,
+            **llm.completion_options(
+                settings,
+                max_completion_tokens=900,
+                reasoning_effort="minimal",
+                verbosity="low",
+            ),
         )
         parsed = completion.choices[0].message.parsed
         if parsed is None:

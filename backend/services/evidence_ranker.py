@@ -11,6 +11,7 @@ from openai import AsyncOpenAI
 from pydantic import ValidationError
 
 from backend.config import get_settings
+from backend.services import llm
 from backend.services.recommendation_models import (
     AssessmentBatch,
     CandidateAssessment,
@@ -92,7 +93,7 @@ async def assess_candidate_evidence(
     candidates = sanitize_candidate_evidence(candidates)
     lexical = _lexical_assessments(intent, candidates)
     settings = get_settings()
-    if not settings.OPENAI_API_KEY:
+    if not llm.is_configured(settings):
         return lexical
 
     payload = {
@@ -119,21 +120,23 @@ async def assess_candidate_evidence(
     }
     try:
         client = AsyncOpenAI(
-            api_key=settings.OPENAI_API_KEY,
-            max_retries=0,
-            timeout=min(settings.CHAT_RANKING_TIMEOUT_SECONDS, 10.5),
+            **llm.client_options(
+                settings, timeout=min(settings.CHAT_RANKING_TIMEOUT_SECONDS, 10.5)
+            )
         )
         completion = await client.chat.completions.parse(
-            model=settings.MODEL_NAME,
+            model=llm.model_name(settings),
             messages=[
                 {"role": "system", "content": ASSESSMENT_SYSTEM_PROMPT},
                 {"role": "user", "content": json.dumps(payload, ensure_ascii=False)},
             ],
             response_format=AssessmentBatch,
-            max_completion_tokens=2400,
-            reasoning_effort="minimal",
-            verbosity="low",
-            store=False,
+            **llm.completion_options(
+                settings,
+                max_completion_tokens=2400,
+                reasoning_effort="minimal",
+                verbosity="low",
+            ),
         )
         parsed = completion.choices[0].message.parsed
         if parsed is None:

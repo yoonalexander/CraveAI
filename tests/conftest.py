@@ -5,6 +5,8 @@ import os
 # Module-level FastAPI app creation happens during collection. Keep collection
 # isolated from production services; individual tests receive a fresh database.
 os.environ.setdefault("OPENAI_API_KEY", "test-openai")
+# Keep the suite deterministic even when a developer has LLM_PROVIDER=gemini set.
+os.environ["LLM_PROVIDER"] = "openai"
 os.environ.setdefault("GOOGLE_API_KEY", "test-google")
 os.environ.setdefault("DATABASE_URL", "sqlite+pysqlite:///./data/pytest-collection.db")
 os.environ.setdefault("AUTO_CREATE_SCHEMA", "true")

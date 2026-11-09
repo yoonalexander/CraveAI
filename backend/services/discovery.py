@@ -20,6 +20,7 @@ from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 from backend.config import get_settings
 from backend.database import get_session_factory
 from backend.models import DiscoveryRefresh, DiscoverySignal
+from backend.services import llm
 from backend.services.discovery_sources import (
     Article, NewsSource, REGIONS, SOURCES, canonical_url, fetch_articles,
     fingerprint, normalized, publisher_group, utc,
@@ -126,7 +127,7 @@ def validate_venues(batch: VenueBatch, articles: list[Article], source: NewsSour
 
 async def extract_venues(articles: list[Article], source: NewsSource) -> VenueBatch:
     settings = get_settings()
-    if not settings.OPENAI_API_KEY:
+    if not llm.is_configured(settings):
         raise RuntimeError("discovery_model_unavailable")
     payload = json.dumps({"cities": source.region.cities, "articles": [
         {"article_key": item.key, "text": item.text} for item in articles
@@ -135,12 +136,14 @@ async def extract_venues(articles: list[Article], source: NewsSource) -> VenueBa
     await reserve_daily_quota("__discovery__", 1, max(0, settings.DISCOVERY_DAILY_MODEL_CALLS), namespace="discovery_ai")
     token_ceiling = len((MODEL_PROMPT + payload).encode()) + 2000
     await reserve_daily_quota("__discovery__", token_ceiling, 100000, settings.GLOBAL_DAILY_CHAT_LIMIT, GLOBAL_USAGE_USER_ID, namespace="chat")
-    async with AsyncOpenAI(api_key=settings.OPENAI_API_KEY, max_retries=0, timeout=25) as client:
+    async with AsyncOpenAI(**llm.client_options(settings, timeout=25)) as client:
         completion = await client.chat.completions.parse(
-            model=settings.DISCOVERY_MODEL or settings.MODEL_NAME,
-            reasoning_effort="low", max_completion_tokens=2000, store=False,
+            model=llm.model_name(settings, settings.DISCOVERY_MODEL),
             messages=[{"role": "system", "content": MODEL_PROMPT}, {"role": "user", "content": payload}],
             response_format=VenueBatch,
+            **llm.completion_options(
+                settings, max_completion_tokens=2000, reasoning_effort="low"
+            ),
         )
     result = completion.choices[0].message.parsed
     if result is None:

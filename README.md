@@ -332,7 +332,7 @@ All settings are documented in `.env.example`. The main groups are:
 
 | Group | Variables |
 | --- | --- |
-| Providers | `OPENAI_API_KEY`, `GOOGLE_API_KEY`, `VITE_GOOGLE_MAPS_API_KEY`, `MODEL_NAME` |
+| Providers | `LLM_PROVIDER`, `OPENAI_API_KEY`, `GEMINI_API_KEY`, `GEMINI_BASE_URL`, `GOOGLE_API_KEY`, `VITE_GOOGLE_MAPS_API_KEY`, `MODEL_NAME` |
 | Database | `DATABASE_URL`, `AUTO_CREATE_SCHEMA` |
 | Supabase | `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` |
 | Session security | `SESSION_ENCRYPTION_KEY`, `IDENTITY_SIGNING_SECRET`, session lifetime settings |
@@ -342,6 +342,13 @@ All settings are documented in `.env.example`. The main groups are:
 | Voice | `GUEST_DAILY_VOICE_SECONDS`, `ACCOUNT_DAILY_VOICE_SECONDS`, `AUDIO_MAX_BYTES` |
 | Quotas | Explicit guest, account, global, feedback, and authentication limit variables |
 | Request limits | `REQUEST_BODY_LIMIT_BYTES` |
+
+The language model can run on either provider. With `LLM_PROVIDER=gemini` and
+`GEMINI_API_KEY` set, chat intent extraction, evidence ranking, menu-label
+classification, news discovery, and voice transcription use Gemini's
+OpenAI-compatible API. Gemini's free tier has per-project request and token rate
+limits, and free-tier content may be used to improve Google products. Google
+Places usage is metered separately and is not affected by this switch.
 
 Generate a Fernet session encryption key with:
 

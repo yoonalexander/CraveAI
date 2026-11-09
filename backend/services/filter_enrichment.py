@@ -13,6 +13,7 @@ from openai import AsyncOpenAI
 from pydantic import BaseModel
 
 from backend.config import get_settings
+from backend.services import llm
 from backend.services.menu_evidence import enrich_candidates_with_menu_evidence
 from backend.services.recommendation_models import CravingIntent
 
@@ -88,7 +89,7 @@ async def classify_menu_labels(candidates: list[dict[str, Any]]) -> None:
     payload = []
     for candidate in candidates[:MAX_FILTER_PLACES]:
         candidate["dietary_labels"] = [item for item in candidate.get("dietary_labels", []) if item["source"] == "google"]
-        candidate["menu_status"] = "unavailable" if not settings.OPENAI_API_KEY else "no_evidence"
+        candidate["menu_status"] = "unavailable" if not llm.is_configured(settings) else "no_evidence"
         evidence = [item for item in candidate.get("evidence", [])
                     if item.get("kind") in {"official_menu", "official_website"}
                     and item.get("id") and str(item.get("source_url", "")).startswith(("http://", "https://"))][:10]
@@ -100,18 +101,20 @@ async def classify_menu_labels(candidates: list[dict[str, Any]]) -> None:
                             "evidence": [{"id": item["id"], "kind": item["kind"],
                                           "label": str(item.get("label", ""))[:240],
                                           "detail": str(item.get("detail", ""))[:240]} for item in evidence]})
-    if not payload or not settings.OPENAI_API_KEY:
+    if not payload or not llm.is_configured(settings):
         return
     try:
-        client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY, max_retries=0, timeout=12.0)
+        client = AsyncOpenAI(**llm.client_options(settings, timeout=12.0))
         async with asyncio.timeout(12):
             completion = await client.chat.completions.parse(
-                model=settings.FILTER_LABEL_MODEL or settings.MODEL_NAME,
-                reasoning_effort="low", max_completion_tokens=3000, store=False,
+                model=llm.model_name(settings, settings.FILTER_LABEL_MODEL),
                 messages=[{"role": "system", "content": LABEL_PROMPT},
                           {"role": "user", "content": json.dumps({
                               "cuisines": list(CUISINES.values()), "dietary": DIETS, "candidates": payload})}],
                 response_format=LabelBatch,
+                **llm.completion_options(
+                    settings, max_completion_tokens=3000, reasoning_effort="low"
+                ),
             )
         parsed = completion.choices[0].message.parsed
         if parsed is None:
@@ -219,7 +222,7 @@ async def enrich_filter_places(place_ids: list[str]) -> list[dict[str, Any]]:
 
         results = await asyncio.gather(*(resolve(place_id) for place_id in ids))
     candidates = [item for item in results if item.get("website")]
-    if candidates and settings.OPENAI_API_KEY:
+    if candidates and llm.is_configured(settings):
         menu_timed_out = False
         try:
             async with asyncio.timeout(18):
