@@ -95,7 +95,6 @@ function CraveApplication(): JSX.Element {
   const [weather, setWeather] = useState<CurrentWeather | null>(null);
   const [weatherLoading, setWeatherLoading] = useState(true);
   const [preferences, setPreferences] = useState<Preferences | null>(null);
-  const [preferencesLoaded, setPreferencesLoaded] = useState(false);
   const [savedPlaceIds, setSavedPlaceIds] = useState<Set<string>>(new Set());
   const [filterData, setFilterData] = useState<Map<string, FilterData>>(new Map());
   const [filterDataLoading, setFilterDataLoading] = useState(false);
@@ -104,35 +103,36 @@ function CraveApplication(): JSX.Element {
   const locationSourceRef = useRef<LocationSource | null>(null);
 
   useEffect(() => {
-    setPreferencesLoaded(false);
-    if (!user) { setPreferences(null); setSavedPlaceIds(new Set()); setPreferencesLoaded(true); return; }
-    let active = true;
+    setPreferences(null);
+    setSavedPlaceIds(new Set());
+    if (!user) return;
+
     const startedAt = performance.now();
-    let outcome: "success" | "timeout" | "error" = "success";
     const controller = new AbortController();
     const timeout = window.setTimeout(() => controller.abort(), PREFERENCES_TIMEOUT_MS);
-    void Promise.all([
-      fetchPreferences(controller.signal),
-      listSavedPlaces(undefined, controller.signal),
-    ])
-      .then(([value, saved]) => {
-        if (!active) return;
+    let active = true;
+    const preferencesRequest = fetchPreferences(controller.signal).then(
+      (value) => {
+        if (!active || controller.signal.aborted) return;
         setPreferences(value);
-        setSavedPlaceIds(new Set(saved.flatMap((item) => item.place_id ? [item.place_id] : [])));
-      })
-      .catch(() => {
-        outcome = controller.signal.aborted ? "timeout" : "error";
-      })
-      .finally(() => {
-        window.clearTimeout(timeout);
-        if (active) {
-          recordStartupTiming("preferences", outcome, performance.now() - startedAt);
-          setPreferencesLoaded(true);
-        }
-      });
-    controller.signal.addEventListener("abort", () => {
-      outcome = "timeout";
-    }, { once: true });
+        recordStartupTiming("preferences", "success", performance.now() - startedAt);
+      },
+      () => {
+        if (!active) return;
+        recordStartupTiming(
+          "preferences",
+          controller.signal.aborted ? "timeout" : "error",
+          performance.now() - startedAt,
+        );
+      },
+    );
+    const savedPlacesRequest = listSavedPlaces(undefined, controller.signal).then((saved) => {
+      if (!active || controller.signal.aborted) return;
+      setSavedPlaceIds(new Set(saved.flatMap((item) => item.place_id ? [item.place_id] : [])));
+    });
+    void Promise.allSettled([preferencesRequest, savedPlacesRequest]).then(() => {
+      window.clearTimeout(timeout);
+    });
     return () => {
       active = false;
       controller.abort();
@@ -220,7 +220,7 @@ function CraveApplication(): JSX.Element {
   }, [confirmLocation]);
 
   useEffect(() => {
-    if (!preferencesLoaded || !preferences?.default_location) return;
+    if (!preferences?.default_location) return;
     if (locationSourceRef.current === "device" || locationSourceRef.current === "manual") return;
     confirmLocation(
       { lat: preferences.default_location.lat, lng: preferences.default_location.lng },
@@ -229,7 +229,7 @@ function CraveApplication(): JSX.Element {
       "Using your saved default location.",
       preferences.default_radius_meters,
     );
-  }, [confirmLocation, preferences, preferencesLoaded]);
+  }, [confirmLocation, preferences]);
 
   useEffect(() => {
     if (!mapsLoaded || !searchArea || searchArea.bounds || searchArea.label !== "Current location") return;
@@ -237,7 +237,6 @@ function CraveApplication(): JSX.Element {
     reverseGeocode(searchArea.center).then((label) => {
       if (!active || !label) return;
       setSearchArea((area) => area && sameCoordinates(area.center, searchArea.center) ? { ...area, label } : area);
-      setRequestedArea((area) => area && sameCoordinates(area.center, searchArea.center) ? { ...area, label } : area);
     });
     return () => { active = false; };
   }, [mapsLoaded, searchArea]);
@@ -281,7 +280,7 @@ function CraveApplication(): JSX.Element {
         suggestionsRef.current = mergedPlaces;
         setSuggestions(mergedPlaces);
         setResultsArea(requestedArea);
-        setSearchArea(requestedArea);
+        if (requestedArea.bounds) setSearchArea(requestedArea);
         setLastFailedArea(null);
         setMapRecommendations([]);
         setMapFocusRequest(null);
@@ -316,20 +315,24 @@ function CraveApplication(): JSX.Element {
     };
   }, [requestedArea]);
 
+  const searchLatitude = searchArea?.center.lat;
+  const searchLongitude = searchArea?.center.lng;
   useEffect(() => {
-    if (!searchArea) return;
+    if (searchLatitude === undefined || searchLongitude === undefined) return;
     const controller = new AbortController();
     setWeatherLoading(true);
-    fetchCurrentWeather(searchArea.center.lat, searchArea.center.lng, controller.signal)
-      .then(setWeather)
-      .catch((reason) => {
-        if (!(reason instanceof DOMException && reason.name === "AbortError")) setWeather(null);
+    fetchCurrentWeather(searchLatitude, searchLongitude, controller.signal)
+      .then((value) => {
+        if (!controller.signal.aborted) setWeather(value);
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) setWeather(null);
       })
       .finally(() => {
         if (!controller.signal.aborted) setWeatherLoading(false);
       });
     return () => controller.abort();
-  }, [searchArea]);
+  }, [searchLatitude, searchLongitude]);
 
   useEffect(() => {
     filterDataRequest.current?.abort();
@@ -464,6 +467,8 @@ function CraveApplication(): JSX.Element {
   const homeVisible = currentPath === "/";
   const discoveryVisible = currentPath === "/discovery";
   const searchRouteVisible = homeVisible || discoveryVisible;
+  const resultsAreaLabel = resultsArea?.label === "Current location" && searchArea &&
+    sameCoordinates(resultsArea.center, searchArea.center) ? searchArea.label : resultsArea?.label;
   const chatLocation = searchArea
     ? {
         ...searchArea.center,
@@ -585,7 +590,7 @@ function CraveApplication(): JSX.Element {
                   {toolbar}
                   <MapView
                     listOpen={mapListOpen}
-                    resultsAreaLabel={resultsArea?.label}
+                    resultsAreaLabel={resultsAreaLabel}
                     onListOpenChange={(open) => { setMapListOpen(open); if (open) setMobileChatExpanded(false); }}
                     error={suggestionError}
                     coverageNotice={coverageNotice}

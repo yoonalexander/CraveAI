@@ -192,7 +192,7 @@ export async function sendChat(
       ) {
         throw new ChatQuotaError(
           "You've reached today's CraveAI chat limit. Please try again after the daily reset.",
-          quotaDetail.usage ?? readUsageHeaders(response),
+          quotaDetail.usage ?? readUsageHeaders(response) ?? undefined,
         );
       }
 
@@ -256,17 +256,11 @@ export async function streamChat(
     save_conversation: Boolean(options.saveConversation),
     age_confirmed: options.ageConfirmed ?? sessionStorage.getItem("craveai-age-18") === "true",
   };
-  let response: Response;
-  try {
-    response = await apiFetch("/chat/stream", {
-      method: "POST", headers: { "Content-Type": "application/json", Accept: "text/event-stream" },
-      body: JSON.stringify(payload),
-      signal: options.signal,
-    }, { csrf: Boolean(options.authenticated) });
-  } catch {
-    throwIfStopped(options.signal);
-    return sendChat(query, options);
-  }
+  const response = await apiFetch("/chat/stream", {
+    method: "POST", headers: { "Content-Type": "application/json", Accept: "text/event-stream" },
+    body: JSON.stringify(payload),
+    signal: options.signal,
+  }, { csrf: Boolean(options.authenticated) });
   throwIfStopped(options.signal);
   // During a phased production rollout, the frontend can reach an older API
   // that does not expose the SSE endpoint yet. Its strict request schema also
@@ -275,11 +269,16 @@ export async function streamChat(
   if (response.status === 404 || response.status === 405) {
     return sendLegacyChat(query, options);
   }
-  if (!response.ok || !response.body) return sendChat(query, options);
+  if (!response.ok) {
+    const { json } = await readErrorPayload(response);
+    throwIfStopped(options.signal);
+    throw chatStreamError(response.status, json?.detail, readUsageHeaders(response) ?? undefined);
+  }
+  if (!response.body) throw new Error("Chat response was interrupted.");
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
   let buffer = "";
-  let reply = "";
+  let reply: string | undefined;
   let usage: UsageMetadata | undefined;
   let conversationId: string | undefined;
   const recommendations: ChatRecommendation[] = [];
@@ -307,19 +306,26 @@ export async function streamChat(
         if (event === "reply") { reply = String(data.reply || ""); conversationId = data.conversation_id ? String(data.conversation_id) : undefined; }
         if (event === "usage") usage = data as unknown as UsageMetadata;
         if (event === "error") {
-          const detail = data.detail as { code?: string; usage?: UsageMetadata } | undefined;
-          if (Number(data.status) === 429) throw new ChatQuotaError("You've reached today's CraveAI chat limit.", detail?.usage);
-          throw new Error(detail?.code?.replaceAll("_", " ") || "Chat request failed.");
+          throw chatStreamError(Number(data.status), data.detail as ApiErrorPayload["detail"]);
         }
       }
       if (done) break;
     }
+    if (reply === undefined) throw new Error("Chat response was interrupted.");
     return { reply, messages: reply ? [{ role: "assistant", content: reply }] : [], recommendations, usage, conversation_id: conversationId };
   } finally {
     options.signal?.removeEventListener("abort", cancelReader);
     await reader.cancel().catch(() => undefined);
     reader.releaseLock();
   }
+}
+
+function chatStreamError(status: number, detail?: ApiErrorPayload["detail"], usage?: UsageMetadata): Error {
+  if (status === 429) {
+    return new ChatQuotaError("You've reached today's CraveAI chat limit.", detail?.usage ?? usage);
+  }
+  if (status === 504) return new ChatTimeoutError();
+  return new Error(detail?.code?.replaceAll("_", " ") || "Chat request failed.");
 }
 
 async function sendLegacyChat(
@@ -363,7 +369,7 @@ async function sendLegacyChat(
       if (response.status === 429) {
         throw new ChatQuotaError(
           "You've reached today's CraveAI chat limit. Please try again after the daily reset.",
-          detail?.usage ?? readUsageHeaders(response),
+          detail?.usage ?? readUsageHeaders(response) ?? undefined,
         );
       }
       if (response.status === 504) throw new ChatTimeoutError();

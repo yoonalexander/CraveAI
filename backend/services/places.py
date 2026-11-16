@@ -187,10 +187,9 @@ async def get_top_rated_nearby(
 
 
 async def resolve_place_ids(place_ids: List[str]) -> List[Dict[str, Any]]:
-    """Hydrate a bounded list of Place IDs without caching provider content."""
-    unique = list(dict.fromkeys(item.strip() for item in place_ids if item.strip()))[:20]
+    """Hydrate the validated, deduplicated Place IDs without caching provider content."""
     if not GOOGLE_PLACES_API_KEY:
-        return [{"place_id": item, "unavailable": True} for item in unique]
+        return [{"place_id": item, "unavailable": True} for item in place_ids]
     fields = (
         "place_id,name,rating,user_ratings_total,formatted_address,geometry,types,"
         "price_level,opening_hours,business_status"
@@ -213,10 +212,10 @@ async def resolve_place_ids(place_ids: List[str]) -> List[Dict[str, Any]]:
             )
             return parsed
 
-        results = await asyncio.gather(*(_resolve(item) for item in unique), return_exceptions=True)
+        results = await asyncio.gather(*(_resolve(item) for item in place_ids), return_exceptions=True)
     return [
-        ({"place_id": unique[index], "unavailable": True} if isinstance(item, Exception) else item)
-        for index, item in enumerate(results)
+        ({"place_id": place_id, "unavailable": True} if isinstance(item, Exception) else item)
+        for place_id, item in zip(place_ids, results)
     ]
 
 

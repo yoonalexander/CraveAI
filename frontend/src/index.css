@@ -1226,6 +1226,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   .home-map { position: absolute; width: 100%; min-width: 0; inset: 0; }
   .home-map .map-state { height: 56%; }
   .home-chat { position: absolute; z-index: 10; inset: 0; padding: 0; border: 0; pointer-events: none; }
+  .home-chat:has(.mobile-chat-sheet:is(.is-expanded, .is-dragging)) { z-index: 16; }
   .mobile-chat-sheet {
     --sheet-drag: 0px;
     --sheet-collapsed-height: min(max(44%, 300px), calc(100% - 8px));

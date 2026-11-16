@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import type { Suggestion } from "./places";
-import { ChatTimeoutError, sendChat, streamChat } from "./chat";
+import { ChatQuotaError, ChatTimeoutError, sendChat, streamChat } from "./chat";
 
 afterEach(() => {
   window.localStorage.clear();
@@ -41,7 +41,7 @@ describe("sendChat", () => {
     expect(fetch).toHaveBeenCalledOnce();
   });
 
-  it.each([404, 503])("passes cancellation through the JSON fallback without reporting it as a timeout (%s)", async (status) => {
+  it.each([404, 405])("passes cancellation through the legacy fallback without reporting it as a timeout (%s)", async (status) => {
     const abort = new AbortController();
     const fetch = vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(new Response("", { status }))
       .mockImplementationOnce(async (_url, init) => new Promise((_resolve, reject) => {
@@ -52,6 +52,34 @@ describe("sendChat", () => {
     await vi.waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
     abort.abort(); await rejection;
     expect(fetch.mock.calls[1][1]?.signal?.aborted).toBe(true);
+  });
+
+  it.each([
+    [429, ChatQuotaError],
+    [503, Error],
+    [504, ChatTimeoutError],
+  ] as const)("surfaces HTTP %s without submitting another chat request", async (status, errorType) => {
+    const fetch = vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response("", { status }));
+
+    await expect(streamChat("Dinner", {})).rejects.toBeInstanceOf(errorType);
+    expect(fetch).toHaveBeenCalledOnce();
+  });
+
+  it("surfaces a network failure without submitting another chat request", async () => {
+    const fetch = vi.spyOn(globalThis, "fetch").mockRejectedValue(new TypeError("Connection lost"));
+
+    await expect(streamChat("Dinner", {})).rejects.toThrow("Connection lost");
+    expect(fetch).toHaveBeenCalledOnce();
+  });
+
+  it("rejects a stream that ends before the reply arrives", async () => {
+    const fetch = vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(
+      'event: stage\ndata: {"message":"Finding restaurants…"}\n\n',
+      { headers: { "Content-Type": "text/event-stream" } },
+    ));
+
+    await expect(streamChat("Dinner", {})).rejects.toThrow("Chat response was interrupted.");
+    expect(fetch).toHaveBeenCalledOnce();
   });
 
   it("keeps cancellation connected while a JSON response body is still loading", async () => {

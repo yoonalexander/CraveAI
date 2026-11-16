@@ -1451,6 +1451,44 @@ def test_places_endpoint_rejects_incomplete_or_invalid_viewport_bounds(monkeypat
     assert invalid.json()["detail"]["code"] == "invalid_viewport_bounds"
 
 
+@pytest.mark.parametrize("lat,lng", [(91, 0), (0, -181), ("nan", 0)])
+def test_places_endpoint_rejects_invalid_coordinates(lat, lng):
+    app = create_app()
+
+    async def exercise():
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            return await client.get("/places/suggestions", params={"lat": lat, "lng": lng})
+
+    assert asyncio.run(exercise()).status_code == 422
+
+
+def test_resolving_places_reserves_one_unit_per_distinct_place(monkeypatch):
+    monkeypatch.setenv("DAILY_PLACES_REQUEST_LIMIT", "3")
+    get_settings.cache_clear()
+    calls = []
+
+    async def fake_resolve(ids):
+        calls.append(ids)
+        return [{"place_id": place_id} for place_id in ids]
+
+    monkeypatch.setattr(places_router, "resolve_place_ids", fake_resolve)
+    app = create_app()
+
+    async def exercise():
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            empty = await client.post("/places/resolve", json={"place_ids": ["  "]})
+            first = await client.post("/places/resolve", json={"place_ids": ["a", " a ", "b"]})
+            second = await client.post("/places/resolve", json={"place_ids": ["c", "d"]})
+            return empty, first, second
+
+    empty, first, second = asyncio.run(exercise())
+    assert empty.json() == {"places": []}
+    assert first.status_code == 200
+    assert first.headers["X-RateLimit-Remaining"] == "1"
+    assert second.status_code == 429
+    assert calls == [["a", "b"]]
+
+
 @pytest.mark.parametrize("actor_limit,global_limit", [(1, 10), (10, 1), (10, 10)])
 def test_paginated_discovery_counts_provider_requests_and_preserves_quota_limited_results(monkeypatch, actor_limit, global_limit):
     import httpx

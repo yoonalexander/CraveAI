@@ -117,8 +117,8 @@ async def filter_data(
 async def get_suggestions(
     request: Request,
     response: Response,
-    lat: float = Query(..., description="Latitude of the user"),
-    lng: float = Query(..., description="Longitude of the user"),
+    lat: float = Query(..., ge=-90, le=90, description="Latitude of the user"),
+    lng: float = Query(..., ge=-180, le=180, description="Longitude of the user"),
     radius: int = Query(5000, ge=100, le=20000, description="Search radius in meters"),
     north: float | None = Query(default=None, ge=-90, le=90),
     south: float | None = Query(default=None, ge=-90, le=90),
@@ -232,6 +232,10 @@ async def resolve_places(
     response: Response,
     session: SessionContext | None = Depends(optional_session),
 ) -> dict:
+    ids = list(dict.fromkeys(item.strip() for item in payload.place_ids if item.strip()))
+    if not ids:
+        return {"places": []}
+
     settings = get_settings()
     usage_identities = resolve_request_usage_identities(
         "places", request, response, session.user_id if session else None
@@ -241,7 +245,7 @@ async def resolve_places(
     try:
         usage = await reserve_daily_quota(
             user_id=usage_user_id,
-            token_cost=1,
+            token_cost=len(ids),
             daily_limit=resolve_entitlements(bool(session))["limits"]["places_per_day"],
             global_daily_limit=settings.GLOBAL_DAILY_PLACES_LIMIT,
             global_user_id=PLACES_GLOBAL_USAGE_USER_ID,
@@ -258,7 +262,7 @@ async def resolve_places(
     if enforce_actor_limit:
         for header, value in rate_limit_headers(usage).items():
             response.headers[header] = value
-    return {"places": await resolve_place_ids(payload.place_ids)}
+    return {"places": await resolve_place_ids(ids)}
 
 
 @router.post("/dietary-evidence")

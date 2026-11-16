@@ -6,15 +6,22 @@ import type { ChatRecommendation } from "./api/chat";
 import App from "./App";
 import { listSavedPlaces } from "./api/favorites";
 import { fetchSuggestions, PlacesQuotaError } from "./api/places";
-import { fetchPreferences, resolvePlaces } from "./api/product";
+import { fetchPreferences, resolvePlaces, type Preferences } from "./api/product";
 import { fetchDiscoveryNews } from "./api/discovery";
+import { fetchCurrentWeather } from "./api/weather";
 import type { SearchArea } from "./types/searchArea";
 
-const { authState } = vi.hoisted(() => ({
+const { authState, mapsState } = vi.hoisted(() => ({
   authState: {
     user: null as null | { user_id: string; email: string; email_verified: boolean },
     loading: false,
   },
+  mapsState: { isLoaded: false, hasApiKey: false, loadError: undefined },
+}));
+
+vi.mock("./context/GoogleMapsContext", () => ({
+  GoogleMapsProvider: ({ children }: { children: React.ReactNode }) => children,
+  useGoogleMaps: () => mapsState,
 }));
 
 vi.mock("./context/AuthContext", () => ({
@@ -129,7 +136,7 @@ const mockedFetchSuggestions = vi.mocked(fetchSuggestions);
 const mockedFetchPreferences = vi.mocked(fetchPreferences);
 const mockedListSavedPlaces = vi.mocked(listSavedPlaces);
 
-const defaultPreferences = {
+const defaultPreferences: Preferences = {
   favorite_cuisines: [],
   disliked_foods: [],
   dietary_restrictions: [],
@@ -169,6 +176,7 @@ beforeEach(() => {
   window.history.replaceState({}, "", "/");
   authState.user = null;
   authState.loading = false;
+  mapsState.isLoaded = false;
   mockedFetchSuggestions.mockReset();
   mockedFetchPreferences.mockReset();
   mockedFetchPreferences.mockResolvedValue(defaultPreferences);
@@ -250,7 +258,7 @@ describe("Airbnb-style application shell", () => {
     expect(mockedFetchSuggestions).toHaveBeenCalledTimes(1);
   });
 
-  it("uses a saved location when preferences arrive before device location", async () => {
+  it("uses a saved location while favorites and device location are pending", async () => {
     authState.user = {
       user_id: "user-1",
       email: "signed-in@example.com",
@@ -269,6 +277,7 @@ describe("Airbnb-style application shell", () => {
       ...defaultPreferences,
       default_location: { lat: 45.5019, lng: -73.5674, label: "Montreal, QC" },
     });
+    mockedListSavedPlaces.mockImplementation(() => new Promise(() => undefined));
     mockedFetchSuggestions.mockResolvedValue(makeSuggestions(4));
 
     render(<App />);
@@ -300,9 +309,7 @@ describe("Airbnb-style application shell", () => {
       email: "signed-in@example.com",
       email_verified: true,
     };
-    let resolvePreferences: ((value: typeof defaultPreferences & {
-      default_location: { lat: number; lng: number; label: string };
-    }) => void) | undefined;
+    let resolvePreferences: ((value: Preferences) => void) | undefined;
     mockedFetchPreferences.mockImplementation(() => new Promise((resolve) => {
       resolvePreferences = resolve;
     }));
@@ -320,6 +327,28 @@ describe("Airbnb-style application shell", () => {
       await Promise.resolve();
     });
     expect(screen.getByTestId("map-location")).toHaveTextContent("Current location");
+  });
+
+  it("updates the device location label without restarting nearby search or weather", async () => {
+    mapsState.isLoaded = true;
+    const address = { results: [{ formatted_address: "Toronto, ON", address_components: [] }] };
+    vi.stubGlobal("google", { maps: { Geocoder: class {
+      geocode() { return Promise.resolve(address); }
+    } } });
+    const weather = vi.mocked(fetchCurrentWeather);
+    weather.mockClear();
+    mockedFetchSuggestions.mockResolvedValue(makeSuggestions(4));
+
+    try {
+      render(<App />);
+      await flushEffects();
+
+      expect(screen.getByTestId("map-location")).toHaveTextContent("Toronto, ON");
+      expect(mockedFetchSuggestions).toHaveBeenCalledTimes(1);
+      expect(weather).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 
   it("falls back to Toronto when device location is denied", async () => {
