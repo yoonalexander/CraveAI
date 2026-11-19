@@ -54,6 +54,26 @@ export function SearchToolbar({
   const [draftFilters, setDraftFilters] = useState(advancedFilters);
   const moreRef = useRef<HTMLDivElement>(null);
   const dialogRef = useRef<HTMLElement>(null);
+  const filtersRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const filters = filtersRef.current;
+    if (!filters) return;
+    const scrollFilters = (event: WheelEvent) => {
+      if (event.ctrlKey || event.shiftKey || Math.abs(event.deltaX) >= Math.abs(event.deltaY)) return;
+      const unit = event.deltaMode === WheelEvent.DOM_DELTA_LINE ? 16 :
+        event.deltaMode === WheelEvent.DOM_DELTA_PAGE ? filters.clientWidth : 1;
+      const next = Math.max(0, Math.min(
+        filters.scrollLeft + event.deltaY * unit,
+        filters.scrollWidth - filters.clientWidth,
+      ));
+      if (next === filters.scrollLeft) return;
+      event.preventDefault();
+      filters.scrollLeft = next;
+    };
+    filters.addEventListener("wheel", scrollFilters, { passive: false });
+    return () => filters.removeEventListener("wheel", scrollFilters);
+  }, []);
 
   useEffect(() => {
     if (!showMore) return;
@@ -119,7 +139,7 @@ export function SearchToolbar({
         </div>
       </div>
 
-      <div className="search-toolbar-filters">
+      <div className="search-toolbar-filters" ref={filtersRef}>
         <div className="search-filter-scroll" role="group" aria-label="Restaurant filters">
           <button
             aria-pressed={!hasFilters}

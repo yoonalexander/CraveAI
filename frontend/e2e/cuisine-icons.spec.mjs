@@ -21,6 +21,25 @@ test.beforeEach(async ({ page, context }) => {
 });
 
 const activate = (button, hasTouch) => hasTouch ? button.tap() : button.click();
+
+for (const path of ["/", "/discovery"]) {
+  test(`mouse wheel scrolls cuisine filters in both directions on ${path}`, async ({ page }) => {
+    await page.goto(path);
+    const choices = page.getByRole("group", { name: "Cuisine filters" });
+    const scroll = page.locator(".search-toolbar-filters");
+    await expect(choices.getByRole("button", { name: "Any cuisine", exact: true })).toBeEnabled();
+    await choices.getByRole("button", { name: "Any cuisine", exact: true }).hover();
+    await page.mouse.wheel(0, 240);
+    await expect.poll(() => scroll.evaluate((node) => node.scrollLeft)).toBeGreaterThan(0);
+    const position = await scroll.evaluate((node) => node.scrollLeft);
+    const bounds = await scroll.boundingBox();
+    await page.mouse.move(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
+    await page.mouse.wheel(0, -240);
+    await expect.poll(() => scroll.evaluate((node) => node.scrollLeft)).toBeLessThan(position);
+    await expect(choices.getByRole("button", { name: "Any cuisine", exact: true })).toHaveAttribute("aria-pressed", "true");
+  });
+}
+
 const appearance = (button) => button.evaluate((node) => {
   const style = getComputedStyle(node);
   return { background: style.backgroundColor, color: style.color, border: style.borderColor };
