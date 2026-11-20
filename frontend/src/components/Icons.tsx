@@ -25,6 +25,9 @@ export const MenuIcon = (props: IconProps) => (
 export const PanelIcon = (props: IconProps) => (
   <IconBase {...props}><rect height="16" rx="2" width="18" x="3" y="4" /><path d="M15 4v16" /></IconBase>
 );
+export const PageArrowIcon = (props: IconProps) => (
+  <IconBase {...props}><path d="M13 5h6v6m0-6-9 9m0-8H7a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-3" /></IconBase>
+);
 export const PenIcon = (props: IconProps) => (
   <IconBase {...props}><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z" /></IconBase>
 );

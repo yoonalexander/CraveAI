@@ -556,7 +556,7 @@ export function ChatPanel({
         <p className="chat-disclaimer">CraveAI can make mistakes. Check important details.</p>
       ) : (
         <p className="chat-legal-notice">
-          CraveAI uses AI. Don’t share sensitive information. Prompts and bounded context go to OpenAI; confirmed location and search data go to map, Places, and weather providers. History is off by default; chats are saved only if you enable History or explicitly save one. Review our <a href="/terms">Terms</a>, <a href="/privacy">Privacy Policy</a>, and <a href="/help/data-use">learn more</a>.
+          Avoid sensitive info. Prompts and bounded context go to OpenAI or Gemini. Maps, search, and weather use location. History defaults to off. <a href="/terms">Terms</a> · <a href="/privacy">Privacy Policy</a> · <a href="/help/data-use">Data use</a>
         </p>
       )}
       {notice ? <div className="chat-notice" role="status">{notice}</div> : null}

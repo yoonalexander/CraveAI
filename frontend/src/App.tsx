@@ -528,7 +528,7 @@ function CraveApplication(): JSX.Element {
         weatherLoading={weatherLoading}
       />
 
-      <div className="crave-main">
+      <div className={`crave-main${homeVisible ? " crave-main-home" : ""}`}>
         <header className="crave-topbar">
           <button
             aria-label="Open navigation"
@@ -538,12 +538,6 @@ function CraveApplication(): JSX.Element {
           >
             <MenuIcon />
           </button>
-          <a className="crave-wordmark" href="/" onClick={(event) => {
-            event.preventDefault();
-            navigate("/");
-          }}>
-            CRAVEAI
-          </a>
           {searchRouteVisible ? (
             <button
               className="mobile-location-pill"

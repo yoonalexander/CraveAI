@@ -11,6 +11,7 @@ import {
   HeartIcon,
   HelpIcon,
   HistoryIcon,
+  PageArrowIcon,
   PanelIcon,
   PenIcon,
   SettingsIcon,
@@ -34,6 +35,7 @@ type NavigationItem = {
   path: string;
   icon: ComponentType<{ className?: string }>;
   resetChat?: boolean;
+  pageArrow?: boolean;
 };
 
 const primaryItems: NavigationItem[] = [
@@ -44,9 +46,9 @@ const primaryItems: NavigationItem[] = [
 ];
 
 const secondaryItems: NavigationItem[] = [
-  { label: "See plans and pricing", path: "/pricing", icon: BadgeIcon },
+  { label: "See plans and pricing", path: "/pricing", icon: BadgeIcon, pageArrow: true },
   { label: "Settings", path: "/settings", icon: SettingsIcon },
-  { label: "Help", path: "/help", icon: HelpIcon },
+  { label: "Help", path: "/help", icon: HelpIcon, pageArrow: true },
 ];
 
 export function Sidebar({
@@ -118,7 +120,7 @@ export function Sidebar({
     return (
       <a
         aria-current={active ? "page" : undefined}
-        className={`sidebar-link${active ? " is-active" : ""}`}
+        className="sidebar-link"
         href={item.path}
         key={item.path}
         onClick={(event) => navigate(event, item)}
@@ -126,6 +128,7 @@ export function Sidebar({
       >
         <Icon className="sidebar-icon" />
         <span className="sidebar-label">{item.label}</span>
+        {item.pageArrow ? <PageArrowIcon className="sidebar-page-arrow" /> : null}
       </a>
     );
   };
@@ -145,16 +148,17 @@ export function Sidebar({
         ref={panelRef}
       >
         <div className="sidebar-top">
-          <img alt="CraveAI" className="sidebar-logo" src="/craveai-pin.svg" />
+          <a className="crave-wordmark" href="/" onClick={(event) => navigate(event, primaryItems[0])}>CraveAI</a>
           <button
-            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            aria-label={mobileOpen ? "Close sidebar" : collapsed ? "Expand sidebar" : "Collapse sidebar"}
             className="sidebar-collapse-button"
-            onClick={onToggle}
+            onClick={mobileOpen ? onCloseMobile : onToggle}
             onPointerUp={(event) => event.currentTarget.blur()}
-            title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            title={mobileOpen ? "Close sidebar" : collapsed ? "Expand sidebar" : "Collapse sidebar"}
             type="button"
           >
             <PanelIcon className="sidebar-icon" />
+            {collapsed && !mobileOpen ? <img alt="" className="sidebar-logo" src="/craveai-pin.svg" /> : null}
           </button>
         </div>
 
@@ -232,10 +236,6 @@ export function Sidebar({
             </>
           )}
         </div>
-        <nav aria-label="Legal" className="sidebar-legal-links">
-          <a href="/terms">Terms</a>
-          <a href="/privacy">Privacy</a>
-        </nav>
       </aside>
     </>
   );

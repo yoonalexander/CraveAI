@@ -270,7 +270,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 
 /* Shell */
 .crave-app {
-  --sidebar-width: 216px;
+  --sidebar-width: 240px;
   display: grid;
   grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
   width: 100%;
@@ -293,11 +293,12 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 }
 .crave-wordmark {
   color: #477b47;
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 800;
-  letter-spacing: .34em;
+  letter-spacing: -.025em;
   text-decoration: none;
 }
+.crave-sidebar.is-collapsed .crave-wordmark { display: none; }
 .crave-topbar > .top-auth-actions, .crave-topbar > span { margin-left: auto; }
 .mobile-menu-button {
   display: none;
@@ -341,7 +342,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   padding: 8px 6px 10px;
   overflow: hidden;
   border-right: 1px solid #e8e9e5;
-  background: #f8f9f7;
+  background: #fff;
 }
 .sidebar-top {
   display: flex;
@@ -349,9 +350,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   justify-content: space-between;
   height: 38px;
   margin-bottom: 4px;
-  padding: 0 4px;
+  padding: 0 8px;
 }
-.sidebar-logo { width: 25px; height: 31px; object-fit: contain; transition: opacity 120ms ease; }
+.sidebar-logo { width: 24px; height: 29px; object-fit: contain; }
 .sidebar-collapse-button {
   display: inline-flex;
   align-items: center;
@@ -382,8 +383,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   white-space: nowrap;
   transition: background 160ms ease,color 160ms ease;
 }
-.sidebar-link.is-active { color: #243623; background: #e7e9e5; }
-.sidebar-link.is-active .sidebar-icon { color: #3e783d; }
+.sidebar-page-arrow { width: 14px; height: 14px; margin-left: auto; color: #676e65; flex-shrink: 0; }
+.crave-sidebar.is-collapsed:not(.is-mobile-open) .sidebar-page-arrow { display: none; }
 .sidebar-label { overflow: hidden; text-overflow: ellipsis; }
 .sidebar-weather {
   display: flex;
@@ -402,7 +403,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .sidebar-weather-copy span { color: #777975; }
 .weather-attribution { margin-top: 2px; color: #577753; font-size: 8px; line-height: 1.2; text-decoration: underline; text-underline-offset: 2px; }
 .sidebar-spacer { flex: 1; min-height: 20px; }
-.sidebar-legal-links { display: flex; justify-content: center; gap: 10px; padding: 4px 8px 8px; font-size: 9px; }.sidebar-legal-links a { color: #747873; text-decoration: underline; text-underline-offset: 2px; }
 .sidebar-nav-secondary { padding-bottom: 8px; }
 .sidebar-account { padding: 12px 5px 0; overflow: hidden; border-top: 1px solid #dddeda; }
 .sidebar-login-copy { min-width: 184px; padding: 0 4px 12px; }
@@ -430,13 +430,13 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .sidebar-account-copy { display: flex; min-width: 0; flex-direction: column; }
 .sidebar-account-copy small { max-width: 145px; overflow: hidden; color: #777975; font-weight: 400; text-overflow: ellipsis; }
 .crave-sidebar.is-collapsed .sidebar-top { justify-content: center; padding: 0; }
-.crave-sidebar.is-collapsed .sidebar-logo { opacity: 0; }
-.crave-sidebar.is-collapsed .sidebar-collapse-button { position: absolute; top: 8px; left: 12px; opacity: 1; }
+.crave-sidebar.is-collapsed:not(.is-mobile-open) .sidebar-collapse-button > svg { display: none; }
+.crave-sidebar.is-collapsed:not(.is-mobile-open) .sidebar-collapse-button:is(:hover, :focus-visible) > svg { display: block; }
+.crave-sidebar.is-collapsed .sidebar-collapse-button:is(:hover, :focus-visible) .sidebar-logo { display: none; }
 .crave-sidebar.is-collapsed .sidebar-label,
 .crave-sidebar.is-collapsed .sidebar-weather-copy,
 .crave-sidebar.is-collapsed .sidebar-login-copy,
-.crave-sidebar.is-collapsed .sidebar-account-copy,
-.crave-sidebar.is-collapsed .sidebar-legal-links { display: none; }
+.crave-sidebar.is-collapsed .sidebar-account-copy { display: none; }
 .crave-sidebar.is-collapsed .sidebar-link { justify-content: center; padding: 8px; }
 .crave-sidebar.is-collapsed .sidebar-weather { justify-content: center; margin-inline: 0; padding-inline: 0; }
 .crave-sidebar.is-collapsed .sidebar-account { padding-inline: 1px; }
@@ -460,7 +460,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   line-height: 1;
   text-decoration: none;
 }
-.top-login-button { color: #fff; background: #171815; }
+.top-login-button { color: #fff; background: #416f43; }
+.top-login-button:hover { background: #355c37; }
 .top-signup-button, .top-signout-button { border: 1px solid #d9dad6; color: #2c2d2a; background: #fff; }
 .top-auth-actions .top-profile-button { width: 44px; min-height: 44px; flex-shrink: 0; padding: 10px; border: 1px solid var(--border); color: var(--foreground); background: var(--background); }
 .top-profile-button svg { width: 22px; height: 22px; }
@@ -676,8 +677,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .chat-composer-meta { display: flex; justify-content: center; min-height: 20px; padding: 5px 12px 0; color: #777a74; font-size: 12px; }
 .chat-error { margin-left: 8px; color: #a6423a; }
 .chat-disclaimer { position: absolute; right: 0; bottom: 0; left: 0; margin: 0; color: #777a74; font-size: 12px; text-align: center; }
-.chat-legal-notice { position: absolute; right: 16px; bottom: 0; left: 16px; max-width: 720px; margin: auto; color: #6e716b; font-size: 11px; line-height: 1.45; text-align: center; }
-.chat-legal-notice a { color: #4b7749; font-weight: 700; text-underline-offset: 2px; }
+.chat-legal-notice { position: absolute; right: 4px; bottom: 0; left: 4px; max-width: 720px; margin: auto; color: #6e716b; font-size: 11px; line-height: 1.45; text-align: center; text-wrap: balance; }
+.chat-legal-notice a { color: #3f6940; text-decoration: underline; text-underline-offset: 2px; white-space: nowrap; }
 .chat-notice { position: absolute; z-index: 12; top: 42px; left: 50%; padding: 8px 12px; border: 1px solid #dedfda; border-radius: 9px; color: #454743; background: #fff; box-shadow: 0 8px 24px rgba(34,40,32,.12); font-size: 11px; transform: translateX(-50%); }
 
 /* Suggestions */
@@ -798,18 +799,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .placeholder-page > button { margin-top: 24px; padding: 10px 17px; border: 0; border-radius: 999px; color: #fff; background: #5f8f55; font-size: 12px; font-weight: 700; cursor: pointer; }
 
 @media (max-width: 1240px) and (min-width: 961px) {
-  .crave-app { --sidebar-width: 56px; }
-  .crave-sidebar .sidebar-top { justify-content: center; padding: 0; }
-  .crave-sidebar .sidebar-collapse-button { display: none; }
-  .crave-sidebar .sidebar-label,
-  .crave-sidebar .sidebar-weather-copy,
-  .crave-sidebar .sidebar-login-copy,
-  .crave-sidebar .sidebar-account-copy { display: none; }
-  .crave-sidebar .sidebar-link { justify-content: center; padding: 8px; }
-  .crave-sidebar .sidebar-weather { justify-content: center; margin-inline: 0; padding-inline: 0; }
-  .crave-sidebar .sidebar-login-button,
-  .crave-sidebar .sidebar-account-link { width: 40px; min-height: 40px; padding: 8px; border: 0; background: transparent; }
-  .crave-sidebar .sidebar-login-icon { display: block; }
   .crave-workspace { grid-template-columns: minmax(270px,310px) minmax(340px,1fr) minmax(285px,320px); gap: 12px; padding-inline: 14px; }
   .map-card-header { padding-inline: 14px; }
   .map-filter-row { gap: 4px; }
@@ -842,12 +831,11 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   .crave-sidebar, .crave-sidebar.is-collapsed { position: fixed; z-index: 80; top: 0; bottom: 0; left: 0; width: min(286px,calc(100vw - 54px)); height: 100dvh; padding: 10px 8px; box-shadow: 12px 0 40px rgba(23,29,22,.18); transform: translateX(-105%); transition: transform 220ms ease; }
   .crave-sidebar.is-mobile-open { transform: translateX(0); }
   .crave-sidebar.is-collapsed .sidebar-top { justify-content: space-between; padding: 0 4px; }
-  .crave-sidebar.is-collapsed .sidebar-logo { opacity: 1; }
+  .crave-sidebar.is-mobile-open .crave-wordmark { display: inline; }
   .crave-sidebar.is-collapsed .sidebar-collapse-button { position: static; display: inline-flex; opacity: 1; }
   .crave-sidebar.is-collapsed .sidebar-label,
   .crave-sidebar.is-collapsed .sidebar-weather-copy,
   .crave-sidebar.is-collapsed .sidebar-account-copy { display: flex; }
-  .crave-sidebar.is-collapsed .sidebar-legal-links { display: flex; }
   .crave-sidebar.is-collapsed .sidebar-login-copy { display: block; }
   .crave-sidebar.is-collapsed .sidebar-link { justify-content: flex-start; padding: 7px 9px; }
   .crave-sidebar.is-collapsed .sidebar-weather { justify-content: flex-start; margin-inline: 4px; padding-inline: 5px; }
@@ -1051,7 +1039,14 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 
 .home-split { display: grid; height: 100%; min-height: 0; grid-template-columns: minmax(0,1fr) minmax(0,1fr); overflow: hidden; }
 .home-chat, .home-map { min-width: 0; min-height: 0; }
-.home-chat { padding: 24px 26px 18px; border-right: 1px solid #e2e3df; }
+.home-chat { padding: 24px 26px 18px; }
+@media (min-width: 961px) {
+  .crave-main-home { position: relative; }
+  .crave-main-home > .crave-topbar { position: absolute; top: 0; left: 0; width: 50%; padding-inline: 16px; }
+  .crave-main-home > .crave-content { height: 100%; }
+  .home-chat { padding-top: 60px; }
+  .home-chat .chat-legal-notice { inset-inline: -14px; }
+}
 .home-map { position: relative; display: grid; grid-template-rows: auto minmax(0,1fr); overflow: hidden; background: #eef3ea; }
 .home-map > .map-surface { min-height: 0; }
 .mobile-chat-sheet, .mobile-sheet-content { height: 100%; min-height: 0; }
@@ -1188,7 +1183,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   .crave-main { height: 100dvh; min-height: 0; overflow: hidden; }
   .crave-topbar { position: relative; height: 66px; gap: 7px; padding: 8px 10px; border-bottom: 1px solid #e7e8e4; }
   .mobile-menu-button { display: inline-flex; flex: 0 0 auto; }
-  .crave-wordmark { display: none; }
   .mobile-location-pill { display: flex; min-width: 0; max-width: min(430px,calc(100vw - 115px)); flex: 1; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 6px 13px; border: 1px solid #e1e2de; border-radius: 999px; color: #292b28; background: #fff; box-shadow: 0 3px 12px rgba(31,37,29,.08); }
   .mobile-location-pill > svg { width: 17px; flex: 0 0 auto; color: #568751; }
   .mobile-location-pill > span:not(.location-loader) { display: flex; min-width: 0; flex-direction: column; text-align: center; }
