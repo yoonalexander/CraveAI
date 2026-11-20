@@ -7,6 +7,8 @@ export interface Suggestion {
   address: string;
   reason: string;
   place_id: string;
+  source?: "openstreetmap";
+  website?: string | null;
   lat: number;
   lng: number;
   tags?: string[];
@@ -26,7 +28,7 @@ export interface Suggestion {
 
 export type FilterLabel = {
   value: string;
-  source: "google" | "inferred_menu";
+  source: "google" | "inferred_menu" | "openstreetmap";
   evidence: Array<{ id: string; label: string; source_url: string }>;
 };
 export type FilterData = Partial<Suggestion> & { place_id: string };

@@ -31,7 +31,10 @@ export function MapRestaurantList({ entries, selectedKey, origin, areaLabel, isL
     {entries.length ? <ul aria-label="Pinned restaurants">{entries.map((entry) => {
       const place = entry.place;
       const query = new URLSearchParams({ api: "1", query: `${place.lat},${place.lng}` });
-      if (place.place_id) { query.set("query", place.name); query.set("query_place_id", place.place_id); }
+      if (place.place_id && !place.place_id.startsWith("osm:")) {
+        query.set("query", place.name);
+        query.set("query_place_id", place.place_id);
+      }
       const rating = typeof place.rating === "number" && Number.isFinite(place.rating) ? place.rating.toFixed(1) : null;
       return <li key={entry.key}><article className={`map-list-card${selectedKey === entry.key ? " is-selected" : ""}`}>
         <RestaurantPhotos placeId={place.place_id} title={place.name} compact />
@@ -46,6 +49,7 @@ export function MapRestaurantList({ entries, selectedKey, origin, areaLabel, isL
         </div>
       </article></li>;
     })}</ul> : !isLoading ? <div className="map-list-empty"><PinIcon /><h3>{error ? "Restaurants are unavailable" : "No restaurant pins to show"}</h3><p>{error ? "Try the search again or choose another area." : "Clear a filter or choose another search area. You can browse without starting a chat."}</p></div> : null}
-    <a className="map-list-attribution" href="https://maps.google.com/" target="_blank" rel="noreferrer">Restaurant data by Google Maps</a>
+    {entries.some(({ place }) => place.place_id && !place.place_id.startsWith("osm:")) ?
+      <a className="map-list-attribution" href="https://maps.google.com/" target="_blank" rel="noreferrer">Restaurant data by Google Maps</a> : null}
   </section>;
 }

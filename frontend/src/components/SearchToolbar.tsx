@@ -15,6 +15,7 @@ type SearchToolbarProps = {
   count: number;
   totalCount?: number;
   coverageNotice?: string | null;
+  catalogResults?: boolean;
   error: string | null;
   isLoading: boolean;
   canRetry: boolean;
@@ -36,6 +37,7 @@ export function SearchToolbar({
   count,
   totalCount = count,
   coverageNotice,
+  catalogResults,
   error,
   isLoading,
   canRetry,
@@ -157,6 +159,7 @@ export function SearchToolbar({
         <CuisineFilters cuisine={advancedFilters.cuisine} disabled={isLoading} onChange={onCuisineChange} />
       </div>
       {!isLoading && coverageNotice ? <p className="discovery-coverage-notice" role="status">{coverageNotice}</p> : null}
+      {catalogResults ? <a className="map-list-attribution" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">Restaurant listings © OpenStreetMap contributors</a> : null}
       <span className="sr-only" id="budget-filter-explanation">
         Budget-friendly includes Google price levels free and inexpensive. It does not guarantee a meal under a dollar amount.
       </span>

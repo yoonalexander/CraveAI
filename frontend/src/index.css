@@ -1082,6 +1082,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .map-list-actions svg { width: 16px; height: 16px; }
 .map-list-actions a, .map-list-attribution { color: #396632; text-decoration: underline; text-underline-offset: 3px; }
 .map-list-attribution { display: block; margin-top: 16px; font-size: 11px; }
+.search-toolbar > .map-list-attribution { align-self: flex-start; margin-top: 0; }
 .map-list-notice { padding: 9px 11px; border: 1px solid #d4dfca; border-radius: 8px; background: #eef4e8; }
 .map-list-empty { padding: 24px 8px; text-align: center; }
 .map-list-empty > svg { width: 30px; height: 30px; color: #477b45; }

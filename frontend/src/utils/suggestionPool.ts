@@ -73,7 +73,7 @@ export function filterSuggestions(
     }
     if (filters.has("open") && suggestion.open_now !== true) return false;
     if (advanced.cuisine.trim() && !(suggestion.cuisine_labels || []).some((label) =>
-      label.value.toLowerCase() === advanced.cuisine.trim().toLowerCase() && (advanced.includeMenuLabels || label.source === "google"))) return false;
+      label.value.toLowerCase() === advanced.cuisine.trim().toLowerCase() && (advanced.includeMenuLabels || label.source !== "inferred_menu"))) return false;
     if (advanced.minimumRating && (typeof suggestion.rating !== "number" || suggestion.rating < advanced.minimumRating)) return false;
     if (advanced.priceLevels.length && (typeof suggestion.price_level !== "number" || !advanced.priceLevels.includes(suggestion.price_level))) return false;
     if (advanced.takeout && suggestion.takeout !== true) return false;

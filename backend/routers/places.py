@@ -11,6 +11,7 @@ from backend.services.sessions import SessionContext, optional_session
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints
 from backend.services.filter_enrichment import enrich_filter_places
 from backend.services.place_photos import fetch_place_photo, PhotoProviderError
+from backend.services.restaurant_catalog import find_catalog_restaurants, resolve_catalog_restaurants
 
 from backend.services.places import DiscoveryCoverage, get_top_rated_nearby, resolve_place_ids, verify_dietary_place_ids
 from backend.services.usage_limits import (
@@ -159,6 +160,13 @@ async def get_suggestions(
         window_seconds=60,
         code="places_rate_limited",
     )
+    catalog = await find_catalog_restaurants(lat, lng, radius, bounds)
+    if catalog:
+        response.headers["X-Places-Coverage"] = "complete"
+        response.headers["X-Places-Requests"] = "0"
+        response.headers["X-Places-Pages"] = "0"
+        response.headers["Cache-Control"] = "no-store"
+        return catalog
     configured_daily_limit = resolve_entitlements(bool(session))["limits"]["places_per_day"]
     daily_limit = configured_daily_limit
     enforce_actor_limit = not has_unlimited_usage_access(session)
@@ -236,6 +244,12 @@ async def resolve_places(
     if not ids:
         return {"places": []}
 
+    catalog_ids = [item for item in ids if item.startswith("osm:")]
+    catalog = await resolve_catalog_restaurants(catalog_ids)
+    google_ids = [item for item in ids if not item.startswith("osm:")]
+    if not google_ids:
+        return {"places": [catalog.get(item, {"place_id": item, "unavailable": True}) for item in ids]}
+
     settings = get_settings()
     usage_identities = resolve_request_usage_identities(
         "places", request, response, session.user_id if session else None
@@ -245,7 +259,7 @@ async def resolve_places(
     try:
         usage = await reserve_daily_quota(
             user_id=usage_user_id,
-            token_cost=len(ids),
+            token_cost=len(google_ids),
             daily_limit=resolve_entitlements(bool(session))["limits"]["places_per_day"],
             global_daily_limit=settings.GLOBAL_DAILY_PLACES_LIMIT,
             global_user_id=PLACES_GLOBAL_USAGE_USER_ID,
@@ -262,7 +276,9 @@ async def resolve_places(
     if enforce_actor_limit:
         for header, value in rate_limit_headers(usage).items():
             response.headers[header] = value
-    return {"places": await resolve_place_ids(ids)}
+    google = {item["place_id"]: item for item in await resolve_place_ids(google_ids)}
+    return {"places": [catalog.get(item) or google.get(item) or {"place_id": item, "unavailable": True}
+                       for item in ids]}
 
 
 @router.post("/dietary-evidence")

@@ -94,7 +94,34 @@ see:
 | Menu evidence | `httpx`, HTML/JSON-LD parser | Ephemeral evidence from public official menu/order pages |
 | Ranking | Model-assisted evidence classification plus deterministic Python scoring | Constraint satisfaction, coherence, exclusions, confidence |
 | Authentication | Supabase Auth | Email/password, verification, recovery, Google OAuth |
-| Application data | SQLAlchemy, Alembic, Supabase Postgres | Profiles, opaque sessions, identities, favorites, feedback, quotas, audits |
+| Application data | SQLAlchemy, Alembic, Supabase Postgres | Profiles, opaque sessions, identities, favorites, feedback, quotas, audits, restaurant catalog |
+
+### Toronto and Mississauga restaurant catalog
+
+With the catalog imported, map browsing uses local results where the catalog has
+matches. Areas without matches still use the Google Places path. Catalog listings
+have no Google rating, photo, live hours, or price data. Chat continues to use its
+existing recommendation pipeline.
+
+For Supabase Postgres, apply the migrations and load the snapshot into the
+database selected by `DATABASE_URL`:
+
+```powershell
+python -m alembic upgrade head
+python -m scripts.import_restaurant_catalog
+```
+
+For local SQLite, use the application's local schema initializer before
+importing instead of running the Postgres migrations:
+
+```powershell
+$env:DATABASE_URL = "sqlite+pysqlite:///./data/gta-catalog.db"
+python -c "from backend.services.storage import init_storage; init_storage()"
+python -m scripts.import_restaurant_catalog
+```
+
+The import atomically replaces the catalog and leaves other application tables
+out of the import. See [catalog data and refresh instructions](data/README.md).
 | Hosting | Vercel frontend, Render backend | Same-origin `/api` proxy and backend runtime |
 
 There is intentionally no vector database or embedding layer in the current

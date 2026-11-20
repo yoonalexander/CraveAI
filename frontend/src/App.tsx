@@ -273,7 +273,7 @@ function CraveApplication(): JSX.Element {
       .then((places) => {
         if (!active) return;
         const mergedPlaces = mergeSuggestionsForBounds(
-          suggestionsRef.current,
+          places.length ? suggestionsRef.current.filter((place) => place.source === places[0].source) : suggestionsRef.current,
           places,
           requestedArea.bounds,
         );
@@ -345,8 +345,9 @@ function CraveApplication(): JSX.Element {
 
   const checkFilterData = useCallback(async () => {
     if (filterDataRequest.current || isLoadingSuggestions) return;
-    const remaining = suggestions.filter((place) => !filterData.has(place.place_id));
-    const candidates = remaining.length ? remaining : suggestions.filter((place) => {
+    const googlePlaces = suggestions.filter((place) => place.source !== "openstreetmap");
+    const remaining = googlePlaces.filter((place) => !filterData.has(place.place_id));
+    const candidates = remaining.length ? remaining : googlePlaces.filter((place) => {
       const data = filterData.get(place.place_id);
       return data?.enrichment_status === "unavailable" || data?.menu_status === "unavailable";
     });
@@ -487,6 +488,7 @@ function CraveApplication(): JSX.Element {
       count={filteredSuggestions.length}
       totalCount={suggestions.length}
       coverageNotice={coverageNotice}
+      catalogResults={suggestions.some((place) => place.source === "openstreetmap")}
       error={suggestionError}
       isLoading={isLoadingSuggestions || isResolvingArea}
       onChangeLocation={() => setLocationDialogOpen(true)}
@@ -508,7 +510,7 @@ function CraveApplication(): JSX.Element {
         loading: filterDataLoading, error: filterDataError,
         checked: annotatedSuggestions.filter((place) => place.enrichment_status === "checked").length,
         menus: annotatedSuggestions.filter((place) => place.menu_status === "assessed").length,
-        remaining: suggestions.filter((place) => !filterData.has(place.place_id)).length,
+        remaining: suggestions.filter((place) => place.source !== "openstreetmap" && !filterData.has(place.place_id)).length,
         unavailable: annotatedSuggestions.filter((place) => place.enrichment_status === "unavailable" || place.menu_status === "unavailable").length,
       }}
       onCheckFilterData={() => void checkFilterData()}
@@ -567,7 +569,7 @@ function CraveApplication(): JSX.Element {
                 <section className="home-chat" aria-label="Chat">
                   <MobileChatSheet expanded={mobileChatExpanded} onExpandedChange={(expanded) => { setMobileChatExpanded(expanded); if (expanded) setMapListOpen(false); }}>
                     <ChatPanel
-                      candidatePlaces={filteredSuggestions}
+                      candidatePlaces={filteredSuggestions.filter((place) => place.source !== "openstreetmap")}
                       key={chatSession}
                       location={chatLocation}
                       onConversationStart={() => { setMobileChatExpanded(true); setMapListOpen(false); }}

@@ -226,7 +226,9 @@ export function MapView({
               {selectedPlace.address ? <p>{selectedPlace.address}</p> : null}
               {"cuisine_labels" in selectedPlace ? <FilterEvidence labels={[...(selectedPlace.cuisine_labels || []), ...(selectedPlace.dietary_labels || [])]} /> : null}
               {selectedPlace.place_id ? (
-                <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selectedPlace.name)}&query_place_id=${encodeURIComponent(selectedPlace.place_id)}`} rel="noreferrer" target="_blank">
+                <a href={selectedPlace.place_id.startsWith("osm:")
+                  ? `https://www.google.com/maps/search/?api=1&query=${selectedPlace.lat},${selectedPlace.lng}`
+                  : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selectedPlace.name)}&query_place_id=${encodeURIComponent(selectedPlace.place_id)}`} rel="noreferrer" target="_blank">
                   Open in Google Maps
                 </a>
               ) : null}

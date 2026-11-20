@@ -1489,6 +1489,44 @@ def test_resolving_places_reserves_one_unit_per_distinct_place(monkeypatch):
     assert calls == [["a", "b"]]
 
 
+def test_catalog_browsing_and_saved_place_lookup_skip_google_and_quota(monkeypatch):
+    from backend.database import get_session_factory
+    from backend.models import CatalogRestaurant
+
+    async def unexpected_provider(*args, **kwargs):
+        raise AssertionError("Catalog results should require no Places calls or quota")
+
+    monkeypatch.setattr(places_router, "get_top_rated_nearby", unexpected_provider)
+    monkeypatch.setattr(places_router, "resolve_place_ids", unexpected_provider)
+    monkeypatch.setattr(places_router, "reserve_daily_quota", unexpected_provider)
+    app = create_app()
+    with get_session_factory()() as db:
+        db.add_all([
+            CatalogRestaurant(id="osm:node:1", name="Pilot Restaurant", lat=43.65, lng=-79.38,
+                              address="", cuisine="sushi", website=""),
+            CatalogRestaurant(id="osm:node:2", name="Outside viewport", lat=43.67, lng=-79.38,
+                              address="", cuisine="", website=""),
+        ])
+        db.commit()
+
+    async def exercise():
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            nearby = await client.get("/places/suggestions", params={
+                "lat": 43.65, "lng": -79.38, "radius": 5000,
+                "south": 43.64, "north": 43.66, "west": -79.39, "east": -79.37,
+            })
+            saved = await client.post("/places/resolve", json={"place_ids": ["osm:node:1", "osm:node:3"]})
+            return nearby, saved
+
+    nearby, saved = asyncio.run(exercise())
+    assert nearby.status_code == 200
+    assert nearby.headers["X-Places-Requests"] == "0"
+    assert [place["place_id"] for place in nearby.json()] == ["osm:node:1"]
+    assert nearby.json()[0]["rating"] is None
+    assert nearby.json()[0]["cuisine_labels"] == [{"value": "Japanese", "source": "openstreetmap", "evidence": []}]
+    assert saved.json() == {"places": [nearby.json()[0], {"place_id": "osm:node:3", "unavailable": True}]}
+
+
 @pytest.mark.parametrize("actor_limit,global_limit", [(1, 10), (10, 1), (10, 10)])
 def test_paginated_discovery_counts_provider_requests_and_preserves_quota_limited_results(monkeypatch, actor_limit, global_limit):
     import httpx

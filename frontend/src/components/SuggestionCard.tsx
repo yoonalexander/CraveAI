@@ -18,6 +18,8 @@ type SuggestionCardProps = {
   filterLabels?: FilterLabel[];
   cuisineLabels?: FilterLabel[];
   compactPhoto?: boolean;
+  coordinates?: { lat: number; lng: number };
+  showCatalogAttribution?: boolean;
 };
 
 let savedPlaceIdsPromise: Promise<Set<string>> | null = null;
@@ -42,6 +44,8 @@ export function SuggestionCard({
   filterLabels,
   cuisineLabels,
   compactPhoto = false,
+  coordinates,
+  showCatalogAttribution = false,
 }: SuggestionCardProps): JSX.Element {
   const { user } = useAuth();
   const [saved, setSaved] = useState(false);
@@ -99,10 +103,17 @@ export function SuggestionCard({
         </div>
         <p className="suggestion-address">{description}</p>
         <FilterEvidence labels={filterLabels || cuisineLabels} />
+        {showCatalogAttribution && placeId.startsWith("osm:") ? (
+          <a className="suggestion-google-source" href="https://www.openstreetmap.org/copyright" rel="noreferrer" target="_blank">
+            © OpenStreetMap contributors
+          </a>
+        ) : null}
         {!placeId.startsWith("placeholder-") ? (
           <a
             className="suggestion-google-source"
-            href={`https://www.google.com/maps/search/?api=1&query_place_id=${encodeURIComponent(placeId)}`}
+            href={placeId.startsWith("osm:")
+              ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(coordinates ? `${coordinates.lat},${coordinates.lng}` : title)}`
+              : `https://www.google.com/maps/search/?api=1&query_place_id=${encodeURIComponent(placeId)}`}
             rel="noreferrer"
             target="_blank"
           >

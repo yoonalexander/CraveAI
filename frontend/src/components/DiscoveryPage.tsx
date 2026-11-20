@@ -57,6 +57,7 @@ export function DiscoveryPage({
         <div className="discovery-grid" aria-live="polite">
           {visible.map((suggestion) => (
             <SuggestionCard
+              coordinates={suggestion}
               description={suggestion.address || suggestion.reason}
               distance={origin
                 ? `${calculateDistanceKm(origin.lat, origin.lng, suggestion.lat, suggestion.lng).toFixed(1)} km`

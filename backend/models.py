@@ -7,6 +7,7 @@ from sqlalchemy import (
     Date,
     DateTime,
     ForeignKey,
+    Float,
     Index,
     Integer,
     String,
@@ -17,6 +18,19 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column
 
 from backend.database import Base
+
+
+class CatalogRestaurant(Base):
+    __tablename__ = "catalog_restaurants"
+    __table_args__ = (Index("ix_catalog_restaurants_lat_lng", "lat", "lng"),)
+
+    id: Mapped[str] = mapped_column(String(40), primary_key=True)
+    name: Mapped[str] = mapped_column(String(250))
+    lat: Mapped[float] = mapped_column(Float)
+    lng: Mapped[float] = mapped_column(Float)
+    address: Mapped[str] = mapped_column(String(300))
+    cuisine: Mapped[str] = mapped_column(String(250))
+    website: Mapped[str] = mapped_column(String(500))
 
 
 class Profile(Base):
