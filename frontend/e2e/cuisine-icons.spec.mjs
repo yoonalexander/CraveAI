@@ -22,6 +22,28 @@ test.beforeEach(async ({ page, context }) => {
 
 const activate = (button, hasTouch) => hasTouch ? button.tap() : button.click();
 
+for (const reduced of [false, true]) {
+  test(`cuisine wheel inputs accumulate and reverse with ${reduced ? "reduced" : "smooth"} motion`, async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: reduced ? "reduce" : "no-preference" });
+    await page.goto("/");
+    const choices = page.getByRole("group", { name: "Cuisine filters" });
+    await expect(choices.getByRole("button", { name: "Any cuisine", exact: true })).toBeEnabled();
+    const initial = await choices.evaluate((node) => {
+      for (let i = 0; i < 3; i++) {
+        node.dispatchEvent(new WheelEvent("wheel", { deltaY: 120, cancelable: true }));
+      }
+      return node.scrollLeft;
+    });
+    if (reduced) expect(initial).toBe(360);
+    else expect(initial).toBeLessThan(360);
+    await expect.poll(() => choices.evaluate((node) => node.scrollLeft)).toBeCloseTo(360, 0);
+    await choices.evaluate((node) => {
+      node.dispatchEvent(new WheelEvent("wheel", { deltaY: -240, cancelable: true }));
+    });
+    await expect.poll(() => choices.evaluate((node) => node.scrollLeft)).toBeCloseTo(120, 0);
+  });
+}
+
 for (const path of ["/", "/discovery"]) {
   test(`mouse wheel scrolls cuisine filters in both directions on ${path}`, async ({ page }) => {
     await page.goto(path);
@@ -40,6 +62,7 @@ for (const path of ["/", "/discovery"]) {
     await page.mouse.move(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
     await page.mouse.wheel(0, -240);
     await expect.poll(() => scroll.evaluate((node) => node.scrollLeft)).toBeLessThan(position);
+    await expect.poll(() => scroll.evaluate((node) => node.scrollLeft)).toBeCloseTo(0, 0);
     await expect(choices.getByRole("button", { name: "Any cuisine", exact: true })).toHaveAttribute("aria-pressed", "true");
     await scroll.evaluate((node) => { node.scrollLeft = node.scrollWidth; });
     await expect(carousel).not.toHaveClass(/can-scroll-right/);
