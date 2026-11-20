@@ -26,17 +26,29 @@ for (const path of ["/", "/discovery"]) {
   test(`mouse wheel scrolls cuisine filters in both directions on ${path}`, async ({ page }) => {
     await page.goto(path);
     const choices = page.getByRole("group", { name: "Cuisine filters" });
-    const scroll = page.locator(".search-toolbar-filters");
+    const scroll = choices;
+    const carousel = page.locator(".cuisine-filters");
     await expect(choices.getByRole("button", { name: "Any cuisine", exact: true })).toBeEnabled();
+    await expect(carousel).toHaveClass(/can-scroll-right/);
+    await expect(carousel).not.toHaveClass(/can-scroll-left/);
     await choices.getByRole("button", { name: "Any cuisine", exact: true }).hover();
     await page.mouse.wheel(0, 240);
     await expect.poll(() => scroll.evaluate((node) => node.scrollLeft)).toBeGreaterThan(0);
+    await expect(carousel).toHaveClass(/can-scroll-left/);
     const position = await scroll.evaluate((node) => node.scrollLeft);
     const bounds = await scroll.boundingBox();
     await page.mouse.move(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
     await page.mouse.wheel(0, -240);
     await expect.poll(() => scroll.evaluate((node) => node.scrollLeft)).toBeLessThan(position);
     await expect(choices.getByRole("button", { name: "Any cuisine", exact: true })).toHaveAttribute("aria-pressed", "true");
+    await scroll.evaluate((node) => { node.scrollLeft = node.scrollWidth; });
+    await expect(carousel).not.toHaveClass(/can-scroll-right/);
+    await scroll.evaluate((node) => { node.scrollLeft = 0; });
+    await expect(carousel).not.toHaveClass(/can-scroll-left/);
+    const general = await page.getByRole("group", { name: "Restaurant filters" }).boundingBox();
+    const cuisines = await choices.boundingBox();
+    expect(general.y + general.height).toBeLessThanOrEqual(cuisines.y);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   });
 }
 
