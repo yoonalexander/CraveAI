@@ -14,7 +14,7 @@ cities and measure the remaining database space before expanding.
 | Restaurant listings | The hosted catalog has 7,856 browseable listings across Toronto and Mississauga. This includes seven branch-verified municipal listings. Six duplicate OSM records remain available to existing bookmarks and are hidden from new searches. |
 | Menu dishes | Stage 3 adds a hosted index of 48 reviewed dishes across 12 locations, all with published prices. The first pass records a menu-source outcome for every browsable listing. |
 | Chat search | Stage 4 merges nearby catalog matches with Google Places. The 34-query replay increased queries with menu-backed results from 6 to 15 and retained every baseline menu-backed venue. Chat continues to call Places for possible alternatives. |
-| Storage | Hosted Postgres measured 16.35 MB after Stage 3, up from 13.30 MB before the catalog import. Stage 3's dish and source-check tables and indexes account for 1.26 MB. |
+| Storage | The Stage 5 snapshot measured 31.62 MB across the CraveAI project's Postgres databases, including 16.35 MB in the app database. The catalog, dish, and source-check tables and indexes account for 2.99 MB. |
 
 The restaurant catalog and dish index are two different parts of the same
 project. We can finish the basic map and restaurant search while incrementally
@@ -206,20 +206,77 @@ live comparison and sparse menu coverage give no basis for skipping them.
 
 ## Stage 5 — Measure space and decide what to add next
 
-Supabase’s free plan includes **500 MB of database size per project**. After
-the two-city import and first enrichment pass, record the dashboard’s database
-usage, the size of the catalog and menu tables including indexes, and the
-space left for normal app growth. Compare those numbers with the readings
-before import and after Stage 2. Use the measured increase to estimate the
-cost of another city or richer coverage in the first two. [Supabase pricing](https://supabase.com/pricing) ·
-[Understanding database size](https://supabase.com/docs/guides/platform/database-size)
-
 - [x] Measure the snapshot files. The starting file was about 0.65 MB and the expanded file is about 1.17 MB.
 - [x] Record hosted database usage before the refreshed import and after Stage 2.
 - [x] Measure the catalog and menu tables with indexes after the first enrichment pass.
-- [ ] Report remaining space and decide whether to expand or improve coverage in the two cities.
+- [x] Report remaining space and decide whether to expand or improve coverage in the two cities.
 
-**Done when** there is a simple two-city report with the number of restaurants
-in the app, basic field and dish coverage, database space used, and remaining
-headroom. Use that report to decide whether to improve Toronto and
-Mississauga further or add another city.
+### Hosted coverage on November 21, 2026
+
+| Coverage | Toronto | Mississauga | Total |
+| --- | ---: | ---: | ---: |
+| Browsable restaurant listings | 6,468 | 1,388 | 7,856 |
+| With a website | 1,584 | 383 | 1,967 |
+| With at least one verified dish | 6 | 6 | 12 |
+| With at least one verified price | 6 | 6 | 12 |
+| Verified dishes | 22 | 26 | 48 |
+
+Hosted totals were queried directly. The city split uses the Stage 1
+municipal counts, the Stage 2 archive and admission decisions, and the
+branch IDs in the reviewed menu seed. The hosted catalog has 7,862 rows,
+including six retired duplicate IDs. Of the browsable listings, 5,797
+(73.8%) have a cuisine, 4,233 (53.9%) have a street address, 1,967 (25.0%)
+have a website, four have a phone number, and five have published hours.
+Every browsable listing has a source-check record. Of the 131 listings
+that yielded automated dish candidates, 126 still have zero reviewed
+dishes. [City counts and sources](../data/README.md) ·
+[Catalog review decisions](../data/gta-catalog-reviewed.json) · [Reviewed dishes](../data/gta-menu-reviewed.json)
+
+### Database space
+
+| Measurement | Bytes | MB |
+| --- | ---: | ---: |
+| App database before Stage 2 | 13,298,835 | 13.30 |
+| App database after Stage 2 | 15,051,923 | 15.05 |
+| App database after Stage 3 and at Stage 5 | 16,346,259 | 16.35 |
+| Stage 5 CraveAI project database size, using the dashboard formula | 31,619,893 | 31.62 |
+| Catalog table and indexes | 1,728,512 | 1.73 |
+| Menu source checks and indexes | 1,179,648 | 1.18 |
+| Dish table and indexes | 81,920 | 0.08 |
+| Three catalog-related tables and indexes | 2,990,080 | 2.99 |
+
+Supabase confirms the organization is on Free. Against its published
+500 MB per-project allowance, the CraveAI snapshot uses about **6.3%** and
+has **468.38 MB** of headroom. Figures use decimal MB. Earlier readings
+measured the app database with `pg_database_size(current_database())`.
+The current project figure sums all three Postgres databases using
+Supabase's dashboard formula. Table totals use `pg_total_relation_size`.
+The organization has two other projects. Supabase evaluates fair use
+across the organization using the billing-period daily average, which
+this single-project snapshot does not measure. [Supabase pricing](https://supabase.com/pricing) ·
+[Supabase database metrics and fair use](https://supabase.com/docs/guides/platform/database-size)
+
+### Capacity estimates and decision
+
+| Scenario | Extra database space | Project total at current baseline |
+| --- | ---: | ---: |
+| Reach 2 dishes per current listing on average | 11.75–19.58 MB | 43.37–51.20 MB |
+| Reach 10 dishes per current listing on average | 58.88–98.14 MB | 90.50–129.76 MB |
+| Add 5,000 similar listings and their menu source checks | About 1.85 MB | About 33.47 MB |
+| Add 5,000 similar listings with source checks and 10 dishes each | 39.35–64.35 MB | 70.97–95.97 MB |
+
+The catalog and checks use about 370 bytes per browsable listing, including
+indexes. Current dish row data averages 253 bytes across 48 rows before
+index overhead. The projections use a planning allowance of 750–1,250 bytes
+per added dish to cover longer records and database overhead. They assume
+the existing text and price schema, subtract the 48 dishes already stored
+from the two enrichment scenarios, and hold unrelated database growth
+constant.
+
+**Stage 5 decision.** Improve Toronto and Mississauga before adding a third
+city. About 0.15% of listings have a reviewed dish, and only a quarter have
+a website. Start with the 126 listings that already yielded candidates,
+then use what works to recover more official menu links and review
+unresolved municipal listings. Aim for one or two useful dishes with
+published prices where available. Revisit expansion after the next batch
+shows how many reviewed dishes and priced venues the process can add.
