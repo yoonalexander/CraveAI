@@ -134,6 +134,7 @@ class ChatRequest(BaseModel):
     conversation_id: Optional[str] = Field(default=None, max_length=80)
     save_conversation: bool = False
     age_confirmed: bool = False
+    use_catalog: bool = True
 
     @model_validator(mode="after")
     def require_chat_text(self) -> "ChatRequest":
@@ -343,6 +344,8 @@ async def generate_chat_response(
                     location=location_payload,
                     candidate_places=[item.model_dump() for item in payload.candidate_places],
                     on_stage=getattr(request.state, "chat_stage_callback", None),
+                    latest_query=user_text,
+                    use_catalog=payload.use_catalog,
                 ),
                 timeout=settings.CHAT_PIPELINE_TIMEOUT_SECONDS,
             )
@@ -352,6 +355,9 @@ async def generate_chat_response(
             detail={"code": "chat_pipeline_timeout"},
         ) from exc
 
+    if "places_requests" in rag_result:
+        response.headers["X-Places-Requests"] = str(rag_result["places_requests"])
+        response.headers["X-CraveAI-Catalog-Candidates"] = str(rag_result["catalog_candidates"])
     assistant_message = ChatMessage(role="assistant", content=rag_result.get("reply", ""))
     recommendations = [
         Recommendation(

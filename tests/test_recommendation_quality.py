@@ -57,7 +57,7 @@ def spicy_soup_intent(*, spicy_strength: str = "strong") -> CravingIntent:
 def test_retrieval_never_returns_candidates_outside_confirmed_bounds(monkeypatch):
     intent = spicy_soup_intent()
 
-    async def fake_fallback(_intent, _location):
+    async def fake_fallback(_intent, _location, _places_count=None):
         return {
             "inside": {
                 "place_id": "inside",
@@ -814,7 +814,7 @@ def test_spicy_pipeline_survives_malformed_retrieved_and_menu_evidence(monkeypat
     async def fake_intent(query):
         return fallback_intent(query)
 
-    async def fake_retrieve(*_args):
+    async def fake_retrieve(*_args, **_options):
         valid = [evidence("mixed:good", "Spicy noodles")] if has_valid_evidence else []
         return [candidate("mixed", "Mixed", malformed_evidence() + valid)]
 

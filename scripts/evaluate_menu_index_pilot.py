@@ -131,7 +131,7 @@ async def evaluate(data: dict) -> dict:
         async def fixed_intent(*args):
             return intent
 
-        async def retrieve(parsed, area, session_pool):
+        async def retrieve(parsed, area, session_pool, **_options):
             nonlocal price_options, used_index
             if index_first:
                 candidates, price_options = local_candidates(case, parsed, nearby)
@@ -149,7 +149,7 @@ async def evaluate(data: dict) -> dict:
             patch.object(rag_pipeline, "assess_candidate_evidence", assess),
             patch.object(menu_evidence, "_safe_fetch_html", capture_html),
         ):
-            result = await rag_pipeline.generate_recommendations(case["query"], location)
+            result = await rag_pipeline.generate_recommendations(case["query"], location, latest_query="", use_catalog=False)
 
         if "search failed" in result["reply"] or "search timed out" in result["reply"]:
             raise RuntimeError(f"Pipeline did not complete for {case['id']}: {result['reply']}")

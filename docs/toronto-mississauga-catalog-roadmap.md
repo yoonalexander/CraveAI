@@ -164,9 +164,28 @@ calls. Skip Places only in the kinds of searches where the pilot shows that
 doing so preserves useful results.
 
 - [x] Run the offline 28-query comparison and document the alternatives missed by index-first search.
-- [ ] Merge verified menu matches with existing search results and check strict budget and portion matching.
-- [ ] Replay broad and narrow queries to check verified results and lost alternatives.
+- [x] Merge verified menu matches with existing search results and check strict budget and portion matching.
+- [x] Replay broad and narrow queries to check verified results and lost alternatives.
 - [ ] Enable a limited live pilot and measure actual Places calls before changing when they’re skipped.
+
+The chat pilot searches the 48 reviewed dishes and explicit Toronto and
+Mississauga catalog cuisine or venue tags for searches up to 5 km. It adds
+at most four catalog-only venues per request and attaches dish evidence to a
+provider result when the name and location identify the same branch.
+Unpriced evidence is eligible for ordinary chat. An explicit CAD ceiling
+requires an official price for the stated dish and requested portion,
+preparation, or ordering channel. In this pilot the hosted index is the source
+of those verified prices.
+
+The offline replay covered the frozen 28-query holdout plus six cuisine,
+geography, and portion cases. With the same recorded provider fixtures and
+strict price rule in both arms, provider-only returned menu-backed results on
+6 of 34 queries and the merged path returned them on 15 of 34. Every
+menu-backed venue the baseline returned stayed in the merged top three.
+Both arms replayed 34 provider lookups. This replay uses the prior reviewed
+menu evidence fixture and lexical assessment, so it measures the effect of
+adding the current index under controlled conditions.
+[Replay script](../scripts/evaluate_chat_catalog.py)
 
 **Done when** chat can use both sources, restaurants with partial information
 still surface appropriately, and the pilot shows where we can safely save

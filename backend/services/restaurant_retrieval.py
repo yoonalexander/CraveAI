@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+from dataclasses import dataclass
 import logging
 import math
 from typing import Any, Sequence
@@ -38,10 +39,20 @@ MAX_RESULTS_PER_QUERY = 10
 MAX_RETRIEVAL_CANDIDATES = 12
 
 
+@dataclass
+class PlacesRequestCount:
+    attempts: int = 0
+
+    async def record(self, _request: httpx.Request) -> None:
+        self.attempts += 1
+
+
 async def retrieve_candidate_restaurants(
     intent: CravingIntent,
     location: dict[str, Any],
     session_pool: Sequence[dict[str, Any]] = (),
+    *,
+    places_count: PlacesRequestCount | None = None,
 ) -> list[dict[str, Any]]:
     """Retrieve restaurants for dish-oriented queries and attach retrieval evidence."""
     settings = get_settings()
@@ -56,7 +67,8 @@ async def retrieve_candidate_restaurants(
     live_results: list[list[dict[str, Any]]] = []
 
     if settings.GOOGLE_API_KEY and queries:
-        async with httpx.AsyncClient(timeout=httpx.Timeout(8.0)) as client:
+        hooks = {"request": [places_count.record]} if places_count else None
+        async with httpx.AsyncClient(timeout=httpx.Timeout(8.0), event_hooks=hooks) as client:
             tasks = [
                 _search_text(
                     client,
@@ -103,7 +115,7 @@ async def retrieve_candidate_restaurants(
 
     merged = _merge_query_results(live_results)
     if not merged:
-        merged = await _legacy_provider_fallback(intent, location)
+        merged = await _legacy_provider_fallback(intent, location, places_count)
 
     _merge_relevant_session_pool(merged, session_pool, intent)
     if bounds:
@@ -242,6 +254,7 @@ def _merge_query_results(
 async def _legacy_provider_fallback(
     intent: CravingIntent,
     location: dict[str, Any],
+    places_count: PlacesRequestCount | None = None,
 ) -> dict[str, dict[str, Any]]:
     """Keep availability during a Places New rollout without claiming menu evidence."""
     lat = _number_or_none(location.get("lat"))
@@ -250,11 +263,13 @@ async def _legacy_provider_fallback(
         return {}
     terms = [item.text for item in intent.search_queries[:3]]
     try:
+        options = {"request_hook": places_count.record} if places_count else {}
         places = await search_nearby_places(
             terms,
             lat=lat,
             lng=lng,
             radius=location.get("radius"),
+            **options,
         )
     except Exception as exc:
         logger.warning(

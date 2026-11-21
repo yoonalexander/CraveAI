@@ -32,30 +32,13 @@ async def find_catalog_restaurants(
     lat: float, lng: float, radius: int, bounds: dict[str, float] | None,
     name: str = "",
 ) -> list[dict]:
-    south, west, north, east = PILOT_BOUNDS
-
-    # Local equirectangular distance is appropriate for these short distances
-    # near Toronto. Viewport queries use the supplied rectangle directly.
-    lng_scale = 111_195 * cos(radians(lat))
-    lat_delta = radius / 111_195
-    lng_delta = radius / lng_scale
-    area = bounds or {"south": lat - lat_delta, "north": lat + lat_delta,
-                      "west": lng - lng_delta, "east": lng + lng_delta}
-    if area["north"] < south or area["south"] > north or area["east"] < west or area["west"] > east:
+    area_query = catalog_area_query(lat, lng, radius, bounds)
+    if area_query is None:
         return []
-    lat_offset = (CatalogRestaurant.lat - lat) * 111_195
-    lng_offset = (CatalogRestaurant.lng - lng) * lng_scale
-    distance_squared = lat_offset * lat_offset + lng_offset * lng_offset
-    query = select(CatalogRestaurant).where(
-        CatalogRestaurant.listed.is_(True),
-        CatalogRestaurant.lat.between(area["south"], area["north"]),
-        CatalogRestaurant.lng.between(area["west"], area["east"]),
-    )
+    query = area_query
     if name:
         query = query.where(CatalogRestaurant.name.icontains(name, autoescape=True))
-    if bounds is None:
-        query = query.where(distance_squared <= radius * radius)
-    query = query.order_by(distance_squared, CatalogRestaurant.id).limit(SUGGESTION_POOL_LIMIT)
+    query = query.limit(SUGGESTION_POOL_LIMIT)
 
     def load() -> list[dict]:
         with get_session_factory()() as db:
@@ -66,6 +49,31 @@ async def find_catalog_restaurants(
     except SQLAlchemyError:
         logger.warning("Restaurant catalog lookup failed; using the existing discovery provider.")
         return []
+
+
+def catalog_area_query(lat: float, lng: float, radius: int, bounds: dict[str, float] | None):
+    south, west, north, east = PILOT_BOUNDS
+
+    # Local equirectangular distance is appropriate for these short distances
+    # near Toronto. Viewport queries use the supplied rectangle directly.
+    lng_scale = 111_195 * max(cos(radians(lat)), 0.001)
+    lat_delta = radius / 111_195
+    lng_delta = radius / lng_scale
+    area = bounds or {"south": lat - lat_delta, "north": lat + lat_delta,
+                      "west": lng - lng_delta, "east": lng + lng_delta}
+    if area["north"] < south or area["south"] > north or area["east"] < west or area["west"] > east:
+        return None
+    lat_offset = (CatalogRestaurant.lat - lat) * 111_195
+    lng_offset = (CatalogRestaurant.lng - lng) * lng_scale
+    distance_squared = lat_offset * lat_offset + lng_offset * lng_offset
+    query = select(CatalogRestaurant).where(
+        CatalogRestaurant.listed.is_(True),
+        CatalogRestaurant.lat.between(area["south"], area["north"]),
+        CatalogRestaurant.lng.between(area["west"], area["east"]),
+    )
+    if bounds is None:
+        query = query.where(distance_squared <= radius * radius)
+    return query.order_by(distance_squared, CatalogRestaurant.id)
 
 
 async def resolve_catalog_restaurants(ids: list[str]) -> dict[str, dict]:

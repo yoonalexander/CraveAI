@@ -103,6 +103,8 @@ async def search_nearby_places(
     lat: float,
     lng: float,
     radius: Optional[int] = None,
+    *,
+    request_hook=None,
 ) -> List[Dict[str, Any]]:
     """
     Query the Google Places API for multiple cuisines and merge results.
@@ -114,7 +116,8 @@ async def search_nearby_places(
         logger.info("Google Places API key not configured; returning placeholder venues.")
         return _placeholder_places(cuisines, lat, lng)
 
-    async with httpx.AsyncClient(timeout=httpx.Timeout(10.0)) as client:
+    hooks = {"request": [request_hook]} if request_hook else None
+    async with httpx.AsyncClient(timeout=httpx.Timeout(10.0), event_hooks=hooks) as client:
         tasks = [
             _query_places_api(client, cuisine, lat=lat, lng=lng, radius=radius)
             for cuisine in cuisines

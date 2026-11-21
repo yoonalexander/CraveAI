@@ -86,7 +86,7 @@ def mocked_pipeline(monkeypatch):
         call_tracker["extract"] += 1
         return rag_pipeline.fallback_intent(user_query)
 
-    async def fake_retrieve(intent, location, session_pool):
+    async def fake_retrieve(intent, location, session_pool, **_options):
         call_tracker["places"] += 1
         return [
             {
@@ -105,7 +105,7 @@ def mocked_pipeline(monkeypatch):
     async def fake_assess(intent, places):
         return []
 
-    def fake_rank(intent, places, assessments):
+    def fake_rank(intent, places, assessments, **_options):
         call_tracker["rank"] += 1
         return {
             "reply": "I'd try Mock Ramen House - sounds perfect for cozy ramen vibes.",

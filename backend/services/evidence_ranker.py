@@ -12,6 +12,7 @@ from pydantic import ValidationError
 
 from backend.config import get_settings
 from backend.services import llm
+from backend.services.dish_budget import BUDGET_CONSTRAINT_ID, DishBudget
 from backend.services.recommendation_models import (
     AssessmentBatch,
     CandidateAssessment,
@@ -194,6 +195,8 @@ def rank_evidence_candidates(
     intent: CravingIntent,
     candidates: Sequence[dict[str, Any]],
     assessments: Sequence[CandidateAssessment],
+    *,
+    budget: DishBudget | None = None,
 ) -> dict[str, Any]:
     """Apply deterministic constraint/evidence scoring and confidence gates."""
     assessment_by_id = {item.place_id: item for item in assessments}
@@ -204,7 +207,7 @@ def rank_evidence_candidates(
             place_id,
             CandidateAssessment(place_id=place_id, links=[]),
         )
-        result = score_candidate(intent, candidate, assessment)
+        result = score_candidate(intent, candidate, assessment, budget=budget)
         if result is not None:
             ranked.append(result)
 
@@ -227,6 +230,8 @@ def score_candidate(
     intent: CravingIntent,
     candidate: dict[str, Any],
     assessment: CandidateAssessment,
+    *,
+    budget: DishBudget | None = None,
 ) -> dict[str, Any] | None:
     if not candidate_matches_venue_constraints(intent, candidate):
         return None
@@ -243,7 +248,7 @@ def score_candidate(
     for link in links:
         target = support_by_evidence if link.stance == "supports" else violations_by_evidence
         for constraint_id in link.constraint_ids:
-            if constraint_id in constraints and link.evidence_id in evidence_by_id:
+            if constraint_id in constraints and link.evidence_id in evidence_by_id and constraint_id != BUDGET_CONSTRAINT_ID:
                 target[link.evidence_id].add(constraint_id)
 
     usable_evidence: set[str] = set(evidence_by_id)
@@ -254,6 +259,34 @@ def score_candidate(
             for item in violation_ids
         ):
             usable_evidence.discard(evidence_id)
+
+    verified_prices = {}
+    if budget:
+        required_food = {
+            item.id for item in constraints.values()
+            if item.polarity == "include" and item.strength in {"required", "strong"}
+            and item.dimension not in {"price", "cuisine", "venue"}
+        }
+        for item in evidence_by_id.values():
+            if (item.kind != "official_menu" or item.id not in usable_evidence
+                    or not required_food <= support_by_evidence[item.id]):
+                continue
+            offers = [price for price in item.prices if budget.accepts(price, item.label, item.price_channel)]
+            if offers:
+                verified_prices[item.id] = min(offers, key=lambda price: price.amount_cents)
+                support_by_evidence[item.id].add(BUDGET_CONSTRAINT_ID)
+        if not verified_prices:
+            return None
+        usable_evidence.intersection_update(
+            verified_prices.keys() | {
+                item.id for item in evidence_by_id.values() if item.kind == "restaurant_tag"
+            }
+        )
+        for item in evidence_by_id.values():
+            if item.kind == "restaurant_tag":
+                support_by_evidence[item.id].intersection_update(
+                    constraint.id for constraint in constraints.values() if constraint.dimension in {"cuisine", "venue"}
+                )
 
     inclusion_constraints = [
         item for item in intent.constraints if item.polarity == "include"
@@ -357,6 +390,8 @@ def score_candidate(
         usable_evidence,
         constraints,
     )
+    if budget:
+        selected_evidence = [item for item in selected_evidence if item.id in verified_prices]
     if len(inclusion_constraints) > 1:
         coherent_display = [
             item
@@ -416,16 +451,21 @@ def score_candidate(
     )
     confidence = "high" if all_important_official and official_joint else "medium"
 
+    reason = _build_reason(selected_evidence, support_by_evidence, constraints)
+    if budget:
+        offers = []
+        for item in selected_evidence[:3]:
+            price = verified_prices[item.id]
+            option = f" ({price.option})" if price.option else ""
+            channel = (item.price_channel or "published_menu").replace("_", " ")
+            offers.append(f"{item.label}{option} CA${price.amount_cents / 100:.2f} ({channel})")
+        reason = "Published prices within budget. " + " · ".join(offers)
     return {
         "place_id": candidate.get("place_id"),
         "name": candidate.get("name"),
         "rating": candidate.get("rating"),
         "address": candidate.get("address"),
-        "reason": _build_reason(
-            selected_evidence,
-            support_by_evidence,
-            constraints,
-        ),
+        "reason": reason,
         "lat": candidate.get("lat"),
         "lng": candidate.get("lng"),
         "match_score": round(score, 3),
@@ -576,8 +616,11 @@ def _select_display_evidence(
             and all(token in label for token in _normalize(constraints[item].value).split())
         )
         scored.append((weight * evidence.quality + kind_bonus + label_bonus, evidence))
-    scored.sort(key=lambda pair: pair[0], reverse=True)
-    return [item for _, item in scored]
+    scored.sort(key=lambda pair: (-pair[0], pair[1].id))
+    unique = {}
+    for _, item in scored:
+        unique.setdefault((item.kind, _normalize(item.label)), item)
+    return list(unique.values())
 
 
 def _coherent_constraint_ids(

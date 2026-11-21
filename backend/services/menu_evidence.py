@@ -500,9 +500,13 @@ def _deduplicate_text(values: Iterable[str]) -> list[str]:
 
 def _deduplicate_evidence(values: Sequence[dict[str, Any]]) -> list[dict[str, Any]]:
     result: list[dict[str, Any]] = []
-    seen: set[tuple[str, str]] = set()
+    seen: set[tuple[str, str, str, bool]] = set()
     for value in values:
-        key = (str(value.get("kind")), _normalize(str(value.get("label") or "")))
+        kind = str(value.get("kind"))
+        # Keep independent dish evidence when the live source adds a detail or
+        # the reviewed item has a published price.
+        detail = _normalize(str(value.get("detail") or "")) if kind == "official_menu" else ""
+        key = (kind, _normalize(str(value.get("label") or "")), detail, bool(value.get("prices")))
         if not key[1] or key in seen:
             continue
         seen.add(key)

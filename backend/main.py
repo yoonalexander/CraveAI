@@ -79,6 +79,7 @@ def create_app() -> FastAPI:
             "X-RateLimit-Reset",
             "X-Places-Coverage",
             "X-Places-Requests",
+            "X-CraveAI-Catalog-Candidates",
             "X-Places-Pages",
             "X-CraveAI-Anonymous-Token",
             "Retry-After",

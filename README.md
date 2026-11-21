@@ -102,8 +102,12 @@ Map browsing starts with the local catalog where matches are available. Search
 by restaurant name looks in the local catalog for the selected area. **Find more
 restaurants** expands local results with Google Places when coverage is partial,
 and nearby searches in areas without catalog rows still use Google Places.
-Catalog listings show available contact information and published hours. Chat
-continues to use its existing recommendation pipeline.
+Catalog listings show available contact information and published hours.
+Within the Toronto and Mississauga chat pilot, the recommendation pipeline
+adds reviewed local dishes and cuisine listings alongside Google Places
+results. Explicit dollar limits require a published CAD price for the requested
+dish and portion. Set `CHAT_CATALOG_PILOT_ENABLED=false` to disable catalog
+retrieval for chat. Map and name search use the catalog independently.
 
 For Supabase Postgres, apply the migrations and load the snapshot into the
 database selected by `DATABASE_URL`:

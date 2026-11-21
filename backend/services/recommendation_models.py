@@ -54,6 +54,12 @@ class CravingIntent(BaseModel):
     search_queries: list[SearchQuerySpec]
 
 
+class PublishedMenuPrice(BaseModel):
+    amount_cents: int = Field(gt=0, le=1_000_000)
+    currency: Literal["CAD"]
+    option: str | None = Field(default=None, max_length=80)
+
+
 class EvidenceItem(BaseModel):
     """A bounded, attributable fact that may support a recommendation."""
 
@@ -65,6 +71,8 @@ class EvidenceItem(BaseModel):
     quality: float = Field(ge=0, le=1)
     declared_constraint_ids: list[str] = Field(default_factory=list)
     retrieval_rank: int | None = Field(default=None, ge=1)
+    prices: list[PublishedMenuPrice] = Field(default_factory=list)
+    price_channel: Literal["published_menu", "dine_in", "pickup", "delivery"] | None = None
 
 
 class EvidenceLink(BaseModel):

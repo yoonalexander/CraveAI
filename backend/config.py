@@ -117,6 +117,9 @@ class Config:
     CHAT_RANKING_TIMEOUT_SECONDS: int = field(
         default_factory=lambda: _env_int("CHAT_RANKING_TIMEOUT_SECONDS", 12)
     )
+    CHAT_CATALOG_PILOT_ENABLED: bool = field(
+        default_factory=lambda: _env_bool("CHAT_CATALOG_PILOT_ENABLED", True)
+    )
     GUEST_DAILY_CHAT_LIMIT: int = field(
         default_factory=lambda: _env_int_alias(
             "GUEST_DAILY_CHAT_LIMIT", "DAILY_CHAT_MESSAGE_LIMIT", 9

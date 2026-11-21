@@ -15,7 +15,7 @@ import {
   streamChat,
   UsageMetadata,
 } from "../api/chat";
-import type { Suggestion } from "../api/places";
+import { CATALOG_ATTRIBUTIONS, catalogSourceForId, type Suggestion } from "../api/places";
 import { saveConversationMessages, submitFeedback, transcribeAudio } from "../api/product";
 import { useAuth } from "../context/AuthContext";
 import { ArrowUpIcon, CopyIcon, MicIcon, ShareIcon } from "./Icons";
@@ -435,6 +435,10 @@ export function ChatPanel({
                   <div className="chat-recommendations">
                     {message.recommendations.map((recommendation, index) => {
                       const sources = getRecommendationSources(recommendation);
+                      const catalogSource = catalogSourceForId(recommendation.place_id || "");
+                      const coordinates = hasMapCoordinates(recommendation) ? `${recommendation.lat},${recommendation.lng}` : recommendation.name;
+                      const mapQuery = new URLSearchParams({ api: "1", query: catalogSource ? coordinates : recommendation.name });
+                      if (recommendation.place_id && !catalogSource) mapQuery.set("query_place_id", recommendation.place_id);
                       return (
                       <div key={`${message.id}-${recommendation.place_id || recommendation.name}-${index}`}>
                         <RestaurantPhotos inlineNav placeId={recommendation.place_id} title={recommendation.name} />
@@ -443,7 +447,8 @@ export function ChatPanel({
                           {typeof recommendation.rating === "number" ? `★ ${recommendation.rating.toFixed(1)}` : ""}
                           {recommendation.address ? `${typeof recommendation.rating === "number" ? " · " : ""}${recommendation.address}` : ""}
                         </span>
-                        {recommendation.place_id ? <a className="recommendation-google-source" href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(recommendation.name)}&query_place_id=${encodeURIComponent(recommendation.place_id)}`} rel="noreferrer" target="_blank">Open in Google Maps</a> : null}
+                        {recommendation.place_id ? <a className="recommendation-google-source" href={`https://www.google.com/maps/search/?${mapQuery}`} rel="noreferrer" target="_blank">Open in Google Maps</a> : null}
+                        {catalogSource ? <a className="recommendation-google-source" href={CATALOG_ATTRIBUTIONS[catalogSource].url} rel="noreferrer" target="_blank">{CATALOG_ATTRIBUTIONS[catalogSource].name}</a> : null}
                         {recommendation.confidence ? (
                           <div className={`recommendation-confidence is-${recommendation.confidence}`}>
                             {recommendation.confidence === "high" ? "Strong match" : "Relevant match"}
