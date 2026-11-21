@@ -3,7 +3,7 @@ uvicorn[standard]
 httpx
 python-dotenv
 sqlalchemy>=2.0.43,<3
-psycopg[binary]>=3.2,<4
+psycopg[binary]>=3.3.4,<4
 alembic>=1.14,<2
 cryptography>=50,<51
 email-validator>=2.2,<3
