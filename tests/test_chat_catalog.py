@@ -5,6 +5,7 @@ import pytest
 
 from backend.services import restaurant_retrieval
 from backend.services.chat_catalog import merge_catalog_candidates
+from backend.services.craving_intent import normalize_intent
 from backend.services.dish_budget import BUDGET_CONSTRAINT_ID, parse_dish_budget
 from backend.services.evidence_ranker import _lexical_assessments, rank_evidence_candidates
 from backend.services.recommendation_models import CravingIntent, EvidenceItem, PublishedMenuPrice
@@ -71,6 +72,22 @@ def test_merge_keeps_provider_alternatives_and_only_combines_same_branch():
     assert [place["place_id"] for place in merged] == ["google-one", "google-two", "google-three"]
     assert merged[0]["evidence"][0]["id"] == "google-one:e1"
     assert not merged[1]["evidence"]
+
+
+def test_cuisine_restaurant_phrase_keeps_eligible_venue_metadata():
+    intent = normalize_intent(CravingIntent(
+        summary="Thai restaurants nearby",
+        constraints=[{"id": "c1", "dimension": "venue", "value": "Thai restaurant",
+                      "polarity": "include", "strength": "required"}],
+        candidate_dishes=[], search_queries=[{"text": "Thai restaurants", "constraint_ids": ["c1"]}],
+    ), "Thai restaurants nearby")
+    assert (intent.constraints[0].dimension, intent.constraints[0].value) == ("cuisine", "thai")
+    candidate = {"place_id": "google", "name": "Siam Kitchen", "tags": ["Thai Restaurant"], "evidence": []}
+    restaurant_retrieval._attach_venue_metadata_evidence(candidate, intent)
+    restaurant_retrieval._assign_evidence_ids(candidate)
+    result = rank_evidence_candidates(intent, [candidate], _lexical_assessments(intent, [candidate]))
+    assert [item["name"] for item in result["recommendations"]] == ["Siam Kitchen"]
+    assert result["recommendations"][0]["matching_dishes"] == []
 
 
 def test_count_measures_each_google_http_attempt(monkeypatch):

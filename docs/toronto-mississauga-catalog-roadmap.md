@@ -13,7 +13,7 @@ cities and measure the remaining database space before expanding.
 | --- | --- |
 | Restaurant listings | The hosted catalog has 7,856 browseable listings across Toronto and Mississauga. This includes seven branch-verified municipal listings. Six duplicate OSM records remain available to existing bookmarks and are hidden from new searches. |
 | Menu dishes | Stage 3 adds a hosted index of 48 reviewed dishes across 12 locations, all with published prices. The first pass records a menu-source outcome for every browsable listing. |
-| Chat search | In a 28-query replay, searching the dish index first increased queries with a verified result from 7 to 13 and reduced simulated Places calls from 28 to 18. It also hid valid alternatives on three queries whenever it stopped after finding a local match. |
+| Chat search | Stage 4 merges nearby catalog matches with Google Places. The 34-query replay increased queries with menu-backed results from 6 to 15 and retained every baseline menu-backed venue. Chat continues to call Places for possible alternatives. |
 | Storage | Hosted Postgres measured 16.35 MB after Stage 3, up from 13.30 MB before the catalog import. Stage 3's dish and source-check tables and indexes account for 1.26 MB. |
 
 The restaurant catalog and dish index are two different parts of the same
@@ -166,7 +166,7 @@ doing so preserves useful results.
 - [x] Run the offline 28-query comparison and document the alternatives missed by index-first search.
 - [x] Merge verified menu matches with existing search results and check strict budget and portion matching.
 - [x] Replay broad and narrow queries to check verified results and lost alternatives.
-- [ ] Enable a limited live pilot and measure actual Places calls before changing when they’re skipped.
+- [x] Enable a limited live pilot and measure actual Places calls before changing when they’re skipped.
 
 The chat pilot searches the 48 reviewed dishes and explicit Toronto and
 Mississauga catalog cuisine or venue tags for searches up to 5 km. It adds
@@ -187,9 +187,22 @@ menu evidence fixture and lexical assessment, so it measures the effect of
 adding the current index under controlled conditions.
 [Replay script](../scripts/evaluate_chat_catalog.py)
 
-**Done when** chat can use both sources, restaurants with partial information
-still surface appropriately, and the pilot shows where we can safely save
-provider calls.
+The November 21 production pilot used the same chat pipeline as the streaming
+UI. The JSON chat response reported outbound Google Places attempts.
+
+| Live request | Catalog | Places attempts | Result |
+| --- | --- | ---: | --- |
+| Small spicy boat noodles under CA$16, Toronto | Control | 3 | No verified priced match |
+| Small spicy boat noodles under CA$16, Toronto | Merged | 2 | 555 Boat Noodles, small at CA$15 |
+| Six-piece grilled gyoza under CA$15, Mississauga | Merged | 3 | No verified priced match |
+| Six-piece grilled gyoza under CA$16, Mississauga | Merged | 2 | Kamen, six grilled pieces at CA$15.50 |
+
+The model generated different numbers of search queries for the Toronto pair.
+Both requests ran their provider searches. The initial broad Thai search
+exposed a cuisine classification bug that was fixed with a regression test.
+
+**Stage 4 pilot complete.** Chat keeps the existing Places calls. The limited
+live comparison and sparse menu coverage give no basis for skipping them.
 
 ## Stage 5 — Measure space and decide what to add next
 

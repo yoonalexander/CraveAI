@@ -13,6 +13,7 @@ from backend.services.places import is_coordinate_in_bounds, search_nearby_place
 from backend.services.recommendation_models import CravingIntent, EvidenceItem
 from backend.services.venue_constraints import (
     candidate_matches_venue_constraints,
+    matching_cuisine_constraint_ids,
     matching_venue_constraint_ids,
     venue_metadata_label,
 )
@@ -338,7 +339,9 @@ def _attach_venue_metadata_evidence(
     candidate: dict[str, Any],
     intent: CravingIntent,
 ) -> None:
-    constraint_ids = matching_venue_constraint_ids(intent, candidate)
+    venue_ids = matching_venue_constraint_ids(intent, candidate)
+    cuisine_ids = matching_cuisine_constraint_ids(intent, candidate)
+    constraint_ids = venue_ids + cuisine_ids
     if not constraint_ids:
         return
     candidate.setdefault("evidence", []).append(
@@ -346,8 +349,8 @@ def _attach_venue_metadata_evidence(
             id="pending",
             kind="restaurant_tag",
             label=venue_metadata_label(candidate),
-            detail="Explicit venue category from Google Places type or name metadata.",
-            quality=0.75,
+            detail="Explicit cuisine or venue category from Google Places metadata.",
+            quality=0.82 if cuisine_ids else 0.75,
             declared_constraint_ids=constraint_ids,
         ).model_dump()
     )

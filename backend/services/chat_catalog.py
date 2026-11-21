@@ -17,7 +17,7 @@ from backend.services.recommendation_models import CravingIntent, EvidenceItem, 
 from backend.services.restaurant_catalog import _suggestion, catalog_area_query
 from backend.services.restaurant_retrieval import _assign_evidence_ids
 from backend.services.venue_constraints import (
-    candidate_matches_venue_constraints, matching_venue_constraint_ids,
+    candidate_matches_venue_constraints, matching_cuisine_constraint_ids, matching_venue_constraint_ids,
 )
 
 logger = logging.getLogger(__name__)
@@ -50,12 +50,7 @@ def _is_hard(item: IntentConstraint) -> bool:
 
 
 def _catalog_tags(intent: CravingIntent, place: dict) -> list[str]:
-    return matching_venue_constraint_ids(intent, place) + [
-        item.id for item in intent.constraints
-        if item.dimension == "cuisine" and item.polarity == "include"
-        and any(_dish_key(item.value.lower().removesuffix(" cuisine").removesuffix(" food")) == _dish_key(tag)
-                for tag in place["tags"])
-    ]
+    return matching_venue_constraint_ids(intent, place) + matching_cuisine_constraint_ids(intent, place)
 
 
 def _tag_evidence(place: dict, matched: list[str]) -> dict:

@@ -5,6 +5,13 @@ from typing import Any, Sequence
 
 from backend.services.recommendation_models import CravingIntent, IntentConstraint
 
+CUISINE_CATEGORIES = (
+    "african", "american", "brazilian", "caribbean", "chinese", "ethiopian", "french",
+    "greek", "indian", "indonesian", "italian", "japanese", "korean", "lebanese",
+    "mediterranean", "mexican", "middle eastern", "pakistani", "spanish", "thai",
+    "turkish", "vietnamese",
+)
+
 
 _VENUE_ALIASES: dict[str, tuple[str, ...]] = {
     "pub": (
@@ -49,6 +56,25 @@ def normalize_venue_constraint(value: str) -> str | None:
         if any(_contains_phrase(normalized, phrase) for phrase in phrases):
             return category
     return None
+
+
+def normalize_cuisine_category(value: str) -> str | None:
+    normalized = _normalize(value)
+    for suffix in (" restaurants", " restaurant", " cuisine", " food"):
+        normalized = normalized.removesuffix(suffix)
+    return normalized if normalized in CUISINE_CATEGORIES else None
+
+
+def matching_cuisine_constraint_ids(intent: CravingIntent, candidate: dict[str, Any]) -> list[str]:
+    categories = {
+        category for tag in _clean_values(candidate.get("tags") or [])
+        if (category := normalize_cuisine_category(tag))
+    }
+    return [
+        item.id for item in intent.constraints
+        if item.dimension == "cuisine" and item.polarity == "include"
+        and normalize_cuisine_category(item.value) in categories
+    ]
 
 
 def candidate_matches_venue_constraints(

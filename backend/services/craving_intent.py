@@ -13,7 +13,7 @@ from backend.services.recommendation_models import (
     IntentConstraint,
     SearchQuerySpec,
 )
-from backend.services.venue_constraints import normalize_venue_constraint
+from backend.services.venue_constraints import CUISINE_CATEGORIES, normalize_cuisine_category, normalize_venue_constraint
 
 logger = logging.getLogger(__name__)
 
@@ -101,9 +101,13 @@ def normalize_intent(intent: CravingIntent, user_query: str) -> CravingIntent:
             continue
         dimension = raw.dimension
         canonical_venue = normalize_venue_constraint(value)
+        canonical_cuisine = normalize_cuisine_category(value)
         if canonical_venue:
             dimension = "venue"
             value = canonical_venue
+        elif canonical_cuisine and dimension in {"cuisine", "venue"}:
+            dimension = "cuisine"
+            value = canonical_cuisine
         if raw.strength in {"preferred", "weak"} and not _constraint_grounded(
             value, user_query
         ):
@@ -176,6 +180,7 @@ def fallback_intent(user_query: str) -> CravingIntent:
     constraints: list[IntentConstraint] = []
 
     vocab: dict[str, tuple[str, ...]] = {
+        "cuisine": CUISINE_CATEGORIES,
         "taste": (
             "spicy",
             "sweet",
