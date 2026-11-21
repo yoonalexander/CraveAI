@@ -7,8 +7,10 @@ from urllib.parse import urlsplit
 import osmium
 from shapely import Point, from_wkb
 from shapely.errors import GEOSException
+from shapely.geometry import mapping
 
 CITIES = ("Toronto", "Mississauga")
+FOOD_AMENITIES = {"restaurant", "fast_food"}
 FACTORY = osmium.geom.WKBFactory()
 
 
@@ -44,14 +46,14 @@ class Extractor(osmium.SimpleHandler):
         }
 
     def node(self, node):
-        if node.tags.get("amenity") == "restaurant" and node.tags.get("name") and node.location.valid():
+        if node.tags.get("amenity") in FOOD_AMENITIES and node.tags.get("name") and node.location.valid():
             self.add("node", node.id, node.tags, round(node.lat, 6), round(node.lon, 6))
 
     def area(self, area):
         tags = area.tags
         name = tags.get("name")
         boundary = tags.get("boundary") == "administrative" and name in CITIES
-        restaurant = tags.get("amenity") == "restaurant" and name
+        restaurant = tags.get("amenity") in FOOD_AMENITIES and name
         if not boundary and not restaurant:
             return
         try:
@@ -72,6 +74,7 @@ def main():
     parser.add_argument("output", type=Path)
     parser.add_argument("--source-url", required=True)
     parser.add_argument("--retrieved-on", required=True)
+    parser.add_argument("--boundaries-output", type=Path)
     args = parser.parse_args()
     extractor = Extractor()
     extractor.apply_file(args.pbf, locations=True, idx="flex_mem")
@@ -90,11 +93,18 @@ def main():
                 break
     if not all(counts.values()):
         parser.error("The extract did not produce listings for both municipalities.")
+    with osmium.io.Reader(str(args.pbf)) as reader:
+        data_timestamp = reader.header().get("osmosis_replication_timestamp")
     snapshot = {"source": args.source_url, "retrieved_on": args.retrieved_on,
-                "license": "ODbL-1.0", "counts": counts, "restaurants": rows}
+                "data_timestamp": data_timestamp or None, "license": "ODbL-1.0",
+                "counts": counts, "restaurants": rows}
     with args.output.open("w", encoding="utf-8", newline="\n") as output:
         json.dump(snapshot, output, ensure_ascii=False, separators=(",", ":"))
         output.write("\n")
+    if args.boundaries_output:
+        args.boundaries_output.write_text(json.dumps({
+            city: mapping(extractor.boundaries[city]) for city in CITIES
+        }), encoding="utf-8")
     print(counts)
 
 
