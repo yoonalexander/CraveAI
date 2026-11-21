@@ -4,6 +4,8 @@ import { calculateDistanceKm } from "../utils/suggestionPool";
 import { FilterEvidence } from "./FilterEvidence";
 import { PinIcon } from "./Icons";
 import { RestaurantPhotos } from "./RestaurantPhotos";
+import { catalogSourceForId } from "../api/places";
+import { CatalogListingDetails } from "./CatalogListingDetails";
 
 export function MapRestaurantList({ entries, selectedKey, origin, areaLabel, isLoading, error, coverageNotice, canRetry, onRetry, onSelect, mapAvailable }: {
   entries: MapRestaurant[];
@@ -31,7 +33,7 @@ export function MapRestaurantList({ entries, selectedKey, origin, areaLabel, isL
     {entries.length ? <ul aria-label="Pinned restaurants">{entries.map((entry) => {
       const place = entry.place;
       const query = new URLSearchParams({ api: "1", query: `${place.lat},${place.lng}` });
-      if (place.place_id && !place.place_id.startsWith("osm:")) {
+      if (place.place_id && !catalogSourceForId(place.place_id)) {
         query.set("query", place.name);
         query.set("query_place_id", place.place_id);
       }
@@ -43,13 +45,14 @@ export function MapRestaurantList({ entries, selectedKey, origin, areaLabel, isL
           <h3>{place.name}</h3>
           <p>{rating ? `★ ${rating}` : "Rating unavailable"}{origin ? ` · ${calculateDistanceKm(origin.lat, origin.lng, place.lat, place.lng).toFixed(1)} km away` : ""}</p>
           <p>{place.address || "Address unavailable"}</p>
+          {"checked_on" in place ? <CatalogListingDetails place={place} /> : null}
           {"cuisine_labels" in place ? <FilterEvidence labels={[...(place.cuisine_labels || []), ...(place.dietary_labels || [])]} /> : null}
           <div className="map-list-actions"><button type="button" disabled={!mapAvailable} aria-label={`Show ${place.name} on map`} aria-pressed={selectedKey === entry.key} onClick={() => onSelect(entry)}><PinIcon />Show on map</button>
             <a href={`https://www.google.com/maps/search/?${query}`} target="_blank" rel="noreferrer">Open in Google Maps</a></div>
         </div>
       </article></li>;
     })}</ul> : !isLoading ? <div className="map-list-empty"><PinIcon /><h3>{error ? "Restaurants are unavailable" : "No restaurant pins to show"}</h3><p>{error ? "Try the search again or choose another area." : "Clear a filter or choose another search area. You can browse without starting a chat."}</p></div> : null}
-    {entries.some(({ place }) => place.place_id && !place.place_id.startsWith("osm:")) ?
+    {entries.some(({ place }) => place.place_id && !catalogSourceForId(place.place_id)) ?
       <a className="map-list-attribution" href="https://maps.google.com/" target="_blank" rel="noreferrer">Restaurant data by Google Maps</a> : null}
   </section>;
 }

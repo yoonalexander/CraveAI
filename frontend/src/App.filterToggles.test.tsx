@@ -25,6 +25,52 @@ vi.mock("@react-google-maps/api", async () => {
 
 afterEach(() => { vi.unstubAllGlobals(); vi.unstubAllEnvs(); });
 
+it("shows catalog map and list results, searches by name, and expands only on request", async () => {
+  vi.stubEnv("VITE_GOOGLE_MAPS_API_KEY", "fake-test-key");
+  window.history.replaceState({}, "", "/");
+  window.localStorage.clear();
+  window.sessionStorage.clear();
+  const listings = [
+    { place_id: "osm:node:10050107272", name: "Salad King", lat: 43.650458, lng: -79.389981,
+      source: "openstreetmap", rating: null, checked_on: "2026-11-14", address: "224 Queen Street West" },
+    { place_id: "toronto-licence:B71-4188257", name: "Gusto 101", lat: 43.645, lng: -79.399,
+      source: "toronto", rating: null, checked_on: "2026-11-21", address: "101 Portland Street",
+      website: "https://www.gusto101.com/" },
+  ];
+  const searches: URL[] = [];
+  vi.stubGlobal("fetch", vi.fn(async (input: string | URL | Request) => {
+    const url = new URL(typeof input === "string" ? input : input instanceof URL ? input.href : input.url, "http://test");
+    if (url.pathname === "/api/places/suggestions") {
+      searches.push(url);
+      const expanded = url.searchParams.has("include_provider");
+      const name = url.searchParams.get("name");
+      const results = name ? listings.filter((listing) => listing.name === name) : listings;
+      return Response.json(results, { headers: { "X-Places-Coverage": name ? "catalog_name" : expanded ? "combined" : "catalog" } });
+    }
+    if (url.pathname === "/api/chat/status") return Response.json({ usage: { limit: 3, used: 0, remaining: 3 } });
+    return Response.json({});
+  }));
+  render(<App />);
+  await screen.findByRole("button", { name: "Show Salad King on map" });
+  expect(searches).toHaveLength(1);
+  expect(searches[0].searchParams.has("include_provider")).toBe(false);
+  expect(screen.getByText("Showing local catalog results. More restaurants may be available.")).toBeInTheDocument();
+
+  fireEvent.click(screen.getByRole("button", { name: /^List/ }));
+  expect(screen.getByRole("heading", { name: "Salad King" })).toBeInTheDocument();
+  expect(screen.getByRole("link", { name: "Restaurant website" })).toHaveAttribute("href", "https://www.gusto101.com/");
+  fireEvent.change(screen.getByRole("searchbox", { name: "Restaurant name" }), { target: { value: "Gusto 101" } });
+  fireEvent.click(screen.getByRole("button", { name: "Search by name" }));
+  await screen.findByText("1 catalog match for “Gusto 101”");
+  expect(screen.queryByRole("heading", { name: "Salad King" })).not.toBeInTheDocument();
+  expect(searches[1].searchParams.get("name")).toBe("Gusto 101");
+  fireEvent.click(screen.getByRole("button", { name: "Clear name" }));
+  await screen.findByRole("heading", { name: "Salad King" });
+  fireEvent.click(screen.getByRole("button", { name: "Find more restaurants" }));
+  await screen.findAllByText("Showing results from the local catalog and Google Maps. Coverage may be partial.");
+  expect(searches[3].searchParams.get("include_provider")).toBe("true");
+});
+
 it("keeps selected filters, counts, and actual restaurant markers in sync across repeated toggles and loading", async () => {
   vi.stubEnv("VITE_GOOGLE_MAPS_API_KEY", "fake-test-key");
   window.history.replaceState({}, "", "/");

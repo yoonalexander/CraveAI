@@ -1158,6 +1158,31 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .discovery-heading h1 { margin: 0; font-size: clamp(28px,3vw,42px); font-weight: 600; letter-spacing: -.025em; }
 .search-toolbar:has(.discovery-coverage-notice) { row-gap: 8px; }
 .discovery-coverage-notice { grid-column: 1 / -1; margin: 0; color: var(--muted-foreground); font-size: 12px; line-height: 1.5; }
+.catalog-name-search, .catalog-coverage, .catalog-attributions, .catalog-listing-details {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+}
+.catalog-name-search input {
+  min-width: 0;
+  flex: 1 1 130px;
+  max-width: 280px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--background);
+  color: inherit;
+  padding: 6px 10px;
+}
+.catalog-name-search button, .catalog-coverage button {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--background);
+  color: inherit;
+  padding: 6px 10px;
+  font-size: 12px;
+}
+.catalog-listing-details p { flex-basis: 100%; }
 .discovery-heading > a { padding-bottom: 6px; color: #557851; font-size: 11px; text-decoration: underline; text-underline-offset: 2px; }
 .discovery-intro { max-width: 720px; margin: 10px 0 24px; color: #696c66; font-size: 14px; line-height: 1.55; }
 .discovery-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 22px; }

@@ -6,7 +6,7 @@ import { RestaurantPhotos } from "./RestaurantPhotos";
 import { BookmarkIcon, PinIcon } from "./Icons";
 import { FilterEvidence } from "./FilterEvidence";
 import { CuisineIcon } from "./CuisineIcon";
-import type { FilterLabel } from "../api/places";
+import { CATALOG_ATTRIBUTIONS, catalogSourceForId, type FilterLabel } from "../api/places";
 
 type SuggestionCardProps = {
   placeId: string;
@@ -51,6 +51,7 @@ export function SuggestionCard({
   const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const foodTag = cuisineLabels?.[0]?.value || tags[0];
+  const catalogSource = catalogSourceForId(placeId);
 
   useEffect(() => {
     if (!user) {
@@ -103,15 +104,15 @@ export function SuggestionCard({
         </div>
         <p className="suggestion-address">{description}</p>
         <FilterEvidence labels={filterLabels || cuisineLabels} />
-        {showCatalogAttribution && placeId.startsWith("osm:") ? (
-          <a className="suggestion-google-source" href="https://www.openstreetmap.org/copyright" rel="noreferrer" target="_blank">
-            © OpenStreetMap contributors
+        {showCatalogAttribution && catalogSource ? (
+          <a className="suggestion-google-source" href={CATALOG_ATTRIBUTIONS[catalogSource].url} rel="noreferrer" target="_blank">
+            {CATALOG_ATTRIBUTIONS[catalogSource].name}
           </a>
         ) : null}
         {!placeId.startsWith("placeholder-") ? (
           <a
             className="suggestion-google-source"
-            href={placeId.startsWith("osm:")
+            href={catalogSource
               ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(coordinates ? `${coordinates.lat},${coordinates.lng}` : title)}`
               : `https://www.google.com/maps/search/?api=1&query_place_id=${encodeURIComponent(placeId)}`}
             rel="noreferrer"

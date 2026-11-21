@@ -1521,10 +1521,73 @@ def test_catalog_browsing_and_saved_place_lookup_skip_google_and_quota(monkeypat
     nearby, saved = asyncio.run(exercise())
     assert nearby.status_code == 200
     assert nearby.headers["X-Places-Requests"] == "0"
+    assert nearby.headers["X-Places-Coverage"] == "catalog"
     assert [place["place_id"] for place in nearby.json()] == ["osm:node:1"]
     assert nearby.json()[0]["rating"] is None
     assert nearby.json()[0]["cuisine_labels"] == [{"value": "Japanese", "source": "openstreetmap", "evidence": []}]
     assert saved.json() == {"places": [nearby.json()[0], {"place_id": "osm:node:3", "unavailable": True}]}
+
+
+def test_gta_catalog_refresh_and_named_lookup_with_real_records(monkeypatch):
+    from backend.database import get_engine
+    from scripts.import_restaurant_catalog import SNAPSHOT, read_catalog_rows, refresh_catalog
+
+    async def unexpected_provider(*args, **kwargs):
+        raise AssertionError("Local lookup should require no Places calls or quota")
+
+    monkeypatch.setattr(places_router, "get_top_rated_nearby", unexpected_provider)
+    monkeypatch.setattr(places_router, "resolve_place_ids", unexpected_provider)
+    monkeypatch.setattr(places_router, "reserve_daily_quota", unexpected_provider)
+    app = create_app()
+    rows = read_catalog_rows(SNAPSHOT)
+    with get_engine().begin() as connection:
+        refresh_catalog(connection, [dict(rows[0], id="osm:node:previous")])
+    with get_engine().begin() as connection:
+        refresh_catalog(connection, rows)
+
+    async def exercise():
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            for name, location, expected, source in [
+                ("salad king", {"lat": 43.65, "lng": -79.38}, "Salad King", "openstreetmap"),
+                ("doughbox", {"lat": 43.55, "lng": -79.58}, "Doughbox Port Credit", "mississauga"),
+                ("rouge kitchen", {
+                    "lat": 43.79, "lng": -79.09, "south": 43.78, "north": 43.8,
+                    "west": -79.15, "east": -79.08,
+                }, "Rouge Kitchen", "openstreetmap"),
+            ]:
+                result = await client.get("/places/suggestions", params={**location, "name": name})
+                assert result.status_code == 200
+                assert result.headers["X-Places-Coverage"] == "catalog_name"
+                assert result.headers["X-Places-Requests"] == "0"
+                matches = [place for place in result.json() if place["name"] == expected]
+                assert matches and matches[0]["source"] == source
+                if name == "salad king":
+                    assert matches[0]["website"] is None
+                if name == "doughbox":
+                    assert matches[0]["hours"] and matches[0]["phone"]
+            retired = await client.post("/places/resolve", json={"place_ids": [
+                "osm:node:previous", "osm:node:10601676738", "toronto-licence:B71-4188257",
+            ]})
+            assert [place["name"] for place in retired.json()["places"]] == [
+                rows[0]["name"], "Brunch On Cosburn Ave", "Gusto 101",
+            ]
+            brunch = await client.get("/places/suggestions", params={
+                "lat": 43.69, "lng": -79.33, "name": "Brunch On Cosburn Ave",
+            })
+            assert [place["place_id"] for place in brunch.json()] == ["osm:way:663569492"]
+            absent = await client.get("/places/suggestions", params={"lat": 43.65, "lng": -79.38, "name": "%"})
+            assert absent.json() == []
+
+    asyncio.run(exercise())
+
+
+def test_catalog_provider_merge_keeps_distinct_branches():
+    local = [
+        {"place_id": "osm:node:1", "name": "Sushi House", "lat": 43.6500, "lng": -79.38},
+        {"place_id": "osm:node:2", "name": "Sushi House", "lat": 43.6510, "lng": -79.38},
+    ]
+    provider = [{"place_id": "google-1", "name": "Sushi House", "lat": 43.65001, "lng": -79.38}]
+    assert places_router.combine_discovery_results(local, provider) == [local[1], provider[0]]
 
 
 @pytest.mark.parametrize("actor_limit,global_limit", [(1, 10), (10, 1), (10, 10)])

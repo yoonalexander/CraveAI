@@ -11,10 +11,10 @@ cities and measure the remaining database space before expanding.
 
 | Area | Current status |
 | --- | --- |
-| Restaurant listings | Stage 1 expanded the OpenStreetMap base to 6,471 Toronto listings and 1,384 Mississauga listings, including named fast-food and takeout locations. The cross-check identified 3,393 additional municipal candidates and recorded unresolved leads separately. The refreshed catalog is local. |
+| Restaurant listings | The hosted catalog has 7,856 browseable listings across Toronto and Mississauga. This includes seven branch-verified municipal listings. Six duplicate OSM records remain available to existing bookmarks and are hidden from new searches. |
 | Menu dishes | v0.2 includes a menu reader and 20 reviewed dishes across 10 restaurants. The dishes are in an evaluation file. The app has no live dish index yet. |
 | Chat search | In a 28-query replay, searching the dish index first increased queries with a verified result from 7 to 13 and reduced simulated Places calls from 28 to 18. It also hid valid alternatives on three queries whenever it stopped after finding a local match. |
-| Storage | The expanded OSM snapshot is about 1.17 MB as a JSON file. Actual hosted usage includes database tables, indexes, and other CraveAI data, and still needs to be measured. |
+| Storage | Hosted Postgres measured 15.05 MB after the import, up from 13.30 MB. The catalog table and indexes account for 1.72 MB. |
 
 The restaurant catalog and dish index are two different parts of the same
 project. We can finish the basic map and restaurant search while incrementally
@@ -58,25 +58,36 @@ unknown fields blank. A missing website or cuisine tag should never hide an
 otherwise useful restaurant listing.
 
 - [x] Build the catalog importer and connect the basic catalog lookup to the map.
-- [ ] Verify which restaurant records are already loaded in the hosted database.
-- [ ] Make refreshes preserve restaurant IDs so bookmarks and future dish
-  records stay attached. The current importer replaces the snapshot.
-- [ ] Load the refreshed two-city list into the hosted database.
-- [ ] Confirm municipal candidates and review possible duplicates before adding them to the public catalog.
-- [ ] Test the map, restaurant list, name search, location changes, and city
-  edges with real records, including restaurants without menus.
-- [ ] Fix the map’s coverage label so a few local results can show partial coverage.
+- [x] Verify the hosted catalog before import. It had zero restaurant rows.
+- [x] Preserve IDs during refresh. Update existing records in place and retain
+  missing or duplicate IDs for saved-place lookup.
+- [x] Load the refreshed two-city catalog into hosted Supabase.
+- [x] Verify the municipal branches included in the release and review duplicate
+  records before publishing. Seven municipal candidates passed branch checks.
+  The remaining 3,386 candidates and uncertain duplicate matches stay in the
+  source review data for further reconciliation.
+- [x] Test the map, list, and name search with restaurant records, including
+  local API lookups in both cities and a viewport crossing the eastern city edge.
+  A Toronto listing without a website still appears in search and on the map.
+- [x] Label local catalog coverage as partial and offer **Find more restaurants**
+  to expand with Google Places. Name search uses the catalog in the selected
+  area. The nearby search still falls back to Google Places when the catalog
+  has no rows.
 
-One issue to fix during this stage is that the map currently labels an area
-as completely covered once the catalog returns any rows. Return coverage
-based on the area and the results actually available. A few local results
-should still leave a path to find more. [Current map lookup](../backend/routers/places.py) ·
+The Stage 2 import has 7,862 stored rows and 7,856 browseable listings.
+Of those listings, 4,233 have a street address, 5,797 have a cuisine,
+1,967 have a website, four have a verified phone number, and five have
+published hours. Unknown values stay blank. [Verified branches and duplicate IDs](../data/gta-catalog-reviewed.json) ·
 [Catalog importer](../scripts/import_restaurant_catalog.py)
 
-**Done when** the app can find and open records in both cities, including
-restaurants without menus, and accurately signals where coverage is partial.
-Record the hosted database size at this point to isolate the cost of the
-base catalog.
+| Hosted storage | Before import | After import |
+| --- | ---: | ---: |
+| Whole database | 13,298,835 bytes | 15,051,923 bytes |
+| Catalog table and indexes | 24,576 bytes | 1,720,320 bytes |
+
+The whole-database measurements use `pg_database_size`. The table measurements
+use `pg_total_relation_size`. These are Postgres measurements taken on
+November 21, 2026.
 
 ## Stage 3 — Add dishes and prices where we can
 
@@ -137,7 +148,7 @@ cost of another city or richer coverage in the first two. [Supabase pricing](htt
 [Understanding database size](https://supabase.com/docs/guides/platform/database-size)
 
 - [x] Measure the snapshot files. The starting file was about 0.65 MB and the expanded file is about 1.17 MB.
-- [ ] Record hosted database usage before the refreshed import and after Stage 2.
+- [x] Record hosted database usage before the refreshed import and after Stage 2.
 - [ ] Measure the catalog and menu tables with indexes after the first enrichment pass.
 - [ ] Report remaining space and decide whether to expand or improve coverage in the two cities.
 

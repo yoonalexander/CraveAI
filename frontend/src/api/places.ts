@@ -1,14 +1,35 @@
 import { apiFetch } from "./client";
 import type { ViewportBounds } from "../types/searchArea";
 
+const CATALOG_PREFIXES = {
+  "osm:": "openstreetmap",
+  "toronto-licence:": "toronto",
+  "mississauga-directory-2025:": "mississauga",
+} as const;
+
+export type CatalogSource = typeof CATALOG_PREFIXES[keyof typeof CATALOG_PREFIXES];
+
+export const CATALOG_ATTRIBUTIONS: Record<CatalogSource, { name: string; url: string }> = {
+  openstreetmap: { name: "© OpenStreetMap contributors", url: "https://www.openstreetmap.org/copyright" },
+  toronto: { name: "City of Toronto business licences", url: "https://open.toronto.ca/dataset/municipal-licensing-and-standards-business-licences-and-permits/" },
+  mississauga: { name: "Mississauga Business Directory", url: "https://www.mississauga.ca/services-and-programs/business/employment-survey/" },
+};
+
+export function catalogSourceForId(placeId: string): CatalogSource | undefined {
+  return Object.entries(CATALOG_PREFIXES).find(([prefix]) => placeId.startsWith(prefix))?.[1];
+}
+
 export interface Suggestion {
   name: string;
   rating: number | null;
   address: string;
   reason: string;
   place_id: string;
-  source?: "openstreetmap";
+  source?: CatalogSource;
   website?: string | null;
+  phone?: string | null;
+  hours?: string | null;
+  checked_on?: string | null;
   lat: number;
   lng: number;
   tags?: string[];
@@ -28,7 +49,7 @@ export interface Suggestion {
 
 export type FilterLabel = {
   value: string;
-  source: "google" | "inferred_menu" | "openstreetmap";
+  source: "google" | "inferred_menu" | CatalogSource;
   evidence: Array<{ id: string; label: string; source_url: string }>;
 };
 export type FilterData = Partial<Suggestion> & { place_id: string };
@@ -65,6 +86,7 @@ export async function fetchSuggestions(
     signal?: AbortSignal,
     bounds?: ViewportBounds,
     onCoverage?: (coverage: DiscoveryCoverage) => void,
+    options?: { name?: string; includeProvider?: boolean },
 ): Promise<Suggestion[]> {
   const search = new URLSearchParams({
     lat: String(lat),
@@ -77,6 +99,8 @@ export async function fetchSuggestions(
     search.set("east", String(bounds.east));
     search.set("west", String(bounds.west));
   }
+  if (options?.name) search.set("name", options.name);
+  if (options?.includeProvider) search.set("include_provider", "true");
   const response = await apiFetch(
     `/places/suggestions?${search.toString()}`,
     { signal },

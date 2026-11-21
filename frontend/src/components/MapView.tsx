@@ -3,7 +3,8 @@ import { GoogleMap, InfoWindow, Marker, OverlayView } from "@react-google-maps/a
 import { FilterEvidence } from "./FilterEvidence";
 
 import type { ChatRecommendation } from "../api/chat";
-import type { Suggestion } from "../api/places";
+import { catalogSourceForId, type Suggestion } from "../api/places";
+import { CatalogListingDetails } from "./CatalogListingDetails";
 import { useGoogleMaps } from "../context/GoogleMapsContext";
 import type { Coordinates, SearchArea, ViewportBounds } from "../types/searchArea";
 import { calculateDistanceKm } from "../utils/suggestionPool";
@@ -224,9 +225,10 @@ export function MapView({
               <strong>{selectedPlace.name}</strong>
               {typeof selectedPlace.rating === "number" ? <span>★ {selectedPlace.rating.toFixed(1)}</span> : null}
               {selectedPlace.address ? <p>{selectedPlace.address}</p> : null}
+              {"checked_on" in selectedPlace ? <CatalogListingDetails place={selectedPlace} /> : null}
               {"cuisine_labels" in selectedPlace ? <FilterEvidence labels={[...(selectedPlace.cuisine_labels || []), ...(selectedPlace.dietary_labels || [])]} /> : null}
               {selectedPlace.place_id ? (
-                <a href={selectedPlace.place_id.startsWith("osm:")
+                <a href={catalogSourceForId(selectedPlace.place_id)
                   ? `https://www.google.com/maps/search/?api=1&query=${selectedPlace.lat},${selectedPlace.lng}`
                   : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selectedPlace.name)}&query_place_id=${encodeURIComponent(selectedPlace.place_id)}`} rel="noreferrer" target="_blank">
                   Open in Google Maps

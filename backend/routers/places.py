@@ -1,5 +1,6 @@
 from typing import List
 from typing import Annotated
+from math import cos, radians
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
 
@@ -11,7 +12,7 @@ from backend.services.sessions import SessionContext, optional_session
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints
 from backend.services.filter_enrichment import enrich_filter_places
 from backend.services.place_photos import fetch_place_photo, PhotoProviderError
-from backend.services.restaurant_catalog import find_catalog_restaurants, resolve_catalog_restaurants
+from backend.services.restaurant_catalog import find_catalog_restaurants, is_catalog_place_id, resolve_catalog_restaurants
 
 from backend.services.places import DiscoveryCoverage, get_top_rated_nearby, resolve_place_ids, verify_dietary_place_ids
 from backend.services.usage_limits import (
@@ -46,6 +47,26 @@ class PlacePhotoRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
     place_id: PlaceId
     index: int = Field(default=0, ge=0, le=9)
+
+
+def combine_discovery_results(catalog: list[dict], provider: list[dict]) -> list[dict]:
+    def normalized(name: str) -> str:
+        return "".join(character for character in name.casefold() if character.isalnum())
+
+    local_names: dict[str, list[dict]] = {}
+    for place in catalog:
+        local_names.setdefault(normalized(place["name"]), []).append(place)
+    duplicate_ids = set()
+    for place in provider:
+        nearby_matches = local_names.get(normalized(place["name"]), [])
+        lng_scale = 111_195 * cos(radians(place["lat"]))
+        for local in nearby_matches:
+            lat_offset = (local["lat"] - place["lat"]) * 111_195
+            lng_offset = (local["lng"] - place["lng"]) * lng_scale
+            if lat_offset ** 2 + lng_offset ** 2 <= 35 ** 2:
+                duplicate_ids.add(local["place_id"])
+    # Keep the catalog IDs resolvable independently of the result source.
+    return [place for place in catalog if place["place_id"] not in duplicate_ids] + provider
 
 
 @router.post("/photo")
@@ -125,6 +146,8 @@ async def get_suggestions(
     south: float | None = Query(default=None, ge=-90, le=90),
     east: float | None = Query(default=None, ge=-180, le=180),
     west: float | None = Query(default=None, ge=-180, le=180),
+    name: str = Query(default="", max_length=100),
+    include_provider: bool = Query(default=False),
     session: SessionContext | None = Depends(optional_session),
 ) -> List[dict]:
     """
@@ -160,13 +183,20 @@ async def get_suggestions(
         window_seconds=60,
         code="places_rate_limited",
     )
-    catalog = await find_catalog_restaurants(lat, lng, radius, bounds)
-    if catalog:
-        response.headers["X-Places-Coverage"] = "complete"
+    name = " ".join(name.split())
+    catalog = await find_catalog_restaurants(lat, lng, radius, bounds, name)
+
+    def catalog_only(reason: str) -> list[dict]:
+        response.headers["X-Places-Coverage"] = reason
         response.headers["X-Places-Requests"] = "0"
         response.headers["X-Places-Pages"] = "0"
         response.headers["Cache-Control"] = "no-store"
         return catalog
+
+    if name:
+        return catalog_only("catalog_name")
+    if catalog and not include_provider:
+        return catalog_only("catalog")
     configured_daily_limit = resolve_entitlements(bool(session))["limits"]["places_per_day"]
     daily_limit = configured_daily_limit
     enforce_actor_limit = not has_unlimited_usage_access(session)
@@ -182,6 +212,9 @@ async def get_suggestions(
             additional_user_ids=usage_identities[1:],
         )
     except DailyQuotaExceeded as exc:
+        if catalog:
+            response.headers.update(rate_limit_headers(exc.usage, include_retry_after=True))
+            return catalog_only("quota")
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
             detail={"code": "daily_places_request_quota_exceeded"},
@@ -225,12 +258,15 @@ async def get_suggestions(
             before_request=before_provider_request, coverage=coverage,
         )
     except Exception as exc:
-        raise HTTPException(status_code=502, detail={"code": "places_provider_unavailable"}) from exc
-    response.headers["X-Places-Coverage"] = coverage.partial_reason or "complete"
+        if not catalog:
+            raise HTTPException(status_code=502, detail={"code": "places_provider_unavailable"}) from exc
+        suggestions = []
+        coverage.partial_reason = "provider"
+    response.headers["X-Places-Coverage"] = coverage.partial_reason or ("combined" if catalog else "complete")
     response.headers["X-Places-Requests"] = str(coverage.provider_requests)
     response.headers["X-Places-Pages"] = str(coverage.pages_loaded)
     response.headers["Cache-Control"] = "no-store"
-    return suggestions
+    return combine_discovery_results(catalog, suggestions) if catalog else suggestions
 
 
 @router.post("/resolve")
@@ -244,9 +280,9 @@ async def resolve_places(
     if not ids:
         return {"places": []}
 
-    catalog_ids = [item for item in ids if item.startswith("osm:")]
+    catalog_ids = [item for item in ids if is_catalog_place_id(item)]
     catalog = await resolve_catalog_restaurants(catalog_ids)
-    google_ids = [item for item in ids if not item.startswith("osm:")]
+    google_ids = [item for item in ids if not is_catalog_place_id(item)]
     if not google_ids:
         return {"places": [catalog.get(item, {"place_id": item, "unavailable": True}) for item in ids]}
 

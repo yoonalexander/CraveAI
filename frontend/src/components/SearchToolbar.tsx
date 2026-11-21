@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import type { SearchArea } from "../types/searchArea";
-import type { Suggestion } from "../api/places";
+import { CATALOG_ATTRIBUTIONS, type CatalogSource, type Suggestion } from "../api/places";
 import type { AdvancedFilters, SuggestionFilter } from "../utils/suggestionPool";
 import { advancedFilterSummary, CUISINE_OPTIONS, DEFAULT_ADVANCED_FILTERS } from "../utils/suggestionPool";
 import { ClockIcon, DollarIcon, PinIcon, SlidersIcon } from "./Icons";
@@ -15,7 +15,10 @@ type SearchToolbarProps = {
   count: number;
   totalCount?: number;
   coverageNotice?: string | null;
-  catalogResults?: boolean;
+  catalogSources?: CatalogSource[];
+  restaurantName?: string;
+  onSearchName?: (name: string) => void;
+  onExpandCoverage?: () => void;
   error: string | null;
   isLoading: boolean;
   canRetry: boolean;
@@ -37,7 +40,10 @@ export function SearchToolbar({
   count,
   totalCount = count,
   coverageNotice,
-  catalogResults,
+  catalogSources = [],
+  restaurantName,
+  onSearchName,
+  onExpandCoverage,
   error,
   isLoading,
   canRetry,
@@ -96,7 +102,9 @@ export function SearchToolbar({
       ? error
       : hasFilters || count !== totalCount
         ? `${count} of ${totalCount} loaded restaurants shown`
-        : `${count} restaurant${count === 1 ? "" : "s"} in this area`;
+        : restaurantName
+          ? `${count} catalog match${count === 1 ? "" : "es"} for “${restaurantName}”`
+          : `${count} restaurant${count === 1 ? "" : "s"}${catalogSources.length ? " loaded" : ""} in this area`;
 
   return (
     <section
@@ -158,8 +166,26 @@ export function SearchToolbar({
       <div className="search-toolbar-filters">
         <CuisineFilters cuisine={advancedFilters.cuisine} disabled={isLoading} onChange={onCuisineChange} />
       </div>
-      {!isLoading && coverageNotice ? <p className="discovery-coverage-notice" role="status">{coverageNotice}</p> : null}
-      {catalogResults ? <a className="map-list-attribution" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">Restaurant listings © OpenStreetMap contributors</a> : null}
+      {onSearchName ? (
+        <form className="catalog-name-search" key={`${area?.center.lat},${area?.center.lng}:${restaurantName}`} onSubmit={(event) => {
+          event.preventDefault();
+          const name = String(new FormData(event.currentTarget).get("restaurant") || "").trim();
+          if (name || restaurantName) onSearchName(name);
+        }}>
+          <input aria-label="Restaurant name" name="restaurant" type="search" maxLength={100}
+            placeholder="Restaurant name" defaultValue={restaurantName} disabled={isLoading || !area} />
+          <button type="submit" disabled={isLoading || !area}>Search by name</button>
+          {restaurantName ? <button type="button" disabled={isLoading} onClick={() => onSearchName("")}>Clear name</button> : null}
+        </form>
+      ) : null}
+      {!isLoading && coverageNotice ? <div className="catalog-coverage">
+        <p className="discovery-coverage-notice" role="status">{coverageNotice}</p>
+        {onExpandCoverage ? <button type="button" onClick={onExpandCoverage}>Find more restaurants</button> : null}
+      </div> : null}
+      {catalogSources.length ? <div className="catalog-attributions">
+        {catalogSources.map((source) => <a key={source} className="map-list-attribution" href={CATALOG_ATTRIBUTIONS[source].url}
+          target="_blank" rel="noreferrer">{CATALOG_ATTRIBUTIONS[source].name}</a>)}
+      </div> : null}
       <span className="sr-only" id="budget-filter-explanation">
         Budget-friendly includes Google price levels free and inexpensive. It does not guarantee a meal under a dollar amount.
       </span>

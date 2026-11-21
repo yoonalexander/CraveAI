@@ -30,8 +30,8 @@ named fast-food or takeout records.
 municipal candidate records, and a review queue with reasons. Matched source
 records may point to the same OSM listing. The additional candidates have
 source coordinates inside the city and passed conservative identity checks.
-Their sources can still be stale or misclassified. Keep the OSM and municipal
-records separate until Stage 2 reconciles them for display. The queue is not
+Their sources can still be stale or misclassified. Keep unreviewed municipal
+records in the coverage data for follow-up. The queue is not
 a count of missing restaurants. It includes ambiguous addresses, possible
 duplicates, unaffirmed licences, and businesses that may fall outside scope.
 
@@ -73,5 +73,14 @@ python -m scripts.build_restaurant_catalog Toronto.osm.pbf data/gta-restaurants.
 python -m scripts.reconcile_restaurant_catalog --osm data/gta-restaurants.json --boundaries gta-boundaries.json --toronto-licences business-licences-data.csv --dinesafe dinesafe.csv --mississauga mississauga-food-services.json --output data/gta-restaurant-coverage.json --checked YYYY-MM-DD
 ```
 
-The base seed passed an isolated, in-memory SQLite load using the app's
-catalog schema. The hosted import belongs to Stage 2.
+Apply the Alembic migrations to the Postgres database first, then run
+`python -m scripts.import_restaurant_catalog`. The importer includes the
+branch-verified municipal listings and OSM duplicate decisions in
+[gta-catalog-reviewed.json](gta-catalog-reviewed.json). Before the next
+refresh, recheck those decisions against the updated source files as IDs
+may have changed. The importer validates that reviewed IDs exist in the
+inputs. Past IDs stay resolvable for saved places even if they leave the
+browseable catalog.
+
+See the [Stage 2 roadmap](../docs/toronto-mississauga-catalog-roadmap.md#stage-2--make-the-basic-catalog-work-in-the-app)
+for the hosted import counts and storage measurements.

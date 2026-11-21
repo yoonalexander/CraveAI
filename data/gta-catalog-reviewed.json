@@ -1,0 +1,20 @@
+{
+  "checked_on": "2026-11-21",
+  "municipal_listings": [
+    {"id":"toronto-licence:B71-3951485","name":"Crown & Dragon Pub","website":"https://crownanddragon.com/","phone":"416-927-7976","hours":"Mon–Tue 3–11 p.m.; Wed–Fri 11:30 a.m.–midnight; Sat noon–midnight; Sun noon–11 p.m."},
+    {"id":"toronto-licence:B71-4188257","name":"Gusto 101","website":"https://www.gusto101.com/","cuisine":"italian","hours":"Mon–Fri 11:45 a.m.–11 p.m.; Sat 11 a.m.–11 p.m.; Sun 11 a.m.–10 p.m."},
+    {"id":"toronto-licence:B71-5653984","name":"Jersey Mike's Subs","website":"https://www.jerseymikes.ca/locations","phone":"647-368-6802","hours":"Daily 10 a.m.–10 p.m."},
+    {"id":"mississauga-directory-2025:18574","name":"Doughbox Port Credit","website":"https://doughbox.ca/location/doughbox-port-credit/","cuisine":"pizza","phone":"289-297-5222","hours":"Sun–Thu 11 a.m.–10 p.m.; Fri–Sat 11 a.m.–11 p.m."},
+    {"id":"mississauga-directory-2025:19871","name":"Galito's Flame Grilled Chicken","website":"https://galitoschicken.com/locations/central-parkway","hours":"Mon 11 a.m.–10 p.m.; Tue–Thu and Sun noon–10 p.m.; Fri–Sat noon–midnight."},
+    {"id":"mississauga-directory-2025:20013","name":"Gladiator Burger","website":"https://www.gladiatorburger.com/contact","cuisine":"burger","phone":"905-238-9777"},
+    {"id":"mississauga-directory-2025:25006","name":"Quesada","website":"https://quesada.ca/quesada-restaurant/mississauga-3359-mississauga-road/","cuisine":"mexican"}
+  ],
+  "osm_duplicate_ids": {
+    "osm:node:10601676738":"osm:way:663569492",
+    "osm:node:10601676746":"osm:way:663568826",
+    "osm:node:14331637025":"osm:node:11803596897",
+    "osm:node:13082630505":"osm:node:13082643101",
+    "osm:node:13082646201":"osm:node:13082643101",
+    "osm:node:14125631701":"osm:node:14125522802"
+  }
+}

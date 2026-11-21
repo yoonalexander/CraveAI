@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type { ChatRecommendation } from "./api/chat";
-import { fetchSuggestions, fetchFilterData, FilterData, PlacesQuotaError, Suggestion } from "./api/places";
+import { catalogSourceForId, fetchSuggestions, fetchFilterData, FilterData, PlacesQuotaError, Suggestion } from "./api/places";
 import { listSavedPlaces } from "./api/favorites";
 import { fetchCurrentWeather, CurrentWeather } from "./api/weather";
 import { fetchPreferences, Preferences } from "./api/product";
@@ -49,6 +49,8 @@ const TORONTO_FALLBACK = {
 
 type LocationSource = "device" | "manual" | "fallback";
 
+type RestaurantSearch = SearchArea & { name?: string; includeProvider?: boolean };
+
 export default function App(): JSX.Element {
   return (
     <GoogleMapsProvider>
@@ -73,18 +75,21 @@ function CraveApplication(): JSX.Element {
   const [locationStatus, setLocationStatus] = useState("Finding your location…");
   const [locationReady, setLocationReady] = useState(false);
   const [searchArea, setSearchArea] = useState<SearchArea | null>(null);
-  const [requestedArea, setRequestedArea] = useState<SearchArea | null>(null);
-  const [lastFailedArea, setLastFailedArea] = useState<SearchArea | null>(null);
+  const [requestedArea, setRequestedArea] = useState<RestaurantSearch | null>(null);
+  const [lastFailedArea, setLastFailedArea] = useState<RestaurantSearch | null>(null);
   const [recenterVersion, setRecenterVersion] = useState(0);
 
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [resultsArea, setResultsArea] = useState<SearchArea | null>(null);
   const suggestionsRef = useRef<Suggestion[]>([]);
+  const previousSearchWasTargeted = useRef(false);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const [isResolvingArea, setIsResolvingArea] = useState(false);
   const [suggestionError, setSuggestionError] = useState<string | null>(null);
   const [suggestionQuotaResetAt, setSuggestionQuotaResetAt] = useState<string | null>(null);
   const [coverageNotice, setCoverageNotice] = useState<string | null>(null);
+  const [canExpandCoverage, setCanExpandCoverage] = useState(false);
+  const [searchedRestaurantName, setSearchedRestaurantName] = useState("");
   const [activeFilters, setActiveFilters] = useState<Set<SuggestionFilter>>(new Set());
   const [advancedFilters, setAdvancedFilters] = useState<AdvancedFilters>(DEFAULT_ADVANCED_FILTERS);
   const [mapRecommendations, setMapRecommendations] = useState<ChatRecommendation[]>([]);
@@ -254,6 +259,9 @@ function CraveApplication(): JSX.Element {
     setIsLoadingSuggestions(true);
     setSuggestionError(null);
     setSuggestionQuotaResetAt(null);
+    setCanExpandCoverage(false);
+    setCoverageNotice(null);
+    const { name, includeProvider } = requestedArea;
     fetchSuggestions(
       requestedArea.center.lat,
       requestedArea.center.lng,
@@ -262,29 +270,39 @@ function CraveApplication(): JSX.Element {
       requestedArea.bounds,
       (coverage) => {
         if (!active) return;
-        setCoverageNotice(coverage.partialReason === "quota"
-          ? "Some restaurants are shown. The discovery limit prevented loading more; try again after the daily reset."
-          : coverage.partialReason
-            ? "Some restaurants are shown. Additional results could not be loaded; try searching this area again."
-            : null);
+        const reason = coverage.partialReason;
+        setCanExpandCoverage(reason === "catalog");
+        setCoverageNotice(reason === "catalog"
+          ? "Showing local catalog results. More restaurants may be available."
+          : reason === "combined"
+            ? "Showing results from the local catalog and Google Maps. Coverage may be partial."
+            : reason === "quota"
+              ? "Some restaurants are shown. The discovery limit prevented loading more; try again after the daily reset."
+              : reason && reason !== "catalog_name"
+                ? "Some restaurants are shown. Additional results could not be loaded; try searching this area again."
+                : null);
         if (coverage.partialReason === "quota") setSuggestionQuotaResetAt(coverage.resetAt);
       },
+      { name, includeProvider },
     )
       .then((places) => {
         if (!active) return;
-        const mergedPlaces = mergeSuggestionsForBounds(
-          places.length ? suggestionsRef.current.filter((place) => place.source === places[0].source) : suggestionsRef.current,
-          places,
-          requestedArea.bounds,
+        const targetedSearch = Boolean(name || includeProvider);
+        const sources = new Set(places.map((place) => place.source));
+        const prior = previousSearchWasTargeted.current ? [] : suggestionsRef.current;
+        const mergedPlaces = targetedSearch ? places : mergeSuggestionsForBounds(
+          places.length ? prior.filter((place) => sources.has(place.source)) : prior, places, requestedArea.bounds,
         );
+        previousSearchWasTargeted.current = targetedSearch;
         suggestionsRef.current = mergedPlaces;
         setSuggestions(mergedPlaces);
         setResultsArea(requestedArea);
-        if (requestedArea.bounds) setSearchArea(requestedArea);
+        if (requestedArea.bounds && !targetedSearch) setSearchArea(requestedArea);
+        setSearchedRestaurantName(name || "");
         setLastFailedArea(null);
         setMapRecommendations([]);
         setMapFocusRequest(null);
-        if (!mergedPlaces.length) setSuggestionError("No restaurants were found in this map area.");
+        if (!mergedPlaces.length && !name) setSuggestionError("No restaurants were found in this map area.");
       })
       .catch((reason) => {
         if (!active) return;
@@ -345,7 +363,7 @@ function CraveApplication(): JSX.Element {
 
   const checkFilterData = useCallback(async () => {
     if (filterDataRequest.current || isLoadingSuggestions) return;
-    const googlePlaces = suggestions.filter((place) => place.source !== "openstreetmap");
+    const googlePlaces = suggestions.filter((place) => !catalogSourceForId(place.place_id));
     const remaining = googlePlaces.filter((place) => !filterData.has(place.place_id));
     const candidates = remaining.length ? remaining : googlePlaces.filter((place) => {
       const data = filterData.get(place.place_id);
@@ -488,7 +506,14 @@ function CraveApplication(): JSX.Element {
       count={filteredSuggestions.length}
       totalCount={suggestions.length}
       coverageNotice={coverageNotice}
-      catalogResults={suggestions.some((place) => place.source === "openstreetmap")}
+      catalogSources={[...new Set(suggestions.flatMap((place) => place.source ? [place.source] : []))]}
+      restaurantName={searchedRestaurantName}
+      onSearchName={(name) => {
+        if (searchArea) setRequestedArea({ ...searchArea, name });
+      }}
+      onExpandCoverage={canExpandCoverage && searchArea
+        ? () => setRequestedArea({ ...searchArea, includeProvider: true })
+        : undefined}
       error={suggestionError}
       isLoading={isLoadingSuggestions || isResolvingArea}
       onChangeLocation={() => setLocationDialogOpen(true)}
@@ -510,7 +535,7 @@ function CraveApplication(): JSX.Element {
         loading: filterDataLoading, error: filterDataError,
         checked: annotatedSuggestions.filter((place) => place.enrichment_status === "checked").length,
         menus: annotatedSuggestions.filter((place) => place.menu_status === "assessed").length,
-        remaining: suggestions.filter((place) => place.source !== "openstreetmap" && !filterData.has(place.place_id)).length,
+        remaining: suggestions.filter((place) => !catalogSourceForId(place.place_id) && !filterData.has(place.place_id)).length,
         unavailable: annotatedSuggestions.filter((place) => place.enrichment_status === "unavailable" || place.menu_status === "unavailable").length,
       }}
       onCheckFilterData={() => void checkFilterData()}
@@ -569,7 +594,7 @@ function CraveApplication(): JSX.Element {
                 <section className="home-chat" aria-label="Chat">
                   <MobileChatSheet expanded={mobileChatExpanded} onExpandedChange={(expanded) => { setMobileChatExpanded(expanded); if (expanded) setMapListOpen(false); }}>
                     <ChatPanel
-                      candidatePlaces={filteredSuggestions.filter((place) => place.source !== "openstreetmap")}
+                      candidatePlaces={filteredSuggestions.filter((place) => !catalogSourceForId(place.place_id))}
                       key={chatSession}
                       location={chatLocation}
                       onConversationStart={() => { setMobileChatExpanded(true); setMapListOpen(false); }}

@@ -98,10 +98,12 @@ see:
 
 ### Toronto and Mississauga restaurant catalog
 
-With the catalog imported, map browsing uses local results where the catalog has
-matches. Areas without matches still use the Google Places path. Catalog listings
-have no Google rating, photo, live hours, or price data. Chat continues to use its
-existing recommendation pipeline.
+Map browsing starts with the local catalog where matches are available. Search
+by restaurant name looks in the local catalog for the selected area. **Find more
+restaurants** expands local results with Google Places when coverage is partial,
+and nearby searches in areas without catalog rows still use Google Places.
+Catalog listings show available contact information and published hours. Chat
+continues to use its existing recommendation pipeline.
 
 For Supabase Postgres, apply the migrations and load the snapshot into the
 database selected by `DATABASE_URL`:
@@ -120,8 +122,8 @@ python -c "from backend.services.storage import init_storage; init_storage()"
 python -m scripts.import_restaurant_catalog
 ```
 
-The import atomically replaces the catalog and leaves other application tables
-out of the import. See [catalog data and refresh instructions](data/README.md).
+The import updates catalog records in a single transaction and retains retired
+IDs so existing bookmarks still resolve. See [catalog data and refresh instructions](data/README.md).
 | Hosting | Vercel frontend, Render backend | Same-origin `/api` proxy and backend runtime |
 
 There is intentionally no vector database or embedding layer in the current

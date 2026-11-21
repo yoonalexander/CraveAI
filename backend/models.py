@@ -14,6 +14,7 @@ from sqlalchemy import (
     Text,
     Uuid,
     UniqueConstraint,
+    true,
 )
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -31,6 +32,10 @@ class CatalogRestaurant(Base):
     address: Mapped[str] = mapped_column(String(300))
     cuisine: Mapped[str] = mapped_column(String(250))
     website: Mapped[str] = mapped_column(String(500))
+    listed: Mapped[bool] = mapped_column(Boolean, default=True, server_default=true())
+    checked_on: Mapped[date | None] = mapped_column(Date)
+    phone: Mapped[str | None] = mapped_column(String(40))
+    hours: Mapped[str | None] = mapped_column(String(500))
 
 
 class Profile(Base):
