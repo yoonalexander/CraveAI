@@ -9,7 +9,7 @@ import re
 import socket
 from dataclasses import dataclass, field
 from html.parser import HTMLParser
-from typing import Any, Iterable, Sequence
+from typing import Any, Awaitable, Callable, Iterable, Sequence
 from urllib.parse import urljoin, urlparse
 
 import httpx
@@ -238,6 +238,7 @@ async def _safe_fetch_html(
 
 async def _safe_fetch_menu_document(
     client: httpx.AsyncClient, url: str, *, pdf_limit: int = 0, host: str | None = None,
+    before_fetch: Callable[[str], Awaitable[None]] | None = None,
 ) -> tuple[str, str, bytes, str]:
     current = url
     for _ in range(MAX_REDIRECTS + 1):
@@ -245,6 +246,8 @@ async def _safe_fetch_menu_document(
         if off_host and not (pdf_limit and is_menu_pdf_asset(current)):
             raise ValueError("Menu link changed host.")
         await _validate_public_url(current)
+        if before_fetch is not None:
+            await before_fetch(current)
         async with client.stream("GET", current) as response:
             if response.status_code in {301, 302, 303, 307, 308}:
                 target = response.headers.get("location")

@@ -4,12 +4,14 @@ from datetime import date, datetime
 
 from sqlalchemy import (
     Boolean,
+    CheckConstraint,
     Date,
     DateTime,
     ForeignKey,
     Float,
     Index,
     Integer,
+    JSON,
     String,
     Text,
     Uuid,
@@ -36,6 +38,35 @@ class CatalogRestaurant(Base):
     checked_on: Mapped[date | None] = mapped_column(Date)
     phone: Mapped[str | None] = mapped_column(String(40))
     hours: Mapped[str | None] = mapped_column(String(500))
+
+
+class CatalogMenuCheck(Base):
+    __tablename__ = "catalog_menu_checks"
+
+    restaurant_id: Mapped[str] = mapped_column(ForeignKey("catalog_restaurants.id"), primary_key=True)
+    checked_on: Mapped[date] = mapped_column(Date)
+    outcome: Mapped[str] = mapped_column(String(24))
+    candidates: Mapped[int] = mapped_column(Integer)
+    documents: Mapped[dict] = mapped_column(JSON)
+    issues: Mapped[dict] = mapped_column(JSON)
+
+
+class CatalogDish(Base):
+    __tablename__ = "catalog_dishes"
+    __table_args__ = (
+        CheckConstraint("slot BETWEEN 1 AND 10", name="ck_catalog_dish_slot"),
+        UniqueConstraint("restaurant_id", "dish_key", name="uq_catalog_dish_key"),
+    )
+
+    restaurant_id: Mapped[str] = mapped_column(ForeignKey("catalog_restaurants.id"), primary_key=True)
+    slot: Mapped[int] = mapped_column(Integer, primary_key=True)
+    dish_key: Mapped[str] = mapped_column(String(160))
+    name: Mapped[str] = mapped_column(String(160))
+    family: Mapped[str] = mapped_column(String(160))
+    source_url: Mapped[str] = mapped_column(String(500))
+    checked_on: Mapped[date] = mapped_column(Date)
+    channel: Mapped[str] = mapped_column(String(20))
+    prices: Mapped[list] = mapped_column(JSON)
 
 
 class Profile(Base):

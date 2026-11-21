@@ -1,0 +1,113 @@
+{
+  "checked_on": "2026-11-21",
+  "restaurants": [
+    {
+      "id": "osm:node:1157114350",
+      "dishes": [
+        {"name":"Spicy Boat Noodles","family":"noodle soup","source_url":"https://555noodles.com/noodle-soup","channel":"published_menu","prices":{"Small":1500,"Medium":2000}},
+        {"name":"Pork Noodles in Clear Broth","family":"noodle soup","source_url":"https://555noodles.com/noodle-soup","channel":"published_menu","prices":{"Small":1400,"Medium":1900}},
+        {"name":"Beef Rice Bowl","source_url":"https://555noodles.com/rice-bowl","channel":"published_menu","prices":{"Small":1400,"Medium":1900}},
+        {"name":"Kao Lhao with Rice","source_url":"https://555noodles.com/rice-bowl","channel":"published_menu","prices":{"Small":1700,"Medium":2200}},
+        {"name":"Fried Pork and Cabbage Wontons","source_url":"https://555noodles.com/appetizers","channel":"published_menu","prices":{"":1200}},
+        {"name":"Luok Jhim","source_url":"https://555noodles.com/appetizers","channel":"published_menu","prices":{"":1000}}
+      ]
+    },
+    {
+      "id": "osm:node:5718263121",
+      "dishes": [
+        {"name":"Thai Chicken Wings","source_url":"https://bangkokgarden.ca/toronto-thai-food-menu/","channel":"published_menu","prices":{"6 pieces":1285,"12 pieces":2400}},
+        {"name":"Thai Calamari","source_url":"https://bangkokgarden.ca/toronto-thai-food-menu/","channel":"published_menu","prices":{"":1275}},
+        {"name":"Spicy Garlic Beef","source_url":"https://bangkokgarden.ca/toronto-thai-food-menu/","channel":"published_menu","prices":{"":2995}}
+      ]
+    },
+    {
+      "id": "osm:node:14000002801",
+      "dishes": [
+        {"name":"Dhal and Roti","source_url":"https://www.soostoronto.com/food","channel":"published_menu","prices":{"2 pieces":1400}},
+        {"name":"Rendang Braised Beef","source_url":"https://www.soostoronto.com/food","channel":"published_menu","prices":{"":3800}},
+        {"name":"Kapitan Chicken Tacos","source_url":"https://www.soostoronto.com/food","channel":"published_menu","prices":{"2 pieces":1700}}
+      ]
+    },
+    {
+      "id": "osm:node:2021650360",
+      "dishes": [
+        {"name":"Halibut Tacos","source_url":"https://kingswayfishandchips.com/fish-dinners/","channel":"published_menu","prices":{"3 pieces":2490}},
+        {"name":"Halibut Fish and Chips","source_url":"https://kingswayfishandchips.com/fish-dinners/","channel":"published_menu","prices":{"":2490}},
+        {"name":"Seafood Platter","source_url":"https://kingswayfishandchips.com/fish-dinners/","channel":"published_menu","prices":{"":4040}}
+      ]
+    },
+    {
+      "id": "osm:node:13203894286",
+      "dishes": [
+        {"name":"Classic Pad Thai","source_url":"https://lelert.ca/menu.html","channel":"published_menu","prices":{"":1900}},
+        {"name":"Double Truffle Burger","source_url":"https://lelert.ca/menu.html","channel":"published_menu","prices":{"":2700}},
+        {"name":"Crispy Taro Fritters","source_url":"https://lelert.ca/menu.html","channel":"published_menu","prices":{"":1200}},
+        {"name":"Khao Soi","source_url":"https://lelert.ca/menu.html","channel":"published_menu","prices":{"Braised beef with egg noodles":2500,"Chicken":2400,"Vegan with rice noodles":2300}}
+      ]
+    },
+    {
+      "id": "osm:node:13668069846",
+      "dishes": [
+        {"name":"Caprese Salad","source_url":"https://mamamolinaros.ca/mississauga-mama-molinaro-s-pizzeria-food-menu","channel":"published_menu","prices":{"Regular":1199,"Large":1999}},
+        {"name":"Pepperoni Pizza","source_url":"https://mamamolinaros.ca/mississauga-mama-molinaro-s-pizzeria-food-menu","channel":"published_menu","prices":{"10 inch":1200,"12 inch":1425,"16 inch":1850,"Party":2550}},
+        {"name":"Garlic Bread","source_url":"https://mamamolinaros.ca/mississauga-mama-molinaro-s-pizzeria-food-menu","channel":"published_menu","prices":{"":899}}
+      ]
+    },
+    {
+      "id": "osm:node:4203487489",
+      "dishes": [
+        {"name":"Masala Dosa","source_url":"https://www.udupimadrascafe.ca/dosas","channel":"published_menu","prices":{"":1045}},
+        {"name":"Medu Vada","source_url":"https://www.udupimadrascafe.ca/menu","channel":"published_menu","prices":{"2 pieces":799}},
+        {"name":"Potato Bonda","source_url":"https://www.udupimadrascafe.ca/menu","channel":"published_menu","prices":{"2 pieces":645}},
+        {"name":"Rasam","source_url":"https://www.udupimadrascafe.ca/menu","channel":"published_menu","prices":{"":599}},
+        {"name":"Idli","source_url":"https://www.udupimadrascafe.ca/menu","channel":"published_menu","prices":{"2 pieces":799}}
+      ]
+    },
+    {
+      "id": "osm:node:3748566733",
+      "dishes": [
+        {"name":"Spicy Seafood Ramen","source_url":"https://www.ramenkamen.com/_files/ugd/6dfc81_a8dcec9484cf4b7caa5a6fac644598ff.pdf#page=2","channel":"dine_in","prices":{"":2395}},
+        {"name":"Fresh Tofu Ramen","source_url":"https://www.ramenkamen.com/_files/ugd/6dfc81_a8dcec9484cf4b7caa5a6fac644598ff.pdf#page=2","channel":"dine_in","prices":{"":1795}},
+        {"name":"Gyoza","source_url":"https://www.ramenkamen.com/_files/ugd/6dfc81_a8dcec9484cf4b7caa5a6fac644598ff.pdf#page=2","channel":"dine_in","prices":{"Grilled 6 pieces":1550,"Deep-fried 6 pieces":1450,"Deep-fried 3 pieces":800,"Deep-fried vegetable 6 pieces":1350}},
+        {"name":"Gyudon Beef Rice Bowl","source_url":"https://www.ramenkamen.com/_files/ugd/6dfc81_a8dcec9484cf4b7caa5a6fac644598ff.pdf#page=2","channel":"dine_in","prices":{"":1995}},
+        {"name":"Chicken Karaage","source_url":"https://www.ramenkamen.com/_files/ugd/6dfc81_a8dcec9484cf4b7caa5a6fac644598ff.pdf#page=2","channel":"dine_in","prices":{"":1450}},
+        {"name":"Takoyaki","source_url":"https://www.ramenkamen.com/_files/ugd/6dfc81_a8dcec9484cf4b7caa5a6fac644598ff.pdf#page=2","channel":"dine_in","prices":{"":1550}}
+      ]
+    },
+    {
+      "id": "osm:node:1313004755",
+      "dishes": [
+        {"name":"Pepperoni Pizza","source_url":"https://papagiuseppes.com/menu/","channel":"published_menu","prices":{"":2200}},
+        {"name":"Lobster Ravioli","source_url":"https://papagiuseppes.com/menu/","channel":"published_menu","prices":{"":2900}},
+        {"name":"Chicken Parm","source_url":"https://papagiuseppes.com/menu/","channel":"published_menu","prices":{"":2800}},
+        {"name":"Fried Calamari","source_url":"https://papagiuseppes.com/menu/","channel":"published_menu","prices":{"":2100}}
+      ]
+    },
+    {
+      "id": "osm:node:12727136507",
+      "dishes": [
+        {"name":"Matcha Souffle Pancake","source_url":"https://www.flipperscanada.com/menus?menu=dinner-menu","channel":"published_menu","prices":{"":1900}},
+        {"name":"Fried Chicken and Waffle","source_url":"https://www.flipperscanada.com/menus?menu=dinner-menu","channel":"published_menu","prices":{"":2400}},
+        {"name":"Spinach and Mushroom Omelette","source_url":"https://www.flipperscanada.com/menus?menu=dinner-menu","channel":"published_menu","prices":{"":1900}}
+      ]
+    },
+    {
+      "id": "osm:node:11885207169",
+      "dishes": [
+        {"name":"Hummus","source_url":"https://eastteacan.com/wp-content/uploads/2026/10/ETC_MainDinnerMenu_2026_v36_Web.pdf","channel":"dine_in","prices":{"":1150}},
+        {"name":"Falafel","source_url":"https://eastteacan.com/wp-content/uploads/2026/10/ETC_MainDinnerMenu_2026_v36_Web.pdf","channel":"dine_in","prices":{"5 pieces":1200}},
+        {"name":"Lamb Shank Quzi","source_url":"https://eastteacan.com/wp-content/uploads/2026/10/ETC_MainDinnerMenu_2026_v36_Web.pdf","channel":"dine_in","prices":{"":3700}},
+        {"name":"Zaatar Flatbread","source_url":"https://eastteacan.com/wp-content/uploads/2026/10/ETC_MainDinnerMenu_2026_v36_Web.pdf","channel":"dine_in","prices":{"":1200}}
+      ]
+    },
+    {
+      "id": "osm:way:77039702",
+      "dishes": [
+        {"name":"Special Beef Pho","source_url":"https://phohung.ca/menu_items.csv","channel":"published_menu","prices":{"Regular":1400,"Large":1800}},
+        {"name":"Fried Pork and Shrimp Spring Rolls","source_url":"https://phohung.ca/menu_items.csv","channel":"published_menu","prices":{"Regular":800,"Large":1500}},
+        {"name":"Roasted Chicken with Rice","source_url":"https://phohung.ca/menu_items.csv","channel":"published_menu","prices":{"":1500}},
+        {"name":"Fish Sauce Chicken Wings with Sticky Rice","source_url":"https://phohung.ca/menu_items.csv","channel":"published_menu","prices":{"":1500}}
+      ]
+    }
+  ]
+}

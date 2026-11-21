@@ -12,6 +12,7 @@ import re
 import shutil
 import subprocess
 from time import perf_counter
+from typing import Awaitable, Callable
 from urllib.parse import urldefrag, urljoin, urlsplit
 
 import httpx
@@ -62,7 +63,10 @@ def sample_restaurants(rows: list[dict], count: int, seed: int) -> list[dict]:
     return list(chosen.values())
 
 
-async def probe(client: httpx.AsyncClient, row: dict, pdf_tool: str | None) -> dict:
+async def probe(
+    client: httpx.AsyncClient, row: dict, pdf_tool: str | None, *,
+    before_fetch: Callable[[str], Awaitable[None]] | None = None,
+) -> dict:
     pages = []
     issues: list[str] = []
     sources = Counter()
@@ -78,7 +82,7 @@ async def probe(client: httpx.AsyncClient, row: dict, pdf_tool: str | None) -> d
                 seen.add(url)
                 try:
                     final, kind, data, encoding = await _safe_fetch_menu_document(
-                        client, url, pdf_limit=PDF_LIMIT if pdf_tool else 0, host=host,
+                        client, url, pdf_limit=PDF_LIMIT if pdf_tool else 0, host=host, before_fetch=before_fetch,
                     )
                     if kind == "application/pdf" and pdf_tool:
                         page = await asyncio.to_thread(parse_menu_pdf, data, pdf_tool)

@@ -12,9 +12,9 @@ cities and measure the remaining database space before expanding.
 | Area | Current status |
 | --- | --- |
 | Restaurant listings | The hosted catalog has 7,856 browseable listings across Toronto and Mississauga. This includes seven branch-verified municipal listings. Six duplicate OSM records remain available to existing bookmarks and are hidden from new searches. |
-| Menu dishes | v0.2 includes a menu reader and 20 reviewed dishes across 10 restaurants. The dishes are in an evaluation file. The app has no live dish index yet. |
+| Menu dishes | Stage 3 adds a hosted index of 48 reviewed dishes across 12 locations, all with published prices. The first pass records a menu-source outcome for every browsable listing. |
 | Chat search | In a 28-query replay, searching the dish index first increased queries with a verified result from 7 to 13 and reduced simulated Places calls from 28 to 18. It also hid valid alternatives on three queries whenever it stopped after finding a local match. |
-| Storage | Hosted Postgres measured 15.05 MB after the import, up from 13.30 MB. The catalog table and indexes account for 1.72 MB. |
+| Storage | Hosted Postgres measured 16.35 MB after Stage 3, up from 13.30 MB before the catalog import. Stage 3's dish and source-check tables and indexes account for 1.26 MB. |
 
 The restaurant catalog and dish index are two different parts of the same
 project. We can finish the basic map and restaurant search while incrementally
@@ -100,19 +100,54 @@ pass can focus on the actual gaps.
 
 - [x] Build and test a reader for HTML menus, text PDFs, and supported ordering pages.
 - [x] Review 20 dishes across 10 restaurants, with source links and published prices.
-- [ ] Run a first pass across the two-city catalog and log which sources worked.
-- [ ] Aim for **one or two useful dishes** when a menu is hard to read. Keep up
-  to **10 distinct dishes** when we have good coverage. Usually keep one
-  representative per dish family before adding a second variant.
-- [ ] Store the verified dishes with the exact restaurant location, source, and check date.
-  Add a price only when the menu ties it to that item and portion. Label
-  pickup or delivery prices when applicable. Unknown prices can stay blank.
-- [ ] Keep the restaurant visible when we get zero dishes. Use its known details
-  for nearby, cuisine, and name searches.
+- [x] Run the first pass across all 7,856 browsable listings. Check the 1,967
+  listings with website links and record the 5,889 listings without one.
+- [x] Limit the index to **10 dishes per restaurant** and at most **two per
+  dish family**. Choose different dish families before retaining variations.
+- [x] Load reviewed dishes with the catalog ID, source URL, check date,
+  channel, and published CAD prices for the stated portions. The importer
+  supports unpriced dishes and explicitly labeled pickup and delivery prices.
+- [x] Keep listings with zero dishes available to nearby, cuisine, and name search.
 
-**Done when** every catalog listing has gone through the available source
-checks, and we can report separately how many have a website, a dish, and a
-priced dish. Menu coverage can improve after launch.
+| November 21, 2026 first pass | Listings |
+| --- | ---: |
+| Browsable catalog | 7,856 |
+| Website URL in the catalog | 1,967 |
+| Website yielded at least one automated candidate | 131 |
+| Website yielded at least two automated candidates | 124 |
+| Website yielded no readable dish and logged no fetch issue | 805 |
+| No candidate and at least one source issue | 1,031 |
+| No catalog website to check | 5,889 |
+| At least one stored, reviewed dish | 12 |
+| At least one stored, priced dish | 12 |
+
+The first pass attempted 1,827 distinct starting URLs. Of the 131 listings with
+candidates, 114 had readable HTML and 21 had readable PDFs. Four had both.
+Candidates can come from a shared site and need branch and price review before
+import. The source-issue log captures restrictions, timeouts, unsupported
+documents, and other fetch failures. A listing with no catalog website has no
+starting URL for this pass.
+
+The reviewed index covers six Toronto and six Mississauga locations.
+Targeted checks recovered distinct dishes from an official CSV, a text PDF,
+an image PDF, and HTML menus the automatic reader missed. The import stores
+selected dish facts and prices with links to the official menus. Menu copy,
+PDFs, and photos are excluded. For example, the Kamen source ties the CA$8
+price to three deep-fried gyoza and the CA$15.50 price to six grilled gyoza.
+[Reviewed seed](../data/gta-menu-reviewed.json) ·
+[Kamen menu, page two](https://www.ramenkamen.com/_files/ugd/6dfc81_a8dcec9484cf4b7caa5a6fac644598ff.pdf#page=2)
+
+| Stage 3 hosted storage | Bytes |
+| --- | ---: |
+| Whole database just before the menu import | 15,060,115 |
+| Whole database after the menu import | 16,346,259 |
+| Restaurant catalog and indexes | 1,728,512 |
+| Source check table and indexes | 1,179,648 |
+| Dish table and indexes | 81,920 |
+
+**Stage 3 complete for the first source pass and reviewed import.** Broader
+dish coverage still depends on finding websites for missing listings and
+reviewing the candidates. Chat integration starts in Stage 4.
 
 ## Stage 4 — Use the catalog and dishes in chat
 
@@ -149,7 +184,7 @@ cost of another city or richer coverage in the first two. [Supabase pricing](htt
 
 - [x] Measure the snapshot files. The starting file was about 0.65 MB and the expanded file is about 1.17 MB.
 - [x] Record hosted database usage before the refreshed import and after Stage 2.
-- [ ] Measure the catalog and menu tables with indexes after the first enrichment pass.
+- [x] Measure the catalog and menu tables with indexes after the first enrichment pass.
 - [ ] Report remaining space and decide whether to expand or improve coverage in the two cities.
 
 **Done when** there is a simple two-city report with the number of restaurants

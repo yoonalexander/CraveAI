@@ -282,10 +282,12 @@ def test_discovery_migration_upgrade_and_downgrade_on_an_isolated_database():
     from alembic.config import Config
     from sqlalchemy import inspect
     from backend.database import get_engine
-    from backend.models import CatalogRestaurant
+    from backend.models import CatalogDish, CatalogMenuCheck, CatalogRestaurant
     engine = get_engine()
     # Only new test tables are dropped; the fixture DB belongs to this test.
     DiscoverySignal.__table__.drop(engine); DiscoveryRefresh.__table__.drop(engine)
+    CatalogDish.__table__.drop(engine)
+    CatalogMenuCheck.__table__.drop(engine)
     CatalogRestaurant.__table__.drop(engine)
     # A migration invoked in-process must not disable the application's loggers.
     config = Config()
@@ -295,9 +297,11 @@ def test_discovery_migration_upgrade_and_downgrade_on_an_isolated_database():
     assert "discovery_signals" in inspect(engine).get_table_names()
     assert "ix_discovery_signals_region_expiry" in {index["name"] for index in inspect(engine).get_indexes("discovery_signals")}
     assert "ix_catalog_restaurants_lat_lng" in {index["name"] for index in inspect(engine).get_indexes("catalog_restaurants")}
+    assert {"catalog_dishes", "catalog_menu_checks"} <= set(inspect(engine).get_table_names())
     command.downgrade(config, "0003_profile_username")
     assert "discovery_signals" not in inspect(engine).get_table_names()
     assert "catalog_restaurants" not in inspect(engine).get_table_names()
+    assert {"catalog_dishes", "catalog_menu_checks"}.isdisjoint(inspect(engine).get_table_names())
     command.upgrade(config, "head")
 
 

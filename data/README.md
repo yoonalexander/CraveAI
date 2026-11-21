@@ -84,3 +84,24 @@ browseable catalog.
 
 See the [Stage 2 roadmap](../docs/toronto-mississauga-catalog-roadmap.md#stage-2--make-the-basic-catalog-work-in-the-app)
 for the hosted import counts and storage measurements.
+
+## Menu source checks and dish import
+
+The source pass checks catalog website URLs in batches and records a status
+for every active catalog ID. It reads public pages with a bounded site crawl,
+respects robots restrictions, and makes zero calls to Google Places or an AI
+model. Install `pdftotext` for the text-PDF pass. Restarting with the same
+report continues from the IDs already checked.
+
+```powershell
+python -m scripts.check_catalog_menus --output catalog-menu-checks.jsonl --checked-on YYYY-MM-DD
+python -m alembic upgrade head
+python -m scripts.import_catalog_menus --checks catalog-menu-checks.jsonl
+```
+
+The importer requires a report for the current active catalog. It stores the
+source check outcomes and loads dishes from [the reviewed seed](gta-menu-reviewed.json).
+The approved seed records menu facts and portion prices keyed to the catalog
+branch. Automated extraction counts help prioritize review. Refreshes of the
+restaurant catalog preserve these branch IDs. The new tables are available
+through the server database connection.
