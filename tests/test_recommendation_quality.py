@@ -325,10 +325,13 @@ def test_menu_parser_extracts_structured_menu_items_without_inventing_text():
     page = _parse_html(
         """
         <html><body><script type="application/ld+json">
-        {"@type":"Menu","hasMenuItem":[
-          {"@type":"MenuItem","name":"Hot & Sour Soup","description":"Spicy broth"},
-          {"@type":"MenuItem","name":"French Onion Soup","description":"Cheesy toast"}
-        ]}
+        [
+          {"@type":"Product","name":"Digital Gift Card"},
+          {"@type":"Menu","hasMenuItem":[
+            {"@type":"MenuItem","name":"Hot & Sour Soup","description":"Spicy broth"},
+            {"@type":"Product","name":"French Onion Soup","description":"Cheesy toast"}
+          ]}
+        ]
         </script></body></html>
         """
     )
@@ -337,6 +340,84 @@ def test_menu_parser_extracts_structured_menu_items_without_inventing_text():
         ("Hot & Sour Soup", "Spicy broth"),
         ("French Onion Soup", "Cheesy toast"),
     ]
+
+
+def test_menu_parser_does_not_assign_a_price_to_a_different_same_named_record():
+    page = _parse_html("""
+        <script type="application/ld+json">
+          {"@type":"MenuItem","name":"Soup","description":"Lunch cup"}
+        </script>
+        <div data-hook="item.root">
+          <span data-hook="item.name">Soup</span>
+          <span data-hook="item.description">Dinner bowl</span>
+          <span data-hook="item.price">$15</span>
+        </div>
+        <div data-hook="item.root">
+          <span data-hook="item.name">Rice Bowl</span>
+          <span data-hook="item.description">Lunch special</span>
+        </div>
+        <div data-hook="item.root">
+          <span data-hook="item.name">Rice Bowl</span>
+          <span data-hook="item.description">Dinner special</span>
+          <span data-hook="item.price">$17</span>
+        </div>
+    """)
+
+    assert page.menu_items == [("Soup", "Lunch cup"), ("Rice Bowl", "Lunch special")]
+    assert page.menu_prices == {}
+
+
+def test_menu_parser_keeps_visible_names_and_evidence_inside_their_dish_cards():
+    page = _parse_html("""
+        <div data-framer-name="text">
+          <div data-framer-name="Title"><h3>Beef Noodles</h3></div>
+          <div data-framer-name="description"><h3>S 15, M 20</h3><p>Broccoli and garlic</p><p>Garlic</p></div>
+          <div data-framer-name="Choice of meat"><h3>Choice of Meat</h3><p>Beef /</p><p>Pork</p></div>
+          <div data-framer-name="Choice of meat"><h3>Choice of Noodles:</h3><p>Rice noodles /</p><p>Wonton noodles</p></div>
+          <div data-framer-name="Note"><p>Spicy</p></div>
+        </div>
+        <div data-framer-name="text">
+          <div data-framer-name="Title"><h3>Clear Pork Soup</h3></div>
+          <div data-framer-name="description"><p>Clear broth</p></div>
+          <h3 aria-hidden="true">S 1, M 2</h3>
+          <div data-framer-name="Note" aria-hidden="true"><p>Spicy</p></div>
+        </div>
+        <article class="wrapper-menu-item">
+          <div class="menu-desc">
+            <h4><span class="menu-item__title-main">Chicken Noodles<em class="menu-item__title-alt">Alternate title</em></span></h4>
+            <p>Egg and bean sprouts</p>
+          </div>
+          <span class="menu-item__price">17.65</span>
+        </article>
+        <div data-hook="item.root">
+          <span data-hook="item.name">Matcha Pancake</span>
+          <span data-hook="item.description">Matcha cream</span>
+          <span data-hook="item.price">CA$19.50</span>
+        </div>
+        <div data-testid="mesh-container-content">
+          <h6 class="wixui-rich-text__text">Paper Dosa . . . $12.25</h6>
+          <p class="wixui-rich-text__text">Thin crisp dosa</p>
+        </div>
+        <p>Separate paragraph with potato filling</p>
+        <nav><h6 class="wixui-rich-text__text">Gift voucher . . . $25.00</h6></nav>
+    """)
+
+    assert page.menu_items == [
+        ("Beef Noodles", "Broccoli and garlic · Choice of Meat: Beef / Pork · Choice of Noodles: Rice noodles / Wonton noodles · Spicy"),
+        ("Clear Pork Soup", "Clear broth"),
+        ("Chicken Noodles", "Egg and bean sprouts"),
+        ("Matcha Pancake", "Matcha cream"),
+        ("Paper Dosa", "Thin crisp dosa"),
+    ]
+    assert {
+        name: [(price.amount_cents, price.option, price.currency) for price in prices]
+        for name, prices in page.menu_prices.items()
+    } == {
+        "beef noodles": [(1500, "Small", None), (2000, "Medium", None)],
+        "chicken noodles": [(1765, None, None)],
+        "matcha pancake": [(1950, None, "CAD")],
+        "paper dosa": [(1225, None, None)],
+    }
 
 
 def test_visible_menu_evidence_does_not_fuse_adjacent_dishes():

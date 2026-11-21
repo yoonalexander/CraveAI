@@ -1,0 +1,63 @@
+{
+  "checked_on": "2026-11-20",
+  "currency": "CAD",
+  "restaurants": [
+    {"id":"osm:node:1157114350","name":"555 Boat Noodles","city":"Toronto","address":"2 Grosvenor Street","website":"https://555noodles.com/","dishes":[
+      {"name":"Boat Noodles","source":"https://555noodles.com/noodle-soup","detail":"Spicy Thai noodle soup with beef, braised beef or pork.","prices":{"small":1500,"medium":2000}},
+      {"name":"Beef Rice Bowl","source":"https://555noodles.com/rice-bowl","detail":"Beef or braised beef over rice.","prices":{"small":1400,"medium":1900}}
+    ]},
+    {"id":"osm:node:5718263121","name":"Bangkok Garden","city":"Toronto","address":"18 Elm Street","website":"https://bangkokgarden.ca/","dishes":[
+      {"name":"Thai Wings","source":"https://bangkokgarden.ca/toronto-thai-food-menu/","detail":"Fried chicken wings with sweet sriracha.","prices":{"6 pieces":1285,"12 pieces":2400}},
+      {"name":"Spicy Garlic Beef","source":"https://bangkokgarden.ca/toronto-thai-food-menu/","detail":"Beef marinated with chili and garlic.","prices":{"":2995}}
+    ]},
+    {"id":"osm:node:14000002801","name":"Soos","city":"Toronto","address":"94 Ossington Avenue","website":"https://www.soostoronto.com/","dishes":[
+      {"name":"Scrumptious Cakes (4pc)","source":"https://www.soostoronto.com/food","detail":"Steamed rice cakes with salted radish and sambal.","prices":{"":1500}},
+      {"name":"Rendang Braised Beef","source":"https://www.soostoronto.com/food","detail":"Braised beef rib in coconut and galangal curry.","prices":{"":3800}}
+    ]},
+    {"id":"osm:node:2021650360","name":"Kingsway Fish & Chips","city":"Toronto","address":"3060 Bloor Street West","website":"https://kingswayfishandchips.com/","dishes":[
+      {"name":"Fish Tacos","source":"https://kingswayfishandchips.com/fish-dinners/","detail":"Halibut tacos with vegetables.","prices":{"":2490}},
+      {"name":"Seafood Platter","source":"https://kingswayfishandchips.com/fish-dinners/","detail":"Shrimp, scallops, halibut and fries.","prices":{"":4040}}
+    ]},
+    {"id":"osm:node:6205041887","name":"Byblos Downtown","city":"Toronto","address":"11 Duncan Street","website":"https://byblosdowntown.com/","dishes":[
+      {"name":"Crispy Stuffed Olives","source":"https://byblosdowntown.com/","detail":"Olives with feta and preserved lemon.","prices":{"":1400}},
+      {"name":"Tuna Tartare","source":"https://byblosdowntown.com/","detail":"Tuna with citrus tahini, watermelon and avocado.","prices":{"":2500}}
+    ]},
+    {"id":"osm:node:13203894286","name":"Le Lert","city":"Toronto","address":"27 Carlton Street","website":"https://lelert.ca/","dishes":[
+      {"name":"Classic Pad Thai","source":"https://lelert.ca/menu.html","detail":"Classic Pad Thai with tofu, dried shrimp and peanuts.","prices":{"":1900}},
+      {"name":"The Le Lert Double Truffle Burger","source":"https://lelert.ca/menu.html","detail":"Double beef burger with black truffle aioli.","prices":{"":2700}}
+    ]},
+    {"id":"osm:node:13668069846","name":"Mama Molinaro's Pizzeria","city":"Mississauga","address":"496 South Service Road","website":"https://mamamolinaros.ca/","dishes":[
+      {"name":"Caprese Salad","source":"https://mamamolinaros.ca/mississauga-mama-molinaro-s-pizzeria-food-menu","detail":"Tomatoes, mozzarella and basil.","prices":{"regular":1199,"large":1999}},
+      {"name":"Pepperoni","source":"https://mamamolinaros.ca/mississauga-mama-molinaro-s-pizzeria-food-menu","detail":"Pepperoni pizza with mozzarella.","prices":{"10 inch":1200,"12 inch":1425,"16 inch":1850,"party":2550}}
+    ]},
+    {"id":"osm:node:4203487489","name":"Udupi Madras Cafe","city":"Mississauga","address":"265 Enfield Place","website":"https://www.udupimadrascafe.ca/","dishes":[
+      {"name":"Masala Dosa","source":"https://www.udupimadrascafe.ca/dosas","detail":"Crisp dosa with spiced potato masala.","prices":{"":1045}},
+      {"name":"Medu Vada (2 PCS)","source":"https://www.udupimadrascafe.ca/menu","detail":"Fried lentil fritters with chutney and sambar.","prices":{"":799}}
+    ]},
+    {"id":"osm:node:3748566733","name":"Kamen Ramen","city":"Mississauga","address":"720 Burnhamthorpe Road West, Unit 1","website":"https://www.ramenkamen.com/","dishes":[
+      {"name":"Fiery Seafood Kamen","source":"https://www.ramenkamen.com/_files/ugd/6dfc81_a8dcec9484cf4b7caa5a6fac644598ff.pdf","detail":"Spicy seafood ramen with shrimp, squid, scallop and mussel.","prices":{"":2395}},
+      {"name":"Gyoza","source":"https://www.ramenkamen.com/_files/ugd/6dfc81_a8dcec9484cf4b7caa5a6fac644598ff.pdf","detail":"Japanese pork dumplings.","prices":{"grilled 6 pieces":1550,"deep-fried 6 pieces":1450,"deep-fried 3 pieces":800}}
+    ]},
+    {"id":"osm:way:77039702","name":"Phở Hưng","city":"Mississauga","address":"1195 Dundas Street East","website":"https://phohung.ca/","dishes":[
+      {"name":"Hung's Special Beef Rice Noodle Soup (Beef broth)","source":"https://phohung.ca/menu_items.csv","detail":"Beef pho with rare beef, brisket and beef balls.","prices":{"regular":1400,"large":1800}},
+      {"name":"Deep Fried Spring Rolls (with pork & shrimps)","source":"https://phohung.ca/menu_items.csv","detail":"Fried pork and shrimp spring rolls.","prices":{"regular":800,"large":1500}}
+    ]}
+  ],
+  "cases": [
+    {"id":"boat","query":"Spicy boat noodles under $18 near Grosvenor","near":0,"terms":["boat noodles","spicy"],"under":1800,"expected":[[0,0]]},
+    {"id":"wings","query":"Thai wings near Elm Street","near":1,"terms":["thai wings"],"expected":[[1,0]]},
+    {"id":"rendang","query":"Beef rendang near Ossington","near":2,"terms":["rendang","beef"],"expected":[[2,1]]},
+    {"id":"tacos","query":"Fish tacos under $26 in Kingsway","near":3,"terms":["fish tacos"],"under":2600,"expected":[[3,0]]},
+    {"id":"tartare","query":"Tuna tartare near Duncan Street","near":4,"terms":["tuna tartare"],"expected":[[4,1]]},
+    {"id":"burger","query":"Truffle burger under $30 near Carlton","near":5,"terms":["truffle burger"],"under":3000,"expected":[[5,1]]},
+    {"id":"caprese","query":"Regular caprese salad under $13 in Mississauga","near":6,"terms":["caprese salad"],"under":1300,"option":"regular","expected":[[6,0]]},
+    {"id":"dosa","query":"Potato masala dosa near Square One","near":7,"terms":["masala dosa","potato"],"expected":[[7,0]]},
+    {"id":"ramen","query":"Spicy seafood ramen in Mississauga","near":8,"terms":["seafood ramen","spicy"],"expected":[[8,0]]},
+    {"id":"pho","query":"Beef phở under $18 near Dundas East","near":9,"terms":["pho","beef"],"under":1800,"expected":[[9,0]]},
+    {"id":"large_pho","query":"Large beef phở under $18 near Dundas East","near":9,"terms":["pho","beef"],"under":1800,"option":"large","expected":[]},
+    {"id":"large_caprese","query":"Large caprese salad under $13 in Mississauga","near":6,"terms":["caprese salad"],"under":1300,"option":"large","expected":[]},
+    {"id":"over_budget_ramen","query":"Spicy seafood ramen under $20 in Mississauga","near":8,"terms":["seafood ramen","spicy"],"under":2000,"expected":[]},
+    {"id":"wrong_city","query":"Beef phở under $18 near Grosvenor","near":0,"terms":["pho","beef"],"under":1800,"expected":[]},
+    {"id":"index_miss","query":"Chicken Phad Thai near Elm Street","near":1,"terms":["chicken phad thai"],"fallback_expected":[{"restaurant":1,"dish":"Chicken Phad Thai"}],"expected":[]}
+  ]
+}

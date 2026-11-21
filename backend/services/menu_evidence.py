@@ -14,6 +14,7 @@ from urllib.parse import urljoin, urlparse
 
 import httpx
 
+from backend.services.menu_markup import MenuMarkupParser, MenuPrice
 from backend.services.recommendation_models import CravingIntent, EvidenceItem
 
 logger = logging.getLogger(__name__)
@@ -24,6 +25,7 @@ MAX_MENU_ITEMS_PER_CANDIDATE = 14
 MAX_RESPONSE_BYTES = 1_500_000
 MAX_REDIRECTS = 3
 FETCH_TIMEOUT_SECONDS = 5.0
+MENU_PDF_ASSET_HOSTS = {"static1.squarespace.com"}
 
 _SKIP_TAGS = {"script", "style", "svg", "noscript", "template"}
 _MENU_LINK_WORDS = ("menu", "order", "food", "dishes")
@@ -49,6 +51,8 @@ _STOPWORDS = {
 @dataclass
 class ParsedPage:
     menu_items: list[tuple[str, str]] = field(default_factory=list)
+    menu_prices: dict[str, tuple[MenuPrice, ...]] = field(default_factory=dict)
+    beverage_items: set[tuple[str, str]] = field(default_factory=set)
     visible_blocks: list[str] = field(default_factory=list)
     links: list[tuple[str, str]] = field(default_factory=list)
 
@@ -228,8 +232,18 @@ async def _safe_fetch_html(
     client: httpx.AsyncClient,
     url: str,
 ) -> tuple[str, str]:
+    final_url, _, content, encoding = await _safe_fetch_menu_document(client, url)
+    return final_url, content.decode(encoding, errors="replace")
+
+
+async def _safe_fetch_menu_document(
+    client: httpx.AsyncClient, url: str, *, pdf_limit: int = 0, host: str | None = None,
+) -> tuple[str, str, bytes, str]:
     current = url
     for _ in range(MAX_REDIRECTS + 1):
+        off_host = host and (urlparse(current).hostname or "").removeprefix("www.") != host
+        if off_host and not (pdf_limit and is_menu_pdf_asset(current)):
+            raise ValueError("Menu link changed host.")
         await _validate_public_url(current)
         async with client.stream("GET", current) as response:
             if response.status_code in {301, 302, 303, 307, 308}:
@@ -239,19 +253,35 @@ async def _safe_fetch_html(
                 current = urljoin(current, target)
                 continue
             response.raise_for_status()
-            content_type = (response.headers.get("content-type") or "").lower()
-            if "text/html" not in content_type and "application/xhtml+xml" not in content_type:
+            content_type = response.headers.get("content-type", "").partition(";")[0].strip().lower()
+            if off_host and content_type != "application/pdf":
+                raise ValueError("Menu asset was not a PDF.")
+            if content_type in {"text/html", "application/xhtml+xml"}:
+                limit = MAX_RESPONSE_BYTES
+            elif content_type == "application/pdf" and pdf_limit:
+                limit = pdf_limit
+            else:
                 raise ValueError(f"Unsupported menu content type: {content_type or 'unknown'}")
+            length = response.headers.get("content-length", "")
+            if length.isdecimal() and int(length) > limit:
+                raise ValueError("Menu page exceeded the response size limit.")
             chunks: list[bytes] = []
             size = 0
             async for chunk in response.aiter_bytes():
                 size += len(chunk)
-                if size > MAX_RESPONSE_BYTES:
+                if size > limit:
                     raise ValueError("Menu page exceeded the response size limit.")
                 chunks.append(chunk)
-            encoding = response.encoding or "utf-8"
-            return str(response.url), b"".join(chunks).decode(encoding, errors="replace")
+            return str(response.url), content_type, b"".join(chunks), response.encoding or "utf-8"
     raise ValueError("Menu page exceeded the redirect limit.")
+
+
+def is_menu_pdf_asset(url: str) -> bool:
+    parsed = urlparse(url)
+    return (
+        parsed.scheme == "https" and parsed.hostname in MENU_PDF_ASSET_HOSTS
+        and parsed.path.lower().endswith(".pdf")
+    )
 
 
 async def _validate_public_url(url: str) -> None:
@@ -300,26 +330,37 @@ def _is_public_ip(address: ipaddress.IPv4Address | ipaddress.IPv6Address) -> boo
     )
 
 
-def _parse_html(source: str) -> ParsedPage:
+def _parse_html(source: str, *, menu_context: bool = False) -> ParsedPage:
     parser = _MenuHTMLParser()
     parser.feed(source)
-    return parser.parsed()
+    page = parser.parsed()
+    markup = MenuMarkupParser(menu_context=menu_context)
+    markup.feed(source)
+    page.menu_items = _deduplicate_menu_items([*page.menu_items, *markup.items])
+    page.beverage_items = markup.beverage_items
+    visible_rows = set(markup.items)
+    page.menu_prices = {
+        name.casefold(): prices
+        for name, description in page.menu_items
+        if (name, description) in visible_rows and (prices := markup.prices.get(name.casefold()))
+    }
+    return page
 
 
-def _walk_json_ld(value: Any, items: list[tuple[str, str]]) -> None:
+def _walk_json_ld(value: Any, items: list[tuple[str, str]], *, in_menu_items: bool = False) -> None:
     if isinstance(value, dict):
         raw_type = value.get("@type")
         types = raw_type if isinstance(raw_type, list) else [raw_type]
-        if any(item_type in {"MenuItem", "Product"} for item_type in types):
-            name = _clean_text(str(value.get("name") or ""), 180)
-            description = _clean_text(str(value.get("description") or ""), 320)
-            if name:
-                items.append((name, description))
-        for child in value.values():
-            _walk_json_ld(child, items)
+        if "MenuItem" in types or (in_menu_items and "Product" in types):
+            name = value.get("name")
+            description = value.get("description")
+            if isinstance(name, str) and (name := _clean_text(name, 180)):
+                items.append((name, _clean_text(description, 320) if isinstance(description, str) else ""))
+        for key, child in value.items():
+            _walk_json_ld(child, items, in_menu_items=key == "hasMenuItem")
     elif isinstance(value, list):
         for child in value:
-            _walk_json_ld(child, items)
+            _walk_json_ld(child, items, in_menu_items=in_menu_items)
 
 
 def _select_menu_links(links: Sequence[tuple[str, str]], base_url: str) -> list[str]:
