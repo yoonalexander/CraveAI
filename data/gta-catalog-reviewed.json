@@ -1,5 +1,20 @@
 {
   "checked_on": "2026-11-21",
+  "relocated_listings": {
+    "osm:node:6205041886": {
+      "name": "Rasta Pasta",
+      "address": "50 Brant Street, Unit 9",
+      "lat": 43.64712367,
+      "lng": -79.39944948,
+      "website": "https://rastapasta.ca/",
+      "checked_on": "2026-11-22",
+      "source_urls": [
+        "https://rastapasta.ca/",
+        "https://www.waterworksfoodhall.com/restaurants/rasta-pasta",
+        "https://open.toronto.ca/dataset/dinesafe/"
+      ]
+    }
+  },
   "municipal_listings": [
     {"id":"toronto-licence:B71-3951485","name":"Crown & Dragon Pub","website":"https://crownanddragon.com/","phone":"416-927-7976","hours":"Mon–Tue 3–11 p.m.; Wed–Fri 11:30 a.m.–midnight; Sat noon–midnight; Sun noon–11 p.m."},
     {"id":"toronto-licence:B71-4188257","name":"Gusto 101","website":"https://www.gusto101.com/","cuisine":"italian","hours":"Mon–Fri 11:45 a.m.–11 p.m.; Sat 11 a.m.–11 p.m.; Sun 11 a.m.–10 p.m."},

@@ -13,12 +13,13 @@ from backend.database import get_engine
 from backend.models import CatalogRestaurant
 
 SNAPSHOT = Path(__file__).resolve().parents[1] / "data" / "gta-restaurants.json"
+ADMISSIONS = SNAPSHOT.with_name("gta-municipal-admissions.json")
 REFRESH_LOCK = "SELECT pg_advisory_xact_lock(482207106)"
 TABLE = CatalogRestaurant.__table__
 UPDATE_FIELDS = [column.name for column in TABLE.columns if column.name != "id"]
 
 
-def read_catalog_rows(snapshot_path: Path) -> list[dict]:
+def read_catalog_rows(snapshot_path: Path, admissions_path: Path = ADMISSIONS) -> list[dict]:
     snapshot = json.loads(snapshot_path.read_text(encoding="utf-8"))
     rows = snapshot["restaurants"]
     counts = snapshot["counts"]
@@ -40,6 +41,13 @@ def read_catalog_rows(snapshot_path: Path) -> list[dict]:
         if canonical not in by_id or canonical in duplicates or duplicate not in by_id:
             raise ValueError(f"Invalid duplicate mapping for {duplicate}")
         by_id[duplicate]["listed"] = False
+    for ident, relocation in reviewed.get("relocated_listings", {}).items():
+        if ident not in by_id or not by_id[ident]["listed"]:
+            raise ValueError(f"Invalid relocation for {ident}")
+        by_id[ident].update(
+            **{field: relocation[field] for field in ("name", "address", "lat", "lng", "website")},
+            checked_on=date.fromisoformat(relocation["checked_on"]),
+        )
     coverage = json.loads(SNAPSHOT.with_name("gta-restaurant-coverage.json").read_text(encoding="utf-8"))
     candidates = {row["id"]: row for city in coverage["cities"].values() for row in city["additions"]}
     for listing in reviewed["municipal_listings"]:
@@ -54,6 +62,22 @@ def read_catalog_rows(snapshot_path: Path) -> list[dict]:
             "listed": True,
             "checked_on": date.fromisoformat(reviewed["checked_on"]),
         })
+    if admissions_path.exists():
+        admissions = json.loads(admissions_path.read_text(encoding="utf-8"))
+        existing_ids = {row["id"] for row in rows}
+        for listing in admissions:
+            ident = listing["id"]
+            if ident in existing_ids:
+                raise ValueError(f"Repeated catalog admission {ident}")
+            candidate = candidates[ident]
+            rows.append({
+                **{field: candidate[field] for field in ("id", "lat", "lng", "address")},
+                "name": listing["name"], "address": listing.get("address", candidate["address"]),
+                "cuisine": "", "website": listing.get("website", ""),
+                "phone": None, "hours": None, "listed": True,
+                "checked_on": date.fromisoformat(listing["checked_on"]),
+            })
+            existing_ids.add(ident)
     return rows
 
 

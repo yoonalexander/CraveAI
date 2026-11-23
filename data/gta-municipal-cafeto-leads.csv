@@ -1,0 +1,197 @@
+candidate_id,name,address,cafeto_record,cafeto_address,patio_type,distance_m,current_city_records_match,cafeto_licence_active,review_status
+toronto-licence:B50-4064816,TRE MARI BAKERY,1311 ST CLAIR AVE W,R57-55A4600,1311 ST CLAIR AVE W,SIDEWALK CAFE,1.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B50-5307645,MEATY EATS,2288 BLOOR ST W,R57-5348121,2288 BLOOR ST W,SIDEWALK CAFE,1.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B50-5350714,NEON COMMISSARY,243 WALLACE AVE,R57-5562191,243 WALLACE AVE,SIDEWALK CAFE,11.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B50-5418004,PEDAAL INC,168 BRUNSWICK AVE,R57-5553908,168 BRUNSWICK AVE,SIDEWALK CAFE,11.5,True,True,Check current public meal service and catalog identity
+toronto-licence:B50-5595963,EAST FOOD MARKET,3809 KEELE ST,B50-5595963,3809 KEELE ST,TAKE-OUT OR RETAIL FOOD ESTABLISHMENT,0.1,True,True,Check current public meal service and catalog identity
+toronto-licence:B50-55A9578,HASTY MARKET,"300 SIMCOE ST, MAIN",B50-55A9578,"300 SIMCOE ST, MAIN",TAKE-OUT OR RETAIL FOOD ESTABLISHMENT,9.4,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-0203933,FRIAR & FIRKIN,160 JOHN ST,R57-2484292,160 JOHN ST,SIDEWALK CAFE,11.3,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-3240165,STARBUCKS COFFEE 4205,604 DANFORTH AVE,R57-2484024,604 DANFORTH AVE,SIDEWALK CAFE,1.0,False,True,Check current public meal service and catalog identity
+toronto-licence:B71-3249919,THE WALLY TAP AND GRILL,302 O'CONNOR DR,R57-2176353,302 O'CONNOR DR,SIDEWALK CAFE,1.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-3371269,OCCASIONS RESTAURANT,30 EASTWOOD RD,B71-3371269,30 EASTWOOD RD,EATING OR DRINKING ESTABLISHMENT,1.0,False,True,Check current public meal service and catalog identity
+toronto-licence:B71-3591290,RONNIE'S LOCAL 069,69 NASSAU ST,R57-2310497,69 NASSAU ST,SIDEWALK CAFE,9.8,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-3593001,SWAY-BAR,1335 ST CLAIR AVE W,R57-4851968,1335 ST CLAIR AVE W,SIDEWALK CAFE,1.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-3598841,CHICKEN IN THE KITCHEN,"5600 YONGE ST, FL1",B71-3598841,"5600 YONGE ST, FL1",EATING OR DRINKING ESTABLISHMENT,1.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-3834345,ROSA BRANCA CAFE,"816 COLLEGE ST, GROUND",R57-5508566,"816 COLLEGE ST, GROUND",SIDEWALK CAFE,20.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-3835690,MOONBEAN COFFEE COMPANY,30 ST ANDREW ST,R57-3835696,30 ST ANDREW ST,SIDEWALK CAFE,4.4,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-3962079,HOTEL GELATO,532 EGLINTON AVE W,R57-4177620,532 EGLINTON AVE W,SIDEWALK CAFE,5.5,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4074956,STOUT IRISH PUB,221 CARLTON ST,B71-4074956,221 CARLTON ST,EATING OR DRINKING ESTABLISHMENT,18.1,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4179117,BALZAC'S COFFEE,43 HANNA AVE,R57-5552143,43 HANNA AVE,SIDEWALK CAFE,79.3,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4180720,PATISSERIE LA CIGOGNE,1419 DANFORTH AVE,R57-5418000,1419 DANFORTH AVE,SIDEWALK CAFE,7.3,False,True,Check current public meal service and catalog identity
+toronto-licence:B71-4181111,BAR NEON,1226 BLOOR ST W,B71-4181111,1226 BLOOR ST W,EATING OR DRINKING ESTABLISHMENT,31.0,False,True,Check current public meal service and catalog identity
+toronto-licence:B71-4181652,RAILS AND ALES,1106 DANFORTH AVE,R57-4182193,1106 DANFORTH AVE,SIDEWALK CAFE,13.6,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4186362,"WAYSIDE SOCIAL EATERY, CAFE, BAR",901 DIXON RD,B71-4186362,901 DIXON RD,EATING OR DRINKING ESTABLISHMENT,1.5,False,True,Check current public meal service and catalog identity
+toronto-licence:B71-4186362,"WAYSIDE SOCIAL EATERY, CAFE, BAR",901 DIXON RD,B96-4186362,901 DIXON RD,EXPANDED EATING/DRINKING ESTABLISHMENT,1.5,False,True,Check current public meal service and catalog identity
+toronto-licence:B71-4187267,THE LOCAL,396 RONCESVALLES AVE,R57-4187675,396 RONCESVALLES AVE,SIDEWALK CAFE,12.4,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4188760,SQUIRE & FIRKIN,3335 BLOOR ST W,R57-4958143,3335 BLOOR ST W,SIDEWALK CAFE,1.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4290515,RED ROCKET COFFEE,1364 DANFORTH AVE,R57-4317084,1364 DANFORTH AVE,SIDEWALK CAFE,1.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4292522,BAR LE GERMAIN,75 BREMNER BLVD,R57-5201592,75 BREMNER BLVD,SIDEWALK CAFE,42.4,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4294163,GOLDEN WHEAT BAKERY CAFE,579 ROGERS RD,R57-4958164,579 ROGERS RD,SIDEWALK CAFE,6.2,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4294390,ZAZA ESPRESSO BAR,256 BERESFORD AVE,R57-4294674,256 BERESFORD AVE,SIDEWALK CAFE,5.9,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4298187,BRASS TAPS PIZZA PUB,934 COLLEGE ST,R57-2466386,934 COLLEGE ST,SIDEWALK CAFE,30.9,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4304322,BRYDENS,2455 BLOOR ST W,R57-4307945,2455 BLOOR ST W,SIDEWALK CAFE,0.9,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4304910,MENCHIE'S,518 ST CLAIR AVE W,B71-4304910,518 ST CLAIR AVE W,EATING OR DRINKING ESTABLISHMENT,0.3,False,True,Check current public meal service and catalog identity
+toronto-licence:B71-4305961,PARIS BAKERY & PASTRY,654 LANSDOWNE AVE,R57-4179911,654 LANSDOWNE AVE,SIDEWALK CAFE,9.1,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4307805,DINEEN COFFEE CO,140 YONGE ST,R57-5003715,140 YONGE ST,SIDEWALK CAFE,0.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4307805,DINEEN COFFEE CO,140 YONGE ST,R57-5626697,140 YONGE ST,SIDEWALK CAFE,0.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4311702,CALEDONIA BAKERY & PASTRY,1492 ST CLAIR AVE W,R57-5641639,1492 ST CLAIR AVE W,SIDEWALK CAFE,0.9,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4311702,CALEDONIA BAKERY & PASTRY,1492 ST CLAIR AVE W,B71-4311702,1492 ST CLAIR AVE W,EATING OR DRINKING ESTABLISHMENT,0.9,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4418112,MOON LIGHT PUB,1162 DANFORTH AVE,R57-4418970,1162 DANFORTH AVE,SIDEWALK CAFE,1.4,False,True,Check current public meal service and catalog identity
+toronto-licence:B71-4421065,PARISCO CAFE,"215 FORT YORK BLVD, #8",B71-4421065,"215 FORT YORK BLVD, #8",EATING OR DRINKING ESTABLISHMENT,27.4,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4422046,BAR RAVAL,505 COLLEGE ST,R57-4422217,505 COLLEGE ST,SIDEWALK CAFE,22.9,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4422847,CONTRA CAFE,1028 SHAW ST,R57-4423107,1028 SHAW ST,SIDEWALK CAFE,18.9,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4423345,SECOND CUP,355 DANFORTH AVE,R57-4535147,355 DANFORTH AVE,SIDEWALK CAFE,13.5,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4426988,E11EVEN,"15 YORK ST, C",B71-4426988,"15 YORK ST, C",EATING OR DRINKING ESTABLISHMENT,94.9,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4426988,E11EVEN,"15 YORK ST, C",B96-4426988,"15 YORK ST, C",EXPANDED EATING/DRINKING ESTABLISHMENT,94.9,True,False,Check current public meal service and catalog identity
+toronto-licence:B71-4427152,JAYNE'S GOURMET CATERING,3104 DUNDAS ST W,R57-5415387,3104 DUNDAS ST W,SIDEWALK CAFE,1.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4428049,CHURCH STREET ESPRESSO,585 CHURCH ST,R57-4532858,585 CHURCH ST,SIDEWALK CAFE,0.9,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4430203,NORTHERN BELLE,913 DUNDAS ST W,R57-4430656,913 DUNDAS ST W,SIDEWALK CAFE,5.9,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4430347,QUEEN STREET WAREHOUSE,232 QUEEN ST W,R57-4430984,232 QUEEN ST W,SIDEWALK CAFE,17.6,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4431558,SPORTS CAFE CHAMPIONS,2839 EGLINTON AVE E,B71-4431558,2839 EGLINTON AVE E,EATING OR DRINKING ESTABLISHMENT,1.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4431558,SPORTS CAFE CHAMPIONS,2839 EGLINTON AVE E,B96-4431558,2839 EGLINTON AVE E,EXPANDED EATING/DRINKING ESTABLISHMENT,1.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4532048,REAL FRUIT BUBBLE TEA,"2301 BRIMLEY RD, B01145A",B71-4532048,"2301 BRIMLEY RD, B01145A",EATING OR DRINKING ESTABLISHMENT,1.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4532628,TRATTORIA MERCATTO,1 DUNDAS ST W,R57-4176877,1 DUNDAS ST W,SIDEWALK CAFE,95.9,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4533222,TRINITY COMMON,303 AUGUSTA AVE,R57-4533227,303 AUGUSTA AVE,SIDEWALK CAFE,20.7,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4534774,FREE SPIRIT @ RIVERDALE HUB,1326 GERRARD ST E,R57-4538000,1326 GERRARD ST E,SIDEWALK CAFE,0.9,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4536371,KRAVE COFFEE,"781 ST CLAIR AVE W, #2",B71-4536371,"781 ST CLAIR AVE W, #2",EATING OR DRINKING ESTABLISHMENT,1.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4537977,BASKIN-ROBBINS,552 DANFORTH AVE,R57-2461415,552 DANFORTH AVE,SIDEWALK CAFE,5.8,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4542279,ALLEN'S,143 DANFORTH AVE,R57-4542922,143 DANFORTH AVE,SIDEWALK CAFE,0.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4542279,ALLEN'S,143 DANFORTH AVE,B71-4542279,143 DANFORTH AVE,EATING OR DRINKING ESTABLISHMENT,0.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4543845,SHOELESS JOE'S SPORTS GRILL,"1980 ST CLAIR AVE W, #105",R57-4645955,"1980 ST CLAIR AVE W, #105",SIDEWALK CAFE,6.8,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4543845,SHOELESS JOE'S SPORTS GRILL,"1980 ST CLAIR AVE W, #105",B71-4543845,"1980 ST CLAIR AVE W, #105",EATING OR DRINKING ESTABLISHMENT,6.8,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4647309,CAFE ROUGE PATISSERIE,2898 BLOOR ST W,R57-5202664,2898 BLOOR ST W,SIDEWALK CAFE,7.1,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4648350,BAR REYNA,158 CUMBERLAND ST,B71-4648350,158 CUMBERLAND ST,EATING OR DRINKING ESTABLISHMENT,1.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4657652,HANNAH'S CAFE AND BAKERY,1822 BLOOR ST W,B71-4657652,1822 BLOOR ST W,EATING OR DRINKING ESTABLISHMENT,26.8,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4675591,LOCALS ONLY,"589 KING ST W, LOWER LEV",R57-5613397,"589 KING ST W, LOWER LEV",SIDEWALK CAFE,11.7,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4678753,LEELA INDIAN FOOD BAR,"1386 GERRARD ST E, #101",R57-5332346,"1386 GERRARD ST E, #101",SIDEWALK CAFE,1.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4683478,SECOND CUP,"33 BAY ST, #39B",B71-4683478,"33 BAY ST, #39B",EATING OR DRINKING ESTABLISHMENT,54.0,False,True,Check current public meal service and catalog identity
+toronto-licence:B71-4704217,GODSPEED BREWERY,242 COXWELL AVE,B71-4704217,242 COXWELL AVE,EATING OR DRINKING ESTABLISHMENT,4.2,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4706266,CHEZ NOUS WINE BAR,798 QUEEN ST E,R57-4706890,798 QUEEN ST E,SIDEWALK CAFE,11.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4714621,RORSCHACH BREWING CO.,1001 EASTERN AVE,B71-4714621,1001 EASTERN AVE,EATING OR DRINKING ESTABLISHMENT,1.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4800397,SECOND CUP,255 FRONT ST W,B71-4800397,255 FRONT ST W,EATING OR DRINKING ESTABLISHMENT,75.4,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4802968,DINEEN OUTPOST,1042 GERRARD ST E,R57-4839416,1042 GERRARD ST E,SIDEWALK CAFE,1.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4804135,SOFIA,99 YORKVILLE AVE,B71-4804135,99 YORKVILLE AVE,EATING OR DRINKING ESTABLISHMENT,1.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4807652,LA SALA RESTAURANTE,"1975 QUEEN ST E, A",R57-4826539,"1975 QUEEN ST E, A",SIDEWALK CAFE,1.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4811004,DESSERT LADY CAFE & BAKERY,"7 ST THOMAS ST, #105 & 206",R57-4834936,"7 ST THOMAS ST, #105 & 206",SIDEWALK CAFE,3.2,False,True,Check current public meal service and catalog identity
+toronto-licence:B71-4814869,CAFE SERANO,1055 PAPE AVE,R57-4925563,1055 PAPE AVE,SIDEWALK CAFE,1.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4837126,SOHO HOUSE TORONTO PARTNERSHIP,180 UNIVERSITY AVE,R57-5550986,180 UNIVERSITY AVE,SIDEWALK CAFE,4.6,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4839023,AROMA ESPRESSO BAR,20 WELLINGTON ST E,R57-5314954,20 WELLINGTON ST E,SIDEWALK CAFE,4.4,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4889164,THE LAST TEMPTATION,12 KENSINGTON AVE,R57-4889166,12 KENSINGTON AVE,SIDEWALK CAFE,15.9,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4906968,BAR ETC,"1036 GERRARD ST E, MAIN FLOOR",R57-5552774,"1036 GERRARD ST E, MAIN FLOOR",SIDEWALK CAFE,0.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4929457,FOX & FIDDLE,535 DANFORTH AVE,R57-4929466,535 DANFORTH AVE,SIDEWALK CAFE,13.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4933498,KINTON RAMEN,1 YORK ST,B71-4933498,1 YORK ST,EATING OR DRINKING ESTABLISHMENT,0.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4933793,SCORE ON KING,107 KING ST E,B71-4933793,107 KING ST E,EATING OR DRINKING ESTABLISHMENT,14.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4933837,CARBONIC COFFEE,"37 BALDWIN ST, MAIN",R57-5209976,"37 BALDWIN ST, MAIN",SIDEWALK CAFE,16.3,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4940530,STARBUCKS COFFEE,23 LESLIE ST,B71-4940530,23 LESLIE ST,EATING OR DRINKING ESTABLISHMENT,1.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4961219,BAR POET,1090 QUEEN ST W,R57-5319597,1090 QUEEN ST W,SIDEWALK CAFE,25.1,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4976208,NEO COFFEE BAR,"770 BAY ST, #2-3",B71-4976208,"770 BAY ST, #2-3",EATING OR DRINKING ESTABLISHMENT,1.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4979417,THE ROASTED NUT,768 QUEEN ST W,R57-5214653,768 QUEEN ST W,SIDEWALK CAFE,16.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4984661,ID LOVE RESTAURANT,"21 SIGNAL HILL AVE, #1",B71-4984661,"21 SIGNAL HILL AVE, #1",EATING OR DRINKING ESTABLISHMENT,0.8,False,True,Check current public meal service and catalog identity
+toronto-licence:B71-4987951,CLAUDIA'S COFFEE,3079 DUNDAS ST W,R57-5006923,3079 DUNDAS ST W,SIDEWALK CAFE,1.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4992586,AROMA ESPRESSO BAR,51 LOWER SIMCOE ST,B71-4992586,51 LOWER SIMCOE ST,EATING OR DRINKING ESTABLISHMENT,1.1,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-4992590,PADARIA TORONTO,5 MANOR RD E,R57-5577827,5 MANOR RD E,SIDEWALK CAFE,1.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5012485,THE GELATO SHOP,75 YORKVILLE AVE,B71-5012485,75 YORKVILLE AVE,EATING OR DRINKING ESTABLISHMENT,1.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5038719,FIESTA GARIBALDI,"9 MILVAN DR, #7B",B71-5038719,"9 MILVAN DR, #7B",EATING OR DRINKING ESTABLISHMENT,1.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5047575,THE BLACK PONY CAFE AND SNACK BAR,1481 GERRARD ST E,R57-5311922,1481 GERRARD ST E,SIDEWALK CAFE,0.9,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5105199,THE ARCH CAFE,293 AUGUSTA AVE,R57-5633737,293 AUGUSTA AVE,SIDEWALK CAFE,1.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5106697,ZAZA ESPRESSO BAR AND GELATO,2366 BLOOR ST W,R57-5203095,2366 BLOOR ST W,SIDEWALK CAFE,10.4,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5113042,GREY TIGER,1190 BLOOR ST W,R57-5209721,1190 BLOOR ST W,SIDEWALK CAFE,0.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5117076,JIMMY'S COFFEE,806 QUEEN ST E,B71-5117076,806 QUEEN ST E,EATING OR DRINKING ESTABLISHMENT,0.9,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5119745,GLADSTONE HOUSE,1214 QUEEN ST W,R57-5425334,1214 QUEEN ST W,SIDEWALK CAFE,27.1,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5140213,SAVING GIGI,859 BLOOR ST W,R57-5532456,859 BLOOR ST W,SIDEWALK CAFE,15.3,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5144511,FOUND COFFEE,189 SHAW ST,R57-5201680,189 SHAW ST,SIDEWALK CAFE,1.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5145443,BASKIN ROBBINS,2534 BAYVIEW AVE,B71-5145443,2534 BAYVIEW AVE,EATING OR DRINKING ESTABLISHMENT,0.9,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5200279,THE GOOD NEIGHBOUR,238 ANNETTE ST,R57-5200814,238 ANNETTE ST,SIDEWALK CAFE,1.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5200436,BLUEBIRD BAR,2072 DUNDAS ST W,B71-5200436,2072 DUNDAS ST W,EATING OR DRINKING ESTABLISHMENT,7.1,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5201114,MAMA'S LIQUOR & LOUNGE,1602 DUNDAS ST W,B71-5201114,1602 DUNDAS ST W,EATING OR DRINKING ESTABLISHMENT,0.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5201298,FOOD & LIQUOR,1610 QUEEN ST W,B71-5201298,1610 QUEEN ST W,EATING OR DRINKING ESTABLISHMENT,18.2,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5209949,TRUE HISTORY BREWING,1154 ST CLAIR AVE W,R57-5222166,1154 ST CLAIR AVE W,SIDEWALK CAFE,16.4,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5214050,SUNNY'S CHINESE,"60 KENSINGTON AVE, #11-14",B71-5214050,"60 KENSINGTON AVE, #11-14",EATING OR DRINKING ESTABLISHMENT,1.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5214597,NADEGE PATISSERIE,780 QUEEN ST W,R57-5634121,780 QUEEN ST W,SIDEWALK CAFE,17.7,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5220143,LE CONCILIABULE LAB,350 BERKELEY ST,R57-5335241,350 BERKELEY ST,SIDEWALK CAFE,1.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5224240,AU PAIN DORE,81 FRONT ST E,R57-5606441,81 FRONT ST E,SIDEWALK CAFE,19.9,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5230680,MIZZICA GELATERIA & CAFE,307 QUEEN ST W,R57-5460696,307 QUEEN ST W,SIDEWALK CAFE,21.2,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5231892,NO.10 DEAN,200 REDPATH AVE,B71-5231892,200 REDPATH AVE,EATING OR DRINKING ESTABLISHMENT,0.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5240186,LA PARRILLA,"5025 STEELES AVE W, #3",B71-5240186,"5025 STEELES AVE W, #3",EATING OR DRINKING ESTABLISHMENT,1.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5243916,NEO COFFEE BAR,61 SPADINA AVE,B71-5243916,61 SPADINA AVE,EATING OR DRINKING ESTABLISHMENT,0.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5302095,JIMMY'S COFFEE,107 PORTLAND ST,R57-5557162,107 PORTLAND ST,SIDEWALK CAFE,5.7,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5303387,PURPLE PENGUIN CAFE,889 QUEEN ST E,R57-5411874,889 QUEEN ST E,SIDEWALK CAFE,12.3,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5303824,BONJOUR BRIOCHE BAKERY CAFE,812 QUEEN ST E,R57-5510870,812 QUEEN ST E,SIDEWALK CAFE,0.9,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5304733,BAR SUGO,1279 BLOOR ST W,R57-5327303,1279 BLOOR ST W,SIDEWALK CAFE,1.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5308441,SIEMPRE RESTAURANT,"352 FRONT ST W, #105-106",B71-5308441,"352 FRONT ST W, #105-106",EATING OR DRINKING ESTABLISHMENT,15.6,False,True,Check current public meal service and catalog identity
+toronto-licence:B71-5318509,THE FREDERICK/THE CHASE,10 TEMPERANCE ST,R57-5342130,10 TEMPERANCE ST,SIDEWALK CAFE,0.1,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5318509,THE FREDERICK/THE CHASE,10 TEMPERANCE ST,B71-5318509,10 TEMPERANCE ST,EATING OR DRINKING ESTABLISHMENT,0.1,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5323090,MADERITECOFFEE,68 WALES AVE,R57-5435113,68 WALES AVE,SIDEWALK CAFE,0.9,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5327358,LADYBUG WINE BAR,510 KING ST E,B71-5327358,510 KING ST E,EATING OR DRINKING ESTABLISHMENT,18.1,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5329038,SICILIAN SIDEWALK CAFE,710 COLLEGE ST,R57-5514401,710 COLLEGE ST,SIDEWALK CAFE,25.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5330159,EHWA UPTOWN,4866 YONGE ST,R57-5430405,4866 YONGE ST,SIDEWALK CAFE,1.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5332158,MANGAL KEBAB HOUSE,"1585 WARDEN AVE, #3 & 4",B71-5332158,"1585 WARDEN AVE, #3 & 4",EATING OR DRINKING ESTABLISHMENT,1.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5333373,FRESH,348 DANFORTH AVE,R57-5347239,348 DANFORTH AVE,SIDEWALK CAFE,18.6,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5333960,THE OLD YORK TAVERN,167 NIAGARA ST,R57-5444209,167 NIAGARA ST,SIDEWALK CAFE,24.4,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5334774,RACHEL'S COFFEEHOUSE,2011 YONGE ST,R57-5347741,2011 YONGE ST,SIDEWALK CAFE,1.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5339930,LA PLUME/BONNE NUIT,"455 WELLINGTON ST W, UG02",R57-5430768,"455 WELLINGTON ST W, UG02",SIDEWALK CAFE,30.5,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5339930,LA PLUME/BONNE NUIT,"455 WELLINGTON ST W, UG02",B71-5339930,"455 WELLINGTON ST W, UG02",EATING OR DRINKING ESTABLISHMENT,30.5,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5340071,AERA,"8 SPADINA AVE, #3800",B71-5340071,"8 SPADINA AVE, #3800",EATING OR DRINKING ESTABLISHMENT,1.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5340628,BRIDGETTE BAR,423 WELLINGTON ST W,R57-5424983,423 WELLINGTON ST W,SIDEWALK CAFE,0.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5340927,THE DORSET,455 WELLINGTON ST W,R57-5425354,455 WELLINGTON ST W,SIDEWALK CAFE,30.5,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5343711,SECOND CUP COFFEE,415 SPADINA RD,R57-5544725,415 SPADINA RD,SIDEWALK CAFE,1.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5349698,LIU LOQUM ATELIER,533 COLLEGE ST,R57-5411373,533 COLLEGE ST,SIDEWALK CAFE,33.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5358350,L'ESPRESSO BAR MERCURIO,"321 BLOOR ST W, A",B71-5358350,"321 BLOOR ST W, A",EATING OR DRINKING ESTABLISHMENT,24.2,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5363440,AROMA ESPRESSO BAR,2040 AVENUE RD,R57-5420144,2040 AVENUE RD,SIDEWALK CAFE,1.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5371405,PRIVILEGE T O,1395 DANFORTH AVE,R57-5657234,1395 DANFORTH AVE,SIDEWALK CAFE,1.0,False,True,Check current public meal service and catalog identity
+toronto-licence:B71-5373364,SWEAT & TONIC,"486 FRONT ST W, SF 32 & 33",B71-5373364,"486 FRONT ST W, SF 32 & 33",EATING OR DRINKING ESTABLISHMENT,0.1,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5404308,LOW BAR,1426 BLOOR ST W,B71-5404308,1426 BLOOR ST W,EATING OR DRINKING ESTABLISHMENT,22.8,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5421397,MUSOSHIN HARBORD,130 HARBORD ST,R57-5645616,130 HARBORD ST,SIDEWALK CAFE,0.9,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5422478,LYLA,60 SUDBURY ST,B71-5422478,60 SUDBURY ST,EATING OR DRINKING ESTABLISHMENT,16.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5422608,PUR & SIMPLE,"636 DIXON RD, #1",B71-5422608,"636 DIXON RD, #1",EATING OR DRINKING ESTABLISHMENT,1.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5425663,AROMA ESPRESSO BAR,55 CHARLES ST W,B71-5425663,55 CHARLES ST W,EATING OR DRINKING ESTABLISHMENT,1.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5430775,CHAMBERLAINS PONY BAR,583 KING ST W,R57-5458990,583 KING ST W,SIDEWALK CAFE,0.9,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5432291,SCORE ON QUEEN,298 QUEEN ST W,R57-5445906,298 QUEEN ST W,SIDEWALK CAFE,8.6,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5434819,THE BERCZY TAVERN,69 FRONT ST E,R57-5541846,69 FRONT ST E,SIDEWALK CAFE,19.9,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5442002,3 MARIACHIS (ESPLANADE),"140 THE ESPLANADE, A",B71-5442002,"140 THE ESPLANADE, A",EATING OR DRINKING ESTABLISHMENT,19.3,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5442161,SHRINKING VIOLET,828 BLOOR ST W,R57-5449223,828 BLOOR ST W,SIDEWALK CAFE,0.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5443997,URBAN MAHARAJA'S,"22 THE ESPLANADE, CU1",R57-5558274,"22 THE ESPLANADE, CU1",SIDEWALK CAFE,4.5,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5450864,THIRSTY AND MISERABLE,2102 DUNDAS ST W,B71-5450864,2102 DUNDAS ST W,EATING OR DRINKING ESTABLISHMENT,16.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5455198,PENNIES,667 COLLEGE ST,R57-5481664,667 COLLEGE ST,SIDEWALK CAFE,3.5,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5459639,OCCHIOLINO PASTIFICIO,499 BATHURST ST,B71-5459639,499 BATHURST ST,EATING OR DRINKING ESTABLISHMENT,1.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5459944,ISLE OF COFFEE,745 QUEEN ST E,B71-5459944,745 QUEEN ST E,EATING OR DRINKING ESTABLISHMENT,0.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5459952,LOS GYROS,500 QUEEN ST E,R57-5554902,500 QUEEN ST E,SIDEWALK CAFE,11.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5462942,CURATE CAFE,"989 EGLINTON AVE W, #2",B71-5462942,"989 EGLINTON AVE W, #2",EATING OR DRINKING ESTABLISHMENT,1.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5475385,PLANTA,1221 BAY ST,R57-5485641,1221 BAY ST,SIDEWALK CAFE,1.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5481340,BOUTIQUE BAR,553 CHURCH ST,B71-5481340,553 CHURCH ST,EATING OR DRINKING ESTABLISHMENT,1.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5485476,SONNDR CAFE,1068 DUNDAS ST W,R57-5556011,1068 DUNDAS ST W,SIDEWALK CAFE,1.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5500161,CHAO LAY,809 ST CLAIR AVE W,B71-5500161,809 ST CLAIR AVE W,EATING OR DRINKING ESTABLISHMENT,1.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5502888,NORD LYON,250 QUEEN ST W,R57-5526369,250 QUEEN ST W,SIDEWALK CAFE,29.3,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5520003,THE PEACHY,618 YONGE ST,R57-5668148,618 YONGE ST,SIDEWALK CAFE,8.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5527620,ONE GRAM BY PRIMO,466 DANFORTH AVE,R57-5567032,466 DANFORTH AVE,SIDEWALK CAFE,0.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5530717,PIQUETTE WINE BAR,1084 QUEEN ST W,B71-5530717,1084 QUEEN ST W,EATING OR DRINKING ESTABLISHMENT,1.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5531304,THE NICE SLICE,196 BORDEN ST,R57-5553504,196 BORDEN ST,SIDEWALK CAFE,6.6,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5533260,CAPHELIA COFFEE,2 IRWIN AVE,R57-5540087,2 IRWIN AVE,SIDEWALK CAFE,1.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5537691,KAWARTHA DAIRY,888 DANFORTH AVE,R57-5557756,888 DANFORTH AVE,SIDEWALK CAFE,1.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5538728,PANTRY,613 KING ST W,R57-5619045,613 KING ST W,SIDEWALK CAFE,1.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5553506,THE HARBORD HOUSE,"124 HARBORD ST, FL 1",R57-5553535,"124 HARBORD ST, FL 1",SIDEWALK CAFE,21.2,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5553506,THE HARBORD HOUSE,"124 HARBORD ST, FL 1",B71-5553506,"124 HARBORD ST, FL 1",EATING OR DRINKING ESTABLISHMENT,21.2,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5553815,FOX AND JOHN'S KITCHEN AND BAR,3527 LAKE SHORE BLVD W,R57-5593937,3527 LAKE SHORE BLVD W,SIDEWALK CAFE,1.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5556760,KIDULTLAND CAFE,1091 QUEEN ST E,B71-5556760,1091 QUEEN ST E,EATING OR DRINKING ESTABLISHMENT,1.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5569324,HOTBLACK COFFEE,"245 QUEEN ST W, #4",B71-5569324,"245 QUEEN ST W, #4",EATING OR DRINKING ESTABLISHMENT,1.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5583012,KOST,"80 BLUE JAYS WAY, #44 FL",B71-5583012,"80 BLUE JAYS WAY, #44 FL",EATING OR DRINKING ESTABLISHMENT,69.4,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5586057,MUNDO SPORTS BAR LOUNGE,"2560 FINCH AVE W, #3",B71-5586057,"2560 FINCH AVE W, #3",EATING OR DRINKING ESTABLISHMENT,0.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5586641,SISTER SISTER COFFEE BAR,"49 SPADINA AVE, M100",R57-5638907,"49 SPADINA AVE, M100",SIDEWALK CAFE,0.9,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5590501,ROOMS COFFEE,17 BALDWIN ST,R57-5545745,17 BALDWIN ST,SIDEWALK CAFE,9.1,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5593453,DHARMAYUG KATHIYAWADI FOOD,"6923 STEELES AVE W, #4",B71-5593453,"6923 STEELES AVE W, #4",EATING OR DRINKING ESTABLISHMENT,1.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5595398,ANIMA ROMANA ITALIAN BAKERY,149 MAIN ST,R57-5633883,149 MAIN ST,SIDEWALK CAFE,1.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5599515,YELLOW FLOWER,721 PALMERSTON AVE,B71-5599515,721 PALMERSTON AVE,EATING OR DRINKING ESTABLISHMENT,19.5,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5601596,BUSAN DECK,4914 YONGE ST,B71-5601596,4914 YONGE ST,EATING OR DRINKING ESTABLISHMENT,1.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5602796,AYOKA,1416 BAYVIEW AVE,B71-5602796,1416 BAYVIEW AVE,EATING OR DRINKING ESTABLISHMENT,9.2,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5608351,ROXTON PUBLIC HOUSE,1112 DUNDAS ST W,R57-5652308,1112 DUNDAS ST W,SIDEWALK CAFE,37.1,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5611764,GOOD SORT,1057 ST CLAIR AVE W,R57-5643194,1057 ST CLAIR AVE W,SIDEWALK CAFE,0.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5611781,VINTAGE CONSERVATORY,224 KING ST W,B71-5611781,224 KING ST W,EATING OR DRINKING ESTABLISHMENT,0.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5611791,TREROSE BAKERY,2098 KIPLING AVE,B71-5611791,2098 KIPLING AVE,EATING OR DRINKING ESTABLISHMENT,1.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5624603,BYND COFFEE BAR,"338 ADELAIDE ST W, #2",B71-5624603,"338 ADELAIDE ST W, #2",EATING OR DRINKING ESTABLISHMENT,0.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5633873,LA LA BAKESHOP,5459 YONGE ST,B71-5633873,5459 YONGE ST,EATING OR DRINKING ESTABLISHMENT,0.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5634684,LA TAVOLA RISTORANTE,1943 AVENUE RD,B71-5634684,1943 AVENUE RD,EATING OR DRINKING ESTABLISHMENT,0.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5634966,SKOOM,197 KING ST E,B71-5634966,197 KING ST E,EATING OR DRINKING ESTABLISHMENT,1.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5638927,THE INN CAFE,"1416 GERRARD ST E, REAR",R57-5643748,"1416 GERRARD ST E, REAR",SIDEWALK CAFE,0.1,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5642728,THE HARP TAVERN,180 EGLINTON AVE E,B71-5642728,180 EGLINTON AVE E,EATING OR DRINKING ESTABLISHMENT,1.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5663146,LUMOS CAFE,106 HARBORD ST,B71-5663146,106 HARBORD ST,EATING OR DRINKING ESTABLISHMENT,0.0,True,True,Check current public meal service and catalog identity
+toronto-licence:B71-5666653,CASA MIA DELICATESSEN FINE FOODS,1985 QUEEN ST E,B71-5666653,1985 QUEEN ST E,EATING OR DRINKING ESTABLISHMENT,1.0,True,True,Check current public meal service and catalog identity

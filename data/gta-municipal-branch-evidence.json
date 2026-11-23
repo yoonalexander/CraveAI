@@ -1,0 +1,115 @@
+{
+  "toronto-licence:B71-5618041": {
+    "outcome": "already_listed",
+    "related_id": "osm:node:3288799088",
+    "reason": "The operator uses Tenach and Tenoch for the restaurant at 933 St Clair Avenue West. The existing Tenoch pin is eight metres from the municipal coordinates.",
+    "source_url": "https://www.tenachto.ca/about-us"
+  },
+  "mississauga-directory-2025:14960": {
+    "outcome": "supported_addition",
+    "reason": "The operator publishes its street-food menu and Mississauga location at 3535 Odyssey Drive.",
+    "source_url": "https://www.chashaa.com/"
+  },
+  "mississauga-directory-2025:15434": {
+    "outcome": "out_of_scope",
+    "reason": "The operator identifies the premises at 3600 Ridgeway Drive, units 4 and 5, as its trampoline recreation centre.",
+    "source_url": "https://www.airriderz.com/mississauga/"
+  },
+  "mississauga-directory-2025:16213": {
+    "outcome": "supported_addition",
+    "reason": "The operator's Malton branch locator confirms 2970 Drew Road in Mississauga and publishes restaurant hours.",
+    "source_url": "https://bamiyankabob.com/afghani-restaurant-locations/afghani-restaurant-malton-mississauga/"
+  },
+  "mississauga-directory-2025:16520": {
+    "outcome": "needs_confirmation",
+    "reason": "The operator lists the Mississauga steakhouse at 6435 Erin Mills Parkway, unit C8. The directory record points to 6415 and mixes several units. Reconcile the exact address and pin.",
+    "source_url": "https://www.blackstonesteakhouse.ca/locations"
+  },
+  "mississauga-directory-2025:17433": {
+    "outcome": "supported_addition",
+    "reason": "The operator publishes a menu and ordering page at the same Mississauga street address, 4040 Creditview Road.",
+    "source_url": "https://chinesedumplinghousetogo.com/"
+  },
+  "mississauga-directory-2025:17464": {
+    "outcome": "supported_addition",
+    "reason": "The brand's Millcreek branch page confirms the restaurant at 6465 Millcreek Drive.",
+    "source_url": "https://chucksroadhouse.com/locations/mississauga-millcreek/"
+  },
+  "mississauga-directory-2025:17997": {
+    "outcome": "supported_addition",
+    "reason": "The pub's official menu and contact page identify the public restaurant at 158 Queen Street South in Streetsville.",
+    "source_url": "https://cuchulainns.net/"
+  },
+  "mississauga-directory-2025:20000": {
+    "outcome": "supported_addition",
+    "reason": "The operator identifies the Canadian restaurant at 3505 Odyssey Drive and links its reservations and ordering.",
+    "source_url": "https://ginsoy.ca/contact-us/"
+  },
+  "mississauga-directory-2025:22783": {
+    "outcome": "out_of_scope",
+    "reason": "Mississauga's building permit identifies Menzies Aviation at this address. The operator describes its Toronto work as air cargo and fuel services.",
+    "source_url": "https://menziesaviation.com/wp-content/uploads/2026/05/Where-we-Operate-May-2026.pdf"
+  },
+  "mississauga-directory-2025:22796": {
+    "outcome": "supported_addition",
+    "reason": "The official contact page verifies Mermaid Fish and Grill House at 4700 Ridgeway Drive, unit 72. The seafood boil business in unit 73 is a distinct address.",
+    "source_url": "https://mermaidfishhouse.com/contact"
+  },
+  "mississauga-directory-2025:22900": {
+    "outcome": "supported_addition",
+    "reason": "The restaurant's contact page confirms Miga Korean BBQ at 2382 Dundas Street West and publishes hours and ordering options.",
+    "source_url": "https://migabbq.com/contact"
+  },
+  "mississauga-directory-2025:23099": {
+    "outcome": "needs_confirmation",
+    "reason": "The current public ordering page confirms Mi'hito at 90 Courtneypark Drive East, but the directory says unit 5 and a 2026 city permit identifies unit N4. Confirm the operating unit before listing.",
+    "source_url": "https://www.mississauga.ca/wp-content/uploads/2026/03/02091549/January-2026-Detailed-Building-Permit-Report.pdf"
+  },
+  "mississauga-directory-2025:23164": {
+    "outcome": "already_listed",
+    "related_id": "osm:node:6547986957",
+    "reason": "The operator lists one Malton branch, at 7205 Goreway Drive, suite 40. The catalog already has the Moga's Pizza pin in the same shopping centre.",
+    "source_url": "https://www.mogaspizza.ca/"
+  },
+  "mississauga-directory-2025:23176": {
+    "outcome": "supported_addition",
+    "reason": "The operator lists the Mississauga branch at 5101 Dixie Road, unit A6, with dine-in, takeout, and online ordering.",
+    "source_url": "https://www.momoloco.ca/"
+  },
+  "mississauga-directory-2025:23261": {
+    "outcome": "supported_addition",
+    "reason": "The branch's public ordering storefront shows Mount Sinai at 3700 Eglinton Avenue West, unit 61.",
+    "source_url": "https://www.ubereats.com/ca/store/mount-sinai-true-mexican-taste/j1QP60jNRKu-6vUBuVuKxQ"
+  },
+  "mississauga-directory-2025:23263": {
+    "outcome": "duplicate_candidate",
+    "related_id": "mississauga-directory-2025:23261",
+    "reason": "The two directory names refer to the same Mount Sinai restaurant and unit. The public ordering storefront verifies the preferred spelling.",
+    "source_url": "https://www.ubereats.com/ca/store/mount-sinai-true-mexican-taste/j1QP60jNRKu-6vUBuVuKxQ"
+  },
+  "mississauga-directory-2025:23308": {
+    "outcome": "supported_addition",
+    "reason": "Stavro's location page confirms the Streetsville restaurant at 11 Pearl Street with reservations and food ordering.",
+    "source_url": "https://www.greekstavros.ca/location/streetsville/"
+  },
+  "mississauga-directory-2025:23335": {
+    "outcome": "needs_confirmation",
+    "reason": "Tahini's own branch locator identifies it at 2963 Argentia Road, unit 3, the same unit as the Mucho Burrito directory row. Verify the occupant before adding the older business.",
+    "source_url": "https://tahinis.com/locations/on/mississauga-argentia-rd-winston-churchill/"
+  },
+  "mississauga-directory-2025:23351": {
+    "outcome": "supported_addition",
+    "reason": "Mumbai Kitchen's restaurant site confirms 157 Dundas Street East, unit 3B.",
+    "source_url": "https://www.mumbaikitchen.ca/index.php"
+  },
+  "mississauga-directory-2025:23367": {
+    "outcome": "supported_addition",
+    "reason": "The operator's location page confirms restaurant hours at 3480 Platinum Drive, unit 98.",
+    "source_url": "https://www.mutabakkarak.com/locations"
+  },
+  "mississauga-directory-2025:26372": {
+    "outcome": "supported_addition",
+    "reason": "Soranno's own site confirms 341 Lakeshore Road East and publishes menus, hours, and dine-in service.",
+    "source_url": "https://www.sorannosrestaurant.com/"
+  }
+}

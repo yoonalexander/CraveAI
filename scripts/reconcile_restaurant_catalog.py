@@ -30,7 +30,7 @@ NON_RESTAURANT = re.compile(
 POSTAL_CODE = re.compile(r"\b[A-Z]\d[A-Z]\s?\d[A-Z]\d\b", re.I)
 UNIT = re.compile(r"(?:\b(?:unit|suite|apt)\s+|#\s*)([\w-]+)", re.I)
 STREET_WORD = dict(street="st", road="rd", avenue="ave", drive="dr", boulevard="blvd",
-                   crescent="cres", parkway="pkwy", court="ct", lane="ln",
+                   crescent="cres", parkway="pkwy", pky="pkwy", court="ct", lane="ln",
                    east="e", west="w", north="n", south="s")
 
 

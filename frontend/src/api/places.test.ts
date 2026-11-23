@@ -4,6 +4,8 @@ import { fetchSuggestions, PlacesQuotaError } from "./places";
 
 afterEach(() => {
     window.localStorage.clear();
+    window.sessionStorage.clear();
+    vi.useRealTimers();
 });
 
 describe("fetchSuggestions", () => {
@@ -78,5 +80,37 @@ describe("fetchSuggestions", () => {
         expect(fetchMock.mock.calls[0][0]).toBe(
             "/api/places/suggestions?lat=43.7&lng=-79.4&radius=7500&north=43.75&south=43.65&east=-79.34&west=-79.46",
         );
+    });
+
+    it("reuses a recent map area, preserves its coverage, and refreshes after expiry", async () => {
+        vi.useFakeTimers();
+        const places = [{ place_id: "osm:1", source: "openstreetmap", name: "Test Restaurant", lat: 43.65, lng: -79.38 }];
+        const fetchMock = vi.spyOn(globalThis, "fetch").mockImplementation(async () => Response.json(places, {
+            headers: { "X-Places-Coverage": "catalog", "X-Places-Requests": "0" },
+        }));
+        const onCoverage = vi.fn();
+        await fetchSuggestions(43.65, -79.38);
+        expect(await fetchSuggestions(43.65, -79.38, 5000, undefined, undefined, onCoverage)).toEqual(places);
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+        expect(onCoverage).toHaveBeenCalledWith({ partialReason: "catalog", resetAt: null });
+
+        await fetchSuggestions(43.65, -79.38, 5000, undefined, undefined, undefined, { includeProvider: true });
+        await fetchSuggestions(43.66, -79.38);
+        expect(fetchMock).toHaveBeenCalledTimes(3);
+
+        vi.setSystemTime(Date.now() + 10 * 60 * 1000);
+        await fetchSuggestions(43.65, -79.38);
+        expect(fetchMock).toHaveBeenCalledTimes(4);
+    });
+
+    it.each(["complete", "combined", "quota", "catalog"])("does not cache %s responses with Google results", async (coverage) => {
+        const places = [{ place_id: "google-id", name: "Test Restaurant", lat: 43.65, lng: -79.38 }];
+        const fetchMock = vi.spyOn(globalThis, "fetch").mockImplementation(async () => Response.json(places, {
+            headers: { "X-Places-Coverage": coverage, "X-Places-Requests": coverage === "catalog" ? "0" : "1" },
+        }));
+        await fetchSuggestions(43.65, -79.38);
+        await fetchSuggestions(43.65, -79.38);
+        expect(fetchMock).toHaveBeenCalledTimes(2);
+        expect(window.sessionStorage.length).toBe(0);
     });
 });

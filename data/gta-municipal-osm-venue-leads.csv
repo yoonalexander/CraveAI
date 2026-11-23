@@ -1,0 +1,315 @@
+candidate_id,name,address,osm_id,osm_name,osm_address,amenity,food,cuisine,distance_m,address_evidence,operator_url,osm_url
+toronto-licence:B50-3956643,SAM JAMES COFFEE BAR,297 HARBORD ST,osm:node:579253994,Sam James Coffee Bar,297 Harbord Street,cafe,,,20.8,exact,,https://www.openstreetmap.org/node/579253994
+toronto-licence:B50-4064816,TRE MARI BAKERY,1311 ST CLAIR AVE W,osm:node:5443454822,Tre Mari Bakery,1311 St. Clair Avenue West,cafe,,,3.0,exact,https://www.tremari.ca/,https://www.openstreetmap.org/node/5443454822
+toronto-licence:B50-4538840,BLACK GOAT CAFE,3261 LAKE SHORE BLVD W,osm:node:2713388195,Black Goat Cafe,3261 Lake Shore Boulevard West,cafe,,,9.2,exact,,https://www.openstreetmap.org/node/2713388195
+toronto-licence:B50-4540354,CYGNET COFFEE,1691 DUNDAS ST W,osm:node:13944221890,Cygnet Coffee,1691 Dundas Street West,cafe,,coffee_shop,6.4,exact,,https://www.openstreetmap.org/node/13944221890
+toronto-licence:B50-4648632,COFFEE POCKET,688A BLOOR ST W,osm:node:4823845922,Coffee Pocket,688a Bloor Street West,cafe,,,7.8,exact,,https://www.openstreetmap.org/node/4823845922
+toronto-licence:B50-4702646,SECOND CUP,"25 KING ST W, C218",osm:node:1141446130,Second Cup,25 King Street West,cafe,,coffee_shop,61.0,check,,https://www.openstreetmap.org/node/1141446130
+toronto-licence:B50-4721028,ROYALTEA,491A DUNDAS ST W,osm:node:11467258281,Royaltea,,cafe,,bubble_tea,8.7,check,,https://www.openstreetmap.org/node/11467258281
+toronto-licence:B50-4725909,THE ROLLING PIN,1970 AVENUE RD,osm:node:13850642696,The Rolling Pin,1970 Avenue Road,cafe,,donut;dessert,20.9,exact,https://therollingpin.ca/,https://www.openstreetmap.org/node/13850642696
+toronto-licence:B50-4818804,SECOND CUP,"600 UNIVERSITY AVE, #202",osm:node:2670847952,Second Cup,,cafe,,coffee_shop,26.3,check,,https://www.openstreetmap.org/node/2670847952
+toronto-licence:B50-4918935,CHATIME,461 QUEEN ST W,osm:node:5711958522,Chatime,461 Queen Street West,cafe,,bubble_tea,10.2,exact,https://chatime.com/,https://www.openstreetmap.org/node/5711958522
+toronto-licence:B50-4923629,REAL FRUIT BUBBLE TEA,223 QUEEN ST W,osm:node:6416513571,Real Fruit Bubble Tea,223 Queen Street West,cafe,,bubble_tea,4.3,exact,https://realfruitbubbletea.com/,https://www.openstreetmap.org/node/6416513571
+toronto-licence:B50-4928571,TIM HORTONS,1493 FINCH AVE W,osm:node:6780423435,Tim Hortons,,cafe,,coffee_shop,17.2,check,,https://www.openstreetmap.org/node/6780423435
+toronto-licence:B50-4935956,GONG CHA,390 QUEEN ST W,osm:node:5508901522,Gong Cha,390 Queen Street West,cafe,,bubble_tea,8.8,exact,,https://www.openstreetmap.org/node/5508901522
+toronto-licence:B50-4967749,CREME ET MIEL,2075 LAWRENCE AVE E,osm:node:7751944171,Crème et Miel,,cafe,,,6.0,check,,https://www.openstreetmap.org/node/7751944171
+toronto-licence:B50-5103063,COCO FRESH TEA & JUICE,"60 BRIAN HARRISON WAY, #4",osm:node:11226006472,CoCo Fresh Tea & Juice,60 Brian Harrison Way,cafe,,bubble_tea,46.1,check,https://www.cocofreshtea.ca/,https://www.openstreetmap.org/node/11226006472
+toronto-licence:B50-5200389,CARAMEL COFFEE SHOP,6 DONLANDS AVE,osm:node:11113332433,Caramel Coffee Shop,6 Donlands Avenue,cafe,,coffee_shop,1.2,exact,,https://www.openstreetmap.org/node/11113332433
+toronto-licence:B50-5201055,COMIC TEA,"2470 ST CLAIR AVE W, #1",osm:node:11382823910,Comic Tea,2470 St Clair Avenue West,cafe,,bubble_tea,7.7,exact,,https://www.openstreetmap.org/node/11382823910
+toronto-licence:B50-5201070,WALLACE ESPRESSO,1642 DUPONT ST,osm:node:5443462221,Wallace Espresso,1642 Dupont Street,cafe,,,7.7,exact,https://www.wallaceespresso.com/,https://www.openstreetmap.org/node/5443462221
+toronto-licence:B50-5201976,COCO FRESH TEA & JUICE,4868 DUNDAS ST W,osm:node:5159436060,CoCo Fresh Tea & Juice,4868 Dundas Street West,cafe,,bubble_tea,15.2,exact,,https://www.openstreetmap.org/node/5159436060
+toronto-licence:B50-5204560,GONG CHA,85 HOUSEY ST,osm:node:12326900682,Gong Cha,,cafe,,bubble_tea,11.5,check,,https://www.openstreetmap.org/node/12326900682
+toronto-licence:B50-5324110,NEO COFFEE BAR,"130 KING ST W, CS12A",osm:node:1133008875,Neo Coffee Bar,130 King Street West,cafe,,,37.6,check,https://www.neocoffeebar.com/,https://www.openstreetmap.org/node/1133008875
+toronto-licence:B50-5326675,CHICHA SAN CHEN,60 HURON ST,osm:node:11980955329,Chicha San Chen,60 Huron Street,cafe,,bubble_tea,1.6,exact,,https://www.openstreetmap.org/node/11980955329
+toronto-licence:B50-5330425,SLEEPY PETE'S,69 KENSINGTON AVE,osm:node:11229155916,Sleepy Pete's,,cafe,,,10.7,check,,https://www.openstreetmap.org/node/11229155916
+toronto-licence:B50-5340938,PILOT COFFEE ROASTERS,"1 ST CLAIR AVE E, #102",osm:node:9793931790,PILOT Coffee Roasters,,cafe,,,16.8,check,,https://www.openstreetmap.org/node/9793931790
+toronto-licence:B50-5350714,NEON COMMISSARY,243 WALLACE AVE,osm:node:13476941713,Neon Commissary,243 Wallace Avenue,cafe,,coffee_shop,7.5,exact,https://neoncommissary.ca/,https://www.openstreetmap.org/node/13476941713
+toronto-licence:B50-5350892,SECOND CUP,55 ST GEORGE ST,osm:node:11618878435,Second Cup,55 St George Street,cafe,,coffee_shop,36.0,exact,https://secondcup.com/en/location/university-of-toronto-myhal-centre-for-engineering/,https://www.openstreetmap.org/node/11618878435
+toronto-licence:B50-5350916,BAP BUBBLE TEA,1190 WESTON RD,osm:node:6342175888,Bap Bubble Tea,,cafe,,bubble_tea,11.1,check,,https://www.openstreetmap.org/node/6342175888
+toronto-licence:B50-5352220,RAID GALLERY & CAFE,1720 QUEEN ST W,osm:node:6845991722,Raid Gallery Cafe,1720 Queen Street West,cafe,,,25.2,exact,,https://www.openstreetmap.org/node/6845991722
+toronto-licence:B50-5415988,CHAHALO,576 YONGE ST,osm:node:13189705546,ChaHalo,576 Yonge Street,cafe,,tea,3.4,exact,https://cha-halo.ca/,https://www.openstreetmap.org/node/13189705546
+toronto-licence:B50-5418004,PEDAAL INC,168 BRUNSWICK AVE,osm:node:2679673378,Pedaal,,cafe,,,12.3,check,,https://www.openstreetmap.org/node/2679673378
+toronto-licence:B50-5418781,BETTER DAYS COFFEE & DONUTS,963 DOVERCOURT RD,osm:node:13832227957,Better Days Coffee & Donuts,963 Dovercourt Road,cafe,,donut;coffee_shop,19.4,exact,https://betterdaysdonuts.ca/,https://www.openstreetmap.org/node/13832227957
+toronto-licence:B50-5419310,DARK HORSE ESPRESSO BAR,100 QUEENS QUAY E,osm:node:12023030428,Dark Horse Espresso Bar,,cafe,,,25.1,check,,https://www.openstreetmap.org/node/12023030428
+toronto-licence:B50-5443176,CHICHA SAN CHEN,112 OSSINGTON AVE,osm:node:14000208901,Chicha San Chen,112 Ossington Avenue,cafe,,bubble_tea,5.9,exact,https://chichasanchen.ca/,https://www.openstreetmap.org/node/14000208901
+toronto-licence:B50-5450889,AMAZING DONUTS,3499 BATHURST ST,osm:node:7553017344,Amazing Donuts,3499 Bathurst Street,cafe,,donut,10.8,exact,https://amazingdonuts.com/,https://www.openstreetmap.org/node/7553017344
+toronto-licence:B50-5453780,TOGO CAFE,29C ST JOSEPH ST,osm:node:12785228838,Togo cafe,29c St. Joseph Street,cafe,,coffee_shop,63.7,exact,,https://www.openstreetmap.org/node/12785228838
+toronto-licence:B50-5456312,MOLLYTEA,604 YONGE ST,osm:node:7835427950,Molly Tea,604 Yonge Street,cafe,,tea,15.2,exact,https://mollyteaca.com/,https://www.openstreetmap.org/node/7835427950
+toronto-licence:B50-5483896,FAHRENHEIT COFFEE,529 RICHMOND ST W,osm:node:8575717843,Fahrenheit Coffee,529 Richmond Street West,cafe,,coffee_shop,3.1,exact,,https://www.openstreetmap.org/node/8575717843
+toronto-licence:B50-5484013,FAHRENHEIT COFFEE,"120 LOMBARD ST, #1",osm:node:2563836424,Fahrenheit Coffee,120 Lombard Street,cafe,,coffee_shop,9.1,check,http://www.fahrenheitcoffee.com/,https://www.openstreetmap.org/node/2563836424
+toronto-licence:B50-5525938,IVY. COFFEE SHOP,109 QUEENS QUAY W,osm:node:12849797697,Ivy Coffee Shop,109 Queens Quay West,cafe,,coffee_shop,31.4,exact,,https://www.openstreetmap.org/node/12849797697
+toronto-licence:B50-5540818,FABS DONUTS,1618 QUEEN ST W,osm:node:5794366163,Fab's Donuts,1618 Queen Street West,cafe,,donut,6.2,exact,https://www.fabsdonuts.com/,https://www.openstreetmap.org/node/5794366163
+toronto-licence:B50-5541854,TUTTO PANINO,100 SORAUREN AVE,osm:node:547664088,Tutto Panino,100 Sorauren Avenue,cafe,,italian,15.9,exact,https://www.tuttopanino.com/,https://www.openstreetmap.org/node/547664088
+toronto-licence:B50-5593460,TOGO COFFEE,"2095 YONGE ST, #1/2",osm:node:7596627762,Togo Coffee,2095 Yonge Street,cafe,,coffee_shop,9.3,check,,https://www.openstreetmap.org/node/7596627762
+toronto-licence:B50-5602996,CAFE059,"1 SPADINA CRES, #172",osm:node:12544901402,Cafe 059,,cafe,,,11.2,check,,https://www.openstreetmap.org/node/12544901402
+toronto-licence:B50-5631112,SUGAR DADDY DOUGHNUTS,"1221 DUNDAS ST W, #3",osm:node:14104335268,Sugar Daddy Doughnuts,1221 Dundas Street West,cafe,,donut,20.6,exact,http://www.sugardaddydoughnuts.com/,https://www.openstreetmap.org/node/14104335268
+toronto-licence:B50-5633678,DO GOOD DONUTS,1808 DANFORTH AVE,osm:node:13890565800,Do Good Donuts,1808 Danforth Avenue,cafe,,donut,0.1,exact,https://www.dogooddonuts.org/,https://www.openstreetmap.org/node/13890565800
+toronto-licence:B50-5647964,LETTERBOX DOUGHNUTS,1590 QUEEN ST W,osm:node:5459672222,Letterbox Doughnuts,1590 Queen Street West,cafe,,donut,4.6,exact,https://www.letterboxdoughnuts.com/,https://www.openstreetmap.org/node/5459672222
+toronto-licence:B71-0005287,THE DONUT FACTORY,101 PAPE AVE,osm:node:13261728827,The Donut Factory,101 Pape Avenue,cafe,,donut,2.8,exact,,https://www.openstreetmap.org/node/13261728827
+toronto-licence:B71-0014440,MALTA BAKE SHOP,3256 DUNDAS ST W,osm:node:530715671,Malta Bake Shop,,cafe,,,7.9,check,,https://www.openstreetmap.org/node/530715671
+toronto-licence:B71-0240280,RUSTIC COSMO CAFE,1278 QUEEN ST W,osm:node:5794366149,Rustic Cosmo Café,1278 Queen Street West,cafe,,,3.9,exact,,https://www.openstreetmap.org/node/5794366149
+toronto-licence:B71-0243068,CURVA NORD BAR,772 WILSON AVE,osm:node:6545586938,Curva Nord Bar,,bar,,,2.7,check,,https://www.openstreetmap.org/node/6545586938
+toronto-licence:B71-3085411,LAS AMERICAS CAFE,2260 KEELE ST,osm:node:7553496744,Las Americas Cafe,2260 Keele Street,cafe,,,2.2,exact,,https://www.openstreetmap.org/node/7553496744
+toronto-licence:B71-3091780,FIDDLER'S DELL BAR & GRILL,781 ANNETTE ST,osm:node:4493421924,Fiddler's Dell Bar & Grill,781 Annette Street,pub,,,11.0,exact,https://www.fiddlersdell.com/,https://www.openstreetmap.org/node/4493421924
+toronto-licence:B71-3117879,THE LOOSE MOOSE TAP & GRILL,"146 FRONT ST W, LL & MAIN",osm:node:560227414,The Loose Moose Tap & Grill,146 Front Street West,pub,,,16.7,check,,https://www.openstreetmap.org/node/560227414
+toronto-licence:B71-3250125,SUN FA RESTAURANT,1485 QUEEN ST W,osm:node:4317376005,Sun Fa Restaurant,1485 Queen Street West,pub,,,14.2,exact,,https://www.openstreetmap.org/node/4317376005
+toronto-licence:B71-3253895,BALZAC'S COFFEE,"1 TRINITY ST, #60-0100",osm:node:475881505,Balzac's Coffee,1 Trinity Street,cafe,,,76.9,check,https://www.balzacs.com/locations/distillery-district/,https://www.openstreetmap.org/node/475881505
+toronto-licence:B71-3475774,OAKWOOD CAFE,359 OAKWOOD AVE,osm:node:7581385502,Oakwood Cafe,,pub,,,13.6,check,,https://www.openstreetmap.org/node/7581385502
+toronto-licence:B71-3502784,WIDE OPEN,139A SPADINA AVE,osm:node:1616012068,Wide Open,139A Spadina Avenue,pub,,,6.1,exact,,https://www.openstreetmap.org/node/1616012068
+toronto-licence:B71-3591290,RONNIE'S LOCAL 069,69 NASSAU ST,osm:node:5448489221,Ronnie's Local 069,69 Nassau Street,bar,,,14.8,exact,,https://www.openstreetmap.org/node/5448489221
+toronto-licence:B71-3599360,TIM HORTON'S,"75 ELLESMERE RD, B1",osm:node:437988608,Tim Hortons,75 Ellesmere Road,cafe,,coffee_shop,55.8,check,,https://www.openstreetmap.org/node/437988608
+toronto-licence:B71-3720598,TIM HORTON'S,26 DUNDAS ST E,osm:node:253433635,Tim Hortons,,cafe,,coffee_shop,24.3,check,,https://www.openstreetmap.org/node/253433635
+toronto-licence:B71-3720600,TIM HORTON'S,"111 CARLTON ST, KIOSK",osm:node:1628651624,Tim Hortons,111 Carlton Street,cafe,,coffee_shop,21.0,check,,https://www.openstreetmap.org/node/1628651624
+toronto-licence:B71-3721755,EZRA'S POUND,238 DUPONT ST,osm:node:2195201298,Ezra's Pound,238 Dupont Street,cafe,,coffee_shop,14.6,exact,http://www.ezraspound.com/,https://www.openstreetmap.org/node/2195201298
+toronto-licence:B71-3723094,THE DIZZY,305 RONCESVALLES AVE,osm:node:6328178871,The Dizzy,305 Roncesvalles Avenue,pub,,,5.9,exact,,https://www.openstreetmap.org/node/6328178871
+toronto-licence:B71-3949408,COFFEE IN,2181A LAWRENCE AVE E,osm:node:7751993190,Coffee In,,cafe,,,17.3,check,,https://www.openstreetmap.org/node/7751993190
+toronto-licence:B71-3956960,BLACK DICE CAFE,1574 DUNDAS ST W,osm:node:13686625301,Black Dice Cafe,1574 Dundas Street West,bar,,,2.4,exact,,https://www.openstreetmap.org/node/13686625301
+toronto-licence:B71-3960376,THE EMMET RAY,924 COLLEGE ST,osm:node:6848476769,The Emmet Ray,924 College Street,bar,,,3.7,exact,https://www.theemmetray.com/,https://www.openstreetmap.org/node/6848476769
+toronto-licence:B71-4063303,RED ROCKET COFFEE,"154 WELLESLEY ST E, #1",osm:node:1375337646,Red Rocket Coffee,,cafe,,,1.5,check,,https://www.openstreetmap.org/node/1375337646
+toronto-licence:B71-4069964,NOSSA CASA SPORTS CAFE,1331 DUNDAS ST W,osm:node:13990904652,Nossa Casa Sports Cafe,,cafe,,,6.3,check,,https://www.openstreetmap.org/node/13990904652
+toronto-licence:B71-4179117,BALZAC'S COFFEE,43 HANNA AVE,osm:node:2563153278,Balzac's Coffee,,cafe,,coffee_shop,21.1,check,,https://www.openstreetmap.org/node/2563153278
+toronto-licence:B71-4180019,CAPITAL ESPRESSO,1349 QUEEN ST W,osm:node:5503866476,Capital Espresso,1349 Queen Street West,cafe,,coffee_shop,17.8,exact,,https://www.openstreetmap.org/node/5503866476
+toronto-licence:B71-4181111,BAR NEON,1226 BLOOR ST W,osm:node:2286832916,Bar Neon,1226 Bloor Street West,bar,,,13.5,exact,,https://www.openstreetmap.org/node/2286832916
+toronto-licence:B71-4181652,RAILS AND ALES,1106 DANFORTH AVE,osm:node:420539128,Rails and Ales,,pub,,,13.8,check,,https://www.openstreetmap.org/node/420539128
+toronto-licence:B71-4187267,THE LOCAL,396 RONCESVALLES AVE,osm:node:1660067046,The Local,396 Roncesvalles Avenue,bar,,,4.4,exact,,https://www.openstreetmap.org/node/1660067046
+toronto-licence:B71-4290515,RED ROCKET COFFEE,1364 DANFORTH AVE,osm:node:441031354,Red Rocket Coffee,1364 Danforth Avenue,cafe,,,11.9,exact,http://www.redrocketcoffee.com,https://www.openstreetmap.org/node/441031354
+toronto-licence:B71-4295127,ARCHIVE,909 DUNDAS ST W,osm:node:5718084521,Archive,909 Dundas Street West,bar,,,13.0,exact,,https://www.openstreetmap.org/node/5718084521
+toronto-licence:B71-4295473,BALZAC'S COFFEE,122 BOND ST,osm:node:5708841324,Balzac's Coffee,122 Bond Street,cafe,,coffee_shop,41.3,exact,https://shop.balzacs.com/,https://www.openstreetmap.org/node/5708841324
+toronto-licence:B71-4304322,BRYDENS,2455 BLOOR ST W,osm:node:2288606536,Bryden's,2455 Bloor Street West,pub,,,3.9,exact,https://www.brydens.ca/,https://www.openstreetmap.org/node/2288606536
+toronto-licence:B71-4305961,PARIS BAKERY & PASTRY,654 LANSDOWNE AVE,osm:node:2481918279,Paris Bakery & Pastry,,cafe,,pastry,4.2,check,,https://www.openstreetmap.org/node/2481918279
+toronto-licence:B71-4307552,SUD FORNO,716 QUEEN ST W,osm:node:6358218850,Sud Forno,716 Queen Street West,cafe,,,16.9,exact,http://www.terroni.com/sud-forno/sudqueen/,https://www.openstreetmap.org/node/6358218850
+toronto-licence:B71-4313160,CENTRE CAFE,"5 PARK HOME AVE, #150",osm:node:1125362818,Centre Cafe,5 Park Home Avenue,cafe,,,15.4,check,,https://www.openstreetmap.org/node/1125362818
+toronto-licence:B71-4313862,JAMES BLACK BEAR PUB,3276 DANFORTH AVE,osm:node:12978886394,James Black Bear Pub,,pub,,,8.1,check,,https://www.openstreetmap.org/node/12978886394
+toronto-licence:B71-4314190,OUTPOST COFFEE ROASTERS,1578 BLOOR ST W,osm:node:5424621921,Outpost Coffee Roasters Ltd,1578 Bloor Street West,cafe,,coffee_shop,19.3,exact,https://outpostcoffee.com/,https://www.openstreetmap.org/node/5424621921
+toronto-licence:B71-4316604,AMIGOS DA DUNDAS SPORTS BAR,"1570 DUNDAS ST W, BSMT&FL1",osm:node:6820739719,Amigos Da Dundas Sports Bar,,pub,,,15.2,check,,https://www.openstreetmap.org/node/6820739719
+toronto-licence:B71-4418112,MOON LIGHT PUB,1162 DANFORTH AVE,osm:node:13010520105,Moonlight Pub,,pub,,,8.6,check,,https://www.openstreetmap.org/node/13010520105
+toronto-licence:B71-4418615,ED'S REAL SCOOP,189 RONCESVALLES AVE,osm:node:6328179207,Ed's Real Scoop,189 Roncesvalles Avenue,cafe,,ice_cream,7.6,exact,,https://www.openstreetmap.org/node/6328179207
+toronto-licence:B71-4422046,BAR RAVAL,505 COLLEGE ST,osm:node:5717981321,Bar Raval,505 College Street,bar,,,22.4,exact,https://www.thisisbarraval.com/,https://www.openstreetmap.org/node/5717981321
+toronto-licence:B71-4422847,CONTRA CAFE,1028 SHAW ST,osm:node:5476199331,Contra Café,1028 Shaw Street,cafe,,,17.4,exact,https://www.contracafe.ca/,https://www.openstreetmap.org/node/5476199331
+toronto-licence:B71-4423125,TO.LOUNGE,1384 QUEEN ST W,osm:node:6495425605,T.O. Lounge,1384 Queen Street West,bar,,,14.0,exact,,https://www.openstreetmap.org/node/6495425605
+toronto-licence:B71-4423345,SECOND CUP,355 DANFORTH AVE,osm:node:48553537,Second Cup,,cafe,,coffee_shop,12.7,check,,https://www.openstreetmap.org/node/48553537
+toronto-licence:B71-4428049,CHURCH STREET ESPRESSO,585 CHURCH ST,osm:node:3317175461,Church Street Espresso,585 Church Street,cafe,,breakfast;coffee_shop;sandwich,10.5,exact,https://church-street-espresso.grubbio.com,https://www.openstreetmap.org/node/3317175461
+toronto-licence:B71-4430203,NORTHERN BELLE,913 DUNDAS ST W,osm:node:5723546121,Northern Belle,913 Dundas Street West,cafe,,,3.7,exact,https://www.northernbelle.ca/,https://www.openstreetmap.org/node/5723546121
+toronto-licence:B71-4430347,QUEEN STREET WAREHOUSE,232 QUEEN ST W,osm:node:281658961,Queen Street Warehouse,232 Queen Street West,bar,,,2.6,exact,https://www.warehousegroup.ca/el-furniture-warehouse-queen-st,https://www.openstreetmap.org/node/281658961
+toronto-licence:B71-4431558,SPORTS CAFE CHAMPIONS,2839 EGLINTON AVE E,osm:way:660831369,Sports Cafe Champions,2839 Eglinton Avenue East,bar,,,0.6,exact,,https://www.openstreetmap.org/way/660831369
+toronto-licence:B71-4533222,TRINITY COMMON,303 AUGUSTA AVE,osm:node:13510583801,Trinity Common,303 Augusta Avenue,bar,,,13.0,exact,,https://www.openstreetmap.org/node/13510583801
+toronto-licence:B71-4533794,CHATIME,175 RAVEL RD,osm:node:3668839194,Chatime,,cafe,,bubble_tea,6.8,check,,https://www.openstreetmap.org/node/3668839194
+toronto-licence:B71-4534168,SUMACH ESPRESSO,118 SUMACH ST,osm:way:542858853,Sumach Espresso,118 Sumach Street,cafe,,coffee_shop,28.8,exact,,https://www.openstreetmap.org/way/542858853
+toronto-licence:B71-4536371,KRAVE COFFEE,"781 ST CLAIR AVE W, #2",osm:node:5140435746,Krave Coffee,781 St. Clair Avenue West,cafe,,,11.3,exact,,https://www.openstreetmap.org/node/5140435746
+toronto-licence:B71-4537357,I DEAL COFFEE,221 SORAUREN AVE,osm:node:5137524475,I Deal Coffee,221 Sorauren Avenue,cafe,,coffee_shop,14.0,exact,,https://www.openstreetmap.org/node/5137524475
+toronto-licence:B71-4539598,JIMMY'S COFFEE,15 OSSINGTON AVE,osm:node:4919963779,Jimmy's Coffee,15 Ossington Avenue,cafe,,,9.5,exact,http://www.jimmyscoffee.ca/,https://www.openstreetmap.org/node/4919963779
+toronto-licence:B71-4542279,ALLEN'S,143 DANFORTH AVE,osm:node:420542936,Allen's,,pub,,,2.2,check,,https://www.openstreetmap.org/node/420542936
+toronto-licence:B71-4543517,BANDIT BREWERY,2125 DUNDAS ST W,osm:way:440271842,Bandit Brewery,2125 Dundas Street West,pub,,,2.7,exact,https://www.banditbrewery.ca/,https://www.openstreetmap.org/way/440271842
+toronto-licence:B71-4544500,ROUND THE HORN,331 RONCESVALLES AVE,osm:node:6328178868,Round the Horn,331 Roncesvalles Avenue,bar,,,14.4,exact,,https://www.openstreetmap.org/node/6328178868
+toronto-licence:B71-4645126,KILT & HARP PUB,2046 DANFORTH AVE,osm:node:12995038540,Kilt & Harp Pub,,pub,,,4.9,check,,https://www.openstreetmap.org/node/12995038540
+toronto-licence:B71-4647019,SMALL TALK,110 OSSINGTON AVE,osm:node:14000223002,Small Talk,110 Ossington Avenue,bar,,american;tapas,4.6,exact,https://www.smalltalkjazz.com/,https://www.openstreetmap.org/node/14000223002
+toronto-licence:B71-4647309,CAFE ROUGE PATISSERIE,2898 BLOOR ST W,osm:node:6306324871,Café Rouge Patisserie,2898 Bloor Street West,cafe,,french,9.5,exact,https://www.caferougeonbloor.com/,https://www.openstreetmap.org/node/6306324871
+toronto-licence:B71-4648711,FIKA CAFE,28 KENSINGTON AVE,osm:node:5573985522,Fika Cafe,28 Kensington Avenue,cafe,,coffee_shop,5.7,exact,https://www.fika.ca/,https://www.openstreetmap.org/node/5573985522
+toronto-licence:B71-4675591,LOCALS ONLY,"589 KING ST W, LOWER LEV",osm:node:5225586716,Locals Only,,pub,,,10.0,check,,https://www.openstreetmap.org/node/5225586716
+toronto-licence:B71-4679440,THE MERSEYSIDE,2413 DUNDAS ST W,osm:node:6384671279,The Merseyside,2413 Dundas Street West,cafe,,,8.1,exact,https://www.themerseyside.ca/,https://www.openstreetmap.org/node/6384671279
+toronto-licence:B71-4683260,MANIC COFFEE,426 COLLEGE ST,osm:node:5366324122,Manic Coffee,426 College Street,cafe,,,4.0,exact,http://maniccoffee.com,https://www.openstreetmap.org/node/5366324122
+toronto-licence:B71-4687958,LLOYD'S,1298 QUEEN ST E,osm:node:13278692885,LLoyd's,1298 Queen Street East,bar,,,18.3,exact,https://lloydsonqueen.ca/,https://www.openstreetmap.org/node/13278692885
+toronto-licence:B71-4688900,GONG CHA,5449 YONGE ST,osm:node:4643368332,Gong Cha,5449 Yonge Street,cafe,,bubble_tea,2.5,exact,,https://www.openstreetmap.org/node/4643368332
+toronto-licence:B71-4688900,GONG CHA,5449 YONGE ST,osm:node:5721283769,Gong Cha,,cafe,,bubble_tea,8.6,check,,https://www.openstreetmap.org/node/5721283769
+toronto-licence:B71-4691803,COCO FRESH TEA & JUICE,371 SPADINA AVE,osm:node:9156583245,CoCo Fresh Tea & Juice,371 Spadina Avenue,cafe,,bubble_tea,12.8,exact,,https://www.openstreetmap.org/node/9156583245
+toronto-licence:B71-4704217,GODSPEED BREWERY,242 COXWELL AVE,osm:node:5270939321,Godspeed Brewery,242 Coxwell Avenue,bar,,,5.2,exact,https://www.godspeedbrewery.com/,https://www.openstreetmap.org/node/5270939321
+toronto-licence:B71-4712874,COCOA LATTE,671 ST CLAIR AVE W,osm:node:7376876376,Cocoa Latte,671 St. Clair Avenue West,cafe,,,4.6,exact,https://www.cocoalatte.ca,https://www.openstreetmap.org/node/7376876376
+toronto-licence:B71-4715447,POOR ROMEO,1029 GERRARD ST E,osm:node:13276802422,Poor Romeo,1029 Gerrard Street East,bar,,,3.9,exact,,https://www.openstreetmap.org/node/13276802422
+toronto-licence:B71-4733922,PLAZA CAFE,1244 THE QUEENSWAY,osm:node:1995567787,Plaza Cafe,1244 The Queensway,cafe,,,33.0,exact,,https://www.openstreetmap.org/node/1995567787
+toronto-licence:B71-4738124,MAST COFFEE,68 SHUTER ST,osm:node:13183962950,Mast Coffee,68 Shuter Street,cafe,,,14.4,exact,https://mastcoffee.ca/,https://www.openstreetmap.org/node/13183962950
+toronto-licence:B71-4802027,SLANTED DOOR,442 BLOOR ST W,osm:node:4697780123,Slanted Door,442 Bloor Street West,cafe,,,16.0,exact,https://slanteddoor.ca/,https://www.openstreetmap.org/node/4697780123
+toronto-licence:B71-4802968,DINEEN OUTPOST,1042 GERRARD ST E,osm:node:960085555,Dineen Outpost,1042 Gerrard Street East,cafe,,coffee_shop,13.7,exact,,https://www.openstreetmap.org/node/960085555
+toronto-licence:B71-4806230,CHATIME,132 DUNDAS ST W,osm:node:6959206657,Chatime,132 Dundas Street West,cafe,,bubble_tea,3.6,exact,https://chatime.ca/,https://www.openstreetmap.org/node/6959206657
+toronto-licence:B71-4809832,MOTEL BAR,1235 QUEEN ST W,osm:node:6495425617,Motel Bar,1235 Queen Street West,bar,,,15.1,exact,,https://www.openstreetmap.org/node/6495425617
+toronto-licence:B71-4810653,FIRST AND LAST COFFEE SHOP,346 DUPONT ST,osm:node:12688672383,First and Last Coffee Shop,346 Dupont Street,cafe,,coffee_shop,2.3,exact,https://www.firstandlastcoffee.com/,https://www.openstreetmap.org/node/12688672383
+toronto-licence:B71-4814869,CAFE SERANO,1055 PAPE AVE,osm:node:558628286,Cafe Serano,,cafe,,,9.7,check,,https://www.openstreetmap.org/node/558628286
+toronto-licence:B71-4822897,JIMMY'S COFFEE,380 ROYAL YORK RD,osm:node:6422118764,Jimmy's Coffee,380 Royal York Road,cafe,,,9.1,exact,http://www.jimmyscoffee.ca/l,https://www.openstreetmap.org/node/6422118764
+toronto-licence:B71-4825672,THE MAKER BEAN CAFE,1052 BLOOR ST W,osm:node:6064372694,The Maker Bean Café,1052 Bloor Street West,cafe,,coffee_shop,14.9,exact,https://themakerbean.com/,https://www.openstreetmap.org/node/6064372694
+toronto-licence:B71-4839023,AROMA ESPRESSO BAR,20 WELLINGTON ST E,osm:node:6548224598,Aroma Espresso Bar,,cafe,,coffee_shop,26.7,check,,https://www.openstreetmap.org/node/6548224598
+toronto-licence:B71-4858758,THOR ESPRESSO,180 JOHN ST,osm:node:557804029,Thor Espresso,180 John Street,cafe,,coffee_shop,12.8,exact,,https://www.openstreetmap.org/node/557804029
+toronto-licence:B71-4861614,DOUCE FRANCE,820 DANFORTH AVE,osm:node:5467605638,Douce France,820 Danforth Avenue,cafe,,french,6.9,exact,https://doucefrance.ca/,https://www.openstreetmap.org/node/5467605638
+toronto-licence:B71-4862061,BROADVIEW ESPRESSO,817 BROADVIEW AVE,osm:node:5427073221,Broadview Espresso,817 Broadview Avenue,cafe,,,3.0,exact,,https://www.openstreetmap.org/node/5427073221
+toronto-licence:B71-4869499,CAFE ORO DI NAPOLI,75 JARVIS ST,osm:node:9884824917,Cafe Oro di Napoli,75 Jarvis Street,cafe,,,3.9,exact,https://cafeorodinapoli.ca/,https://www.openstreetmap.org/node/9884824917
+toronto-licence:B71-4873447,HAILED COFFEE,801 GERRARD ST E,osm:node:4341524558,Hailed Coffee,801 Gerrard Street East,cafe,,coffee_shop,2.5,exact,https://hailed.ca/,https://www.openstreetmap.org/node/4341524558
+toronto-licence:B71-4877950,CROSSTOWN COFFEE BAR,187 HIGHBOURNE RD,osm:node:6358826488,Crosstown Coffee Bar,187 Highbourne Road,cafe,,coffee_shop,2.8,exact,https://www.appelkoos.com/cafe.php,https://www.openstreetmap.org/node/6358826488
+toronto-licence:B71-4890749,LINSMORE TAVERN,1298 DANFORTH AVE,osm:node:420539115,Linsmore Tavern,1298 Danforth Avenue,pub,,,14.3,exact,,https://www.openstreetmap.org/node/420539115
+toronto-licence:B71-4902651,BLOOMER'S,873 BLOOR ST W,osm:node:4802812392,Bloomer's,873 Bloor Street West,cafe,,donut,3.5,exact,https://www.bloomersto.com/,https://www.openstreetmap.org/node/4802812392
+toronto-licence:B71-4903703,CAFE 513,513 MARLEE AVE,osm:node:4126684616,Cafe 513,,cafe,,,2.7,check,,https://www.openstreetmap.org/node/4126684616
+toronto-licence:B71-4915518,ZED 80,185 DANFORTH AVE,osm:node:13025820697,Zed*80,185 Danforth Avenue,bar,,,9.4,exact,https://www.zedeighty.com/,https://www.openstreetmap.org/node/13025820697
+toronto-licence:B71-4917354,THE ALLEY,621 BLOOR ST W,osm:node:6357286293,The Alley,621 Bloor Street West,cafe,,bubble_tea,6.3,exact,https://www.the-alley.ca,https://www.openstreetmap.org/node/6357286293
+toronto-licence:B71-4933793,SCORE ON KING,107 KING ST E,osm:node:1512121564,Score on King,,bar,,,14.4,check,,https://www.openstreetmap.org/node/1512121564
+toronto-licence:B71-4933837,CARBONIC COFFEE,"37 BALDWIN ST, MAIN",osm:node:7766394986,Carbonic Coffee,37 Baldwin Street,cafe,,,12.8,check,https://carboniccoffee.netlify.app/,https://www.openstreetmap.org/node/7766394986
+toronto-licence:B71-4937388,THE STOCKYARDS GRIND,2382 ST CLAIR AVE W,osm:node:5184936110,The Stockyards Grind,2382 St Clair Avenue West,cafe,,,14.1,exact,,https://www.openstreetmap.org/node/5184936110
+toronto-licence:B71-4937732,WING HOUSE & SPORTS BAR,420 PARLIAMENT ST,osm:node:5110835025,Wing House & Sports Bar,420 Parliament Street,bar,,,3.1,exact,,https://www.openstreetmap.org/node/5110835025
+toronto-licence:B71-4949750,BLOOMER'S,715 QUEEN ST W,osm:node:6358218785,Bloomer's,715 Queen Street West,cafe,,donut,7.6,exact,https://www.bloomersto.com/,https://www.openstreetmap.org/node/6358218785
+toronto-licence:B71-4951731,FREEPLAY,300 COLLEGE ST,osm:node:2806099855,FreePlay,300 College Street,bar,,sandwich,4.2,exact,https://freeplaytoronto.com/#/,https://www.openstreetmap.org/node/2806099855
+toronto-licence:B71-4965024,AROMA ESPRESSO BAR,88 QUEENS QUAY W,osm:node:3714084722,Aroma Espresso Bar,88 Queens Quay West,cafe,,coffee_shop,44.6,exact,,https://www.openstreetmap.org/node/3714084722
+toronto-licence:B71-4972294,STARBUCKS,1507 AVENUE RD,osm:node:417232579,Starbucks,,cafe,,coffee_shop,9.3,check,http://www.macs.ca/,https://www.openstreetmap.org/node/417232579
+toronto-licence:B71-4976208,NEO COFFEE BAR,"770 BAY ST, #2-3",osm:node:8045253714,Neo Coffee Bar,770 Bay Street,cafe,,,3.1,check,https://www.neocoffeebar.com,https://www.openstreetmap.org/node/8045253714
+toronto-licence:B71-4979405,WHITE SQUIRREL COFFEE SHOP,907 QUEEN ST W,osm:node:4595660196,White Squirrel Coffee Shop,907 Queen Street West,cafe,,,3.5,exact,https://whitesquirrelcoffee.com/,https://www.openstreetmap.org/node/4595660196
+toronto-licence:B71-4979417,THE ROASTED NUT,768 QUEEN ST W,osm:node:13098959201,The Roasted Nut,768 Queen Street West,cafe,,,1.3,exact,,https://www.openstreetmap.org/node/13098959201
+toronto-licence:B71-4984377,BAR MORDECAI,1272 DUNDAS ST W,osm:node:12366589601,Bar Mordecai,,bar,,,15.2,check,,https://www.openstreetmap.org/node/12366589601
+toronto-licence:B71-4989158,COFFEE LUNAR,"920 YONGE ST, #6",osm:node:2274510227,Coffee Lunar,,cafe,,,28.1,check,,https://www.openstreetmap.org/node/2274510227
+toronto-licence:B71-4994966,BLACK DOG CAFE,878 KINGSTON RD,osm:node:11172137718,Black Dog Cafe,,cafe,,,5.8,check,,https://www.openstreetmap.org/node/11172137718
+toronto-licence:B71-4995616,SIDEBAR,161 DANFORTH AVE,osm:node:13025831406,Sidebar,,bar,,,19.8,check,,https://www.openstreetmap.org/node/13025831406
+toronto-licence:B71-5003743,BULL DOG COFFEE,89 GRANBY ST,osm:node:8045224139,Bulldog Coffee,89 Granby St,cafe,,,21.9,exact,,https://www.openstreetmap.org/node/8045224139
+toronto-licence:B71-5018646,HANDLEBAR,"159 AUGUSTA AVE, MAIN",osm:node:4336290289,Handlebar,159 Augusta Avenue,bar,,,14.3,check,,https://www.openstreetmap.org/node/4336290289
+toronto-licence:B71-5022226,BAR VENDETTA,928 DUNDAS ST W,osm:node:2392212249,bar vendetta,928 Dundas Street West,bar,,,0.9,exact,,https://www.openstreetmap.org/node/2392212249
+toronto-licence:B71-5031137,POURED COFFEE,2165 DANFORTH AVE,osm:node:12994984295,Poured Coffee,,cafe,,,2.3,check,,https://www.openstreetmap.org/node/12994984295
+toronto-licence:B71-5032102,MOSS PARK ESPRESSO,"185 QUEEN ST E, BSMT",osm:node:10920689889,Moss Park Espresso,,cafe,,,13.2,check,,https://www.openstreetmap.org/node/10920689889
+toronto-licence:B71-5041981,TSUCHI,688 COLLEGE ST,osm:node:6533178803,Tsu Chi,,cafe,,japanese,8.2,check,,https://www.openstreetmap.org/node/6533178803
+toronto-licence:B71-5049576,ROIS CREAM,382 KEELE ST,osm:node:6491503970,Roi's Cream,382 Keele Street,cafe,,bagel;sandwich,9.6,exact,https://www.roiscream.com/,https://www.openstreetmap.org/node/6491503970
+toronto-licence:B71-5105199,THE ARCH CAFE,293 AUGUSTA AVE,osm:node:9118725220,The Arch Café,293 Augusta Ave.,cafe,,,10.9,exact,,https://www.openstreetmap.org/node/9118725220
+toronto-licence:B71-5106210,SUNNYSIDE PROVISIONS,287 RONCESVALLES AVE,osm:node:5508637325,Sunnyside Provisions,287 Roncesvalles Avenue,cafe,,,3.5,exact,https://sunnysideprovisions.ca/,https://www.openstreetmap.org/node/5508637325
+toronto-licence:B71-5112849,COSETTE,1715 BLOOR ST W,osm:node:588647081,Cosette,1715 Bloor Street West,cafe,,coffee_shop,5.2,exact,,https://www.openstreetmap.org/node/588647081
+toronto-licence:B71-5113042,GREY TIGER,1190 BLOOR ST W,osm:node:6372994656,Grey Tiger,1190 Bloor Street West,bar,,,4.8,exact,https://www.greytiger.ca/,https://www.openstreetmap.org/node/6372994656
+toronto-licence:B71-5117076,JIMMY'S COFFEE,806 QUEEN ST E,osm:node:6685670267,Jimmy's Coffee,806 Queen Street East,cafe,,,8.1,exact,https://www.jimmyscoffee.ca/,https://www.openstreetmap.org/node/6685670267
+toronto-licence:B71-5123988,I DEAL ON THE PARK,250 SORAUREN AVE,osm:node:9706265273,I Deal On the Park,250 Sorauren Avenue,cafe,,,13.8,exact,,https://www.openstreetmap.org/node/9706265273
+toronto-licence:B71-5125073,KUNG FU TEA,584 YONGE ST,osm:node:7835431886,Kung Fu Tea,584 Yonge Street,cafe,,bubble_tea,8.5,exact,https://www.kungfuteaontario.com/,https://www.openstreetmap.org/node/7835431886
+toronto-licence:B71-5130006,GONG CHA,451 DANFORTH AVE,osm:node:10159822795,Gong Cha,451 Danforth Avenue,cafe,,bubble_tea,10.1,exact,,https://www.openstreetmap.org/node/10159822795
+toronto-licence:B71-5134229,JJIN TOAST,792 BATHURST ST,osm:node:409183194,Jjin Toast,792 Bathurst Street,cafe,,,2.5,exact,,https://www.openstreetmap.org/node/409183194
+toronto-licence:B71-5140213,SAVING GIGI,859 BLOOR ST W,osm:node:1282223043,Saving Gigi,859 Bloor Street West,cafe,,coffee_shop,4.6,exact,,https://www.openstreetmap.org/node/1282223043
+toronto-licence:B71-5200279,THE GOOD NEIGHBOUR,238 ANNETTE ST,osm:node:762599369,The Good Neighbour,238 Annette Street,cafe,,coffee_shop,8.6,exact,https://facebook.com/thegoodneighbour,https://www.openstreetmap.org/node/762599369
+toronto-licence:B71-5200385,CAFE WANOKA,"2101 BRIMLEY RD, #111",osm:node:11232775896,Cafe Wanoka,2101 Brimley Road,cafe,,,16.7,check,,https://www.openstreetmap.org/node/11232775896
+toronto-licence:B71-5200436,BLUEBIRD BAR,2072 DUNDAS ST W,osm:node:1370481302,Blue Bird Bar,2072 Dundas Street West,bar,,coffee_shop,3.9,exact,https://www.thebluebirdto.com/,https://www.openstreetmap.org/node/1370481302
+toronto-licence:B71-5201068,WALLACE ESPRESSO,188 WALLACE AVE,osm:node:2344798367,Wallace Espresso,188 Wallace Avenue,cafe,,coffee_shop,4.9,exact,,https://www.openstreetmap.org/node/2344798367
+toronto-licence:B71-5201203,HELLO COFFEE,800 BLOOR ST W,osm:node:6340610376,Hello Coffee,800 Bloor Street West,cafe,,,7.1,exact,,https://www.openstreetmap.org/node/6340610376
+toronto-licence:B71-5201298,FOOD & LIQUOR,1610 QUEEN ST W,osm:node:6416352605,Food & Liquor,1610 Queen Street West,bar,,,9.2,exact,https://www.foodandliquor.ca/,https://www.openstreetmap.org/node/6416352605
+toronto-licence:B71-5202105,NOW & LATER,1007 BLOOR ST W,osm:node:6344075527,Now & Later,1007 Bloor Street West,bar,,,7.6,exact,,https://www.openstreetmap.org/node/6344075527
+toronto-licence:B71-5214597,NADEGE PATISSERIE,780 QUEEN ST W,osm:node:2702032886,Nadège Patisserie,780 Queen Street West,cafe,,,5.6,exact,https://www.nadege-patisserie.com/,https://www.openstreetmap.org/node/2702032886
+toronto-licence:B71-5216153,MALLO,"785 BATHURST ST, #2",osm:node:6551628749,Mallo,785 Bathurst Street,cafe,,coffee_shop,7.9,check,,https://www.openstreetmap.org/node/6551628749
+toronto-licence:B71-5218339,SPRING CAFE BISTRO,"931 YONGE ST, PT OF",osm:node:1136370098,Spring Cafe Bistro,931 Yonge Street,cafe,,,10.9,check,,https://www.openstreetmap.org/node/1136370098
+toronto-licence:B71-5219259,HIGH LOW PUB,1673 BLOOR ST W,osm:node:6348434787,High Low Pub,1673 Bloor Street West,pub,,,16.8,exact,,https://www.openstreetmap.org/node/6348434787
+toronto-licence:B71-5223520,STARBUCKS,"370 KING ST W, SW",osm:node:618122806,Starbucks,370 King Street West,cafe,,coffee_shop,27.7,check,,https://www.openstreetmap.org/node/618122806
+toronto-licence:B71-5225805,TRINACRIA,374 DANFORTH AVE,osm:node:12173946076,Trinacria,374 Danforth Avenue,cafe,,coffee_shop;tea;ice_cream;italian,12.8,exact,,https://www.openstreetmap.org/node/12173946076
+toronto-licence:B71-5228451,CHATIME,"1010 WILSON AVE, B",osm:node:12629114050,Chatime,,cafe,,bubble_tea,14.1,check,,https://www.openstreetmap.org/node/12629114050
+toronto-licence:B71-5229395,DIPPED DONUTS,"161 BALDWIN ST, #1",osm:node:14060204074,Dipped Donuts,161 Baldwin Street,cafe,,donut,18.7,exact,https://www.dippeddonuts.ca/,https://www.openstreetmap.org/node/14060204074
+toronto-licence:B71-5235580,SEE-SCAPE,347 KEELE ST,osm:node:9960687234,See-Scape,347 Keele Street,bar,,,10.1,exact,https://www.seescapeto.com/,https://www.openstreetmap.org/node/9960687234
+toronto-licence:B71-5240715,CONTEAGO,1365 WILSON AVE,osm:node:6538479485,Conteago,,cafe,,,12.9,check,,https://www.openstreetmap.org/node/6538479485
+toronto-licence:B71-5243916,NEO COFFEE BAR,61 SPADINA AVE,osm:node:13446364877,Neo Coffee Bar,61 Spadina Avenue,cafe,,,2.5,exact,https://www.neocoffeebar.com/,https://www.openstreetmap.org/node/13446364877
+toronto-licence:B71-5244621,MITFAR ART CAFE GALLERY,1098 YONGE ST,osm:node:1395441468,Mit Far Art Cafe Gallery,1098 Yonge Street,cafe,,,10.4,exact,,https://www.openstreetmap.org/node/1395441468
+toronto-licence:B71-5245089,STARBUCKS,925 DIXON RD,osm:node:9911551499,Starbucks,,cafe,,coffee_shop,19.8,check,,https://www.openstreetmap.org/node/9911551499
+toronto-licence:B71-5245144,MORNING PARADE COFFEE BAR,"256 CRAWFORD ST, B",osm:node:2392212248,Morning Parade Coffee Bar,,cafe,,,24.6,check,,https://www.openstreetmap.org/node/2392212248
+toronto-licence:B71-5300792,DONUT COUNTER,3337 BAYVIEW AVE,osm:node:14116345451,Donut Counter,3337 Bayview Avenue,cafe,,doughnuts,45.2,exact,,https://www.openstreetmap.org/node/14116345451
+toronto-licence:B71-5301187,GIGLI CAFFE,399 JANE ST,osm:node:2342899751,Gigli Caffe,399 Jane Street,cafe,,coffee_shop;cafe,15.8,exact,https://www.giglicaffe.com/,https://www.openstreetmap.org/node/2342899751
+toronto-licence:B71-5302095,JIMMY'S COFFEE,107 PORTLAND ST,osm:node:3119032737,Jimmy's Coffee,107 Portland Street,cafe,,coffee_shop,4.3,exact,https://www.jimmyscoffee.ca/,https://www.openstreetmap.org/node/3119032737
+toronto-licence:B71-5303387,PURPLE PENGUIN CAFE,889 QUEEN ST E,osm:node:4291907405,Purple Penguin Cafe,889 Queen Street East,cafe,,coffee_shop,10.3,exact,https://purplepenguincafe.square.site/,https://www.openstreetmap.org/node/4291907405
+toronto-licence:B71-5304435,THE DRAFT ROOM,395 KEELE ST,osm:node:6491503974,The Draft Room,,bar,,,9.2,check,,https://www.openstreetmap.org/node/6491503974
+toronto-licence:B71-5311370,JAVA JOE'S,405 THE WEST MALL,osm:node:11989158556,Java Joe’s,405 The West Mall,cafe,,,42.4,exact,,https://www.openstreetmap.org/node/11989158556
+toronto-licence:B71-5317501,PENNY'S,1306 BLOOR ST W,osm:node:5022507098,Penny's,1306 Bloor Street West,pub,,,11.4,exact,,https://www.openstreetmap.org/node/5022507098
+toronto-licence:B71-5325698,HIYA SCONE & COFFEE,1389 DUNDAS ST W,osm:node:13970680965,Hiya Scone & Coffee,1389 Dundas Street West,cafe,,,0.3,exact,,https://www.openstreetmap.org/node/13970680965
+toronto-licence:B71-5327969,LIT ESPRESSO BAR,1517 BAYVIEW AVE,osm:node:2179394509,Lit Espresso Bar,1517 Bayview Avenue,cafe,,,5.2,exact,,https://www.openstreetmap.org/node/2179394509
+toronto-licence:B71-5330202,CHATIME,"677 BLOOR ST W, MAIN",osm:node:4512229682,Chatime,677 Bloor Street West,cafe,,bubble_tea,6.0,check,https://chatime.com/,https://www.openstreetmap.org/node/4512229682
+toronto-licence:B71-5334774,RACHEL'S COFFEEHOUSE,2011 YONGE ST,osm:node:1780461013,Rachel's Coffee House,2011 Yonge Street,cafe,,coffee_shop,11.8,exact,https://rachelscoffeehouse.ca,https://www.openstreetmap.org/node/1780461013
+toronto-licence:B71-5344289,SNOW DAY,681 BLOOR ST W,osm:node:5279958524,Snowday,681 Bloor Street West,cafe,,,12.8,exact,,https://www.openstreetmap.org/node/5279958524
+toronto-licence:B71-5349698,LIU LOQUM ATELIER,533 COLLEGE ST,osm:node:10920735417,Liu Loqum Atelier,,cafe,,,19.1,check,,https://www.openstreetmap.org/node/10920735417
+toronto-licence:B71-5352010,GOLDEN GECKO COFFEE,282 JANE ST,osm:node:817903484,Golden Gecko Coffee,282 Jane Street,cafe,,coffee_shop;tea,8.7,exact,https://www.goldengeckocoffee.com/,https://www.openstreetmap.org/node/817903484
+toronto-licence:B71-5355218,AGENDA CAFE,622 COLLEGE ST,osm:node:5717888821,Agenda Cafe,622 College Street,cafe,,,17.8,exact,,https://www.openstreetmap.org/node/5717888821
+toronto-licence:B71-5355685,VELVET LANE CAKES,173 KING ST E,osm:node:6270207703,Velvet Lane Cakes,173 King Street East,cafe,,,8.7,exact,,https://www.openstreetmap.org/node/6270207703
+toronto-licence:B71-5357868,ARIAM CAFE,1242 DANFORTH AVE,osm:node:13007739908,Ariam Cafe,1242 Danforth Avenue,cafe,,,5.9,exact,,https://www.openstreetmap.org/node/13007739908
+toronto-licence:B71-5358350,L'ESPRESSO BAR MERCURIO,"321 BLOOR ST W, A",osm:node:860764215,L'Espresso Bar Mercurio,321 Bloor Street West,cafe,,,10.9,check,https://barmercurio.com/,https://www.openstreetmap.org/node/860764215
+toronto-licence:B71-5363430,NUTTEA,637 BLOOR ST W,osm:node:6357274284,NUTTEA,637 Bloor Street West,cafe,,tea,3.6,exact,https://www.nutteatoronto.ca,https://www.openstreetmap.org/node/6357274284
+toronto-licence:B71-5363440,AROMA ESPRESSO BAR,2040 AVENUE RD,osm:node:7559883060,Aroma Espresso Bar,,cafe,,coffee_shop,10.9,check,https://www.aromacafe.ca/,https://www.openstreetmap.org/node/7559883060
+toronto-licence:B71-5371515,EDILL'S COFFEE HOUSE,"1412 KENNEDY RD, #1-1A",osm:node:11482874258,Edill's Coffee House,1412 Kennedy Road,cafe,,coffee_shop,9.6,check,https://www.edillscoffeehouse.com/,https://www.openstreetmap.org/node/11482874258
+toronto-licence:B71-5373201,GELATEO CAFE,189 DANFORTH AVE,osm:node:4378209741,GelaTeo Cafe,,cafe,,,14.9,check,,https://www.openstreetmap.org/node/4378209741
+toronto-licence:B71-5373592,LE BLEU COFFEE,728 ST CLAIR AVE W,osm:node:7580591505,Le Bleu Coffee,728 St. Clair Avenue West,cafe,,coffee_shop,12.9,exact,,https://www.openstreetmap.org/node/7580591505
+toronto-licence:B71-5377977,SUPERCOFFEE,1148 WESTON RD,osm:node:3782646764,Supercoffee,1148 Weston Road,cafe,,coffee_shop,6.4,exact,,https://www.openstreetmap.org/node/3782646764
+toronto-licence:B71-5403682,KARKUMI CAFE,4033 GORDON BAKER RD,osm:node:14097979049,Karkumi Cafe,4033 Gordon Baker Road,cafe,,breakfast;pizza;sandwich;salad;dessert;coffee_shop;tea,44.6,exact,https://www.karkumicafe.com/,https://www.openstreetmap.org/node/14097979049
+toronto-licence:B71-5404308,LOW BAR,1426 BLOOR ST W,osm:node:6341760049,Low Bar,1426 Bloor Street West,bar,,,13.7,exact,https://www.lowbar.ca,https://www.openstreetmap.org/node/6341760049
+toronto-licence:B71-5405209,PRET A MANGER,"90 ADELAIDE ST W, #100",osm:node:773490272,Pret A Manger,,cafe,,coffee_shop,13.3,check,,https://www.openstreetmap.org/node/773490272
+toronto-licence:B71-5406463,COFFEE LUNAR,6040 YONGE ST,osm:node:12941699622,Coffee Lunar,,cafe,,,6.2,check,,https://www.openstreetmap.org/node/12941699622
+toronto-licence:B71-5414163,NABULU COFFEE,6 ST JOSEPH ST,osm:node:12785181682,Nabulu Coffee,6 St. Joseph Street,cafe,,coffee_shop,1.6,exact,,https://www.openstreetmap.org/node/12785181682
+toronto-licence:B71-5415352,EPOCHAL IMP,123 DANFORTH AVE,osm:node:4378209732,Epochal Imp,123 Danforth Avenue,cafe,,,3.2,exact,,https://www.openstreetmap.org/node/4378209732
+toronto-licence:B71-5415952,AMA KO MOMO,1228 KING ST W,osm:node:6184565140,Ama Ko Momo,1228 King Street West,cafe,,,2.4,exact,,https://www.openstreetmap.org/node/6184565140
+toronto-licence:B71-5419298,DARK HORSE ESPRESSO BAR,"401 RICHMOND ST W, #135",osm:node:2100496733,Dark Horse Espresso Bar,401 Richmond Street West,cafe,,coffee_shop,35.6,check,,https://www.openstreetmap.org/node/2100496733
+toronto-licence:B71-5419299,DARK HORSE ESPRESSO BAR,"215 SPADINA AVE, #102",osm:node:1888317908,Dark Horse Espresso Bar,215 Spadina Avenue,cafe,,coffee_shop,21.8,check,,https://www.openstreetmap.org/node/1888317908
+toronto-licence:B71-5419303,VILLAGE JUICERY,99 RONCESVALLES AVE,osm:node:5476234421,Village Juicery,99 Roncesvalles Avenue,cafe,,juice,8.2,exact,https://www.villagejuicery.com/,https://www.openstreetmap.org/node/5476234421
+toronto-licence:B71-5423361,DREAM BUBBLE TEA,"3379 YONGE ST, #6",osm:node:13859079054,Dream Bubble Tea,,cafe,,bubble_tea,15.5,check,,https://www.openstreetmap.org/node/13859079054
+toronto-licence:B71-5425150,MARRY ME MOCHI,"1980 ST CLAIR AVE W, #127A",osm:node:13719655461,Marry Me Mochi,1980 St. Clair Avenue West,cafe,,donut,51.7,check,https://www.marrymemochi.ca,https://www.openstreetmap.org/node/13719655461
+toronto-licence:B71-5428577,ZAGMACHI,3 ISABELLA ST,osm:node:7684923262,Zagmachi,3 Isabella Street,cafe,,,4.7,exact,,https://www.openstreetmap.org/node/7684923262
+toronto-licence:B71-5430775,CHAMBERLAINS PONY BAR,583 KING ST W,osm:node:12465998290,Chamberlains Pony Bar,,bar,,,3.5,check,,https://www.openstreetmap.org/node/12465998290
+toronto-licence:B71-5440557,JAVA JOE'S,"5353 DUNDAS ST W, #102",osm:node:6310887984,Java Joe's,5353 Dundas Street West,cafe,,,25.6,check,,https://www.openstreetmap.org/node/6310887984
+toronto-licence:B71-5442161,SHRINKING VIOLET,828 BLOOR ST W,osm:node:6340610370,Shrinking Violet,828 Bloor Street West,bar,,,8.9,exact,,https://www.openstreetmap.org/node/6340610370
+toronto-licence:B71-5449948,HELLO NORI,650 KING ST W,osm:node:5854876538,Hello Nori,650 King Street West,bar,,,46.8,exact,,https://www.openstreetmap.org/node/5854876538
+toronto-licence:B71-5450864,THIRSTY AND MISERABLE,2102 DUNDAS ST W,osm:node:6383825316,Thirsty and Miserable,2102 Dundas Street West,bar,,,12.6,exact,,https://www.openstreetmap.org/node/6383825316
+toronto-licence:B71-5459944,ISLE OF COFFEE,745 QUEEN ST E,osm:node:13176774257,Isle of Coffee,745 Queen Street East,cafe,,,5.6,exact,https://www.isleofcoffeeto.com/,https://www.openstreetmap.org/node/13176774257
+toronto-licence:B71-5471387,BKOOKIES,579 COLLEGE ST,osm:node:5720602222,BKookies,579 College Street,cafe,,,17.6,exact,,https://www.openstreetmap.org/node/5720602222
+toronto-licence:B71-5473471,LE PETIT PAIN,431 SPADINA RD,osm:node:12332810169,Le Petit Pain,431 Spadina Road,cafe,,,8.8,exact,https://www.lepetitpain.com/,https://www.openstreetmap.org/node/12332810169
+toronto-licence:B71-5475000,MILKY'S,760 DUNDAS ST W,osm:node:7798343085,Milky’s,760 Dundas Street West,cafe,,,4.0,exact,,https://www.openstreetmap.org/node/7798343085
+toronto-licence:B71-5478538,SECOND CUP,179 COLLEGE ST,osm:node:1155318667,Second Cup,179 College Street,cafe,,coffee_shop,19.6,exact,,https://www.openstreetmap.org/node/1155318667
+toronto-licence:B71-5481684,MACHI MACHI,575 YONGE ST,osm:node:1128861518,Machi machi,575 Yonge Street,cafe,,bubble_tea,4.8,exact,,https://www.openstreetmap.org/node/1128861518
+toronto-licence:B71-5484062,LARRY'S PLACE,1390 QUEEN ST W,osm:node:6495425602,Larry's Place,1390 Queen Street West,cafe,,coffee_shop,8.0,exact,,https://www.openstreetmap.org/node/6495425602
+toronto-licence:B71-5503222,SUPER BOWLS,279 RONCESVALLES AVE,osm:node:6328179187,Super Bowls,279 Roncesvalles Avenue,cafe,,,16.9,exact,,https://www.openstreetmap.org/node/6328179187
+toronto-licence:B71-5503688,ABOL ESPRESSO BAR,1432 DANFORTH AVE,osm:node:12997418457,Abol Espresso Bar,,cafe,,,6.9,check,,https://www.openstreetmap.org/node/12997418457
+toronto-licence:B71-5518101,EUROPA CAFFE,1168 THE QUEENSWAY,osm:node:1887557377,Europa Caffe,1168 The Queensway,cafe,,coffee_shop,2.8,exact,,https://www.openstreetmap.org/node/1887557377
+toronto-licence:B71-5520003,THE PEACHY,618 YONGE ST,osm:node:7685020700,The Peachy,618 Yonge Street,cafe,,korean,3.5,exact,https://www.thepeachy.ca/,https://www.openstreetmap.org/node/7685020700
+toronto-licence:B71-5527620,ONE GRAM BY PRIMO,466 DANFORTH AVE,osm:node:13683413626,One Gram By Primo,,cafe,,,11.3,check,,https://www.openstreetmap.org/node/13683413626
+toronto-licence:B71-5534789,WONDER PET CAFE,"333 QUEEN ST W, B",osm:node:6403221855,Wonder Pet Cafe,333 Queen Street West,cafe,,french,2.5,check,,https://www.openstreetmap.org/node/6403221855
+toronto-licence:B71-5536920,SLOW BITE,"45 SHEPPARD AVE E, #102",osm:node:927210912,Slow Bite,45 Sheppard Avenue East,cafe,,coffee_shop;pastry,5.1,check,,https://www.openstreetmap.org/node/927210912
+toronto-licence:B71-5544778,PORTOVELO CAFE,1669 ST CLAIR AVE W,osm:node:13874925783,Portovelo Cafe,1669 St Clair Avenue West,cafe,,,2.6,exact,,https://www.openstreetmap.org/node/13874925783
+toronto-licence:B71-5552154,DAVANG LUNA,"163 STERLING RD, M",osm:node:14255361373,Davang Luna,163 Sterling Rd,cafe,,,9.6,check,,https://www.openstreetmap.org/node/14255361373
+toronto-licence:B71-5553563,ROOZAMOON CAFE,398 QUEEN ST E,osm:node:13141903741,Roozamoon Cafe,398 Queen Street East,cafe,,,7.5,exact,,https://www.openstreetmap.org/node/13141903741
+toronto-licence:B71-5560513,CHATRAMUE,341 SPADINA AVE,osm:node:11803596883,Cha Tra Mue,341 Spadina Avenue,cafe,,bubble_tea,16.9,exact,,https://www.openstreetmap.org/node/11803596883
+toronto-licence:B71-5560753,SUVARI COFFEE,3378 LAKE SHORE BLVD W,osm:node:3786761687,Suvari Coffee,3378 Lake Shore Boulevard West,cafe,,coffee_shop,8.2,exact,,https://www.openstreetmap.org/node/3786761687
+toronto-licence:B71-5565166,TOGO COFFEE,190 JARVIS ST,osm:node:8044564344,ToGo Coffee,190 Jarvis Street,cafe,,,6.5,exact,https://www.togocafe.ca/,https://www.openstreetmap.org/node/8044564344
+toronto-licence:B71-5566288,SAY COFFEE,"66 ISABELLA ST, #4",osm:node:6329202858,Say Coffee,66 Isabella Street,cafe,,coffee_shop,27.9,exact,,https://www.openstreetmap.org/node/6329202858
+toronto-licence:B71-5569324,HOTBLACK COFFEE,"245 QUEEN ST W, #4",osm:node:4036638717,HotBlack Coffee,245 Queen Street West,cafe,,,14.1,check,http://hotblack-coffee.com,https://www.openstreetmap.org/node/4036638717
+toronto-licence:B71-5578646,MOFER COFFEE,132 QUEENS QUAY E,osm:node:11663588362,Mofer Coffee,,cafe,,,24.8,check,,https://www.openstreetmap.org/node/11663588362
+toronto-licence:B71-5578649,MOFER COFFEE,1040 ST CLAIR AVE W,osm:node:7578594172,Mofer Coffee,,cafe,,coffee_shop,7.7,check,,https://www.openstreetmap.org/node/7578594172
+toronto-licence:B71-5587159,MISC COFFEE,299 OSSINGTON AVE,osm:node:13475380001,Misc Coffee,299 Ossington Avenue,cafe,,,23.7,exact,,https://www.openstreetmap.org/node/13475380001
+toronto-licence:B71-5590501,ROOMS COFFEE,17 BALDWIN ST,osm:node:11800686187,Rooms Coffee,17 Baldwin Street,cafe,,,4.1,exact,,https://www.openstreetmap.org/node/11800686187
+toronto-licence:B71-5593669,MARRY ME MOCHI,"210 AUGUSTA AVE, B",osm:node:13890102780,Marry Me Mochi,210 Augusta Avenue,cafe,,donut,0.9,check,https://www.marrymemochi.ca,https://www.openstreetmap.org/node/13890102780
+toronto-licence:B71-5597301,MATCHA MATCHA,129 MCCAUL ST,osm:node:13609461843,Matcha Matcha,,cafe,,,20.7,check,,https://www.openstreetmap.org/node/13609461843
+toronto-licence:B71-55A4354,PINOT GROUCHIO'S,1609 DUNDAS ST W,osm:node:2558370242,Pinot Grouchio's,1609 Dundas Street West,bar,,,9.7,check,,https://www.openstreetmap.org/node/2558370242
+toronto-licence:B71-5600311,BLACK WOLF COFFEE,130 EGLINTON AVE E,osm:node:5697595584,BlackWolf Coffee,130 Eglinton Avenue East,cafe,,coffee_shop,44.4,exact,https://www.instagram.com/blackwolfcoffee_to,https://www.openstreetmap.org/node/5697595584
+toronto-licence:B71-5602782,CAFE ROSARIUM,"878 YONGE ST, G1",osm:node:13885900250,Café Rosarium,,cafe,,,1.5,check,,https://www.openstreetmap.org/node/13885900250
+toronto-licence:B71-5608316,SARAH & TOM,682 BLOOR ST W,osm:node:4512229683,Sarah & Tom,682 Bloor Street West,cafe,,,5.6,exact,https://kpopworld.ca,https://www.openstreetmap.org/node/4512229683
+toronto-licence:B71-5613376,CAFE RUSSO,139 RONCESVALLES AVE,osm:node:6325960649,Café Russo,139 Roncesvalles Avenue,cafe,,coffee_shop,4.4,exact,,https://www.openstreetmap.org/node/6325960649
+toronto-licence:B71-5614355,THE VIRGINIA COCKTAIL BAR,1374 QUEEN ST W,osm:node:5585260721,The Virginia Cocktail Bar,1374 Queen Street West,bar,,,5.1,exact,,https://www.openstreetmap.org/node/5585260721
+toronto-licence:B71-5618395,COTTI COFFEE,198 QUEEN ST W,osm:node:6074566801,Cotti Coffee,,cafe,,coffee_shop,8.4,check,,https://www.openstreetmap.org/node/6074566801
+toronto-licence:B71-5624603,BYND COFFEE BAR,"338 ADELAIDE ST W, #2",osm:node:13882940707,BYND Coffee Bar,338 Adelaide Street West,cafe,,coffee_shop,0.2,exact,https://byndcoffeebar.com,https://www.openstreetmap.org/node/13882940707
+toronto-licence:B71-5626307,SHUYI TEALICIOUS,394 SPADINA AVE,osm:node:11803596914,Shuyi Tealicious,394 Spadina Avenue,cafe,,bubble_tea,17.4,exact,,https://www.openstreetmap.org/node/11803596914
+toronto-licence:B71-5626903,SUPERCOFFEE,1085 DAVENPORT RD,osm:node:13530016734,Supercoffee,1085 Davenport Road,cafe,,coffee_shop,0.8,exact,https://supercoffee.ca,https://www.openstreetmap.org/node/13530016734
+toronto-licence:B71-5631887,BIRDBITE COFFEE,1420 DUNDAS ST W,osm:node:6820739741,Birdbite Coffee,1420 Dundas Street West,cafe,,coffee_shop,7.0,exact,,https://www.openstreetmap.org/node/6820739741
+toronto-licence:B71-5632832,AHMETZADE,"501 BLOOR ST W, GRND FL",osm:node:575245026,Ahmetzade,,cafe,,dessert,17.0,check,,https://www.openstreetmap.org/node/575245026
+toronto-licence:B71-5633443,TIM HORTON'S,"250 WINCOTT DR, G8",osm:node:383562268,Tim Hortons,250 Wincott Drive,cafe,,coffee_shop,51.5,check,,https://www.openstreetmap.org/node/383562268
+toronto-licence:B71-5633448,THE MOTOR POOL CAFE,342 MUNSTER AVE,osm:node:13990749291,The Motor Pool Cafe,342 Munster Avenue,cafe,,,15.7,exact,,https://www.openstreetmap.org/node/13990749291
+toronto-licence:B71-5635547,SAVOIR COFFEE,15 ATLANTIC AVE,osm:node:14293814601,Savoir Coffee,15 Atlantic Avenue,cafe,,,2.7,exact,,https://www.openstreetmap.org/node/14293814601
+toronto-licence:B71-5636167,M CHA BAR,491 BLOOR ST W,osm:node:575245041,M Chá Bar,491 Bloor Street West,cafe,,,11.3,exact,https://www.mchabar.ca,https://www.openstreetmap.org/node/575245041
+toronto-licence:B71-5636177,BB CAFE,78 MARINE PARADE DR,osm:node:3670530408,BB Cafe,78 Marine Parade Drive,cafe,,,4.6,exact,,https://www.openstreetmap.org/node/3670530408
+toronto-licence:B71-5642728,THE HARP TAVERN,180 EGLINTON AVE E,osm:node:761870818,The Harp Tavern,180 Eglinton Avenue East,pub,,,10.2,exact,,https://www.openstreetmap.org/node/761870818
+toronto-licence:B71-5645931,SPQR ESPRESSO BAR,92 AVENUE RD,osm:node:14167944258,SPQR Espresso Bar,92 Avenue Road,cafe,,coffee_shop,3.4,exact,,https://www.openstreetmap.org/node/14167944258
+toronto-licence:B71-5647943,EVANA CAFE & LOUNGE,334 DUNDAS ST W,osm:node:10925027992,Evana Cafe & Lounge,334 Dundas Street West,cafe,,,4.3,exact,,https://www.openstreetmap.org/node/10925027992
+toronto-licence:B71-5649287,GOOD EARTH COFFEEHOUSE,"8 WELLESLEY ST E, #104",osm:node:280493843,Good Earth Coffeehouse,8 Wellesley Street East,cafe,,,19.3,check,,https://www.openstreetmap.org/node/280493843
+toronto-licence:B71-5652283,DONUTLAN,688 GERRARD ST E,osm:node:13879131375,Donutlan,688 Gerrard Street East,cafe,,donut;churro,0.6,exact,https://www.churrodonuts.com/home,https://www.openstreetmap.org/node/13879131375
+mississauga-directory-2025:17385,Chatime,"515 LAKESHORE RD E, Unit 107",osm:node:10805846977,Chatime,,cafe,,bubble_tea,25.7,check,,https://www.openstreetmap.org/node/10805846977
+mississauga-directory-2025:18101,Daddy O Doughnuts,"589 NORTH SERVICE RD, Unit 5",osm:node:3763715307,Daddy O Doughnuts,589 North Service Road,cafe,,donut,25.8,exact,https://www.daddyodoughnuts.com/,https://www.openstreetmap.org/node/3763715307
+mississauga-directory-2025:20142,Gong cha,"90 BURNHAMTHORPE RD W, Unit 115",osm:node:9946139507,Gong Cha,,cafe,,bubble_tea,27.8,check,,https://www.openstreetmap.org/node/9946139507
+mississauga-directory-2025:25875,Second Cup,"4553 HURONTARIO ST, Unit E2",osm:node:1171162115,Second Cup,,cafe,,coffee_shop,9.7,check,,https://www.openstreetmap.org/node/1171162115
+mississauga-directory-2025:26316,Social Coffee Bean,"211 LAKESHORE RD E, Unit A",osm:node:1818454075,Social Coffee Bean,211 Lakeshore Road East,cafe,,,27.7,check,https://www.socialcoffee.com/,https://www.openstreetmap.org/node/1818454075
+mississauga-directory-2025:26645,Starbucks,250 LAKESHORE RD W,osm:node:7123001567,Starbucks,,cafe,,coffee_shop,22.3,check,,https://www.openstreetmap.org/node/7123001567
+mississauga-directory-2025:26647,Starbucks,334 DUNDAS ST E,osm:way:80812734,Starbucks,,cafe,,coffee_shop,9.6,check,,https://www.openstreetmap.org/way/80812734
+mississauga-directory-2025:26648,Starbucks,362 LAKESHORE RD E,osm:way:77743230,Starbucks,,cafe,,coffee_shop,2.4,check,,https://www.openstreetmap.org/way/77743230
+mississauga-directory-2025:26649,Starbucks,"3030 THOMAS ST, Unit 407",osm:node:2731733037,Starbucks,,cafe,,coffee_shop,28.2,check,,https://www.openstreetmap.org/node/2731733037
+mississauga-directory-2025:26651,Starbucks,3235 DUNDAS ST W,osm:node:1853502870,Starbucks,3235 Dundas Street West,cafe,,coffee_shop,15.6,exact,,https://www.openstreetmap.org/node/1853502870
+mississauga-directory-2025:26653,Starbucks,5067 DIXIE RD,osm:node:3924709142,Starbucks,,cafe,,coffee_shop,26.5,check,,https://www.openstreetmap.org/node/3924709142
+mississauga-directory-2025:26656,Starbucks,5960 DIXIE RD,osm:way:34484344,Starbucks,,cafe,,coffee_shop,1.3,check,,https://www.openstreetmap.org/way/34484344
+mississauga-directory-2025:26657,Starbucks,"2100 HURONTARIO ST, Unit 4",osm:node:414945685,Starbucks,,cafe,,coffee_shop,3.8,check,,https://www.openstreetmap.org/node/414945685
+mississauga-directory-2025:26662,Starbucks,"2963 ARGENTIA RD, Unit 1",osm:node:3976539735,Starbucks,,cafe,,coffee_shop,9.2,check,,https://www.openstreetmap.org/node/3976539735
+mississauga-directory-2025:26663,Starbucks,30 WORLD DR,osm:node:5695584735,Starbucks,30 World Drive,cafe,,coffee_shop,48.4,exact,https://www.starbucks.ca/store-locator/store/1007759/30-world-drive-30-world-drive-mississauga-on-l-5-t-3-a-2-ca,https://www.openstreetmap.org/node/5695584735
+mississauga-directory-2025:26664,Starbucks,6155 ERIN MILLS PKY,osm:node:11474838097,Starbucks,,cafe,,coffee_shop,16.3,check,,https://www.openstreetmap.org/node/11474838097
+mississauga-directory-2025:26666,Starbucks,"1930 FOWLER DR, Unit C 101",osm:node:3468671557,Starbucks,,cafe,,coffee_shop,3.1,check,,https://www.openstreetmap.org/node/3468671557
+mississauga-directory-2025:27528,The Tea Room,"223 QUEEN ST S, Unit 3",osm:node:3452961426,The Tea Room,,cafe,,,10.2,check,https://www.thetearoomstreetsville.ca,https://www.openstreetmap.org/node/3452961426
+mississauga-directory-2025:27615,Tim Hortons,"144 DUNDAS ST W, Unit 4",osm:node:2960534533,Tim Hortons,144 Dundas Street West,cafe,,coffee_shop,13.0,check,,https://www.openstreetmap.org/node/2960534533
+mississauga-directory-2025:27619,Tim Hortons,"1211 HURONTARIO ST, Unit A",osm:node:414941746,Tim Hortons,,cafe,,coffee_shop,8.9,check,,https://www.openstreetmap.org/node/414941746
+mississauga-directory-2025:27621,Tim Hortons,"780 SOUTH SHERIDAN WAY, Unit P2",osm:node:898454123,Tim Hortons,780 South Sheridan Way,cafe,,coffee_shop,6.0,check,,https://www.openstreetmap.org/node/898454123
+mississauga-directory-2025:27625,Tim Hortons,3436 GLEN ERIN DR,osm:way:33279581,Tim Hortons,3436 Glen Erin Drive,cafe,,coffee_shop,5.9,exact,,https://www.openstreetmap.org/way/33279581
+mississauga-directory-2025:27633,Tim Hortons,1715 BLOOR ST,osm:node:3925813291,Tim Hortons,1715 Bloor Street,cafe,,coffee_shop,14.0,exact,,https://www.openstreetmap.org/node/3925813291
+mississauga-directory-2025:27636,Tim Hortons,445 EGLINTON AVE E,osm:node:9759852393,Tim Hortons,445 Eglinton Avenue East,cafe,,coffee_shop,9.8,exact,,https://www.openstreetmap.org/node/9759852393
+mississauga-directory-2025:27637,Tim Hortons,800 BANCROFT DR,osm:node:1854793678,Tim Hortons,,cafe,,coffee_shop,3.0,check,,https://www.openstreetmap.org/node/1854793678
+mississauga-directory-2025:27647,Tim Hortons,475 COURTNEYPARK DR E,osm:way:34147460,Tim Hortons,475 Courtneypark Drive East,cafe,,coffee_shop,2.3,exact,,https://www.openstreetmap.org/way/34147460
+mississauga-directory-2025:27648,Tim Hortons,"3650 DERRY RD E, Unit 104",osm:node:2788594444,Tim Hortons,,cafe,,coffee_shop,7.1,check,,https://www.openstreetmap.org/node/2788594444
+mississauga-directory-2025:27650,Tim Hortons,4595 TOMKEN RD,osm:way:201842122,Tim Hortons,4595 Tomken Road,cafe,,coffee_shop,32.3,exact,,https://www.openstreetmap.org/way/201842122
+mississauga-directory-2025:27651,Tim Hortons,1801 DUNDAS ST E,osm:node:910381087,Tim Hortons,,cafe,,coffee_shop,8.4,check,,https://www.openstreetmap.org/node/910381087
+mississauga-directory-2025:27661,Tim Hortons,"6405 ERIN MILLS PKY, Unit 2",osm:node:4017888663,Tim Hortons,,cafe,,coffee_shop,1.5,check,,https://www.openstreetmap.org/node/4017888663
+mississauga-directory-2025:27668,Tim Hortons,6600 MEADOWVALE TOWN CENTRE CIR,osm:way:140356004,Tim Hortons,,cafe,,coffee_shop,2.7,check,,https://www.openstreetmap.org/way/140356004

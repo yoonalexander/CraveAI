@@ -1,0 +1,4841 @@
+{
+  "toronto-licence:B50-5308486": {
+    "city": "Toronto",
+    "name": "Cubano Kings",
+    "address": "141 Spadina Ave",
+    "url": "https://www.cubanokings.ca/",
+    "signal": "ordering",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B50-5589031": {
+    "city": "Toronto",
+    "name": "Pizza Depot",
+    "address": "2118 Queen St E",
+    "url": "https://pizzadepot.ca/toronto-queen-st-e/",
+    "signal": "ordering",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B71-3732094": {
+    "city": "Toronto",
+    "name": "Coppi Ristorante",
+    "address": "3363 Yonge St",
+    "url": "https://www.coppi.ca/contact-us",
+    "signal": "reservations",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B71-3844592": {
+    "city": "Toronto",
+    "name": "Moti Mahal",
+    "address": "1422 Gerrard St E",
+    "url": "https://custom.order.online/en-US/store/1454509",
+    "signal": "ordering",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B71-4315785": {
+    "city": "Toronto",
+    "name": "The Carbon Bar",
+    "address": "99 Queen St E",
+    "url": "https://www.thecarbonbar.ca/order.html",
+    "signal": "ordering",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B71-4420074": {
+    "city": "Toronto",
+    "name": "Yasu",
+    "address": "81 Harbord St",
+    "url": "https://www.yasu-sushibar.com/contact.html",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B71-4420361": {
+    "city": "Toronto",
+    "name": "Joso's",
+    "address": "202 Davenport Rd",
+    "url": "https://www.josos.com/contact/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B71-4704722": {
+    "city": "Toronto",
+    "name": "La Luce Ristorante",
+    "address": "4377 Steeles Ave W",
+    "url": "https://www.laluceristorante.com/contact/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B71-4811861": {
+    "city": "Toronto",
+    "name": "Tap Works Pub",
+    "address": "816 St Clair Ave W",
+    "url": "https://www.tapworkspub.com/contact-1",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B71-4845402": {
+    "city": "Toronto",
+    "name": "Urban Hakka",
+    "address": "3305 Yonge St",
+    "url": "https://urbanhakka.ca/contact",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B71-5144567": {
+    "city": "Toronto",
+    "name": "Pizzaiolo",
+    "address": "2640 St Clair Ave E",
+    "url": "https://pizzaiolo.ca/locations/2640-st-clair-ave-east",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B71-5312249": {
+    "city": "Toronto",
+    "name": "Gusto 501",
+    "address": "501 King St E",
+    "url": "https://gusto501.com/",
+    "signal": "reservations",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B71-5327348": {
+    "city": "Toronto",
+    "name": "Sinaloa Factory",
+    "address": "181 Augusta Ave",
+    "url": "https://www.sinaloafactory.com/contact",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B71-5371802": {
+    "city": "Toronto",
+    "name": "Cafe Landwer",
+    "address": "383 Spadina Rd",
+    "url": "https://www.landwer.ca/locations/spadina",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B71-5415984": {
+    "city": "Toronto",
+    "name": "Gateau Ghost",
+    "address": "974 College St",
+    "url": "https://gateaughost.com/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B71-5480470": {
+    "city": "Toronto",
+    "name": "Tortaco",
+    "address": "788 Broadview Ave",
+    "url": "https://www.tortaco.ca/contact-location",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B71-5633725": {
+    "city": "Toronto",
+    "name": "Sava Crepes & Coffee",
+    "address": "221 Roncesvalles Ave",
+    "url": "https://www.savacafe.ca/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:17132": {
+    "city": "Mississauga",
+    "name": "Captain's Boil, The",
+    "address": "720 Burnhamthorpe Rd W, Unit 3A",
+    "url": "https://www.thecaptainsboil.com/locations-ca/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:18219": {
+    "city": "Mississauga",
+    "name": "Delhi Chutney House",
+    "address": "5130 Dixie Rd, Unit 3",
+    "url": "https://www.delhichutneyhouse.ca/",
+    "signal": "ordering",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:21583": {
+    "city": "Mississauga",
+    "name": "Khatta Meetha",
+    "address": "1 Glenn Hawthorne Blvd, Unit 3",
+    "url": "https://khattameetha.ca/",
+    "signal": "ordering",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:26997": {
+    "city": "Mississauga",
+    "name": "Sweet India Restaurant",
+    "address": "7126 Airport Rd",
+    "url": "https://sweetindia.ca/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:27646": {
+    "city": "Mississauga",
+    "name": "Tim Hortons",
+    "address": "2427 Cawthra Rd",
+    "url": "https://locations.timhortons.ca/en/on/mississauga/2427-cawthra-rd/",
+    "signal": "ordering",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B71-0203933": {
+    "city": "Toronto",
+    "name": "Friar & Firkin",
+    "address": "160 John St",
+    "url": "https://www.firkinpubs.com/thefriarandfirkin/contact/",
+    "signal": "reservations",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B71-4074956": {
+    "city": "Toronto",
+    "name": "Stout Irish Pub",
+    "address": "221 Carlton St",
+    "url": "https://www.stoutirishpub.ca/contact",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B71-4298187": {
+    "city": "Toronto",
+    "name": "Brass Taps Pizza Pub",
+    "address": "934 College St",
+    "url": "https://www.brasstapsoncollege.com/",
+    "signal": "ordering",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B71-4804135": {
+    "city": "Toronto",
+    "name": "Sofia",
+    "address": "99 Yorkville Ave",
+    "url": "https://sofiayorkville.com/",
+    "signal": "reservations",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B71-5224240": {
+    "city": "Toronto",
+    "name": "Au Pain Doré",
+    "address": "81 Front St E",
+    "url": "https://atelier.aupaindore.com/en/our-boutiques/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B71-5330159": {
+    "city": "Toronto",
+    "name": "Ehwa Uptown",
+    "address": "4866 Yonge St",
+    "url": "https://www.ehwa.ca/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B71-5422478": {
+    "city": "Toronto",
+    "name": "Lyla",
+    "address": "60 Sudbury St",
+    "url": "https://www.lylatoronto.com/menu?menu=golden-hours",
+    "signal": "reservations",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B71-5432291": {
+    "city": "Toronto",
+    "name": "Score on Queen",
+    "address": "298 Queen St W",
+    "url": "https://www.scoreonqueen.com/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B71-5434819": {
+    "city": "Toronto",
+    "name": "The Berczy Tavern",
+    "address": "69 Front St E",
+    "url": "https://www.theberczy.com/contact",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B71-5459639": {
+    "city": "Toronto",
+    "name": "Occhiolino Pastificio",
+    "address": "499 Bathurst St",
+    "url": "https://occhiolino.ca/reserve",
+    "signal": "reservations",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B71-5459952": {
+    "city": "Toronto",
+    "name": "Los Gyros",
+    "address": "500 Queen St E",
+    "url": "https://www.losgyrosmexicanfood.com/locations",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B71-5500161": {
+    "city": "Toronto",
+    "name": "Chao Lay",
+    "address": "809 St Clair Ave W",
+    "url": "https://www.chaolayto.com/contact",
+    "signal": "reservations",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B71-5531304": {
+    "city": "Toronto",
+    "name": "The Nice Slice",
+    "address": "196 Borden St",
+    "url": "https://niceslice.pizza/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B71-5538728": {
+    "city": "Toronto",
+    "name": "Pantry",
+    "address": "613 King St W",
+    "url": "https://orderpantry.com/restaurants/",
+    "signal": "ordering",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B71-5553815": {
+    "city": "Toronto",
+    "name": "Fox and John's Kitchen and Bar",
+    "address": "3527 Lake Shore Blvd W",
+    "url": "https://www.foxandjohnspub.com/long-branch",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B71-5608351": {
+    "city": "Toronto",
+    "name": "Roxton Public House",
+    "address": "1112 Dundas St W",
+    "url": "https://www.roxtonpub.com/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B50-4296067": {
+    "city": "Toronto",
+    "name": "TIM HORTON'S",
+    "address": "135 REXDALE BLVD",
+    "url": "https://locations.timhortons.ca/en/on/etobicoke/135-rexdale-blvd/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B50-4933800": {
+    "city": "Toronto",
+    "name": "TIM HORTONS",
+    "address": "1345 MARTIN GROVE RD",
+    "url": "https://locations.timhortons.ca/en/on/etobicoke/1345-martin-grove-rd/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B50-5031273": {
+    "city": "Toronto",
+    "name": "TIM HORTONS",
+    "address": "150 DUPONT ST",
+    "url": "https://locations.timhortons.ca/en/on/toronto/150-dupont-st/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B71-3134089": {
+    "city": "Toronto",
+    "name": "TIM HORTON'S",
+    "address": "1900 O'CONNOR DR",
+    "url": "https://locations.timhortons.ca/en/on/north-york/1900-oconnor-dr/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B71-3238423": {
+    "city": "Toronto",
+    "name": "TIM HORTON'S",
+    "address": "853 THE QUEENSWAY",
+    "url": "https://locations.timhortons.ca/en/on/etobicoke/853-the-queensway/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B71-3242301": {
+    "city": "Toronto",
+    "name": "TIM HORTON'S",
+    "address": "1751 ALBION RD",
+    "url": "https://locations.timhortons.ca/en/on/etobicoke/1751-albion-rd/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B71-3242302": {
+    "city": "Toronto",
+    "name": "TIM HORTON'S",
+    "address": "1130 ALBION RD",
+    "url": "https://locations.timhortons.ca/en/on/etobicoke/1130-albion-rd/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B71-3358069": {
+    "city": "Toronto",
+    "name": "TIM HORTON'S",
+    "address": "581 PARLIAMENT ST",
+    "url": "https://locations.timhortons.ca/en/on/toronto/581-parliament-st/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B71-3483851": {
+    "city": "Toronto",
+    "name": "TIM HORTONS",
+    "address": "2291 ISLINGTON AVE",
+    "url": "https://locations.timhortons.ca/en/on/etobicoke/2291-islington-ave/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B71-3950269": {
+    "city": "Toronto",
+    "name": "TIM HORTON'S",
+    "address": "323 RICHMOND ST E",
+    "url": "https://locations.timhortons.ca/en/on/toronto/323-richmond-street-east/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B71-4539635": {
+    "city": "Toronto",
+    "name": "TIM HORTON'S",
+    "address": "245 DIXON RD",
+    "url": "https://locations.timhortons.ca/en/on/etobicoke/245-dixon-rd/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B71-4836791": {
+    "city": "Toronto",
+    "name": "TIM HORTON'S",
+    "address": "334 BLOOR ST W",
+    "url": "https://locations.timhortons.ca/en/on/toronto/334-bloor-st-west/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B71-5634709": {
+    "city": "Toronto",
+    "name": "TIM HORTON'S",
+    "address": "800 LAWRENCE AVE E",
+    "url": "https://locations.timhortons.ca/en/on/north-york/800-lawrence-ave-e/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:27612": {
+    "city": "Mississauga",
+    "name": "Tim Hortons",
+    "address": "3285 DERRY RD W",
+    "url": "https://locations.timhortons.ca/en/on/mississauga/3285-derry-rd-west/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:27613": {
+    "city": "Mississauga",
+    "name": "Tim Hortons",
+    "address": "1327 DUNDAS ST E",
+    "url": "https://locations.timhortons.ca/en/on/mississauga/1327-dundas-st-e/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:27614": {
+    "city": "Mississauga",
+    "name": "Tim Hortons",
+    "address": "799 DUNDAS ST E",
+    "url": "https://locations.timhortons.ca/en/on/mississauga/799-dundas-st-e/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:27617": {
+    "city": "Mississauga",
+    "name": "Tim Hortons",
+    "address": "2991 ERIN CENTRE BLVD",
+    "url": "https://locations.timhortons.ca/en/on/mississauga/2991-erin-centre-blvd/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:27623": {
+    "city": "Mississauga",
+    "name": "Tim Hortons",
+    "address": "4040 CREDITVIEW RD",
+    "url": "https://locations.timhortons.ca/en/on/mississauga/4040-creditview-rd/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:27626": {
+    "city": "Mississauga",
+    "name": "Tim Hortons",
+    "address": "780 BANCROFT DR",
+    "url": "https://locations.timhortons.ca/en/on/mississauga/780-bancroft-dr/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:27627": {
+    "city": "Mississauga",
+    "name": "Tim Hortons",
+    "address": "3060 ARTESIAN DR",
+    "url": "https://locations.timhortons.ca/en/on/mississauga/3060-artesian-dr/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:27628": {
+    "city": "Mississauga",
+    "name": "Tim Hortons",
+    "address": "5614 TENTH LINE WEST",
+    "url": "https://locations.timhortons.ca/en/on/mississauga/5614-tenth-line-west/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:27629": {
+    "city": "Mississauga",
+    "name": "Tim Hortons",
+    "address": "20 BRISTOL RD W",
+    "url": "https://locations.timhortons.ca/en/on/mississauga/20-bristol-rd-west/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:27631": {
+    "city": "Mississauga",
+    "name": "Tim Hortons",
+    "address": "1212 SOUTHDOWN RD",
+    "url": "https://locations.timhortons.ca/en/on/mississauga/1212-southdown-rd/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:27634": {
+    "city": "Mississauga",
+    "name": "Tim Hortons",
+    "address": "450 DERRY RD W",
+    "url": "https://locations.timhortons.ca/en/on/mississauga/450-derry-rd-west/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:27635": {
+    "city": "Mississauga",
+    "name": "Tim Hortons",
+    "address": "632 BURNHAMTHORPE RD W",
+    "url": "https://locations.timhortons.ca/en/on/mississauga/632-burnhamthorpe-rd-west/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:27638": {
+    "city": "Mississauga",
+    "name": "Tim Hortons",
+    "address": "5025 HEATHERLEIGH AVE",
+    "url": "https://locations.timhortons.ca/en/on/mississauga/5025-heatherleigh-ave/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:27642": {
+    "city": "Mississauga",
+    "name": "Tim Hortons",
+    "address": "6767 AIRPORT RD",
+    "url": "https://locations.timhortons.ca/en/on/mississauga/6767-airport-rd/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:27643": {
+    "city": "Mississauga",
+    "name": "Tim Hortons",
+    "address": "7480 AIRPORT RD",
+    "url": "https://locations.timhortons.ca/en/on/mississauga/7480-airport-rd/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:27649": {
+    "city": "Mississauga",
+    "name": "Tim Hortons",
+    "address": "480 DERRY RD E",
+    "url": "https://locations.timhortons.ca/en/on/mississauga/480-derry-rd-east/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:27654": {
+    "city": "Mississauga",
+    "name": "Tim Hortons",
+    "address": "3255 DUNDAS ST W",
+    "url": "https://locations.timhortons.ca/en/on/mississauga/3255-dundas-st-west/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:27655": {
+    "city": "Mississauga",
+    "name": "Tim Hortons",
+    "address": "5014 DIXIE RD",
+    "url": "https://locations.timhortons.ca/en/on/mississauga/5014-dixie-rd/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:27656": {
+    "city": "Mississauga",
+    "name": "Tim Hortons",
+    "address": "3990 EGLINTON AVE W",
+    "url": "https://locations.timhortons.ca/en/on/mississauga/3990-eglinton-ave-w/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:27657": {
+    "city": "Mississauga",
+    "name": "Tim Hortons",
+    "address": "3445 HURONTARIO ST",
+    "url": "https://locations.timhortons.ca/en/on/mississauga/3445-hurontario-st/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:27662": {
+    "city": "Mississauga",
+    "name": "Tim Hortons",
+    "address": "6313 MISSISSAUGA RD",
+    "url": "https://locations.timhortons.ca/en/on/mississauga/6313-mississauga-rd/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:27665": {
+    "city": "Mississauga",
+    "name": "Tim Hortons",
+    "address": "3110 ARGENTIA RD",
+    "url": "https://locations.timhortons.ca/en/on/mississauga/3110-argentia-rd/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:27666": {
+    "city": "Mississauga",
+    "name": "Tim Hortons",
+    "address": "2980 ARGENTIA RD",
+    "url": "https://locations.timhortons.ca/en/on/mississauga/2980-argentia-rd/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:27667": {
+    "city": "Mississauga",
+    "name": "Tim Hortons",
+    "address": "120 QUEEN ST S",
+    "url": "https://locations.timhortons.ca/en/on/mississauga/120-queen-st-south/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:27669": {
+    "city": "Mississauga",
+    "name": "Tim Hortons",
+    "address": "4100 DIXIE RD",
+    "url": "https://locations.timhortons.ca/en/on/mississauga/4100-dixie-rd/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:27670": {
+    "city": "Mississauga",
+    "name": "Tim Hortons",
+    "address": "150 LAKESHORE RD E",
+    "url": "https://locations.timhortons.ca/en/on/mississauga/150-lakeshore-rd-east/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:27671": {
+    "city": "Mississauga",
+    "name": "Tim Hortons",
+    "address": "92 LAKESHORE RD E",
+    "url": "https://locations.timhortons.ca/en/on/mississauga/92-lakeshore-rd-e/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:26808": {
+    "city": "Mississauga",
+    "name": "Subway",
+    "address": "1151 Dundas St W, Unit 39",
+    "url": "https://restaurants.subway.com/canada/on/mississauga/1151-dundas-street-west",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:26815": {
+    "city": "Mississauga",
+    "name": "Subway",
+    "address": "925 Rathburn Rd E, Unit C7",
+    "url": "https://restaurants.subway.com/canada/on/mississauga/925-rathburn-road-east",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B50-4542713": {
+    "city": "Toronto",
+    "name": "Hyderabad Palace Inc",
+    "address": "4810 Sheppard Ave E, Unit 208",
+    "url": "https://www.hyderabadpalacegta.ca/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B50-5114092": {
+    "city": "Toronto",
+    "name": "Gaucho Pie Co",
+    "address": "346 Westmoreland Ave N, Unit 105",
+    "url": "https://www.gauchopieco.com/locationcontact",
+    "signal": "ordering",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B50-5238316": {
+    "city": "Toronto",
+    "name": "Los Vietnamita",
+    "address": "2644 St Clair Ave E",
+    "url": "https://www.ubereats.com/ca/store/los-vietnamita-taqueria/v5opw1uUWxOl4QH7bn493w",
+    "signal": "ordering",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B50-5244624": {
+    "city": "Toronto",
+    "name": "Iniya's Kitchen",
+    "address": "2985 Islington Ave",
+    "url": "https://order.online/store/iniya-s-kitchen-inc-24299208",
+    "signal": "ordering",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B71-4315614": {
+    "city": "Toronto",
+    "name": "La Grotta Pizzeria",
+    "address": "951 Pape Ave",
+    "url": "https://www.ubereats.com/ca/store/la-grotta-pizzeria/2PElG5UDROm6CEvEHNp-5w",
+    "signal": "ordering",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B71-4533018": {
+    "city": "Toronto",
+    "name": "Jatujak",
+    "address": "1744 Victoria Park Ave",
+    "url": "https://jatujak.ca/victoria/home",
+    "signal": "ordering",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B71-4869499": {
+    "city": "Toronto",
+    "name": "Cafe Oro Di Napoli",
+    "address": "75 Jarvis St",
+    "url": "https://cafeorodinapoli.ca/contact/",
+    "signal": "reservations",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B71-5553806": {
+    "city": "Toronto",
+    "name": "Sal's Pasta & Chops",
+    "address": "614 College St",
+    "url": "https://www.dinnerwithsal.com/",
+    "signal": "reservations",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:26255": {
+    "city": "Mississauga",
+    "name": "Slice of the 6ix",
+    "address": "2960 Drew Rd, Unit 137",
+    "url": "https://sliceofthe6ix.ca/contact/",
+    "signal": "ordering",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B71-3091780": {
+    "city": "Toronto",
+    "name": "FIDDLER'S DELL BAR & GRILL",
+    "address": "781 ANNETTE ST",
+    "url": "https://www.fiddlersdell.com/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B71-4730039": {
+    "city": "Toronto",
+    "name": "LOUIX LOUIS",
+    "address": "325 BAY ST",
+    "url": "https://www.louixlouis.com/contact-location",
+    "signal": "reservations",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B71-5024432": {
+    "city": "Toronto",
+    "name": "CANTO",
+    "address": "9 OLD MILL RD",
+    "url": "https://www.cantoresto.com/location/canto/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B71-5301187": {
+    "city": "Toronto",
+    "name": "GIGLI CAFFE",
+    "address": "399 JANE ST",
+    "url": "https://www.giglicaffe.com/_files/ugd/777780_c6984567b99d4533a3c8645b5d10b8a4.pdf",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B71-5403682": {
+    "city": "Toronto",
+    "name": "KARKUMI CAFE",
+    "address": "4033 GORDON BAKER RD",
+    "url": "https://www.karkumicafe.com/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:15789": {
+    "city": "Mississauga",
+    "name": "Applewood Bistro",
+    "address": "3000 WOODCHESTER DR",
+    "url": "https://www.applewoodbistro.com/",
+    "signal": "ordering",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:17361": {
+    "city": "Mississauga",
+    "name": "Chapli Kabob",
+    "address": "40 DUNDAS ST W, Unit 6",
+    "url": "https://chaplikabob.com/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:17416": {
+    "city": "Mississauga",
+    "name": "ChickQueen",
+    "address": "5130 DIXIE RD, Unit 4",
+    "url": "https://www.chickqueen.ca/location/mississauga-restaurant/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:18095": {
+    "city": "Mississauga",
+    "name": "Da Grill Plus Halal",
+    "address": "17 QUEEN ST N, Unit 3A",
+    "url": "https://dagrillplus.com/contact.html",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:20407": {
+    "city": "Mississauga",
+    "name": "Hakka Spice",
+    "address": "3105 WINSTON CHURCHILL BLVD, Unit 4",
+    "url": "https://hakkaspice.com/reservations/",
+    "signal": "reservations",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:20438": {
+    "city": "Mississauga",
+    "name": "Happy Chappy",
+    "address": "236 QUEEN ST S",
+    "url": "https://www.happychappygrill.com/order-now",
+    "signal": "ordering",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:21473": {
+    "city": "Mississauga",
+    "name": "Karahi Boys",
+    "address": "3525 PLATINUM DR, Unit 113",
+    "url": "https://karahiboys.com/platinum-dr",
+    "signal": "ordering",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:24095": {
+    "city": "Mississauga",
+    "name": "Pane E Vino Ristorante",
+    "address": "151 BRUNEL RD, Unit 14 & 15",
+    "url": "https://www.pane-vino.ca/contact",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:25981": {
+    "city": "Mississauga",
+    "name": "Shawarma Avenue - Grill & Bakery",
+    "address": "3900 EGLINTON AVE W, Unit 45",
+    "url": "https://shawarmaavenue.ca/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:26071": {
+    "city": "Mississauga",
+    "name": "Shish Mahal Indian Cuisine Ltd., The",
+    "address": "3176 RIDGEWAY DR, Unit 66",
+    "url": "https://www.shishmahalcuisine.com/menu",
+    "signal": "ordering",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:26865": {
+    "city": "Mississauga",
+    "name": "Sultan Xpress",
+    "address": "1100 DUNDAS ST W, Unit 5",
+    "url": "https://www.doordash.com/store/48569080?pickup=true&src=yp",
+    "signal": "ordering",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:27409": {
+    "city": "Mississauga",
+    "name": "The Hakka Hub",
+    "address": "6970 LISGAR DR, Unit A2",
+    "url": "https://thehakkahub.com/",
+    "signal": "ordering",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:28276": {
+    "city": "Mississauga",
+    "name": "Veggie Planet",
+    "address": "6985 DAVAND DR, Unit 1",
+    "url": "https://veggieplanet.ca/menu/",
+    "signal": "ordering",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:28788": {
+    "city": "Mississauga",
+    "name": "Yaseen's Shawarma",
+    "address": "5030 MAINGATE DR, Unit 5",
+    "url": "https://www.yaseensshawarma.ca/",
+    "signal": "ordering",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:15181": {
+    "city": "Mississauga",
+    "name": "Abbey Road Pub & Patio",
+    "address": "3200 Erin Mills Pky, Unit 9",
+    "url": "https://abbeyroadpub.ca/contact-us/",
+    "signal": "hours",
+    "checked_on": "2026-11-21",
+    "supporting_urls": [
+      "https://rmop.hedgerowsoftware.com/Portal/Facility/Details/fdf9da29-4d74-4aab-a94c-167c31220bd1"
+    ]
+  },
+  "toronto-licence:B50-4996962": {
+    "city": "Toronto",
+    "name": "CUCINA MAURO",
+    "address": "76 DENSLEY AVE, #3",
+    "url": "https://www.cucinamauro.com/our-food",
+    "signal": "ordering",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B50-5318681": {
+    "city": "Toronto",
+    "name": "LAMONT VILLAGE CAFE",
+    "address": "2 INTERNATIONAL BLVD, #102",
+    "url": "https://www.lamontvillage.com/online-ordering",
+    "signal": "ordering",
+    "checked_on": "2026-11-21",
+    "supporting_urls": [
+      "https://airbnb.failover.uber.com/ca/store/lamont-village-cafe-2-international-boulevard/C58anuNaUrSvtDFr3IFAnA"
+    ]
+  },
+  "toronto-licence:B71-3834988": {
+    "city": "Toronto",
+    "name": "CREPE IT UP!",
+    "address": "91 FRONT ST E, B7A",
+    "url": "https://crepeitup.com/contact-us/",
+    "signal": "hours",
+    "checked_on": "2026-11-21",
+    "supporting_urls": [
+      "https://www.stlawrencemarket.com/vendors/vendor_detail/60"
+    ]
+  },
+  "toronto-licence:B71-4065718": {
+    "city": "Toronto",
+    "name": "LA SANI GRILL",
+    "address": "2058 ELLESMERE RD, #03",
+    "url": "https://lasanigrill.net/restaurant/lasanigrill",
+    "signal": "ordering",
+    "checked_on": "2026-11-21",
+    "supporting_urls": [
+      "https://www.ubereats.com/ca/store/la-sani-grill-ellesmere-rd/4R9GKteLRLmgZENRdWYdTA"
+    ]
+  },
+  "toronto-licence:B71-4295916": {
+    "city": "Toronto",
+    "name": "HASHI IZAKAYA",
+    "address": "5582 YONGE ST, MAIN",
+    "url": "https://hashiizakaya.com/contact-us",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B71-4951731": {
+    "city": "Toronto",
+    "name": "FREEPLAY",
+    "address": "300 COLLEGE ST",
+    "url": "https://www.freeplaytoronto.com/copy-of-menu",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:16248": {
+    "city": "Mississauga",
+    "name": "BarBQ Tonite",
+    "address": "5165 DIXIE RD, Unit 5",
+    "url": "https://order.online/store/-433343",
+    "signal": "ordering",
+    "checked_on": "2026-11-21",
+    "supporting_urls": [
+      "https://localhealthinspections.com/map/facility/bar-b-q-tonite-5-5165-dixie-rd-mississauga-on-l4w-4g1-restaurant-mississauga"
+    ]
+  },
+  "mississauga-directory-2025:16801": {
+    "city": "Mississauga",
+    "name": "Burger Bloc",
+    "address": "3870 EGLINTON AVE W, Unit 53",
+    "url": "https://burgerbloc.ca/the-best-halal-burger",
+    "signal": "ordering",
+    "checked_on": "2026-11-21",
+    "supporting_urls": [
+      "https://burgerbloc.ca/location"
+    ]
+  },
+  "mississauga-directory-2025:16938": {
+    "city": "Mississauga",
+    "name": "Calypso Hut 2",
+    "address": "1510 DREW RD, Unit 1",
+    "url": "https://www.ubereats.com/ca/store/calypso-hut-2/GrJsS7KuQzOn1seeu62h8Q",
+    "signal": "ordering",
+    "checked_on": "2026-11-21",
+    "supporting_urls": [
+      "https://localhealthinspections.com/map/facility/calypso-hut-2-1-1510-drew-rd-mississauga-on-l5s-1w7-restaurant-mississauga"
+    ]
+  },
+  "mississauga-directory-2025:18576": {
+    "city": "Mississauga",
+    "name": "Dough Master",
+    "address": "128 QUEEN ST S, Unit 23",
+    "url": "https://doughmaster.ca/",
+    "signal": "ordering",
+    "checked_on": "2026-11-21",
+    "supporting_urls": [
+      "https://www.doughmaster.ca/assets/menu.pdf"
+    ]
+  },
+  "mississauga-directory-2025:21441": {
+    "city": "Mississauga",
+    "name": "Kailash Parbat",
+    "address": "1200 DERRY RD E, Unit 1 & 2",
+    "url": "https://www.skipthedishes.com/kailash-parbat",
+    "signal": "ordering",
+    "checked_on": "2026-11-21",
+    "supporting_urls": [
+      "https://peelregion.ca/sites/default/files/2026-04/food-premise-convictions.pdf",
+      "https://kailashparbatgroup.com/locations-international/"
+    ]
+  },
+  "mississauga-directory-2025:27040": {
+    "city": "Mississauga",
+    "name": "Szechuan Noodle Bowl",
+    "address": "400 DUNDAS ST E, Unit 101",
+    "url": "https://szechuannoodlebowl.com/location/Mississauga/",
+    "signal": "ordering",
+    "checked_on": "2026-11-21",
+    "supporting_urls": [
+      "https://localhealthinspections.com/map/facility/szechuan-noodle-bowl-101-400-dundas-st-e-mississauga-on-l5a-1x5-restaurant-mississauga"
+    ]
+  },
+  "mississauga-directory-2025:27332": {
+    "city": "Mississauga",
+    "name": "The Bull Pub & Grill",
+    "address": "2800 SKYMARK AVE, Unit 25 to 29",
+    "url": "https://www.skipthedishes.com/the-bull-pub-and-grill-skymark-avenue",
+    "signal": "ordering",
+    "checked_on": "2026-11-21",
+    "supporting_urls": [
+      "https://localhealthinspections.com/map/facility/the-bull-pub-grill-25-29-2800-skymark-ave-mississauga-on-l4w-5a6-restaurant-mississauga"
+    ]
+  },
+  "toronto-licence:B50-4645172": {
+    "city": "Toronto",
+    "name": "EUROPEAN DELIGHT",
+    "address": "91 FRONT ST E, B6",
+    "url": "https://www.stlawrencemarket.com/vendors/vendor_detail/65",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "supporting_urls": [
+      "https://www.eudelightstore.com/",
+      "https://open.toronto.ca/dataset/dinesafe/"
+    ],
+    "reviewed_inspection_address": "91 Front St E Unit-1112 M5E 1C2",
+    "unit_review_reason": "The licence and current DineSafe record agree on the name, public branch phone and street. The operator and market directory identify the public stall as B6."
+  },
+  "toronto-licence:B50-4717447": {
+    "city": "Toronto",
+    "name": "BUSTER'S SEA COVE",
+    "address": "91 FRONT ST E, #33",
+    "url": "https://www.stlawrencemarket.com/vendors/vendor_detail/55",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B71-3607290": {
+    "city": "Toronto",
+    "name": "CHURRASCO OF ST LAWRENCE",
+    "address": "91 FRONT ST E, #49",
+    "url": "https://www.stlawrencemarket.com/vendors/vendor_detail/59",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B71-4305572": {
+    "city": "Toronto",
+    "name": "UNO MUSTACHIO",
+    "address": "91 FRONT ST E, B34",
+    "url": "https://www.stlawrencemarket.com/vendors/vendor_detail/83",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B71-4307982": {
+    "city": "Toronto",
+    "name": "PASTA MIA",
+    "address": "91 FRONT ST E, B23",
+    "url": "https://www.stlawrencemarket.com/vendors/vendor_detail/86",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B50-5406311": {
+    "city": "Toronto",
+    "name": "DORAJI",
+    "address": "486 FRONT ST W, WM 38",
+    "url": "https://thewelltoronto.com/directory/doraji/",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "supporting_urls": [
+      "https://thewelltoronto.com/wp-content/uploads/2026/02/The-Well-Leasing-Brochure-February-24-2026.pdf",
+      "https://www.doraji.ca/menu"
+    ]
+  },
+  "toronto-licence:B50-5409340": {
+    "city": "Toronto",
+    "name": "POKEWORKS",
+    "address": "486 FRONT ST W, WM 22",
+    "url": "https://order.online/store/pokeworks-front-st-w-30392319",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "supporting_urls": [
+      "https://thewelltoronto.com/wp-content/uploads/2026/02/The-Well-Leasing-Brochure-February-24-2026.pdf",
+      "https://thewelltoronto.com/directory/pokeworks/"
+    ],
+    "reviewed_inspection_address": "486 Front St W Unit-WM22 M5V 0V2",
+    "unit_review_reason": "The mall plan and city inspection confirm that WM22 and WM 22 refer to the same stall."
+  },
+  "toronto-licence:B50-5435106": {
+    "city": "Toronto",
+    "name": "HOOKY'S FISH & CHIPS",
+    "address": "486 FRONT ST W, WM40",
+    "url": "https://thewelltoronto.com/directory/hookys-fish-and-chips/",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "supporting_urls": [
+      "https://thewelltoronto.com/wp-content/uploads/2026/02/The-Well-Leasing-Brochure-February-24-2026.pdf"
+    ],
+    "reviewed_inspection_address": "486 Front St W Unit-WM M5V 0V2",
+    "unit_review_reason": "The inspection records the market prefix only. The landlord plan and city licence identify the Hooky’s stall as WM40."
+  },
+  "toronto-licence:B50-5438538": {
+    "city": "Toronto",
+    "name": "SZECHUAN",
+    "address": "486 FRONT ST W, WM39",
+    "url": "https://thewelltoronto.com/directory/szechuan-express/",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "supporting_urls": [
+      "https://thewelltoronto.com/wp-content/uploads/2026/02/The-Well-Leasing-Brochure-February-24-2026.pdf"
+    ]
+  },
+  "toronto-licence:B50-5440600": {
+    "city": "Toronto",
+    "name": "JAPADOG",
+    "address": "486 FRONT ST W, #24",
+    "url": "https://japadog.com/location",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "supporting_urls": [
+      "https://thewelltoronto.com/wp-content/uploads/2026/02/The-Well-Leasing-Brochure-February-24-2026.pdf",
+      "https://thewelltoronto.com/directory/japadog/"
+    ],
+    "reviewed_inspection_address": "486 Front St W Unit-WM24 M5V 0V2",
+    "unit_review_reason": "The inspection and mall plan identify stall WM24, with the licence recording it as #24."
+  },
+  "toronto-licence:B50-5440783": {
+    "city": "Toronto",
+    "name": "TONG MEIN",
+    "address": "486 FRONT ST W, WM03",
+    "url": "https://www.tongmein.com/",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "supporting_urls": [
+      "https://thewelltoronto.com/wp-content/uploads/2026/02/The-Well-Leasing-Brochure-February-24-2026.pdf"
+    ]
+  },
+  "toronto-licence:B50-5513584": {
+    "city": "Toronto",
+    "name": "BEAR STEAK SANDWICHES",
+    "address": "486 FRONT ST W, WM19",
+    "url": "https://thewelltoronto.com/directory/bear-steak-sandwiches/",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "supporting_urls": [
+      "https://thewelltoronto.com/wp-content/uploads/2026/02/The-Well-Leasing-Brochure-February-24-2026.pdf"
+    ]
+  },
+  "toronto-licence:B50-5552133": {
+    "city": "Toronto",
+    "name": "THE CARVERY",
+    "address": "486 FRONT ST W, WM12",
+    "url": "https://thewelltoronto.com/directory/the-carvery/",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "supporting_urls": [
+      "https://thewelltoronto.com/wp-content/uploads/2026/02/The-Well-Leasing-Brochure-February-24-2026.pdf"
+    ]
+  },
+  "toronto-licence:B50-5661268": {
+    "city": "Toronto",
+    "name": "ROSSO PASTA BAR",
+    "address": "486 FRONT ST W, WM 37",
+    "url": "https://thewelltoronto.com/directory/rosso-pasta-bar/",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "supporting_urls": [
+      "https://rossopastabar.com/menu",
+      "https://www.chopsbook.com/en/restaurants/rosso-pasta-bar-toronto-1j4lb"
+    ]
+  },
+  "toronto-licence:B50-5678609": {
+    "city": "Toronto",
+    "name": "PALA THE WELL",
+    "address": "486 FRONT ST W",
+    "url": "https://thewelltoronto.com/directory/pala/",
+    "signal": "hours",
+    "checked_on": "2026-11-22"
+  },
+  "mississauga-directory-2025:18803": {
+    "city": "Mississauga",
+    "name": "Dynasty B.B.Q. Restaurant",
+    "address": "1550 SOUTH GATEWAY RD, Unit 106",
+    "url": "https://www.yellowpages.ca/bus/Ontario/Mississauga/Dynasty-Bbq-Restaurant/2239074.html",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "supporting_urls": [
+      "https://localhealthinspections.com/map/facility/dynasty-bbq-restaurant-106-1550-south-gateway-rd-mississauga-on-l4w-5g6-food-take-out-mississauga",
+      "https://mcba-canada.com/wp-content/uploads/2025/06/2025-MCBA-Directory-V03-0113.pdf"
+    ]
+  },
+  "mississauga-directory-2025:20727": {
+    "city": "Mississauga",
+    "name": "House of Pepper",
+    "address": "1550 SOUTH GATEWAY RD, Unit 1G",
+    "url": "https://www.ubereats.com/ca/store/house-of-pepper/-KZcTE9FSzKTMEbi2uhDmg",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "supporting_urls": [
+      "https://localhealthinspections.com/regions/mississauga?page=47"
+    ]
+  },
+  "mississauga-directory-2025:25861": {
+    "city": "Mississauga",
+    "name": "Sea Star Restaurant",
+    "address": "1550 SOUTH GATEWAY RD, Unit 1H",
+    "url": "https://www.restaurantji.com/on/mississauga/sea-star-/",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "supporting_urls": [
+      "https://localhealthinspections.com/map/facility/sea-star-1h-1550-south-gateway-rd-mississauga-on-l4w-5g6-food-take-out-mississauga"
+    ]
+  },
+  "toronto-licence:B50-4966701": {
+    "city": "Toronto",
+    "name": "MAD RADISH",
+    "address": "130 KING ST W, CS03",
+    "url": "https://www.madradish.com/location/first-canadian-place/",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "supporting_urls": [
+      "https://fcpex.ca/stores/map/mad-radish"
+    ]
+  },
+  "toronto-licence:B50-5200593": {
+    "city": "Toronto",
+    "name": "PANTRY",
+    "address": "120 ADELAIDE ST W, FC03",
+    "url": "https://orderpantry.com/restaurants/",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "supporting_urls": []
+  },
+  "toronto-licence:B50-5224231": {
+    "city": "Toronto",
+    "name": "THE POKE BOX",
+    "address": "120 ADELAIDE ST W, FC04",
+    "url": "https://thepokebox.com/locations",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "supporting_urls": [
+      "https://opengovca.com/toronto-business/B50-5224231"
+    ]
+  },
+  "toronto-licence:B50-5235923": {
+    "city": "Toronto",
+    "name": "PATTIES EXPRESS",
+    "address": "199 BAY ST, C142",
+    "url": "https://www.pattiesexpress.ca/",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "supporting_urls": [
+      "https://opengovca.com/toronto-building-permit/199-bay-st",
+      "https://localhealthinspections.com/map/facility/patties-express-199-bay-st-unit-c142-food-premises-toronto"
+    ]
+  },
+  "toronto-licence:B50-5240154": {
+    "city": "Toronto",
+    "name": "IMPERFECT FRESH EATS",
+    "address": "199 BAY ST, C220-C222",
+    "url": "https://imperfecteats.ca/location/",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "supporting_urls": [
+      "https://ritual.co/order/IMPERFECT"
+    ]
+  },
+  "toronto-licence:B50-5310777": {
+    "city": "Toronto",
+    "name": "BUSTER'S SEA COVE",
+    "address": "199 BAY ST, C148-C150",
+    "url": "https://www.bustersseacove.ca/commerce-court-menu",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "supporting_urls": [
+      "https://sites.ambassador.ai/?s=bustercommercecourt"
+    ]
+  },
+  "toronto-licence:B50-5442835": {
+    "city": "Toronto",
+    "name": "PENNY'S HOT CHICKEN",
+    "address": "120 ADELAIDE ST W, FC8",
+    "url": "https://pennys.squarespace.com/locations",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "supporting_urls": [
+      "https://order.online/store/pennys-hot-chicken-23140231"
+    ]
+  },
+  "toronto-licence:B50-5553566": {
+    "city": "Toronto",
+    "name": "SALUS FRESH FOODS",
+    "address": "130 KING ST W, CUFC6",
+    "url": "https://salusfreshfoods.com/hours-and-locations/",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "supporting_urls": [
+      "https://fcpex.ca/stores/map/salus-fresh-foods"
+    ]
+  },
+  "toronto-licence:B50-5585850": {
+    "city": "Toronto",
+    "name": "JI- MODERN SOUTH ASIAN GRILL",
+    "address": "130 KING ST W, CUFC3",
+    "url": "https://www.jigrill.com/location",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "supporting_urls": [
+      "https://opengovca.com/toronto-business?postal=M5X+1A9"
+    ]
+  },
+  "toronto-licence:B50-5613298": {
+    "city": "Toronto",
+    "name": "POKERRITO",
+    "address": "199 BAY ST, C-144",
+    "url": "https://pokerrito.com/locations/commerce-court-toronto",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "supporting_urls": [
+      "https://pokerrito.com/locations"
+    ]
+  },
+  "toronto-licence:B71-3598511": {
+    "city": "Toronto",
+    "name": "FAST FRESH FOODS",
+    "address": "199 BAY ST, C116",
+    "url": "https://www.fastfreshfoods.ca/locations/",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "supporting_urls": [
+      "https://crewcmsblob.blob.core.windows.net/crew/5f9f83960c129712e1eddc09/commerce-court-tenant-manual-september-2022.pdf"
+    ]
+  },
+  "toronto-licence:B50-5559920": {
+    "city": "Toronto",
+    "name": "MICO ITALIAN SANDWICHES",
+    "address": "679 QUEEN ST W",
+    "url": "https://www.micosandwiches.ca/",
+    "signal": "ordering",
+    "supporting_urls": [
+      "https://www.micosandwiches.ca/contact"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B50-5582118": {
+    "city": "Toronto",
+    "name": "KIBO SUSHI",
+    "address": "1930 AVENUE RD, #1",
+    "url": "https://kibosushi.com/location/",
+    "signal": "hours",
+    "supporting_urls": [],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B50-5304963": {
+    "city": "Toronto",
+    "name": "LITTLE CAESARS",
+    "address": "840 ST CLAIR AVE W, #104",
+    "url": "https://foodchainhub.com/little-caesars/locations/ontario/toronto/en-us-store-11737/",
+    "signal": "hours",
+    "supporting_urls": [
+      "https://opengovca.com/toronto-business/B50-5304963"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "mississauga-directory-2025:22118": {
+    "city": "Mississauga",
+    "name": "Little Caesars",
+    "address": "720 BRISTOL RD W, Unit 7",
+    "url": "https://www.ubereats.com/ca/store/little-caesars-720-bristol-rd-w/AYm_ic62VdWReUpL4DFylw",
+    "signal": "ordering",
+    "supporting_urls": [
+      "https://www.restaurantji.com/on/mississauga/little-caesars-pizza-2/"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B71-3249919": {
+    "city": "Toronto",
+    "name": "THE WALLY TAP AND GRILL",
+    "address": "302 O'CONNOR DR",
+    "url": "https://order.online/store/the-wally-tap-%26-grill-toronto-1412809",
+    "signal": "ordering",
+    "supporting_urls": [],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B71-4181652": {
+    "city": "Toronto",
+    "name": "RAILS AND ALES",
+    "address": "1106 DANFORTH AVE",
+    "url": "https://www.railsandales.ca/menu.html",
+    "signal": "ordering",
+    "supporting_urls": [
+      "https://www.railsandales.ca/contact.html"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B71-4188760": {
+    "city": "Toronto",
+    "name": "SQUIRE & FIRKIN",
+    "address": "3335 BLOOR ST W",
+    "url": "https://www.firkinpubs.com/thesquireandfirkin/contact/",
+    "signal": "hours",
+    "supporting_urls": [
+      "https://apple-maps-app-clip.failover.ubereats.com/ca/store/squire-%26-firkin/yOarYsdsS9mbSyC8GdbgIw"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B71-4304322": {
+    "city": "Toronto",
+    "name": "BRYDENS",
+    "address": "2455 BLOOR ST W",
+    "url": "https://www.brydens.ca/home/",
+    "signal": "hours",
+    "supporting_urls": [],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B71-4422046": {
+    "city": "Toronto",
+    "name": "BAR RAVAL",
+    "address": "505 COLLEGE ST",
+    "url": "https://www.thisisbarraval.com/",
+    "signal": "hours",
+    "supporting_urls": [],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B71-4542279": {
+    "city": "Toronto",
+    "name": "ALLEN'S",
+    "address": "143 DANFORTH AVE",
+    "url": "https://allensdanforth.com/contact",
+    "signal": "hours",
+    "supporting_urls": [
+      "https://allensdanforth.com/dinnermenu"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B71-4648350": {
+    "city": "Toronto",
+    "name": "BAR REYNA",
+    "address": "158 CUMBERLAND ST",
+    "url": "https://www.barreyna.com/contact-us",
+    "signal": "hours",
+    "supporting_urls": [
+      "https://www.barreyna.com/"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B71-4704217": {
+    "city": "Toronto",
+    "name": "GODSPEED BREWERY",
+    "address": "242 COXWELL AVE",
+    "url": "https://www.godspeedbrewery.com/contact",
+    "signal": "hours",
+    "supporting_urls": [
+      "https://www.godspeedbrewery.com/"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B71-4714621": {
+    "city": "Toronto",
+    "name": "RORSCHACH BREWING CO.",
+    "address": "1001 EASTERN AVE",
+    "url": "https://www.rorschachbrewing.com/pages/menu",
+    "signal": "hours",
+    "supporting_urls": [
+      "https://www.rorschachbrewing.com/pages/faqs"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B71-5340628": {
+    "city": "Toronto",
+    "name": "BRIDGETTE BAR",
+    "address": "423 WELLINGTON ST W",
+    "url": "https://www.bridgettebar.com/toronto",
+    "signal": "reservations",
+    "supporting_urls": [
+      "https://www.bridgettebar.com/contact-toronto"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B71-5340927": {
+    "city": "Toronto",
+    "name": "THE DORSET",
+    "address": "455 WELLINGTON ST W",
+    "url": "https://www.thedorsetwellington.com/",
+    "signal": "reservations",
+    "supporting_urls": [
+      "https://thewelltoronto.com/directory/the-dorset/"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B71-5421397": {
+    "city": "Toronto",
+    "name": "MUSOSHIN HARBORD",
+    "address": "130 HARBORD ST",
+    "url": "https://www.skipthedishes.com/musoshin-ramen-harbord-street",
+    "signal": "ordering",
+    "supporting_urls": [
+      "https://www.harbordstreet.com/directory-of-businesses/musoshinramen"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B71-5502888": {
+    "city": "Toronto",
+    "name": "NORD LYON",
+    "address": "250 QUEEN ST W",
+    "url": "https://ritual.co/order/nord-lyon-queen-bathurst-toronto/9b78",
+    "signal": "ordering",
+    "supporting_urls": [
+      "https://queenstreetwest.ca/directory/nord-lyon/"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B71-5601596": {
+    "city": "Toronto",
+    "name": "BUSAN DECK",
+    "address": "4914 YONGE ST",
+    "url": "https://www.ubereats.com/ca/store/busan-deck/GKWHGWgTUDmuPh7ZP9kWow",
+    "signal": "ordering",
+    "supporting_urls": [
+      "https://www.verytoronto.com/places/busan-deck"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B71-5634684": {
+    "city": "Toronto",
+    "name": "LA TAVOLA RISTORANTE",
+    "address": "1943 AVENUE RD",
+    "url": "https://latavolaristo.com/",
+    "signal": "reservations",
+    "supporting_urls": [
+      "https://opengovca.com/toronto-business/B71-5634684"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B50-4299720": {
+    "city": "Toronto",
+    "name": "THE EXCHANGE",
+    "address": "105 ST GEORGE ST",
+    "url": "https://ueat.utoronto.ca/where-to-eat/",
+    "signal": "hours",
+    "supporting_urls": [
+      "https://rotman.utoronto.ca/the-rotman-experience/student-life/campus-and-facilities/"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B50-4538142": {
+    "city": "Toronto",
+    "name": "SULASIE FOODS",
+    "address": "3011 MARKHAM RD, #57",
+    "url": "https://www.sulasiefoods.com/",
+    "signal": "hours",
+    "supporting_urls": [
+      "https://www.sulasiefoods.com/contact-us/"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B50-4709895": {
+    "city": "Toronto",
+    "name": "CROWN PARADISE",
+    "address": "2258 BIRCHMOUNT RD",
+    "url": "https://guava.failover.uber.com/ca/store/crown-paradise-restaurant/VqneudHBXKOWFfNnuQ2jHQ",
+    "signal": "ordering",
+    "supporting_urls": [
+      "https://localhealthinspections.com/regions/toronto?page=54"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B50-4988365": {
+    "city": "Toronto",
+    "name": "HAPPYDINERTO",
+    "address": "3327 BATHURST ST",
+    "url": "https://www.ubereats.com/ca/store/happydinerto-toronto/B6oqM2UZWj-yaxjb713WhA",
+    "signal": "ordering",
+    "supporting_urls": [
+      "https://localhealthinspections.com/map/facility/happydinerto-3327-bathurst-st-food-premises-toronto"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B50-5102325": {
+    "city": "Toronto",
+    "name": "DONKEY KING NORTHTOWN WAY",
+    "address": "10 NORTHTOWN WAY, #111",
+    "url": "https://www.restaurantji.com/on/north-york/donkey-king-northtown-way-north-york-/",
+    "signal": "hours",
+    "supporting_urls": [
+      "https://yongenorthyork.com/listing/donkey-king/",
+      "https://localhealthinspections.com/map/facility/donkey-king-northtown-way-10-northtown-way-unit-111-food-premises-toronto"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B50-5136765": {
+    "city": "Toronto",
+    "name": "CHUNGCHUN RICE HOTDOG WILSON",
+    "address": "360 WILSON AVE",
+    "url": "https://chungchunricedog.ca/",
+    "signal": "hours",
+    "supporting_urls": [],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B50-5144798": {
+    "city": "Toronto",
+    "name": "BURRITO BOYZ",
+    "address": "2060 ELLESMERE RD, #7",
+    "url": "https://www.burritoboyz.ca/scarborough",
+    "signal": "hours",
+    "supporting_urls": [
+      "https://localhealthinspections.com/regions/toronto?page=34"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B50-5210473": {
+    "city": "Toronto",
+    "name": "C&J'S AUTHENTIC JAMAICAN CUISINE",
+    "address": "2183 WESTON RD",
+    "url": "https://www.skipthedishes.com/c-and-j-s-authentic-jamaican-cuisine",
+    "signal": "ordering",
+    "supporting_urls": [],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B50-5330425": {
+    "city": "Toronto",
+    "name": "SLEEPY PETE'S",
+    "address": "69 KENSINGTON AVE",
+    "url": "https://www.ubereats.com/ca/store/sleepy-petes-breakfast-and-brunch/D3KDZ4vlXjq13y3nuhoG5A",
+    "signal": "ordering",
+    "supporting_urls": [
+      "https://www.restaurantji.com/on/toronto/sleepy-pete-s-/"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B50-5348755": {
+    "city": "Toronto",
+    "name": "ZENKU",
+    "address": "210 MORTIMER AVE",
+    "url": "https://zenku-sushi.square.site/product/zenku-sushi-signature/422",
+    "signal": "ordering",
+    "supporting_urls": [],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B50-5363551": {
+    "city": "Toronto",
+    "name": "DESI TADKAA",
+    "address": "2857 JANE ST",
+    "url": "https://www.desitadkaa.com/",
+    "signal": "ordering",
+    "supporting_urls": [
+      "https://order.online/store/desi-tadkaa-jane-st-25994019"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B50-5462832": {
+    "city": "Toronto",
+    "name": "MARY BUN",
+    "address": "5427 YONGE ST",
+    "url": "https://www.ubereats.com/ca/store/mary-bun-%E7%83%A7%E5%8D%96%E5%A7%91%E5%A8%98-yonge-street/gQdgnGchWLGFy2zpozideQ",
+    "signal": "ordering",
+    "supporting_urls": [
+      "https://www.seethesix.com/toronto/north-york/chinese-restaurants/mary-bun/"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B50-5471470": {
+    "city": "Toronto",
+    "name": "SOUPERLICIOUS",
+    "address": "2648 EGLINTON AVE E",
+    "url": "https://www.ubereats.com/ca/store/souperlicious-2648-eglinton-avenue-east/QOCImxeUWke0-pOM8Ovk1w",
+    "signal": "ordering",
+    "supporting_urls": [],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B71-0237050": {
+    "city": "Toronto",
+    "name": "CHINA GOURMET",
+    "address": "877 YORK MILLS RD",
+    "url": "https://www.ubereats.com/store/china-gourmet/qV3jnXZHTe2g8igF2Pozcw",
+    "signal": "ordering",
+    "supporting_urls": [],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B71-3951000": {
+    "city": "Toronto",
+    "name": "SILVER SPOON",
+    "address": "1548 WARDEN AVE",
+    "url": "https://order.online/store/SilverSpoon-210901",
+    "signal": "ordering",
+    "supporting_urls": [],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B71-4073417": {
+    "city": "Toronto",
+    "name": "DENICKS ROTI FACTORY",
+    "address": "750 OAKDALE RD, #2",
+    "url": "https://www.ubereats.com/ca/store/denicks-roti-factory-north-york/OvEu34NAQ9O-G_6GJLaJFg",
+    "signal": "ordering",
+    "supporting_urls": [
+      "https://kitchenchecked.com/on/toronto/restaurants/denick-s-roti-factory-750-oakdale-rd-unit-2/"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B71-4182750": {
+    "city": "Toronto",
+    "name": "DIANA'S SEAFOOD OYSTER BAR",
+    "address": "2105 LAWRENCE AVE E",
+    "url": "https://dianasoysterbar.com/",
+    "signal": "hours",
+    "supporting_urls": [
+      "https://www.restaurantji.com/on/scarborough/dianas-oyster-bar-and-grill-/"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "mississauga-directory-2025:21366": {
+    "city": "Mississauga",
+    "name": "Jung Thai",
+    "address": "105 Dundas St E",
+    "url": "https://www.jungthairestaurant.ca/menu",
+    "signal": "hours",
+    "checked_on": "2026-11-22"
+  },
+  "mississauga-directory-2025:21806": {
+    "city": "Mississauga",
+    "name": "La Bonita Latin American Restaurant",
+    "address": "1065 Canadian Pl, Unit 109",
+    "url": "https://www.restaurantji.com/on/mississauga/la-bonita-/",
+    "signal": "hours",
+    "checked_on": "2026-11-22"
+  },
+  "mississauga-directory-2025:21905": {
+    "city": "Mississauga",
+    "name": "Las Delicias",
+    "address": "59 Dundas St W",
+    "url": "https://lasdeliciasmississauga.ca/",
+    "signal": "ordering",
+    "checked_on": "2026-11-22"
+  },
+  "mississauga-directory-2025:23850": {
+    "city": "Mississauga",
+    "name": "On The Bun Burgers",
+    "address": "5030 Maingate Dr, Unit 11",
+    "url": "https://onthebunburgers.com/contact/",
+    "signal": "hours",
+    "checked_on": "2026-11-22"
+  },
+  "mississauga-directory-2025:24481": {
+    "city": "Mississauga",
+    "name": "Pizza Fiamma",
+    "address": "7460 Airport Rd, Unit B",
+    "url": "https://pizzafiamma.ca/location/pizza-fiamma-airport/",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "supporting_urls": [
+      "https://www.ubereats.com/ca/find-near-me/caledon-on/food"
+    ]
+  },
+  "mississauga-directory-2025:25255": {
+    "city": "Mississauga",
+    "name": "Rei do Churrasco",
+    "address": "2480 Cawthra Rd, Unit 7",
+    "url": "https://www.reidochurrasco.ca/online-ordering",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "supporting_urls": [
+      "https://www.restaurantji.com/on/mississauga/rei-do-churrasco-/"
+    ]
+  },
+  "mississauga-directory-2025:25984": {
+    "city": "Mississauga",
+    "name": "Shawarma Kingdom",
+    "address": "377 Burnhamthorpe Rd E, Unit 4",
+    "url": "https://www.shawarmakingdom.ca/",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "supporting_urls": [
+      "https://www.ubereats.com/ca/store/shawarma-kingdom/gH0P4kdOU_eIG42llNbklg"
+    ]
+  },
+  "mississauga-directory-2025:26881": {
+    "city": "Mississauga",
+    "name": "Sun Chinese Cuisine",
+    "address": "3480 Platinum Dr, Unit 110",
+    "url": "https://www.ubereats.com/ca/store/sun-chinese-cuisine/7dc60e1e-8b4c-5e0c-ab98-bcba38c96206",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "supporting_urls": [
+      "https://www.restaurantji.com/on/mississauga/sun-chinese-cuisine-/"
+    ]
+  },
+  "mississauga-directory-2025:29372": {
+    "city": "Mississauga",
+    "name": "Pinoy Express",
+    "address": "1000 Burnhamthorpe Rd W, Unit 9",
+    "url": "https://www.ubereats.com/ca/store/pinoy-express/prbJBRJHSnCynG9s7ewKhA",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "supporting_urls": [
+      "https://www.kislap.com/ca/business/pinoy-express"
+    ]
+  },
+  "toronto-licence:B50-4430270": {
+    "city": "Toronto",
+    "name": "Pizza Boys",
+    "address": "6055 Steeles Ave E, C130",
+    "url": "https://www.skipthedishes.com/pizza-boys",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "reviewed_inspection_address": "6055 Steeles Ave E #REF! M1X 0A7",
+    "unit_review_reason": "The matching inspection has a spreadsheet placeholder in its unit field. The linked licence supplies C130 and the pickup menu confirms the business at 6055 Steeles Ave E.",
+    "supporting_urls": [
+      "https://open.toronto.ca/dataset/dinesafe/"
+    ]
+  },
+  "toronto-licence:B50-4827742": {
+    "city": "Toronto",
+    "name": "Mr. Souvlaki",
+    "address": "5700 Yonge St, FC04",
+    "url": "https://mrsouvlaki.ca/store/north-american-centre/",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "reviewed_inspection_address": "5700 Yonge St Unit-FOO4 M2M 4K2",
+    "unit_review_reason": "The operator and BIA identify the North American Centre branch at the same property. The inspection record uses a different representation of the food court stall.",
+    "supporting_urls": [
+      "https://yongenorthyork.com/listing/mr-souvlaki/"
+    ]
+  },
+  "toronto-licence:B50-5234309": {
+    "city": "Toronto",
+    "name": "Brasa Peruvian Kitchen",
+    "address": "315 Queen St W, #317",
+    "url": "https://brasaperuvian.com/pages/locations",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "unit_review_reason": "The city locates 317 Queen St W within the licensed premises at 315 Queen St W. The operator uses 317 Queen St W for customer pickup.",
+    "supporting_urls": [
+      "https://order.online/store/brasa-peruvian-kitchen-29253512/",
+      "https://localhealthinspections.com/map/facility/brasa-peruvian-kitchen-315-queen-st-w-unit-317-food-premises-toronto"
+    ]
+  },
+  "toronto-licence:B71-5340672": {
+    "city": "Toronto",
+    "name": "Omni Noodle",
+    "address": "115 Haynes Ave, C3-R120",
+    "url": "https://omninoodle.ca/",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "reviewed_inspection_address": "115 Haynes Ave Unit-20 None",
+    "unit_review_reason": "The operator lists York University unit 120 and the same phone as the exact inspection, which uses unit 20. The landlord lists Omni Noodle in the Quad, corroborating the licensed C3-R120 stall.",
+    "supporting_urls": [
+      "https://quadatyork.ca/community/",
+      "https://www.ubereats.com/ca/store/omni-noodle-york-university/B1dFbELBRc6BZCrnEQG3pg"
+    ]
+  },
+  "toronto-licence:B50-0006576": {
+    "city": "Toronto",
+    "name": "Espresso Bakery & Deli",
+    "address": "4980 Dundas St W",
+    "url": "https://espressobakery.wixsite.com/etobicoke",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "supporting_urls": [
+      "https://www.restaurantji.com/on/etobicoke/espresso-bakery-/"
+    ]
+  },
+  "toronto-licence:B50-3362431": {
+    "city": "Toronto",
+    "name": "Patisserie La Cigogne",
+    "address": "1626 Bayview Ave",
+    "url": "https://patisserielacigogne.com/online/",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "supporting_urls": [
+      "https://bayviewleasidebia.com/business/patisserie-la-cigogne/",
+      "https://www.ubereats.com/ca/store/patisserie-la-cigogne-bayview/aRrP0O9FQGyBLHvzhTW1PQ"
+    ]
+  },
+  "toronto-licence:B50-3488004": {
+    "city": "Toronto",
+    "name": "The Epicure Shop",
+    "address": "473 Parliament St",
+    "url": "https://www.yellowpages.ca/bus/Ontario/Toronto/The-Epicure-Shop/2575401.html",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "supporting_urls": [
+      "https://www.oldcabbagetown.com/cabbagetown-restaurants/"
+    ]
+  },
+  "toronto-licence:B50-5303596": {
+    "city": "Toronto",
+    "name": "Spanish Pig",
+    "address": "77 Roncesvalles Ave",
+    "url": "https://spanishpig.ca/",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "supporting_urls": [
+      "https://www.corner.inc/place/pbwNPoqphDtk",
+      "https://roncesvallesvillage.ca/business-categories/business-listing/spanish-pig/"
+    ]
+  },
+  "toronto-licence:B71-4835300": {
+    "city": "Toronto",
+    "name": "Papamio's",
+    "address": "934 Manning Ave",
+    "url": "https://www.ubereats.com/ca/store/papamios/Asi7wFhVThCt73SlD8UaTQ",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "supporting_urls": [
+      "https://restaurantguru.com/Papamios-Toronto"
+    ]
+  },
+  "toronto-licence:B71-5363843": {
+    "city": "Toronto",
+    "name": "Brockton Village Bakery",
+    "address": "1566 Dundas St W",
+    "url": "https://www.brocktonvillagebakery.com/contact",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "supporting_urls": [
+      "https://www.brocktonvillagebakery.com/",
+      "https://www.ubereats.com/ca/store/brockton-village-bakery-ltd/hqpD58huTmGp8gcPI0Z5Gg"
+    ]
+  },
+  "toronto-licence:B71-5379390": {
+    "city": "Toronto",
+    "name": "Hot Pork",
+    "address": "932 Dundas St W",
+    "url": "https://www.ubereats.com/ca/store/hot-pork/iNQfbGl-ToSc_FSihKcOog",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "supporting_urls": [
+      "https://www.dinewitheggs.com/restaurants/hot-pork"
+    ]
+  },
+  "mississauga-directory-2025:17868": {
+    "city": "Mississauga",
+    "name": "Cosimo's Cheese and Deli Ltd.",
+    "address": "1051 Dundas St W",
+    "url": "https://www.restaurantji.com/on/mississauga/cosimos-cheese-and-deli-ltd-/",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "supporting_urls": [
+      "https://localhealthinspections.com/map/facility/cosimos-cheese-deli-1051-dundas-st-w-mississauga-on-l5c-1c3-food-take-out-mississauga",
+      "https://www.yellowpages.ca/bus/Ontario/Mississauga/Cosimo-s-Cheese-And-Deli-Ltd/438081.html"
+    ]
+  },
+  "mississauga-directory-2025:20421": {
+    "city": "Mississauga",
+    "name": "Handaan Filipino Cuisine",
+    "address": "3008 Novar Rd",
+    "url": "https://www.restaurantji.com/on/mississauga/handaan-filipino-cuisine-/",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "supporting_urls": [
+      "https://www.kislap.com/ca/business/handaan-filipino-cuisine"
+    ]
+  },
+  "toronto-licence:B50-4928571": {
+    "city": "Toronto",
+    "name": "Tim Hortons",
+    "address": "1493 Finch Ave W",
+    "url": "https://locations.timhortons.ca/en/on/north-york/1493-finch-ave/",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "supporting_urls": []
+  },
+  "toronto-licence:B50-5609344": {
+    "city": "Toronto",
+    "name": "Tim Horton's",
+    "address": "200 Church St",
+    "url": "https://locations.timhortons.ca/en/on/north-york/200-church-st/",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "supporting_urls": [
+      "https://www.hrh.ca/volunteer/volunteer-association/",
+      "https://www.hrh.ca/patients-visitors/getting-to-hrh/"
+    ]
+  },
+  "toronto-licence:B71-3117879": {
+    "city": "Toronto",
+    "name": "The Loose Moose Tap & Grill",
+    "address": "146 Front St W, LL & MAIN",
+    "url": "https://theloosemoose.ca/contact/",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "supporting_urls": [
+      "https://theloosemoose.ca/food/",
+      "https://opengovca.com/toronto-business/B71-3117879"
+    ]
+  },
+  "toronto-licence:B71-3605251": {
+    "city": "Toronto",
+    "name": "Mega Wraps",
+    "address": "200 Elizabeth St, R2",
+    "url": "https://wbacademy.utoronto.ca/where-to-eat",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "supporting_urls": [
+      "https://www.restaurantji.com/on/toronto/mega-wraps-/",
+      "https://opengovca.com/toronto-business/B71-3605251"
+    ]
+  },
+  "toronto-licence:B71-4800397": {
+    "city": "Toronto",
+    "name": "Second Cup",
+    "address": "255 Front St W",
+    "url": "https://secondcup.com/en/location/metro-toronto-convention-centre/",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "supporting_urls": [
+      "https://www.mtccc.com/facility/rooms-and-spaces/theatre/john-bassett-theatre-faq/",
+      "https://www.ubereats.com/ca/store/second-cup-cafe-255-front-st-w/4OX4LU9jQpOfWhNQAVyZDg"
+    ]
+  },
+  "toronto-licence:B71-5373364": {
+    "city": "Toronto",
+    "name": "Sweat & Tonic",
+    "address": "486 Front St W, SF 32 & 33",
+    "url": "https://sweatandtonic.com/pages/contact-us",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "supporting_urls": [
+      "https://sweatandtonic.com/pages/faq",
+      "https://www.ubereats.com/ca/store/tonic-bar-by-sweat-and-tonic-%C2%B7the-well/VP_3tYtQUQKk0rFc_8hX4Q"
+    ],
+    "public_name": "Tonic Bar at The Well"
+  },
+  "toronto-licence:B50-5224441": {
+    "city": "Toronto",
+    "name": "Canton Noodle",
+    "address": "2301 Brimley Rd, Unit 134",
+    "url": "https://canada247.info/explore/ontario/toronto_division/toronto/scarborough/canton_rice_noodle.html",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "separate_inspections": {
+      "osm:node:12052129417": "001Vo000013QjmVIAS"
+    },
+    "supporting_urls": [
+      "https://fcr.propertycapsule.com/property/output/document/view/id%3A84453/",
+      "https://www.profilecanada.com/companydetail.cfm?company=621870_Canton_Noodle_Scarborough_ON",
+      "https://www.lostinontario.com/toronto/restaurants/canton-kitchen/"
+    ]
+  },
+  "toronto-licence:B71-5447321": {
+    "city": "Toronto",
+    "name": "Miders Kitchen and Bar",
+    "address": "1370 Birchmount Rd, Unit 1",
+    "url": "https://www.ubereats.com/ca/store/miders-kitchen/UQX3dRXBXReBbqM7bsULMA",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "supporting_urls": [
+      "https://ised-isde.canada.ca/cc/lgcy/fdrlCrpDtls.html?corpId=17444656",
+      "https://kitchenchecked.com/on/toronto/restaurants/miders-kitchen-and-bar-1370-birchmount-rd-unit-1/"
+    ]
+  },
+  "toronto-licence:B50-4295034": {
+    "city": "Toronto",
+    "name": "Kung Fu Duck",
+    "address": "10 Northtown Way, Unit 106",
+    "url": "https://www.ubereats.com/ca/store/kung-fu-duck-north-york/Q-W26Lx7Rum8JiEpFUFGcg",
+    "signal": "ordering",
+    "supporting_urls": [
+      "https://www.restaurantji.com/on/north-york/kung-fu-duck-northtown-way-north-york-on-/"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B50-4646277": {
+    "city": "Toronto",
+    "name": "Thai Express",
+    "address": "1235 Wilson Ave, Unit 2",
+    "url": "https://locations.thaiexpress.ca/on/toronto/1235-wilson-ave",
+    "signal": "hours",
+    "supporting_urls": [
+      "https://open.toronto.ca/dataset/dinesafe/"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B50-5020144": {
+    "city": "Toronto",
+    "name": "The Bagel Stop",
+    "address": "222 Bay St, E3B",
+    "url": "https://www.thebagelstop.com/locations",
+    "signal": "hours",
+    "supporting_urls": [
+      "https://www.thebagelstop.com/"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B50-5310779": {
+    "city": "Toronto",
+    "name": "A Yah So Nice",
+    "address": "1671 Keele St",
+    "url": "https://a-yah-so-nice.hey-restaurants.com/",
+    "signal": "hours",
+    "supporting_urls": [
+      "https://open.toronto.ca/dataset/dinesafe/"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B50-5336012": {
+    "city": "Toronto",
+    "name": "Burrito Houz",
+    "address": "10 Mallard Rd, C112",
+    "url": "https://burritohouz.com/",
+    "signal": "ordering",
+    "supporting_urls": [
+      "https://www.ubereats.com/ca/store/burrito-houz-10-mallard-rd/oAMlmuQcRDCmZkyJTGtKhA"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "mississauga-directory-2025:20468": {
+    "city": "Mississauga",
+    "name": "Harvey?s",
+    "address": "3359 Mississauga Rd, Davis Food Court",
+    "url": "https://www.harveys.ca/en/locations/on/mississauga/3359-mississauga-rd",
+    "public_name": "Harvey’s at UTM",
+    "signal": "hours",
+    "supporting_urls": [
+      "https://www.utm.utoronto.ca/hospitality/davis-food-court-hours-operation",
+      "https://www.utm.utoronto.ca/visitors/maps-and-directions"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "mississauga-directory-2025:27278": {
+    "city": "Mississauga",
+    "name": "Thai Express",
+    "address": "3359 Mississauga Rd, Davis Food Court",
+    "url": "https://www.utm.utoronto.ca/hospitality/davis-food-court-hours-operation",
+    "public_name": "Thai Express at UTM",
+    "signal": "hours",
+    "supporting_urls": [
+      "https://www.utm.utoronto.ca/hospitality/Food",
+      "https://www.utm.utoronto.ca/visitors/maps-and-directions"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "mississauga-directory-2025:25979": {
+    "city": "Mississauga",
+    "name": "Shawarma",
+    "address": "3359 Mississauga Rd, Davis Food Court",
+    "url": "https://www.utm.utoronto.ca/hospitality/davis-food-court-hours-operation",
+    "public_name": "Shawarma Rotisserie at UTM",
+    "signal": "hours",
+    "supporting_urls": [
+      "https://www.utm.utoronto.ca/main-news/order-utms-food-court-opens-expanded-menu",
+      "https://www.utm.utoronto.ca/visitors/maps-and-directions"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "mississauga-directory-2025:25709": {
+    "city": "Mississauga",
+    "name": "Salad",
+    "address": "3359 Mississauga Rd, Davis Food Court",
+    "url": "https://www.utm.utoronto.ca/hospitality/davis-food-court-hours-operation",
+    "public_name": "CRISP Fresh Salads at UTM",
+    "signal": "hours",
+    "supporting_urls": [
+      "https://www.utm.utoronto.ca/main-news/order-utms-food-court-opens-expanded-menu",
+      "https://www.utm.utoronto.ca/visitors/maps-and-directions"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "mississauga-directory-2025:23686": {
+    "city": "Mississauga",
+    "name": "North Bistro",
+    "address": "3359 Mississauga Rd, Deerfield Hall",
+    "url": "https://www.utm.utoronto.ca/hospitality/food-campus/food-campus-utmeats",
+    "public_name": "North Side Bistro",
+    "signal": "hours",
+    "supporting_urls": [
+      "https://www.utm.utoronto.ca/hospitality/Food",
+      "https://www.utm.utoronto.ca/visitors/maps-and-directions"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "mississauga-directory-2025:27386": {
+    "city": "Mississauga",
+    "name": "The Fair Trade Cafe",
+    "address": "3359 Mississauga Rd, Maanjiwe nendamowinan",
+    "url": "https://www.utm.utoronto.ca/hospitality/Food",
+    "public_name": "Fair Trade Café at UTM",
+    "signal": "hours",
+    "supporting_urls": [
+      "https://www.utm.utoronto.ca/future-students/fall-campus-day-program",
+      "https://www.utm.utoronto.ca/visitors/maps-and-directions"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "mississauga-directory-2025:25873": {
+    "city": "Mississauga",
+    "name": "Second Cup",
+    "address": "3359 Mississauga Rd, Kaneff Centre",
+    "url": "https://secondcup.com/en/location/cafe-u-of-t-mississauga/",
+    "public_name": "Second Cup at UTM",
+    "signal": "hours",
+    "supporting_urls": [
+      "https://www.utm.utoronto.ca/hospitality/Food",
+      "https://www.utm.utoronto.ca/visitors/maps-and-directions"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B50-55A3834": {
+    "city": "Toronto",
+    "name": "Lili",
+    "address": "486 Front St W, Unit WM14",
+    "url": "https://www.lilifoods.ca/contact",
+    "public_name": "Lili Foods at The Well",
+    "signal": "hours",
+    "supporting_urls": [
+      "https://www.lilifoods.ca/",
+      "https://thewelltoronto.com/whats-on/lili-foods-grand-opening/",
+      "https://riocan.propertycapsule.com/property/output/document/view/id%3A140043"
+    ],
+    "checked_on": "2026-11-22",
+    "reviewed_inspection_address": "486 Front St W Unit-9 M5V 0V2",
+    "unit_review_reason": "The landlord's current plan marks Lili at WM14, matching the licence; DineSafe's named tenant record uses a different stall number at the property."
+  },
+  "toronto-licence:B50-3483575": {
+    "city": "Toronto",
+    "name": "Ukrainian Store Dnister",
+    "address": "93 Front St E, B16",
+    "url": "https://www.stlawrencemarket.com/vendors/vendor_detail/108",
+    "signal": "hours",
+    "supporting_urls": [
+      "https://www.stlawrencemarket.com/app/webroot/userfiles/files/2026%20SLM%20Flex%20Hours%282%29.pdf"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B50-4430604": {
+    "city": "Toronto",
+    "name": "Tim Horton's",
+    "address": "120 Adelaide St W, FC-09",
+    "url": "https://locations.timhortons.ca/en/on/toronto/120-adelaide-st-w-unit-fc-09/",
+    "signal": "hours",
+    "supporting_urls": [
+      "https://www.oxfordproperties.com/lease/office/120-adelaide-st-west"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B50-4916606": {
+    "city": "Toronto",
+    "name": "The Bagel Stop",
+    "address": "199 Bay St, C160",
+    "url": "https://www.thebagelstop.com/locations",
+    "signal": "hours",
+    "supporting_urls": [
+      "https://opengovca.com/toronto-business?address=199+BAY+ST",
+      "https://www.restaurantji.com/on/toronto/the-bagel-shop-/"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B50-5486066": {
+    "city": "Toronto",
+    "name": "Sultan's Mediterranean Grill",
+    "address": "199 Bay St, C-162",
+    "url": "https://sultansgrill.ca/",
+    "signal": "ordering",
+    "supporting_urls": [
+      "https://www.ubereats.com/ca/store/sultans-mediterranean-grill-%C2%B7-commerce-court-west/ho9H6BbpWeiUqyRjTPxmHg"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B50-5551582": {
+    "city": "Toronto",
+    "name": "Carousel Bakery",
+    "address": "93 Front St E, #3738",
+    "url": "https://www.stlawrencemarket.com/vendors/vendor_detail/56",
+    "signal": "hours",
+    "supporting_urls": [
+      "https://www.toronto.ca/legdocs/mmis/2023/gg/bgrd/backgroundfile-240018.pdf"
+    ],
+    "checked_on": "2026-11-22",
+    "public_address": "93 Front St E, Upper Level 42",
+    "unit_review_reason": "The market's vendor directory gives public stall 42. Its direct phone matches the licensed inspection record at 93 Front St E, which uses unit code 3738."
+  },
+  "toronto-licence:B71-3123202": {
+    "city": "Toronto",
+    "name": "Yianni's Kitchen",
+    "address": "93 Front St E, B33",
+    "url": "https://www.stlawrencemarket.com/vendors/vendor_detail/114",
+    "signal": "hours",
+    "supporting_urls": [
+      "https://www.stlawrencemarket.com/app/webroot/userfiles/files/2026%20SLM%20Flex%20Hours%282%29.pdf"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "mississauga-directory-2025:16217": {
+    "city": "Mississauga",
+    "name": "Banh Mi Bakery Tan Dinh",
+    "address": "3415 Dixie Rd, Unit 15",
+    "url": "https://www.restaurantji.com/on/mississauga/banh-mi-tan-inh-bakery-/",
+    "signal": "hours",
+    "supporting_urls": [
+      "https://localhealthinspections.com/map/facility/banh-mi-bakery-tan-dinh-15-3415-dixie-rd-mississauga-on-l4y-2b1-food-take-out-mississauga"
+    ],
+    "checked_on": "2026-11-22",
+    "public_name": "Banh Mi Tan Dinh"
+  },
+  "mississauga-directory-2025:18322": {
+    "city": "Mississauga",
+    "name": "Desi Hakka Affairs",
+    "address": "3415 Dixie Rd, Unit 4A",
+    "url": "https://www.skipthedishes.com/desi-hakka-affairs-3415",
+    "signal": "ordering",
+    "supporting_urls": [
+      "https://www.restaurantji.com/on/mississauga/desi-hakka-affairs-/"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "mississauga-directory-2025:21089": {
+    "city": "Mississauga",
+    "name": "Iqra?s Kitchen",
+    "address": "3415 Dixie Rd, Unit 3B",
+    "url": "https://www.skipthedishes.com/iqras-kitchen",
+    "signal": "ordering",
+    "supporting_urls": [
+      "https://www.yellowpages.ca/bus/Ontario/Mississauga/Iqra-s-Kitchen/103066454.html"
+    ],
+    "checked_on": "2026-11-22",
+    "public_name": "Iqra’s Kitchen"
+  },
+  "mississauga-directory-2025:22206": {
+    "city": "Mississauga",
+    "name": "Luca Pizza - Subs & Italian Food",
+    "address": "3415 Dixie Rd, Unit 2",
+    "url": "https://lucapizza.ca/",
+    "signal": "hours",
+    "supporting_urls": [
+      "https://menuweb.menu/restaurants/mississauga/luca-pizza/menu"
+    ],
+    "checked_on": "2026-11-22",
+    "public_name": "Luca Pizza"
+  },
+  "mississauga-directory-2025:29489": {
+    "city": "Mississauga",
+    "name": "Tasty B.B.Q.",
+    "address": "3415 Dixie Rd, Unit 12",
+    "url": "https://www.fantuanorder.com/dianping/en-US/store/tasty-bbq-2409204430-ca",
+    "signal": "ordering",
+    "supporting_urls": [
+      "https://www.ubereats.com/ca/store/tasty-bbq/P6Rk311FX2y3PHFNkoqFlg",
+      "https://www.mississauga.ca/wp-content/uploads/2024/06/27104155/May-2024-detailed-building-permit-report.pdf"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B50-4702639": {
+    "city": "Toronto",
+    "name": "Senthura Inc",
+    "address": "2761 Markham Rd, Unit 28",
+    "url": "https://www.ubereats.com/ca/store/senthura/FQ5zCvD0RcKHWc6NnGCXPg",
+    "signal": "ordering",
+    "supporting_urls": [
+      "https://restaurantguru.com/Sarvana-Catering-and-Takeout-Toronto"
+    ],
+    "checked_on": "2026-11-22",
+    "public_name": "Senthura"
+  },
+  "toronto-licence:B50-5541854": {
+    "city": "Toronto",
+    "name": "Tutto Panino",
+    "address": "100 Sorauren Ave",
+    "url": "https://www.restaurantji.com/on/toronto/tutto-panino-/",
+    "signal": "hours",
+    "supporting_urls": [
+      "https://tastet.ca/en/lists/the-best-italian-food-in-toronto/"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B50-5661253": {
+    "city": "Toronto",
+    "name": "Sushi&BBBop",
+    "address": "384 Yonge St, Unit 57",
+    "url": "https://www.skipthedishes.com/sushi-bbbop-yonge",
+    "signal": "ordering",
+    "supporting_urls": [
+      "https://www.restaurantji.com/on/toronto/sushi-and-bbbop-/"
+    ],
+    "checked_on": "2026-11-22",
+    "public_name": "Sushi & Bbbop",
+    "reviewed_inspection_address": "384 YONGE ST, Bldg-57 None M5B 1S8",
+    "unit_review_reason": "The pickup listing and unit-specific service page confirm the same stall 57 recorded in the licence; the city inspection spells the stall as Bldg-57."
+  },
+  "toronto-licence:B71-4306296": {
+    "city": "Toronto",
+    "name": "Double Double Pizza & Chicken",
+    "address": "145 Rexdale Blvd",
+    "url": "https://order.online/store/double-double-pizza-chicken-rexdale-blvd-549405",
+    "signal": "ordering",
+    "supporting_urls": [
+      "https://www.skipthedishes.com/doubledouble-rexdale"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B71-5357868": {
+    "city": "Toronto",
+    "name": "Ariam Cafe",
+    "address": "1242 Danforth Ave",
+    "url": "https://www.ubereats.com/ca/store/ariam-cafe/zyfIjXjdQgW4zQNbcV4z0Q",
+    "signal": "ordering",
+    "supporting_urls": [
+      "https://www.restaurantji.com/on/toronto/ariam-cafe-/"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B71-5400527": {
+    "city": "Toronto",
+    "name": "Rajbhog",
+    "address": "3222 Eglinton Ave E",
+    "url": "https://www.skipthedishes.com/rajbhog-restaurant-eglinton",
+    "signal": "ordering",
+    "supporting_urls": [
+      "https://rajbhog.ca/index.php/contact/"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B71-5412097": {
+    "city": "Toronto",
+    "name": "Fat Bastard Burrito",
+    "address": "1222 St Clair Ave W",
+    "url": "https://order.online/store/FatBastardBurrito-27638621",
+    "signal": "ordering",
+    "supporting_urls": [],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B71-5447365": {
+    "city": "Toronto",
+    "name": "Amma's Kitchen",
+    "address": "18 Four Seasons Pl, Unit 100",
+    "url": "https://www.ammakitchen.org/contact",
+    "signal": "hours",
+    "supporting_urls": [
+      "https://ammaskitchenca.square.site/"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B71-5475221": {
+    "city": "Toronto",
+    "name": "Casa Morales",
+    "address": "152 Augusta Ave",
+    "url": "https://www.casamorales.ca/",
+    "signal": "reservations",
+    "supporting_urls": [
+      "https://www.opentable.ca/r/casa-morales-toronto"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B71-5502901": {
+    "city": "Toronto",
+    "name": "Tiger Blues",
+    "address": "811 Queen St W",
+    "url": "https://www.ubereats.com/ca/store/tiger-blues-queen-st-w/8D4Uh8agV7mDr_w8erRscA",
+    "signal": "ordering",
+    "supporting_urls": [
+      "https://www.verytoronto.com/places/tiger-blues"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B71-5544778": {
+    "city": "Toronto",
+    "name": "Portovelo Cafe",
+    "address": "1669 St Clair Ave W",
+    "url": "https://www.portovelocafe.com/",
+    "signal": "reservations",
+    "supporting_urls": [
+      "https://www.stclairgardens-bia.com/business-directory/1669stclair/"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B71-5571685": {
+    "city": "Toronto",
+    "name": "Lo Banh Mi Tan Khanh",
+    "address": "748 Wilson Ave",
+    "url": "https://www.ubereats.com/ca/store/lo-banh-mi-tan-khanh-748-wilson-avenue/JQpCGvybX72mm4lntP5OfQ",
+    "signal": "ordering",
+    "supporting_urls": [
+      "https://www.verytoronto.com/places/lo-banh-mi-tan-khanh"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B71-5614551": {
+    "city": "Toronto",
+    "name": "Medley Kitchen",
+    "address": "2306 Queen St E",
+    "url": "https://www.ubereats.com/ca/store/medley-kitchen/I_SiiruEVvielTRtwo1XQQ",
+    "signal": "ordering",
+    "supporting_urls": [],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B71-5636160": {
+    "city": "Toronto",
+    "name": "Teow Tem Toh",
+    "address": "237 Augusta Ave",
+    "url": "https://www.doordash.com/store/teow-tem-toh---237-augusta-ave-toronto-52027767/",
+    "signal": "ordering",
+    "supporting_urls": [
+      "https://streetsoftoronto.com/food/restaurants/11-of-the-best-new-restaurants-to-check-out-in-toronto-this-week-2/"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "mississauga-directory-2025:16920": {
+    "city": "Mississauga",
+    "name": "Caffe Prego Inc.",
+    "address": "3115 Dundas St W",
+    "url": "https://www.restaurantji.com/on/mississauga/caffe-prego-/",
+    "signal": "hours",
+    "supporting_urls": [
+      "https://localhealthinspections.com/regions/mississauga/mississauga?page=11"
+    ],
+    "checked_on": "2026-11-22",
+    "public_name": "Caffe Prego"
+  },
+  "mississauga-directory-2025:17205": {
+    "city": "Mississauga",
+    "name": "Casa da Malta Restaurant",
+    "address": "5171 Tomken Rd, Unit 1-2",
+    "url": "https://www.restaurantji.com/on/mississauga/casa-da-malta-restaurant-/",
+    "signal": "hours",
+    "supporting_urls": [
+      "https://localhealthinspections.com/map/facility/casa-da-malta-1-2-5171-tomken-rd-mississauga-on-l4w-1p1-restaurant-mississauga"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "mississauga-directory-2025:21580": {
+    "city": "Mississauga",
+    "name": "Khan Baba Peshawari",
+    "address": "3435 Eglinton Ave W, Unit 4",
+    "url": "https://khanbabapeshawari.com/",
+    "signal": "ordering",
+    "supporting_urls": [
+      "https://passorfail.ca/mississauga/restaurants/khan-baba-peshawari-4-3435"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "mississauga-directory-2025:23402": {
+    "city": "Mississauga",
+    "name": "Myungdong Noodle Shabushabu",
+    "address": "2560 Shepard Ave, Unit 5",
+    "url": "https://www.mdkalguksu.com/",
+    "signal": "hours",
+    "supporting_urls": [],
+    "checked_on": "2026-11-22",
+    "public_name": "Myungdong Noodle Shabu Shabu"
+  },
+  "mississauga-directory-2025:24522": {
+    "city": "Mississauga",
+    "name": "Pizza Pop",
+    "address": "3075 Ridgeway Dr, Unit 28",
+    "url": "https://www.restaurantji.com/on/mississauga/pizza-pop-/",
+    "signal": "hours",
+    "supporting_urls": [
+      "https://www.pcbodirectory.ca/directory/pizza-pop"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "mississauga-directory-2025:26350": {
+    "city": "Mississauga",
+    "name": "Sombrero Express",
+    "address": "5979 Shawson Dr",
+    "url": "https://www.skipthedishes.com/sombrero-express-5979-shawson",
+    "signal": "ordering",
+    "supporting_urls": [
+      "https://localhealthinspections.com/map/facility/sombrero-express-5979-shawson-dr-mississauga-on-l4w-3y2-food-take-out-mississauga"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B71-5371405": {
+    "city": "Toronto",
+    "name": "Privilege T O",
+    "address": "1395 Danforth Ave",
+    "url": "https://privilegeto.ca/our-takeout-menu/",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "public_name": "Privilege T.O.",
+    "supporting_urls": [
+      "https://privilegeto.ca/reservations/",
+      "https://www.ubereats.com/ca/store/privilege-to-1395-danforth-ave/gxQ8J7ELTtSzl7H-HUtvpw"
+    ]
+  },
+  "toronto-licence:B71-5650955": {
+    "city": "Toronto",
+    "name": "La Flota Takerias",
+    "address": "1046 Finch Ave W",
+    "url": "https://www.corner.inc/place/pJRUD9kTtWDa",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "supporting_urls": [
+      "https://www.reddit.com/r/FoodToronto/comments/1vrwkp3/food_gems_near_keel_and_finch/"
+    ]
+  },
+  "toronto-licence:B50-55A7331": {
+    "city": "Toronto",
+    "name": "Kensington Jerk & Pasta",
+    "address": "61 Kensington Avenue",
+    "url": "https://jerkandpasta.com/",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "public_name": "Kensington Jerk & Pasta",
+    "supporting_urls": [
+      "https://rastapasta.ca/",
+      "https://www.waterworksfoodhall.com/restaurants/rasta-pasta"
+    ]
+  },
+  "toronto-licence:B50-5419310": {
+    "city": "Toronto",
+    "name": "DARK HORSE ESPRESSO BAR",
+    "address": "100 Queens Quay East",
+    "url": "https://darkhorseespresso.com/pages/locations",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "public_name": "Dark Horse Espresso Bar"
+  },
+  "toronto-licence:B71-5419297": {
+    "city": "Toronto",
+    "name": "DARK HORSE ESPRESSO BAR",
+    "address": "1187 St Clair Ave West",
+    "url": "https://darkhorseespresso.com/pages/locations",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "public_name": "Dark Horse Espresso Bar"
+  },
+  "toronto-licence:B71-5419298": {
+    "city": "Toronto",
+    "name": "DARK HORSE ESPRESSO BAR",
+    "address": "401 Richmond St W, #135",
+    "url": "https://darkhorseespresso.com/pages/locations",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "public_name": "Dark Horse Espresso Bar",
+    "supporting_urls": [
+      "https://401richmond.com/tenant_category/cafe/"
+    ]
+  },
+  "toronto-licence:B71-5419300": {
+    "city": "Toronto",
+    "name": "DARK HORSE ESPRESSO BAR",
+    "address": "416 Front Street East",
+    "url": "https://darkhorseespresso.com/pages/locations",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "public_name": "Dark Horse Espresso Bar"
+  },
+  "toronto-licence:B71-4307805": {
+    "city": "Toronto",
+    "name": "DINEEN COFFEE CO",
+    "address": "140 Yonge Street",
+    "url": "https://dineencoffee.com/store.php",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "public_name": "Dineen Coffee Co."
+  },
+  "toronto-licence:B71-4802968": {
+    "city": "Toronto",
+    "name": "DINEEN OUTPOST",
+    "address": "1042 Gerrard Street East",
+    "url": "https://dineencoffee.com/store.php",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "public_name": "Dineen Outpost"
+  },
+  "toronto-licence:B50-5664695": {
+    "city": "Toronto",
+    "name": "SECOND CUP",
+    "address": "30 The Queensway",
+    "url": "https://secondcup.com/en/location/st-josephs-hospital/",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "public_name": "Second Cup",
+    "supporting_urls": [
+      "https://unityhealth.to/patients-and-visitors/at-your-hospital/"
+    ]
+  },
+  "toronto-licence:B71-4423345": {
+    "city": "Toronto",
+    "name": "SECOND CUP",
+    "address": "355 Danforth Avenue",
+    "url": "https://secondcup.com/en/location/355-danforth-avenue/",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "public_name": "Second Cup"
+  },
+  "toronto-licence:B71-5406611": {
+    "city": "Toronto",
+    "name": "SECOND CUP",
+    "address": "490 Lawrence Avenue West",
+    "url": "https://secondcup.com/en/location/lawrence-plaza/",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "public_name": "Second Cup"
+  },
+  "toronto-licence:B71-5478538": {
+    "city": "Toronto",
+    "name": "SECOND CUP",
+    "address": "179 College Street",
+    "url": "https://secondcup.com/en/location/179-college-street/",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "public_name": "Second Cup"
+  },
+  "mississauga-directory-2025:27611": {
+    "city": "Mississauga",
+    "name": "Tim Hortons",
+    "address": "6075 Creditview Rd",
+    "url": "https://locations.timhortons.ca/en/on/mississauga/6075-creditview-rd/",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "public_name": "Tim Hortons"
+  },
+  "mississauga-directory-2025:27637": {
+    "city": "Mississauga",
+    "name": "Tim Hortons",
+    "address": "800 Bancroft Drive",
+    "url": "https://locations.timhortons.ca/en/on/mississauga/800/",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "public_name": "Tim Hortons",
+    "supporting_urls": [
+      "https://locations.timhortons.ca/en/on/mississauga/780-bancroft-dr/"
+    ]
+  },
+  "mississauga-directory-2025:27647": {
+    "city": "Mississauga",
+    "name": "Tim Hortons",
+    "address": "475 Courtneypark Dr E",
+    "url": "https://locations.timhortons.ca/en/on/mississauga/475-courtney-park-dr-e/",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "public_name": "Tim Hortons",
+    "supporting_urls": [
+      "https://localhealthinspections.com/map/facility/tim-hortons-475-courtneypark-dr-e-mississauga-on-l5t-2r1-restaurant-mississauga"
+    ]
+  },
+  "mississauga-directory-2025:27650": {
+    "city": "Mississauga",
+    "name": "Tim Hortons",
+    "address": "4595 Tomken Rd",
+    "url": "https://locations.timhortons.ca/en/on/mississauga/4595-tomken-rd/",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "public_name": "Tim Hortons"
+  },
+  "mississauga-directory-2025:27651": {
+    "city": "Mississauga",
+    "name": "Tim Hortons",
+    "address": "1801 Dundas St East",
+    "url": "https://locations.timhortons.ca/en/on/mississauga/1801-dundas-st-east/",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "public_name": "Tim Hortons"
+  },
+  "mississauga-directory-2025:27668": {
+    "city": "Mississauga",
+    "name": "Tim Hortons",
+    "address": "6600 Meadowvale Town Centre Cir",
+    "url": "https://locations.timhortons.ca/en/locations-list/on/mississauga/",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "public_name": "Tim Hortons"
+  },
+  "toronto-licence:B50-3956643": {
+    "city": "Toronto",
+    "name": "SAM JAMES COFFEE BAR",
+    "address": "297 Harbord St",
+    "url": "https://samjamescoffeebar.com/pages/harbord-shop",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "public_name": "Sam James Coffee Bar"
+  },
+  "toronto-licence:B50-4648632": {
+    "city": "Toronto",
+    "name": "COFFEE POCKET",
+    "address": "688A Bloor St W",
+    "url": "https://www.corner.inc/place/p5Ys5LdgNRq3",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "public_name": "Coffee Pocket",
+    "supporting_urls": [
+      "https://www.lostinontario.com/toronto/coffee-shops/coffee-pocket/"
+    ]
+  },
+  "toronto-licence:B50-5483896": {
+    "city": "Toronto",
+    "name": "FAHRENHEIT COFFEE",
+    "address": "529 Richmond St W",
+    "url": "https://order.online/en/store/FahrenheitCoffee-23561417",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "public_name": "Fahrenheit Coffee",
+    "supporting_urls": [
+      "https://www.fahrenheitcoffee.com/",
+      "https://www.corner.inc/place/pT83HyZamaPK"
+    ]
+  },
+  "toronto-licence:B71-4539598": {
+    "city": "Toronto",
+    "name": "JIMMY'S COFFEE",
+    "address": "15 Ossington Ave",
+    "url": "https://www.jimmyscoffee.ca/locations",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "public_name": "Jimmy’s Coffee"
+  },
+  "toronto-licence:B71-4822897": {
+    "city": "Toronto",
+    "name": "JIMMY'S COFFEE",
+    "address": "380 Royal York Rd",
+    "url": "https://www.jimmyscoffee.ca/locations",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "public_name": "Jimmy’s Coffee"
+  },
+  "toronto-licence:B71-5302095": {
+    "city": "Toronto",
+    "name": "JIMMY'S COFFEE",
+    "address": "107 Portland St",
+    "url": "https://www.jimmyscoffee.ca/locations",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "public_name": "Jimmy’s Coffee"
+  },
+  "toronto-licence:B71-5484016": {
+    "city": "Toronto",
+    "name": "FAHRENHEIT COFFEE",
+    "address": "181 University Ave",
+    "url": "https://www.fahrenheitcoffee.com/",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "public_name": "Fahrenheit Coffee",
+    "supporting_urls": [
+      "https://ma.to/venue/fahrenheitto"
+    ]
+  },
+  "toronto-licence:B71-4839023": {
+    "city": "Toronto",
+    "name": "AROMA ESPRESSO BAR",
+    "address": "20 Wellington St E",
+    "url": "https://www.ubereats.com/ca/store/aroma-espresso-bar-wellington/RjryxFA1Ri-wYcqf3g_hZw",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "public_name": "Aroma Espresso Bar",
+    "supporting_urls": [
+      "https://www.corner.inc/place/pzeyWkJ8ZyKZ"
+    ]
+  },
+  "toronto-licence:B71-4965024": {
+    "city": "Toronto",
+    "name": "AROMA ESPRESSO BAR",
+    "address": "88 Queens Quay W",
+    "url": "https://store.ritual.co/order/aroma-espresso-bar-rbc-waterpark-place-toronto/fb1x",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "public_name": "Aroma Espresso Bar",
+    "supporting_urls": [
+      "https://order.online/store/Aroma-Espresso-Bar-1015869/",
+      "https://www.lostinontario.com/toronto/coffee-shops/aroma-espresso-bar-queens-quay-west/"
+    ]
+  },
+  "toronto-licence:B71-5363440": {
+    "city": "Toronto",
+    "name": "AROMA ESPRESSO BAR",
+    "address": "2040 Avenue Rd",
+    "url": "https://order.online/en/store/AromaEspressoBar-542062",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "public_name": "Aroma Espresso Bar",
+    "supporting_urls": [
+      "https://www.restaurantji.com/on/north-york/aroma-espresso-bar-6/"
+    ]
+  },
+  "toronto-licence:B71-4972294": {
+    "city": "Toronto",
+    "name": "STARBUCKS",
+    "address": "1507 Avenue Rd",
+    "url": "https://www.ubereats.com/ca/store/starbucks-1507-avenue-road/shygMnGuSoiQH_dbSsCH7A",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "public_name": "Starbucks",
+    "supporting_urls": [
+      "https://localhealthinspections.com/map/facility/starbucks-1507-avenue-rd-food-premises-toronto"
+    ]
+  },
+  "toronto-licence:B71-5245089": {
+    "city": "Toronto",
+    "name": "STARBUCKS",
+    "address": "925 Dixon Rd",
+    "url": "https://www.hilton.com/en/hotels/ytoapdt-doubletree-toronto-airport/dining/",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "public_name": "Starbucks",
+    "supporting_urls": [
+      "https://www.hilton.com/en/hotels/ytoapdt-doubletree-toronto-airport/"
+    ]
+  },
+  "mississauga-directory-2025:26647": {
+    "city": "Mississauga",
+    "name": "Starbucks",
+    "address": "334 Dundas St E",
+    "url": "https://find-open.ca/mississauga/starbucks-1304813",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "public_name": "Starbucks",
+    "supporting_urls": [
+      "https://localhealthinspections.com/map/facility/starbucks-334-dundas-st-e-mississauga-on-l5a-1w9-food-take-out-mississauga",
+      "https://bizlocationdb.com/locations/starbucks/canada/c/mississauga"
+    ]
+  },
+  "mississauga-directory-2025:26648": {
+    "city": "Mississauga",
+    "name": "Starbucks",
+    "address": "362 Lakeshore Rd E",
+    "url": "https://www.openinghours.ca/starbucks-lakeshore-road-east-mississauga-on",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "public_name": "Starbucks",
+    "supporting_urls": [
+      "https://bizlocationdb.com/locations/starbucks/canada/c/mississauga"
+    ]
+  },
+  "mississauga-directory-2025:26650": {
+    "city": "Mississauga",
+    "name": "Starbucks",
+    "address": "5029 Hurontario St, Unit 1",
+    "url": "https://www.restaurantji.com/on/mississauga/starbucks-10/",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "public_name": "Starbucks",
+    "supporting_urls": [
+      "https://opengovca.com/mississauga-business/85485",
+      "https://bizlocationdb.com/locations/starbucks/canada/c/mississauga"
+    ]
+  },
+  "mississauga-directory-2025:26651": {
+    "city": "Mississauga",
+    "name": "Starbucks",
+    "address": "3235 Dundas St W",
+    "url": "https://www.waze.com/live-map/directions/ca/on/mississauga/starbucks-coffee-company?to=place.ChIJdWuMBqlDK4gRWe4-b1U6jZY",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "public_name": "Starbucks",
+    "supporting_urls": [
+      "https://localhealthinspections.com/map/facility/starbucks-coffee-3235-dundas-st-w-mississauga-on-l5l-3v7-restaurant-mississauga",
+      "https://bizlocationdb.com/locations/starbucks/canada/c/mississauga"
+    ]
+  },
+  "mississauga-directory-2025:26653": {
+    "city": "Mississauga",
+    "name": "Starbucks",
+    "address": "5067 Dixie Rd",
+    "url": "https://www.restaurantji.com/on/mississauga/starbucks-7/",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "public_name": "Starbucks",
+    "supporting_urls": [
+      "https://www.yellowpages.ca/bus/Ontario/Mississauga/Starbucks/6957197.html",
+      "https://bizlocationdb.com/locations/starbucks/canada/c/mississauga"
+    ]
+  },
+  "mississauga-directory-2025:26663": {
+    "city": "Mississauga",
+    "name": "Starbucks",
+    "address": "30 World Dr",
+    "url": "https://www.restaurantji.com/on/mississauga/starbucks-16/",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "public_name": "Starbucks",
+    "supporting_urls": [
+      "https://bizlocationdb.com/locations/starbucks/canada/c/mississauga"
+    ]
+  },
+  "toronto-licence:B50-4066136": {
+    "city": "Toronto",
+    "name": "BASKIN ROBBINS",
+    "address": "3246 Yonge St",
+    "url": "https://order.online/en-CA/store/baskin-robbins-8512-25731648",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "public_name": "Baskin-Robbins"
+  },
+  "toronto-licence:B50-5610142": {
+    "city": "Toronto",
+    "name": "BASKIN ROBBINS",
+    "address": "1820 Bloor St W",
+    "url": "https://www.ubereats.com/ca/store/baskin-robbins-1820-bloor-st-w/ywpzcvPvW8G0i_DrWbDgkw",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "public_name": "Baskin-Robbins"
+  },
+  "toronto-licence:B50-5626310": {
+    "city": "Toronto",
+    "name": "BASKIN ROBBINS",
+    "address": "150 Silver Reign Dr, B5.4",
+    "url": "https://www.ubereats.com/ca/store/baskin-robbins-150-silver-reign-dr/j-Tphy9mVVehMsrxcZAXGg",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "public_name": "Baskin-Robbins",
+    "supporting_urls": [
+      "https://opengovca.com/toronto-business/B50-5626310",
+      "https://kitchenchecked.com/on/brands/baskin-robbins/"
+    ]
+  },
+  "toronto-licence:B71-4537977": {
+    "city": "Toronto",
+    "name": "BASKIN-ROBBINS",
+    "address": "552 Danforth Ave",
+    "url": "https://www.ubereats.com/ca/store/baskin-robbins-552-danforth-ave-toronto/CsgtJs04WSmazSpB7-maQg",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "public_name": "Baskin-Robbins",
+    "supporting_urls": [
+      "https://www.yellowpages.ca/bus/Ontario/Toronto/Baskin-Robbins/102884640.html"
+    ]
+  },
+  "toronto-licence:B71-4718794": {
+    "city": "Toronto",
+    "name": "BASKIN ROBBINS",
+    "address": "270 The Kingsway",
+    "url": "https://www.humbertown.com/directory/baskin-robbins/",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "public_name": "Baskin-Robbins",
+    "supporting_urls": [
+      "https://www.yellowpages.ca/bus/Ontario/Toronto/Baskin-Robbins/102884673.html"
+    ]
+  },
+  "toronto-licence:B71-4746148": {
+    "city": "Toronto",
+    "name": "BASKIN ROBBINS",
+    "address": "1530 Bayview Ave, C",
+    "url": "https://www.ubereats.com/ca/store/baskin-robbins-bayview-%26-millwood/JOE8FRPrSrabYKiARWIhrA",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "public_name": "Baskin-Robbins",
+    "supporting_urls": [
+      "https://opengovca.com/toronto-business/B71-4746148",
+      "https://kitchenchecked.com/on/brands/baskin-robbins/"
+    ]
+  },
+  "toronto-licence:B71-4950414": {
+    "city": "Toronto",
+    "name": "BASKIN ROBBINS",
+    "address": "6212 Yonge St",
+    "url": "https://order.online/store/BaskinRobbins-50774",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "public_name": "Baskin-Robbins"
+  },
+  "toronto-licence:B71-5049334": {
+    "city": "Toronto",
+    "name": "BASKIN ROBBINS",
+    "address": "536 Church St",
+    "url": "https://www.restaurantji.com/on/toronto/baskin-robbins-2/",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "public_name": "Baskin-Robbins"
+  },
+  "toronto-licence:B71-5145443": {
+    "city": "Toronto",
+    "name": "BASKIN ROBBINS",
+    "address": "2534 Bayview Ave",
+    "url": "https://www.ubereats.com/ca/store/baskin-robbins-2534-bayview-ave/ww6G-UuXSaGkEKG4pjGrcw",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "public_name": "Baskin-Robbins"
+  },
+  "toronto-licence:B71-5325690": {
+    "city": "Toronto",
+    "name": "BASKIN ROBBINS",
+    "address": "1029 King St W, #1007A",
+    "url": "https://www.skipthedishes.com/baskin-robbins-king",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "public_name": "Baskin-Robbins",
+    "supporting_urls": [
+      "https://www.restaurantji.com/on/toronto/baskin-robbins-king-and-shaw-st-/",
+      "https://opengovca.com/toronto-business/B71-5325690"
+    ]
+  },
+  "toronto-licence:B71-5632875": {
+    "city": "Toronto",
+    "name": "BASKIN ROBBINS",
+    "address": "135 Bremner Blvd",
+    "url": "https://www.ubereats.com/store/baskin-robbins-cn-tower/pIoWbtc7Xf6naN2Hoq3rxQ",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "public_name": "Baskin-Robbins",
+    "supporting_urls": [
+      "https://ca.indeed.com/viewjob?jk=acd1c4037266751e"
+    ]
+  },
+  "toronto-licence:B71-5361766": {
+    "city": "Toronto",
+    "name": "EVA'S ORIGINAL CHIMNEYS",
+    "address": "454 Bloor St W",
+    "url": "https://www.originalchimneys.com/our-menu",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "public_name": "Eva’s Original Chimneys"
+  },
+  "toronto-licence:B71-3240165": {
+    "city": "Toronto",
+    "name": "STARBUCKS COFFEE 4205",
+    "address": "604 Danforth Ave",
+    "url": "https://www.ubereats.com/ca/store/starbucks-pape-%26-danforth/jREexKC-RT62F-NqNHyjvg",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "public_name": "Starbucks",
+    "supporting_urls": [
+      "https://www.lostinontario.com/toronto/coffee-shops/starbucks-danforth-avenue/"
+    ]
+  },
+  "mississauga-directory-2025:18115": {
+    "city": "Mississauga",
+    "name": "Dairy Queen",
+    "address": "3029 Argentia Rd, Unit 104",
+    "url": "https://www.dairyqueen.com/en-ca/locations/on/mississauga/104-3029-argentia-rd/12268/",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "public_name": "Dairy Queen"
+  },
+  "mississauga-directory-2025:18116": {
+    "city": "Mississauga",
+    "name": "Dairy Queen",
+    "address": "90 Annagem Blvd, Unit 1",
+    "url": "https://www.dairyqueen.com/en-ca/locations/on/mississauga/90-annagem-blvd/12295/",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "public_name": "Dairy Queen",
+    "supporting_urls": [
+      "https://opengovca.com/mississauga-business/92434",
+      "https://www.ubereats.com/ca/brand-city/mississauga-on/dairy-queen"
+    ]
+  },
+  "mississauga-directory-2025:19245": {
+    "city": "Mississauga",
+    "name": "Eva?s Original Chimneys",
+    "address": "53 Lakeshore Rd E",
+    "url": "https://www.originalchimneys.com/best-dessert-port-credit-mississauga-specials",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "public_name": "Eva’s Original Chimneys"
+  },
+  "mississauga-directory-2025:23355": {
+    "city": "Mississauga",
+    "name": "Murphy's Ice Cream Parlour",
+    "address": "9 Main St",
+    "url": "https://www.restaurantji.com/on/mississauga/murphys-ice-cream-parlour-/",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "public_name": "Murphy’s Ice Cream Parlour",
+    "supporting_urls": [
+      "https://www.destinationontario.com/en-ca/articles/best-ice-cream-parlours-ontario"
+    ]
+  },
+  "mississauga-directory-2025:26792": {
+    "city": "Mississauga",
+    "name": "Studio.89",
+    "address": "2520 Eglinton Ave W, Unit 1",
+    "url": "https://studio89.org/menu/",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "public_name": "Studio.89",
+    "supporting_urls": [
+      "https://www.corner.inc/place/prajPezs9kW4"
+    ],
+    "unit_review_reason": "Studio.89 and an independent venue listing both identify Unit 1.",
+    "public_address": "2520 Eglinton Ave W, Unit 1"
+  },
+  "toronto-licence:B71-4940530": {
+    "city": "Toronto",
+    "name": "STARBUCKS COFFEE",
+    "address": "23 Leslie St",
+    "url": "https://www.ubereats.com/ca/store/starbucks-lakeshore-%26-leslie/5tXIkDb2SC2P7QJ-bFGprg",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "public_name": "Starbucks"
+  },
+  "toronto-licence:B71-5219288": {
+    "city": "Toronto",
+    "name": "STARBUCKS COFFEE CANADA",
+    "address": "203 College St",
+    "url": "https://www.corner.inc/place/pfMnmtXbpH2a",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "public_name": "Starbucks",
+    "supporting_urls": [
+      "https://parallaxcorp.ca/portfolio/theory-condominiums/",
+      "https://www.lostinontario.com/toronto/coffee-shops/starbucks-college-street/"
+    ]
+  },
+  "toronto-licence:B71-5223520": {
+    "city": "Toronto",
+    "name": "STARBUCKS",
+    "address": "370 King St W, SW",
+    "url": "https://www.hyatt.com/hyatt-regency/en-US/torrt-hyatt-regency-toronto/dining",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "public_name": "Starbucks"
+  },
+  "mississauga-directory-2025:26644": {
+    "city": "Mississauga",
+    "name": "Starbucks",
+    "address": "3359 Mississauga Rd",
+    "url": "https://www.utm.utoronto.ca/hospitality/Food",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "public_name": "Starbucks",
+    "supporting_urls": [
+      "https://www.utm.utoronto.ca/hospitality/utm-events",
+      "https://www.utm.utoronto.ca/future-students/fall-campus-day-program"
+    ]
+  },
+  "mississauga-directory-2025:26645": {
+    "city": "Mississauga",
+    "name": "Starbucks",
+    "address": "250 Lakeshore Rd W",
+    "url": "https://www.openinghours.ca/starbucks-at-loblaws-lakeshore-road-mississauga-on",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "public_name": "Starbucks",
+    "supporting_urls": [
+      "https://bizlocationdb.com/locations/starbucks/canada/c/mississauga"
+    ]
+  },
+  "mississauga-directory-2025:26649": {
+    "city": "Mississauga",
+    "name": "Starbucks",
+    "address": "3030 Thomas St, Unit 407",
+    "url": "https://www.doordash.com/city/mississauga-on/b/starbucks-11139432/",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "public_name": "Starbucks",
+    "supporting_urls": [
+      "https://opengovca.com/mississauga-business?name=Starbucks"
+    ]
+  },
+  "mississauga-directory-2025:26657": {
+    "city": "Mississauga",
+    "name": "Starbucks",
+    "address": "2100 Hurontario St, Unit 4",
+    "url": "https://www.doordash.com/city/mississauga-on/b/starbucks-11139432/",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "public_name": "Starbucks",
+    "supporting_urls": [
+      "https://opengovca.com/mississauga-business?name=Starbucks"
+    ]
+  },
+  "mississauga-directory-2025:26659": {
+    "city": "Mississauga",
+    "name": "Starbucks",
+    "address": "4076 Confederation Pky",
+    "url": "https://www.doordash.com/city/mississauga-on/b/starbucks-11139432/",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "public_name": "Starbucks",
+    "supporting_urls": [
+      "https://bizlocationdb.com/locations/starbucks/canada/c/mississauga"
+    ]
+  },
+  "mississauga-directory-2025:26660": {
+    "city": "Mississauga",
+    "name": "Starbucks",
+    "address": "3670 Hurontario St",
+    "url": "https://www.marriott.com/en-us/hotels/yyzde-delta-hotels-toronto-mississauga/dining/",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "public_name": "Starbucks",
+    "supporting_urls": [
+      "https://www.marriott.com/en-us/hotels/yyzde-delta-hotels-toronto-mississauga/overview/"
+    ]
+  },
+  "mississauga-directory-2025:26662": {
+    "city": "Mississauga",
+    "name": "Starbucks",
+    "address": "2963 Argentia Rd, Unit 1",
+    "url": "https://www.restaurantji.com/on/mississauga/starbucks-8/",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "public_name": "Starbucks",
+    "supporting_urls": [
+      "https://www.doordash.com/city/mississauga-on/b/starbucks-11139432/",
+      "https://opengovca.com/mississauga-business/57348"
+    ]
+  },
+  "mississauga-directory-2025:26664": {
+    "city": "Mississauga",
+    "name": "Starbucks",
+    "address": "6155 Erin Mills Pky",
+    "url": "https://www.doordash.com/city/mississauga-on/b/starbucks-11139432/",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "public_name": "Starbucks",
+    "supporting_urls": [
+      "https://find-open.ca/mississauga/starbucks-1566968"
+    ]
+  },
+  "mississauga-directory-2025:26665": {
+    "city": "Mississauga",
+    "name": "Starbucks",
+    "address": "111 Lakeshore Rd W",
+    "url": "https://www.doordash.com/city/mississauga-on/b/starbucks-11139432/",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "public_name": "Starbucks",
+    "supporting_urls": [
+      "https://bizlocationdb.com/locations/starbucks/canada/c/mississauga"
+    ]
+  },
+  "mississauga-directory-2025:26666": {
+    "city": "Mississauga",
+    "name": "Starbucks",
+    "address": "1930 Fowler Dr, Unit C 101",
+    "url": "https://www.doordash.com/city/mississauga-on/b/starbucks-11139432/",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "public_name": "Starbucks",
+    "supporting_urls": [
+      "https://opengovca.com/mississauga-business/57880"
+    ]
+  },
+  "toronto-licence:B50-4935956": {
+    "city": "Toronto",
+    "name": "GONG CHA",
+    "address": "390 Queen St W",
+    "url": "https://gong-cha.ca/locations-2/",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "public_name": "Gong Cha"
+  },
+  "toronto-licence:B71-4688900": {
+    "city": "Toronto",
+    "name": "GONG CHA",
+    "address": "5449 Yonge St",
+    "url": "https://gong-cha.ca/locations-2/",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "public_name": "Gong Cha"
+  },
+  "toronto-licence:B71-5130006": {
+    "city": "Toronto",
+    "name": "GONG CHA",
+    "address": "451 Danforth Ave",
+    "url": "https://www.ubereats.com/ca/store/gong-cha-danforth/2Y4V4fcjTCykK5AlyL1Bvg",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "public_name": "Gong Cha"
+  },
+  "toronto-licence:B71-5203994": {
+    "city": "Toronto",
+    "name": "GONG CHA",
+    "address": "70 Forest Manor Rd, #5",
+    "url": "https://order.online/en/store/gong-cha-don-mills-24250630",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "public_name": "Gong Cha",
+    "supporting_urls": [
+      "https://kitchenchecked.com/on/toronto/restaurants/gong-cha-70-forest-manor-rd-unit-5/"
+    ]
+  },
+  "toronto-licence:B71-5315880": {
+    "city": "Toronto",
+    "name": "GONG CHA DAVISVILLE",
+    "address": "2027 Yonge St",
+    "url": "https://gong-cha.ca/locations-2/",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "public_name": "Gong Cha",
+    "supporting_urls": [
+      "https://www.skipthedishes.com/gong-cha-davisville"
+    ]
+  },
+  "toronto-licence:B71-5414331": {
+    "city": "Toronto",
+    "name": "GONG CHA",
+    "address": "5435 Dundas St W, #9",
+    "url": "https://order.online/store/gong-cha-toronto-23993376",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "public_name": "Gong Cha",
+    "supporting_urls": [
+      "https://localhealthinspections.com/map/facility/gong-cha-5435-dundas-st-w-unit-9-food-premises-toronto"
+    ]
+  },
+  "toronto-licence:B71-5678844": {
+    "city": "Toronto",
+    "name": "GONG CHA",
+    "address": "49 East Liberty St, #1",
+    "url": "https://gong-cha.ca/locations-2/",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "public_name": "Gong Cha"
+  },
+  "mississauga-directory-2025:20141": {
+    "city": "Mississauga",
+    "name": "Gong Cha",
+    "address": "3100 Dixie Rd, Unit 7",
+    "url": "https://gong-cha.ca/locations-2/",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "public_name": "Gong Cha"
+  },
+  "mississauga-directory-2025:20142": {
+    "city": "Mississauga",
+    "name": "Gong cha",
+    "address": "90 Burnhamthorpe Rd W, Unit 115",
+    "url": "https://gong-cha.ca/locations-2/",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "public_name": "Gong Cha"
+  },
+  "toronto-licence:B50-4918935": {
+    "city": "Toronto",
+    "name": "CHATIME",
+    "address": "461 Queen St W",
+    "url": "https://chatime.ca/store/toronto-queen/",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "public_name": "Chatime",
+    "supporting_urls": [
+      "https://order.chatime.ca/"
+    ]
+  },
+  "toronto-licence:B50-5443178": {
+    "city": "Toronto",
+    "name": "CHATIME",
+    "address": "486 Front St W, WM04",
+    "url": "https://chatime.ca/store/toronto-the-well/",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "public_name": "Chatime",
+    "supporting_urls": [
+      "https://thewelltoronto.com/directory/chatime/"
+    ]
+  },
+  "toronto-licence:B71-4533794": {
+    "city": "Toronto",
+    "name": "CHATIME",
+    "address": "175 Ravel Rd",
+    "url": "https://order.chatime.ca/",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "public_name": "Chatime"
+  },
+  "toronto-licence:B71-4806230": {
+    "city": "Toronto",
+    "name": "CHATIME",
+    "address": "132 Dundas St W",
+    "url": "https://chatime.ca/store/toronto-dundas/",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "public_name": "Chatime",
+    "supporting_urls": [
+      "https://order.chatime.ca/"
+    ]
+  },
+  "toronto-licence:B71-4923566": {
+    "city": "Toronto",
+    "name": "CHATIME",
+    "address": "30 Weston Rd, H103",
+    "url": "https://chatime.ca/store/toronto-stockyards/",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "public_name": "Chatime",
+    "supporting_urls": [
+      "https://opengovca.com/toronto-business/B71-4923566"
+    ]
+  },
+  "toronto-licence:B71-5228451": {
+    "city": "Toronto",
+    "name": "CHATIME",
+    "address": "1010 Wilson Ave, B",
+    "url": "https://order.chatime.ca/",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "public_name": "Chatime"
+  },
+  "toronto-licence:B71-5230684": {
+    "city": "Toronto",
+    "name": "CHATIME",
+    "address": "3812 Bloor St W, #1",
+    "url": "https://chatime.ca/store/etobicoke-bloor/",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "public_name": "Chatime",
+    "supporting_urls": [
+      "https://order.chatime.ca/"
+    ]
+  },
+  "toronto-licence:B71-5308426": {
+    "city": "Toronto",
+    "name": "CHATIME",
+    "address": "953 Kingston Rd",
+    "url": "https://order.chatime.ca/",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "public_name": "Chatime"
+  },
+  "toronto-licence:B71-5330202": {
+    "city": "Toronto",
+    "name": "CHATIME",
+    "address": "677 Bloor St W, MAIN",
+    "url": "https://order.online/store/ChatimeToronto-728497",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "public_name": "Chatime",
+    "supporting_urls": [
+      "https://opengovca.com/toronto-business/B71-5330202"
+    ]
+  },
+  "mississauga-directory-2025:17384": {
+    "city": "Mississauga",
+    "name": "Chatime",
+    "address": "3359 Mississauga Rd",
+    "url": "https://chatime.ca/store/mississaugau-of-t-mississauga/",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "public_name": "Chatime",
+    "supporting_urls": [
+      "https://www.waze.com/live-map/directions/ca/on/mississauga/chatime-bubble-tea-express?to=place.ChIJS33oBeNDK4gRO7qGrbLgtUo"
+    ]
+  },
+  "mississauga-directory-2025:17385": {
+    "city": "Mississauga",
+    "name": "Chatime",
+    "address": "515 Lakeshore Rd E, Unit 107",
+    "url": "https://www.skipthedishes.com/chatime-lakeshore",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "public_name": "Chatime",
+    "supporting_urls": [
+      "https://passorfail.ca/mississauga/restaurants/chatime-107-515"
+    ]
+  },
+  "mississauga-directory-2025:17386": {
+    "city": "Mississauga",
+    "name": "Chatime",
+    "address": "6435 Erin Mills Pky, Unit 5",
+    "url": "https://chatime.ca/store/mississauga-battleford/",
+    "signal": "hours",
+    "checked_on": "2026-11-22",
+    "public_name": "Chatime",
+    "supporting_urls": [
+      "https://order.chatime.ca/"
+    ]
+  },
+  "mississauga-directory-2025:26655": {
+    "city": "Mississauga",
+    "name": "Starbucks",
+    "address": "1016 Eglinton Avenue East",
+    "url": "https://www.ubereats.com/ca/store/starbucks-eglinton-%26-tomken/yVhyvqzjSFeXBRinS0-Lcg",
+    "signal": "ordering",
+    "checked_on": "2026-11-22",
+    "verified_storefront": {
+      "lat": 43.62751,
+      "lng": -79.62932
+    },
+    "street_number_review_reason": "The city permit places 1010 in the same Sovereign Asset development applied for as 1016, the contractor identifies Starbucks at 1016, and current ordering and the branch point confirm the public 1016 address about 13 metres from the municipal point.",
+    "supporting_urls": [
+      "https://www7.mississauga.ca/documents/business/2016/New_Industrial_and_Commercial_Building_Permits.pdf",
+      "https://www7.mississauga.ca/documents/agendas/committees/adjustment/2015/FEB_26.2015-_1.30_PM.pdf",
+      "https://www.stethan.ca/wp-content/uploads/2025/06/Stethan-Corporate-Brochure-Portfolio-2024.pdf",
+      "https://bizlocationdb.com/locations/starbucks/canada/c/mississauga"
+    ]
+  },
+  "toronto-licence:B50-4542721": {
+    "city": "Toronto",
+    "name": "REAL FRUIT BUBBLE TEA",
+    "address": "20 EGLINTON SQ, #116",
+    "url": "https://mallfinder.ca/malls/eglinton-square-shopping-centre-toronto-on/stores",
+    "signal": "ordering",
+    "checked_on": "2026-11-23",
+    "public_name": "Real Fruit Bubble Tea",
+    "supporting_urls": [
+      "https://opengovca.com/toronto-address/20-eglinton-sq-scarborough",
+      "https://kitchenchecked.com/on/toronto/restaurants/real-fruit-bubble-tea-20-eglinton-sq/",
+      "https://mallmaverick.imgix.net/web/property_managers/8/properties/9/galleries/20241008134841/Eglinton_Square_Site_Plan_September_2024.pdf",
+      "https://www.restaurantji.com/on/scarborough/real-fruit-bubble-tea-6/",
+      "https://mallmaverick.imgix.net/web/property_managers/8/properties/9/galleries/20250401170749/Eglinton_Square_Site_Plan_March_2025.pdf"
+    ]
+  },
+  "toronto-licence:B50-4923629": {
+    "city": "Toronto",
+    "name": "REAL FRUIT BUBBLE TEA",
+    "address": "223 QUEEN ST W",
+    "url": "https://www.ubereats.com/ca/store/real-fruit-bubble-tea-223-queen-st-w/IWnYEL1VQj2OcMAoNHnv6Q",
+    "signal": "ordering",
+    "checked_on": "2026-11-23",
+    "public_name": "Real Fruit Bubble Tea",
+    "supporting_urls": [
+      "https://www.lostinontario.com/toronto/cuisines/bubble-tea/"
+    ]
+  },
+  "toronto-licence:B50-4968090": {
+    "city": "Toronto",
+    "name": "TIGER SUGAR",
+    "address": "3276 MIDLAND AVE, C122",
+    "url": "https://www.restaurantji.com/on/scarborough/tiger-sugar-scarborough-/",
+    "signal": "ordering",
+    "checked_on": "2026-11-23",
+    "public_name": "Tiger Sugar",
+    "supporting_urls": [
+      "https://guava.failover.uber.com/ca/store/tiger-sugar-scarborough/jnjhiBvbQk2qgUwwCb7-Wg",
+      "https://kitchen-file.nodejavascript.com/r/tiger-sugar-001vo000013qjaniak/"
+    ]
+  },
+  "toronto-licence:B50-5103063": {
+    "city": "Toronto",
+    "name": "COCO FRESH TEA & JUICE",
+    "address": "60 BRIAN HARRISON WAY, #4",
+    "url": "https://www.ubereats.com/ca/store/coco-fresh-tea-%26-juice-60-brian-harrison-way/zDnJQ1HWTKKQ-jJFnaJZ0g",
+    "signal": "ordering",
+    "checked_on": "2026-11-23",
+    "public_name": "CoCo Fresh Tea & Juice",
+    "supporting_urls": [
+      "https://kitchenchecked.com/on/brands/coco-fresh-tea-and-juice/",
+      "https://order.online/en-US/store/CocoFresh-1347847"
+    ]
+  },
+  "toronto-licence:B50-5204034": {
+    "city": "Toronto",
+    "name": "REAL FRUIT BUBBLE TEA",
+    "address": "610 UNIVERSITY AVE",
+    "url": "https://www.restaurantji.com/on/toronto/real-fruit-bubble-tea-7/",
+    "signal": "hours",
+    "checked_on": "2026-11-23",
+    "public_name": "Real Fruit Bubble Tea",
+    "supporting_urls": [
+      "https://autoreserve.com/en/restaurants/pgfg7aDV6V7h7Q5cu3cy",
+      "https://www.fantuanorder.com/dianping/en-US/store/real-fruit-bubble-tea-5640126644-ca"
+    ]
+  },
+  "toronto-licence:B50-5363512": {
+    "city": "Toronto",
+    "name": "THE ALLEY",
+    "address": "5431 YONGE ST",
+    "url": "https://order.online/store/the-alley-north-york-348089",
+    "signal": "ordering",
+    "checked_on": "2026-11-23",
+    "public_name": "The Alley",
+    "supporting_urls": [
+      "https://www.the-alley.ca/"
+    ]
+  },
+  "toronto-licence:B50-5466606": {
+    "city": "Toronto",
+    "name": "REAL FRUIT BUBBLE TEA",
+    "address": "4525 KINGSTON RD, #4B",
+    "url": "https://www.skipthedishes.com/real-fruit-bubble-tea-4525",
+    "signal": "ordering",
+    "checked_on": "2026-11-23",
+    "public_name": "Real Fruit Bubble Tea",
+    "supporting_urls": [
+      "https://opengovca.com/toronto-business/B50-5466606",
+      "https://fcr.propertycapsule.com/property/output/document/view/id%3A84573"
+    ]
+  },
+  "toronto-licence:B50-5546102": {
+    "city": "Toronto",
+    "name": "COCO BUBBLE TEA",
+    "address": "2352 YONGE ST",
+    "url": "https://order.online/store/coco-fresh-tea-and-juice-yonge-and-eglinton-750459",
+    "signal": "ordering",
+    "checked_on": "2026-11-23",
+    "public_name": "CoCo Fresh Tea & Juice",
+    "supporting_urls": [
+      "https://www.lostinontario.com/toronto/cuisines/bubble-tea/",
+      "https://www.cocofreshtea.ca/locations/"
+    ]
+  },
+  "toronto-licence:B71-4532048": {
+    "city": "Toronto",
+    "name": "REAL FRUIT BUBBLE TEA",
+    "address": "2301 BRIMLEY RD, B01145A",
+    "url": "https://www.waze.com/live-map/directions/ca/on/toronto/real-fruit-bubble-tea?to=place.ChIJCRvty2vR1IkR3ujnWT_3ju8",
+    "signal": "hours",
+    "checked_on": "2026-11-23",
+    "public_name": "Real Fruit Bubble Tea",
+    "supporting_urls": [
+      "https://www.lostinontario.com/toronto/cuisines/bubble-tea/",
+      "https://www.waze.com/live-map/directions/ca/on/toronto/real-fruit-bubble-tea"
+    ]
+  },
+  "toronto-licence:B71-4691803": {
+    "city": "Toronto",
+    "name": "COCO FRESH TEA & JUICE",
+    "address": "371 SPADINA AVE",
+    "url": "https://order.online/store/CocoFreshTeaJuice-714903",
+    "signal": "ordering",
+    "checked_on": "2026-11-23",
+    "public_name": "CoCo Fresh Tea & Juice",
+    "supporting_urls": [
+      "https://localhealthinspections.com/regions/toronto?page=50",
+      "https://www.cocofreshtea.ca/locations/"
+    ]
+  },
+  "toronto-licence:B71-4917354": {
+    "city": "Toronto",
+    "name": "THE ALLEY",
+    "address": "621 BLOOR ST W",
+    "url": "https://www.verytoronto.com/places/the-alley-bloor",
+    "signal": "hours",
+    "checked_on": "2026-11-23",
+    "public_name": "The Alley",
+    "supporting_urls": [
+      "https://www.ubereats.com/ca/store/the-alley-bloor/qmpXrsBjTI-dW0jCDrWotA",
+      "https://www.the-alley.ca/"
+    ]
+  },
+  "toronto-licence:B71-5104942": {
+    "city": "Toronto",
+    "name": "REAL FRUIT BUBBLE TEA",
+    "address": "2181 STEELES AVE W, B16",
+    "url": "https://www.waze.com/live-map/directions/real-fruit-bubble-tea-steeles-ave-w-2181-toronto?to=place.w.183828918.1838420250.7897921",
+    "signal": "hours",
+    "checked_on": "2026-11-23",
+    "public_name": "Real Fruit Bubble Tea",
+    "supporting_urls": [
+      "https://localhealthinspections.com/map/facility/real-fruit-bubble-tea-2181-steeles-ave-w-unit-b16-food-premises-toronto",
+      "https://www.waze.com/live-map/directions/ca/on/toronto/real-fruit-bubble-tea-2181-steeles-ave-w"
+    ]
+  },
+  "toronto-licence:B71-5441981": {
+    "city": "Toronto",
+    "name": "COCO FRESH TEA & JUICE",
+    "address": "1883 MCNICOLL AVE, #12-13",
+    "url": "https://custom.order.online/en-CA/store/coco-fresh-tea-juice-mcnicoll-ave-30893573",
+    "signal": "ordering",
+    "checked_on": "2026-11-23",
+    "public_name": "CoCo Fresh Tea & Juice",
+    "supporting_urls": [
+      "https://localhealthinspections.com/regions/toronto?page=50",
+      "https://www.cocofreshtea.ca/locations/"
+    ]
+  },
+  "mississauga-directory-2025:17676": {
+    "city": "Mississauga",
+    "name": "Coco Fresh Tea & Juice",
+    "address": "1177 CENTRAL PKY W, Unit 31",
+    "url": "https://www.restaurantji.com/on/mississauga/coco-fresh-tea-and-juice-11/",
+    "signal": "ordering",
+    "checked_on": "2026-11-23",
+    "public_name": "CoCo Fresh Tea & Juice",
+    "supporting_urls": [
+      "https://restaurantguru.com/CoCo-Fresh-Tea-and-Juice-Mississauga-2",
+      "https://www.menupix.com/toronto/restaurants/31965593/CoCo-Fresh-Tea-and-Juice-Mississauga-ON"
+    ]
+  },
+  "toronto-licence:B50-0229914": {
+    "city": "Toronto",
+    "name": "MONTMARTRE BAKERY",
+    "address": "105 MIDWEST RD",
+    "url": "https://montmartrebakery.com/contact.php",
+    "signal": "hours",
+    "checked_on": "2026-11-23",
+    "public_name": "Montmartre Bakery"
+  },
+  "toronto-licence:B50-0237021": {
+    "city": "Toronto",
+    "name": "BAKER'S BEST BAKERY",
+    "address": "4915 STEELES AVE E, #7",
+    "url": "https://www.bakersbestbakery.com/location",
+    "signal": "hours",
+    "checked_on": "2026-11-23",
+    "public_name": "Baker's Best Bakery"
+  },
+  "toronto-licence:B50-0244745": {
+    "city": "Toronto",
+    "name": "DYNASTY BAKERY & CAFE",
+    "address": "440 ROGERS RD",
+    "url": "https://www.ubereats.com/ca-fr/store/dynasty-bakery-and-cafe/ztdHkWpzQjSS2TTag9aUXA",
+    "signal": "hours",
+    "checked_on": "2026-11-23",
+    "public_name": "Dynasty Bakery & Cafe",
+    "supporting_urls": [
+      "https://rogersroadbia.com/directory/dynasty-bakery-cafe/",
+      "https://opengovca.com/toronto-business/B50-0244745"
+    ]
+  },
+  "toronto-licence:B50-3243735": {
+    "city": "Toronto",
+    "name": "SELECT BAKERY PATISSERIE",
+    "address": "405 DONLANDS AVE",
+    "url": "https://www.selectbakery.ca/contact/",
+    "signal": "hours",
+    "checked_on": "2026-11-23",
+    "public_name": "Select Bakery Patisserie",
+    "supporting_urls": [
+      "https://kitchen-file.nodejavascript.com/area/m4j/"
+    ]
+  },
+  "toronto-licence:B50-3366634": {
+    "city": "Toronto",
+    "name": "PORT UNION BAKERY",
+    "address": "287 PORT UNION RD",
+    "url": "https://portunionbakery.ca/contact",
+    "signal": "ordering",
+    "checked_on": "2026-11-23",
+    "public_name": "Port Union Bakery",
+    "supporting_urls": [
+      "https://portunionbakery.squarespace.com/"
+    ]
+  },
+  "toronto-licence:B50-3947851": {
+    "city": "Toronto",
+    "name": "RED SAIL BOAT BAKERY",
+    "address": "2547 WARDEN AVE",
+    "url": "https://torontoshoutouts.com/categories/sweets-treats/red-sail-boat-bakery",
+    "signal": "hours",
+    "checked_on": "2026-11-23",
+    "public_name": "Red Sail Boat Bakery",
+    "supporting_urls": [
+      "https://opengovca.com/toronto-business/B50-3947851"
+    ]
+  },
+  "toronto-licence:B50-4064816": {
+    "city": "Toronto",
+    "name": "TRE MARI BAKERY",
+    "address": "1311 ST CLAIR AVE W",
+    "url": "https://www.tremari.ca/",
+    "signal": "ordering",
+    "checked_on": "2026-11-23",
+    "public_name": "Tre Mari Bakery",
+    "supporting_urls": [
+      "https://www.verytoronto.com/places/tre-mari-bakery"
+    ]
+  },
+  "toronto-licence:B50-4068111": {
+    "city": "Toronto",
+    "name": "NEW SPICELAND TAKE OUT,CATERING AND BAKERY",
+    "address": "6065 STEELES AVE E, #10-12",
+    "url": "https://www.restaurantji.com/on/scarborough/new-spiceland-restaurant-take-out-catering-and-bakery-/",
+    "signal": "ordering",
+    "checked_on": "2026-11-23",
+    "public_name": "New Spiceland Take Out, Catering and Bakery",
+    "supporting_urls": [
+      "https://kitchenchecked.com/on/toronto/restaurants/new-spiceland-take-out-catering-and-bakery-6065-steeles-ave-e/"
+    ]
+  },
+  "toronto-licence:B50-4070299": {
+    "city": "Toronto",
+    "name": "COBS BREAD",
+    "address": "1539 BAYVIEW AVE",
+    "url": "https://www.restaurantji.com/on/toronto/cobs-bread-4/",
+    "signal": "hours",
+    "checked_on": "2026-11-23",
+    "public_name": "COBS Bread",
+    "supporting_urls": [
+      "https://bayviewleasidebia.com/business/cobs-bread/",
+      "https://bayviewleasidebia.com/business-directory/"
+    ]
+  },
+  "toronto-licence:B50-5241219": {
+    "city": "Toronto",
+    "name": "AL' DEEWAN BAKERY & PIZZA",
+    "address": "2067 LAWRENCE AVE E",
+    "url": "https://www.ubereats.com/ca/store/aldeewan-halal-manakeesh-lawrence-east/7_7zgx9FUhKq0Qzgb_FRDg",
+    "signal": "ordering",
+    "checked_on": "2026-11-23",
+    "public_name": "Al'deewan Halal Manakeesh",
+    "supporting_urls": [
+      "https://www.ubereats.com/ch/store/aldeewan-halal-manakeesh-lawrence-east/7_7zgx9FUhKq0Qzgb_FRDg",
+      "https://kitchen-file.nodejavascript.com/r/al-deewan-bakery-pizza-001vo000013qhriia0/"
+    ]
+  },
+  "toronto-licence:B50-5635951": {
+    "city": "Toronto",
+    "name": "PIZZAVILLE",
+    "address": "1235 WILSON AVE, #1",
+    "url": "https://www.pizzaville.ca/stores/view/1235-wilson-ave",
+    "signal": "ordering",
+    "checked_on": "2026-11-23",
+    "public_name": "Pizzaville",
+    "supporting_urls": [
+      "https://localhealthinspections.com/regions/toronto?page=170",
+      "https://www.hrh.ca/patients-visitors/visitor-information/"
+    ]
+  },
+  "toronto-licence:B71-4539974": {
+    "city": "Toronto",
+    "name": "ALMADINA HALAL PIZZA & BAKERY",
+    "address": "2683 LAWRENCE AVE E, #1A",
+    "url": "https://www.ubereats.com/ca/store/al-madina-halal-pizza/-NXzG2-oQUS7QqDS1BnNuA",
+    "signal": "ordering",
+    "checked_on": "2026-11-23",
+    "public_name": "Al Madina Halal Pizza & Bakery",
+    "supporting_urls": [
+      "https://localhealthinspections.com/regions/toronto?page=10",
+      "https://restaurantguru.com/Al-Madina-Halal-Pizza-Toronto"
+    ]
+  },
+  "toronto-licence:B71-5144711": {
+    "city": "Toronto",
+    "name": "PIZZAIOLO",
+    "address": "1548 AVENUE RD",
+    "url": "https://pizzaiolo.ca/locations/1548-avenue-rd",
+    "signal": "hours",
+    "checked_on": "2026-11-23",
+    "public_name": "Pizzaiolo",
+    "supporting_urls": [
+      "https://kitchenchecked.com/on/toronto/restaurants/pizzaiolo-1548-avenue-rd/"
+    ]
+  },
+  "toronto-licence:B71-5457863": {
+    "city": "Toronto",
+    "name": "PIZZAIOLO",
+    "address": "51 UNDERHILL DR, #3",
+    "url": "https://pizzaiolo.ca/locations/51-underhill-dr",
+    "signal": "ordering",
+    "checked_on": "2026-11-23",
+    "public_name": "Pizzaiolo",
+    "supporting_urls": [
+      "https://www.ubereats.com/ca/store/pizzaiolo-51-underhill-drive/yswroBLlUzGdAPdtxcu2BA",
+      "https://kitchenchecked.com/on/brands/pizzaiolo/"
+    ]
+  },
+  "toronto-licence:B71-5578109": {
+    "city": "Toronto",
+    "name": "MCMAN PIZZA",
+    "address": "2116 DANFORTH AVE",
+    "url": "https://mcmanpizza.com/",
+    "signal": "ordering",
+    "checked_on": "2026-11-23",
+    "public_name": "McMan Pizza"
+  },
+  "toronto-licence:B71-5591933": {
+    "city": "Toronto",
+    "name": "THE BIG SLICE PIZZA AND CHICKEN",
+    "address": "226 MARKHAM RD",
+    "url": "https://www.ubereats.com/ca/store/the-big-slice-pizza-%26-chicken/uHSpmX43T2iHKohs3sktVg",
+    "signal": "ordering",
+    "checked_on": "2026-11-23",
+    "public_name": "The Big Slice Pizza and Chicken",
+    "supporting_urls": [
+      "https://www.foodbooking.com/api/legal?add_header=1&language=en&type=terms&uid=8b6434b9-3b30-4d9e-ae92-6b0573497823",
+      "https://localhealthinspections.com/map/facility/the-big-slice-pizza-and-chicken-226-markham-rd-bldg-1-food-premises-toronto",
+      "https://opengovca.com/toronto-business/B71-5591933"
+    ]
+  },
+  "toronto-licence:B71-5601126": {
+    "city": "Toronto",
+    "name": "PIZZAIOLO",
+    "address": "4700 DUFFERIN ST",
+    "url": "https://pizzaiolo.ca/locations/4700-dufferin-st",
+    "signal": "hours",
+    "checked_on": "2026-11-23",
+    "public_name": "Pizzaiolo",
+    "supporting_urls": [
+      "https://opengovca.com/toronto-business/B71-5601126",
+      "https://kitchenchecked.com/on/brands/pizzaiolo/"
+    ]
+  },
+  "mississauga-directory-2025:14987": {
+    "city": "Mississauga",
+    "name": "2-4-1 Pizza",
+    "address": "2155 LEANNE BLVD, Unit 102",
+    "url": "https://www.skipthedishes.com/241-pizza-2155-leanne-blvd",
+    "signal": "ordering",
+    "checked_on": "2026-11-23",
+    "public_name": "2-4-1 Pizza",
+    "supporting_urls": [
+      "https://opendatamississauga.ca/address/2155-leanne-boulevard",
+      "https://localhealthinspections.com/map/facility/2-4-1-pizza-102-2155-leanne-blvd-mississauga-on-l5k-2k8-food-take-out-mississauga",
+      "https://www.241pizza.com/"
+    ]
+  },
+  "mississauga-directory-2025:23130": {
+    "city": "Mississauga",
+    "name": "Mo?Cha Bubble Tea",
+    "address": "204 QUEEN ST S, Unit 101",
+    "url": "https://mochabubbletea.com/order-online/",
+    "signal": "ordering",
+    "checked_on": "2026-11-23",
+    "public_name": "Mo’Cha Bubble Tea",
+    "supporting_urls": [
+      "https://www.restaurantji.com/on/mississauga/mocha-bubble-tea-streetsville-/"
+    ]
+  },
+  "toronto-licence:B50-5350916": {
+    "city": "Toronto",
+    "name": "BAP BUBBLE TEA",
+    "address": "1190 WESTON RD",
+    "url": "https://www.bapbubbletea.com/",
+    "signal": "hours",
+    "checked_on": "2026-11-23",
+    "public_name": "Bắp Bubble Tea"
+  },
+  "mississauga-directory-2025:25184": {
+    "city": "Mississauga",
+    "name": "Real Fruit Bubble Tea",
+    "address": "2150 BURNHAMTHORPE RD W, Unit H23",
+    "url": "https://www.ubereats.com/ca/store/real-fruit-bubble-tea-south-common-mall/l2wTYvP7TLmrFl8DZ17qhw",
+    "signal": "ordering",
+    "checked_on": "2026-11-23",
+    "public_name": "Real Fruit Bubble Tea",
+    "supporting_urls": [
+      "https://www.restaurantji.com/on/mississauga/real-fruit-bubble-tea-5/"
+    ]
+  },
+  "toronto-licence:B50-5326675": {
+    "city": "Toronto",
+    "name": "CHICHA SAN CHEN",
+    "address": "60 HURON ST",
+    "url": "https://www.ubereats.com/ca/store/chicha-san-chen-huron-st/QMzVrd6OVA26AxDormmVqw",
+    "signal": "ordering",
+    "checked_on": "2026-11-23",
+    "public_name": "CHICHA San Chen",
+    "supporting_urls": [
+      "https://www.chichasanchen.com/en/store/Canada/78/"
+    ]
+  },
+  "toronto-licence:B50-5443176": {
+    "city": "Toronto",
+    "name": "CHICHA SAN CHEN",
+    "address": "112 OSSINGTON AVE",
+    "url": "https://www.ubereats.com/ca/store/chicha-san-chen-ossington/n9DLy1eyXT6jc01TVBEL8w",
+    "signal": "ordering",
+    "checked_on": "2026-11-23",
+    "public_name": "CHICHA San Chen",
+    "supporting_urls": [
+      "https://www.chichasanchen.com/en/store/Canada/78/"
+    ]
+  },
+  "toronto-licence:B71-5125073": {
+    "city": "Toronto",
+    "name": "KUNG FU TEA",
+    "address": "584 YONGE ST",
+    "url": "https://www.kungfuteaontario.com/order-online",
+    "signal": "ordering",
+    "checked_on": "2026-11-23",
+    "public_name": "Kung Fu Tea",
+    "supporting_urls": [
+      "https://www.kungfutea.com/delivery/"
+    ]
+  },
+  "mississauga-directory-2025:17677": {
+    "city": "Mississauga",
+    "name": "CoCo Fresh Tea & Juice",
+    "address": "6986 FINANCIAL DR, Unit 5",
+    "url": "https://www.ubereats.com/store/coco-bubble-tea-meadowvale/XIa6SKSpV9GYLq8BM9AH6A",
+    "signal": "ordering",
+    "checked_on": "2026-11-23",
+    "public_name": "CoCo Fresh Tea & Juice",
+    "supporting_urls": [
+      "https://localhealthinspections.com/map/facility/coco-fresh-tea-and-juice-5-6986-financial-drive-mississauga-ontario-l5n-8j4-food-take-out-mississauga"
+    ]
+  },
+  "mississauga-directory-2025:21768": {
+    "city": "Mississauga",
+    "name": "Kung Fu Tea",
+    "address": "285 ENFIELD PL, Unit R102",
+    "url": "https://www.kungfuteaontario.com/order-online",
+    "signal": "ordering",
+    "checked_on": "2026-11-23",
+    "public_name": "Kung Fu Tea"
+  },
+  "toronto-licence:B50-5518081": {
+    "city": "Toronto",
+    "name": "KUNG FU TEA",
+    "address": "52 ORFUS RD, #1",
+    "url": "https://www.kungfuteaontario.com/order-online",
+    "signal": "ordering",
+    "checked_on": "2026-11-23",
+    "public_name": "Kung Fu Tea"
+  },
+  "toronto-licence:B50-5526378": {
+    "city": "Toronto",
+    "name": "CHICHA SAN CHEN",
+    "address": "3272 MIDLAND AVE, B122",
+    "url": "https://www.corner.inc/place/prJ5gtDQXryk",
+    "signal": "hours",
+    "checked_on": "2026-11-23",
+    "public_name": "CHICHA San Chen",
+    "supporting_urls": [
+      "https://www.chichasanchen.com/en/store/Canada/78/"
+    ]
+  },
+  "mississauga-directory-2025:17720": {
+    "city": "Mississauga",
+    "name": "Columbus Bakery",
+    "address": "40 BRISTOL RD E, Unit 2",
+    "url": "https://columbusbakerycafe.com/shop/",
+    "signal": "hours",
+    "checked_on": "2026-11-23",
+    "public_name": "Columbus Bakery Cafe"
+  },
+  "toronto-licence:B50-4298578": {
+    "city": "Toronto",
+    "name": "SERANO BAKERY",
+    "address": "830 PAPE AVE, #1,2 & 5",
+    "url": "https://www.waze.com/live-map/directions/ca/on/toronto/serano-bakery",
+    "signal": "hours",
+    "checked_on": "2026-11-23",
+    "public_name": "Serano Bakery",
+    "supporting_urls": [
+      "https://flyermall.com/serano-bakery"
+    ]
+  },
+  "toronto-licence:B50-4425094": {
+    "city": "Toronto",
+    "name": "COBS BREAD",
+    "address": "1975 QUEEN ST E",
+    "url": "https://opengovca.com/toronto-address/1975a-queen-st-e-toronto",
+    "signal": "hours",
+    "checked_on": "2026-11-23",
+    "public_name": "COBS Bread",
+    "supporting_urls": [
+      "https://www.waze.com/live-map/directions/cobs-bread-queen-st-e-1975-toronto"
+    ]
+  },
+  "toronto-licence:B50-4534132": {
+    "city": "Toronto",
+    "name": "COLUMBUS BAKERY",
+    "address": "2931 DUFFERIN ST",
+    "url": "https://columbusbakerycafe.com/shop/",
+    "signal": "hours",
+    "checked_on": "2026-11-23",
+    "public_name": "Columbus Bakery Cafe"
+  },
+  "toronto-licence:B50-4543756": {
+    "city": "Toronto",
+    "name": "COBS BREAD",
+    "address": "156 DANFORTH AVE",
+    "url": "https://www.cobsbread.com/pages/bakeries/danforth-bakery",
+    "signal": "hours",
+    "checked_on": "2026-11-23",
+    "public_name": "COBS Bread"
+  },
+  "toronto-licence:B50-4723724": {
+    "city": "Toronto",
+    "name": "RICHMOND KOSHER BAKERY",
+    "address": "4119 BATHURST ST",
+    "url": "https://richmondkosherbakery.com/contact/",
+    "signal": "hours",
+    "checked_on": "2026-11-23",
+    "public_name": "Richmond Kosher Bakery"
+  },
+  "toronto-licence:B50-4754057": {
+    "city": "Toronto",
+    "name": "MARJO BAKERY",
+    "address": "2838 VICTORIA PARK AVE",
+    "url": "https://www.marjobakery.ca/contact",
+    "signal": "hours",
+    "checked_on": "2026-11-23",
+    "public_name": "MarJo Bakery"
+  },
+  "toronto-licence:B50-4837962": {
+    "city": "Toronto",
+    "name": "GERRARD ST. BAKERY",
+    "address": "635 GERRARD ST E",
+    "url": "https://www.verytoronto.com/places/gerrard-st-bakery",
+    "signal": "hours",
+    "checked_on": "2026-11-23",
+    "public_name": "Gerrard St. Bakery",
+    "supporting_urls": [
+      "https://untappd.com/v/gerrard-st-bakery/6191939",
+      "https://www.youtube.com/watch?v=Zxlxf9qaC60"
+    ]
+  },
+  "toronto-licence:B50-4866377": {
+    "city": "Toronto",
+    "name": "ARTO BAKERY",
+    "address": "1117 O'CONNOR DR",
+    "url": "https://artobakery.ca/contact",
+    "signal": "hours",
+    "checked_on": "2026-11-23",
+    "public_name": "Arto Bakery"
+  },
+  "toronto-licence:B50-4906399": {
+    "city": "Toronto",
+    "name": "FRAGRANT BAKERY",
+    "address": "3833 MIDLAND AVE, #17",
+    "url": "https://www.corner.inc/place/pSpwSJgaqBtb",
+    "signal": "hours",
+    "checked_on": "2026-11-23",
+    "public_name": "Fragrant Bakery",
+    "supporting_urls": [
+      "https://kitchen-file.nodejavascript.com/r/fragrant-bakery-001vo000013qjtriak/"
+    ]
+  },
+  "toronto-licence:B50-5116327": {
+    "city": "Toronto",
+    "name": "COBS BREAD",
+    "address": "4525 KINGSTON RD, H6",
+    "url": "https://www.ubereats.com/ca/store/cobs-bread-bakery-morningside-crossing/YHv8h4OIVi2x9FtpG-caTg",
+    "signal": "ordering",
+    "checked_on": "2026-11-23",
+    "public_name": "COBS Bread",
+    "supporting_urls": [
+      "https://kitchenchecked.com/on/toronto/restaurants/cobs-bread-4525-kingston-rd/"
+    ]
+  },
+  "toronto-licence:B50-5220283": {
+    "city": "Toronto",
+    "name": "COBS BREAD",
+    "address": "1969 YONGE ST",
+    "url": "https://www.ubereats.com/ca/store/cobs-bread-bakery-yonge-%26-davisville/UPxYbgrwVRu6iAGFUck2iw",
+    "signal": "ordering",
+    "checked_on": "2026-11-23",
+    "public_name": "COBS Bread",
+    "supporting_urls": [
+      "https://kitchenchecked.com/on/brands/cobs-bread/",
+      "https://urbanretailtoronto.com/code/wp-content/uploads/2025/12/1975-Yonge-Street-Brochure.pdf"
+    ]
+  },
+  "toronto-licence:B50-5224723": {
+    "city": "Toronto",
+    "name": "COBS BREAD",
+    "address": "370 BLOOR ST W",
+    "url": "https://www.waze.com/live-map/directions/ca/on/toronto/cobs-bread",
+    "signal": "hours",
+    "checked_on": "2026-11-23",
+    "public_name": "COBS Bread",
+    "supporting_urls": [
+      "https://kitchenchecked.com/on/brands/cobs-bread/"
+    ]
+  },
+  "toronto-licence:B50-5323086": {
+    "city": "Toronto",
+    "name": "BLUE COLLAR BAKERY",
+    "address": "1230 BLOOR ST W",
+    "url": "https://bluecollarbakery.ca/",
+    "signal": "hours",
+    "checked_on": "2026-11-23",
+    "public_name": "Blue Collar Bakery"
+  },
+  "toronto-licence:B50-5404267": {
+    "city": "Toronto",
+    "name": "BAKERY POMPETTE",
+    "address": "655 COLLEGE ST",
+    "url": "https://www.pompette.ca/bakery",
+    "signal": "ordering",
+    "checked_on": "2026-11-23",
+    "public_name": "Bakery Pompette",
+    "supporting_urls": [
+      "https://orders.pompette.ca/"
+    ]
+  },
+  "toronto-licence:B50-5642328": {
+    "city": "Toronto",
+    "name": "COBS BREAD",
+    "address": "2204 BLOOR ST W",
+    "url": "https://www.bloorwestvillagebia.com/directory/cobs-bread/",
+    "signal": "hours",
+    "checked_on": "2026-11-23",
+    "public_name": "COBS Bread",
+    "supporting_urls": [
+      "https://kitchenchecked.com/on/brands/cobs-bread/"
+    ]
+  },
+  "mississauga-directory-2025:16251": {
+    "city": "Mississauga",
+    "name": "BarBurrito",
+    "address": "1900 FOWLER DR, Unit D105",
+    "url": "https://www.barburrito.ca/location/mississauga-1900-fowler-dr/",
+    "signal": "hours",
+    "checked_on": "2026-11-23",
+    "public_name": "BarBurrito"
+  },
+  "mississauga-directory-2025:16825": {
+    "city": "Mississauga",
+    "name": "Burrito Boyz",
+    "address": "17 TANNERY ST, Unit 2",
+    "url": "https://www.burritoboyz.ca/streetsville",
+    "signal": "hours",
+    "checked_on": "2026-11-23",
+    "public_name": "Burrito Boyz"
+  },
+  "mississauga-directory-2025:24478": {
+    "city": "Mississauga",
+    "name": "Pizza Depot",
+    "address": "1075 CEREMONIAL DR, Unit 2",
+    "url": "https://pizzadepot.ca/mississauga-ceremonial-dr/",
+    "signal": "hours",
+    "checked_on": "2026-11-23",
+    "public_name": "Pizza Depot"
+  },
+  "mississauga-directory-2025:24499": {
+    "city": "Mississauga",
+    "name": "Pizza Nova",
+    "address": "2400 DUNDAS ST W, Unit 4",
+    "url": "https://www.skipthedishes.com/pizza-nova-2400-dundas-street-west",
+    "signal": "ordering",
+    "checked_on": "2026-11-23",
+    "public_name": "Pizza Nova",
+    "supporting_urls": [
+      "https://localhealthinspections.com/map/facility/pizza-nova-4-2400-dundas-st-w-mississauga-on-l5k-2r8-food-take-out-mississauga"
+    ]
+  },
+  "mississauga-directory-2025:26926": {
+    "city": "Mississauga",
+    "name": "Super Choice Pizza",
+    "address": "2985 DREW RD, Unit 101",
+    "url": "https://www.ubereats.com/ca/store/superchoice-pizza-2985-drew-rd/ec8ewkWMX6uLooiBA2taJQ",
+    "signal": "ordering",
+    "checked_on": "2026-11-23",
+    "public_name": "Super Choice Pizza",
+    "supporting_urls": [
+      "https://opengovca.com/mississauga-business/57424",
+      "https://superchoicepizza.com"
+    ]
+  },
+  "toronto-licence:B50-4542722": {
+    "city": "Toronto",
+    "name": "BARBURRITO",
+    "address": "600 UNIVERSITY AVE, #7",
+    "url": "https://www.barburrito.ca/location/toronto-mount-sinai-hospital/",
+    "signal": "hours",
+    "checked_on": "2026-11-23",
+    "public_name": "BarBurrito",
+    "supporting_urls": [
+      "https://www.barburrito.ca/locations/"
+    ]
+  },
+  "toronto-licence:B71-3598841": {
+    "city": "Toronto",
+    "name": "CHICKEN IN THE KITCHEN",
+    "address": "5600 YONGE ST, FL1",
+    "url": "https://www.chickeninthekitchen.ca/visit",
+    "signal": "hours",
+    "checked_on": "2026-11-23",
+    "public_name": "Chicken in the Kitchen"
+  },
+  "toronto-licence:B71-5040403": {
+    "city": "Toronto",
+    "name": "BARBURRITO",
+    "address": "464 FRONT ST E, #2",
+    "url": "https://www.barburrito.ca/location/canary-district/",
+    "signal": "hours",
+    "checked_on": "2026-11-23",
+    "public_name": "BarBurrito",
+    "supporting_urls": [
+      "https://www.barburrito.ca/locations/"
+    ]
+  },
+  "mississauga-directory-2025:24087": {
+    "city": "Mississauga",
+    "name": "Panago Pizza",
+    "address": "4058 CONFEDERATION PKY",
+    "url": "https://www.panago.com/location/on-mississauga-4058-confederation-parkway",
+    "signal": "ordering",
+    "checked_on": "2026-11-23",
+    "public_name": "Panago Pizza",
+    "supporting_urls": [
+      "https://www.panago.net"
+    ]
+  },
+  "mississauga-directory-2025:25980": {
+    "city": "Mississauga",
+    "name": "Shawarma Alzaeem",
+    "address": "1018 EGLINTON AVE E, Unit 2 & 3",
+    "url": "https://www.alzaeem.ca/menu",
+    "signal": "ordering",
+    "checked_on": "2026-11-23",
+    "public_name": "Shawarma Alzaeem",
+    "supporting_urls": [
+      "https://www.restaurantji.com/on/mississauga/alzaeem-kebob-and-broasted-chicken-/"
+    ]
+  },
+  "mississauga-directory-2025:25985": {
+    "city": "Mississauga",
+    "name": "Shawarma Mazaya",
+    "address": "5130 DIXIE RD, Unit 6",
+    "url": "https://shawarmamazaya.com/",
+    "signal": "ordering",
+    "checked_on": "2026-11-23",
+    "public_name": "Shawarma Mazaya",
+    "supporting_urls": [
+      "https://order.online/store/shwarma-mazaya-restaurant-mississauga-886548"
+    ]
+  },
+  "mississauga-directory-2025:25986": {
+    "city": "Mississauga",
+    "name": "Shawarma Plus",
+    "address": "4700 RIDGEWAY DR, Unit 67",
+    "url": "https://www.shawermaplus.com/locations/",
+    "signal": "hours",
+    "checked_on": "2026-11-23",
+    "public_name": "Shawerma Plus",
+    "supporting_urls": [
+      "https://halalfoodpass.ca/restaurants/shawerma-plus-mississauga/"
+    ]
+  },
+  "mississauga-directory-2025:25245": {
+    "city": "Mississauga",
+    "name": "Reggae Fusion Caribbean Restaurant",
+    "address": "3115 WINSTON CHURCHILL BLVD, Unit 2",
+    "url": "https://reggaefusion.ca/",
+    "public_name": "Reggae Fusion Caribbean Restaurant",
+    "checked_on": "2026-11-23",
+    "signal": "hours"
+  },
+  "mississauga-directory-2025:26979": {
+    "city": "Mississauga",
+    "name": "Sushijun Express",
+    "address": "1415 BONHILL RD, Unit 19",
+    "url": "https://www.sushijunexpress.com/contact.html",
+    "public_name": "Sushijun Express",
+    "checked_on": "2026-11-23",
+    "signal": "hours"
+  },
+  "mississauga-directory-2025:27528": {
+    "city": "Mississauga",
+    "name": "The Tea Room",
+    "address": "223 QUEEN ST S, Unit 3",
+    "url": "https://findmetea.com/tea-shops/shop/tea-room-streetsville",
+    "public_name": "The Tea Room",
+    "checked_on": "2026-11-23",
+    "signal": "hours",
+    "supporting_urls": [
+      "https://www.thetearoomstreetsville.ca"
+    ]
+  },
+  "toronto-licence:B50-4725909": {
+    "city": "Toronto",
+    "name": "THE ROLLING PIN",
+    "address": "1970 AVENUE RD",
+    "url": "https://therollingpin.ca/",
+    "public_name": "THE ROLLING PIN",
+    "checked_on": "2026-11-23",
+    "signal": "hours"
+  },
+  "toronto-licence:B50-5350714": {
+    "city": "Toronto",
+    "name": "NEON COMMISSARY",
+    "address": "243 WALLACE AVE",
+    "url": "https://neoncommissary.ca/",
+    "public_name": "NEON COMMISSARY",
+    "checked_on": "2026-11-23",
+    "signal": "hours"
+  },
+  "toronto-licence:B50-5418781": {
+    "city": "Toronto",
+    "name": "BETTER DAYS COFFEE & DONUTS",
+    "address": "963 DOVERCOURT RD",
+    "url": "https://www.betterdaysdonuts.ca/",
+    "public_name": "BETTER DAYS COFFEE & DONUTS",
+    "checked_on": "2026-11-23",
+    "signal": "hours",
+    "supporting_urls": [
+      "https://betterdaysdonuts.ca/"
+    ]
+  },
+  "toronto-licence:B50-5450889": {
+    "city": "Toronto",
+    "name": "AMAZING DONUTS",
+    "address": "3499 BATHURST ST",
+    "url": "https://www.ubereats.com/ca/store/amazing-donuts/e3c1inJOTq2ZGQZaBYphUg",
+    "public_name": "AMAZING DONUTS",
+    "checked_on": "2026-11-23",
+    "signal": "ordering",
+    "supporting_urls": [
+      "https://amazingdonuts.com/"
+    ]
+  },
+  "toronto-licence:B50-5647964": {
+    "city": "Toronto",
+    "name": "LETTERBOX DOUGHNUTS",
+    "address": "1590 QUEEN ST W",
+    "url": "https://www.letterboxdoughnuts.com/",
+    "public_name": "LETTERBOX DOUGHNUTS",
+    "checked_on": "2026-11-23",
+    "signal": "ordering",
+    "supporting_urls": [
+      "https://www.letterboxdoughnuts.com/contactus"
+    ]
+  },
+  "toronto-licence:B71-0240280": {
+    "city": "Toronto",
+    "name": "RUSTIC COSMO CAFE",
+    "address": "1278 QUEEN ST W",
+    "url": "https://www.rusticcosmo.com/",
+    "public_name": "RUSTIC COSMO CAFE",
+    "checked_on": "2026-11-23",
+    "signal": "hours"
+  },
+  "toronto-licence:B71-3956960": {
+    "city": "Toronto",
+    "name": "BLACK DICE CAFE",
+    "address": "1574 DUNDAS ST W",
+    "url": "https://www.waze.com/live-map/directions/ca/on/toronto/black-dice-cafe?to=place.ChIJAXrqmlE0K4gRrYCBOTt_5A8",
+    "public_name": "Black Dice Cafe",
+    "checked_on": "2026-11-23",
+    "signal": "hours",
+    "supporting_urls": [
+      "https://restaurantguru.com/Black-Dice-Cafe-Toronto"
+    ]
+  },
+  "toronto-licence:B71-4290515": {
+    "city": "Toronto",
+    "name": "RED ROCKET COFFEE",
+    "address": "1364 DANFORTH AVE",
+    "url": "https://www.shopredrocketcoffee.com/locations",
+    "public_name": "Red Rocket Coffee",
+    "checked_on": "2026-11-23",
+    "signal": "hours"
+  },
+  "toronto-licence:B71-4314190": {
+    "city": "Toronto",
+    "name": "OUTPOST COFFEE ROASTERS",
+    "address": "1578 BLOOR ST W",
+    "url": "https://outpostcoffee.com/pages/faq",
+    "public_name": "Outpost Coffee Roasters",
+    "checked_on": "2026-11-23",
+    "signal": "hours",
+    "supporting_urls": [
+      "https://outpostcoffee.com/pages/menu-1578-bloor-st-w"
+    ]
+  },
+  "toronto-licence:B71-4647309": {
+    "city": "Toronto",
+    "name": "CAFE ROUGE PATISSERIE",
+    "address": "2898 BLOOR ST W",
+    "url": "https://www.caferougeonbloor.com/",
+    "public_name": "Cafe Rouge Patisserie",
+    "checked_on": "2026-11-23",
+    "signal": "hours",
+    "supporting_urls": [
+      "https://www.caferougeonbloor.com/about-us/"
+    ]
+  },
+  "toronto-licence:B71-4683260": {
+    "city": "Toronto",
+    "name": "MANIC COFFEE",
+    "address": "426 COLLEGE ST",
+    "url": "https://maniccoffee.com/",
+    "public_name": "Manic Coffee",
+    "checked_on": "2026-11-23",
+    "signal": "hours",
+    "supporting_urls": [
+      "https://maniccoffee.com/contact"
+    ]
+  },
+  "toronto-licence:B71-5334774": {
+    "city": "Toronto",
+    "name": "RACHEL'S COFFEEHOUSE",
+    "address": "2011 YONGE ST",
+    "url": "https://rachelscoffeehouse.ca",
+    "public_name": "Rachel'S Coffeehouse",
+    "checked_on": "2026-11-23",
+    "signal": "hours"
+  },
+  "toronto-licence:B71-5363430": {
+    "city": "Toronto",
+    "name": "NUTTEA",
+    "address": "637 BLOOR ST W",
+    "url": "https://www.nutteatoronto.ca",
+    "public_name": "Nuttea",
+    "checked_on": "2026-11-23",
+    "signal": "hours"
+  },
+  "toronto-licence:B71-3960376": {
+    "city": "Toronto",
+    "name": "THE EMMET RAY",
+    "address": "924 COLLEGE ST",
+    "url": "https://www.theemmetray.com/",
+    "public_name": "The Emmet Ray",
+    "checked_on": "2026-11-23",
+    "signal": "hours"
+  },
+  "toronto-licence:B71-4418615": {
+    "city": "Toronto",
+    "name": "ED'S REAL SCOOP",
+    "address": "189 RONCESVALLES AVE",
+    "url": "https://www.edsrealscoop.com/locations",
+    "public_name": "Ed'S Real Scoop",
+    "checked_on": "2026-11-23",
+    "signal": "hours"
+  },
+  "toronto-licence:B71-4802027": {
+    "city": "Toronto",
+    "name": "SLANTED DOOR",
+    "address": "442 BLOOR ST W",
+    "url": "https://slanteddoor.ca/contact-us/",
+    "public_name": "Slanted Door",
+    "checked_on": "2026-11-23",
+    "signal": "hours"
+  },
+  "toronto-licence:B71-4861614": {
+    "city": "Toronto",
+    "name": "DOUCE FRANCE",
+    "address": "820 DANFORTH AVE",
+    "url": "https://doucefrance.ca/",
+    "public_name": "Douce France",
+    "checked_on": "2026-11-23",
+    "signal": "ordering"
+  },
+  "toronto-licence:B71-4933793": {
+    "city": "Toronto",
+    "name": "SCORE ON KING",
+    "address": "107 KING ST E",
+    "url": "https://www.scoreonking.com/",
+    "public_name": "Score On King",
+    "checked_on": "2026-11-23",
+    "signal": "reservations"
+  },
+  "toronto-licence:B71-4979417": {
+    "city": "Toronto",
+    "name": "THE ROASTED NUT",
+    "address": "768 QUEEN ST W",
+    "url": "https://theroastednutcompany.com/pages/contact",
+    "public_name": "The Roasted Nut",
+    "checked_on": "2026-11-23",
+    "signal": "hours"
+  },
+  "toronto-licence:B71-5200436": {
+    "city": "Toronto",
+    "name": "BLUEBIRD BAR",
+    "address": "2072 DUNDAS ST W",
+    "url": "https://www.bluebirdbarto.com/",
+    "public_name": "Bluebird Bar",
+    "checked_on": "2026-11-23",
+    "signal": "hours"
+  },
+  "toronto-licence:B71-5201068": {
+    "city": "Toronto",
+    "name": "WALLACE ESPRESSO",
+    "address": "188 WALLACE AVE",
+    "url": "https://www.wallaceespresso.com/",
+    "public_name": "Wallace Espresso",
+    "checked_on": "2026-11-23",
+    "signal": "hours"
+  },
+  "toronto-licence:B71-5201298": {
+    "city": "Toronto",
+    "name": "FOOD & LIQUOR",
+    "address": "1610 QUEEN ST W",
+    "url": "https://www.foodandliquor.ca/",
+    "public_name": "Food & Liquor",
+    "checked_on": "2026-11-23",
+    "signal": "hours"
+  },
+  "toronto-licence:B71-5214597": {
+    "city": "Toronto",
+    "name": "NADEGE PATISSERIE",
+    "address": "780 QUEEN ST W",
+    "url": "https://www.nadege-patisserie.com/contact/",
+    "public_name": "Nadege Patisserie",
+    "checked_on": "2026-11-23",
+    "signal": "hours"
+  },
+  "toronto-licence:B71-5229395": {
+    "city": "Toronto",
+    "name": "DIPPED DONUTS",
+    "address": "161 BALDWIN ST, #1",
+    "url": "https://dippeddonuts.ca/",
+    "public_name": "Dipped Donuts",
+    "checked_on": "2026-11-23",
+    "signal": "ordering"
+  },
+  "toronto-licence:B71-5355685": {
+    "city": "Toronto",
+    "name": "VELVET LANE CAKES",
+    "address": "173 KING ST E",
+    "url": "https://velvetlanecakes.com/pages/contact",
+    "public_name": "Velvet Lane Cakes",
+    "checked_on": "2026-11-23",
+    "signal": "hours"
+  },
+  "toronto-licence:B71-5419299": {
+    "city": "Toronto",
+    "name": "DARK HORSE ESPRESSO BAR",
+    "address": "215 SPADINA AVE, #102",
+    "url": "https://darkhorseespresso.com/pages/locations",
+    "public_name": "Dark Horse Espresso Bar",
+    "checked_on": "2026-11-23",
+    "signal": "ordering"
+  },
+  "toronto-licence:B71-5473471": {
+    "city": "Toronto",
+    "name": "LE PETIT PAIN",
+    "address": "431 SPADINA RD",
+    "url": "https://www.lepetitpain.com/",
+    "public_name": "Le Petit Pain",
+    "checked_on": "2026-11-23",
+    "signal": "hours"
+  },
+  "mississauga-directory-2025:15154": {
+    "city": "Mississauga",
+    "name": "A+ Smoodees",
+    "address": "1065 CANADIAN PL, Unit 124",
+    "url": "https://aplussmoodees.com/",
+    "public_name": "A+ Smoodees",
+    "checked_on": "2026-11-23",
+    "signal": "ordering"
+  },
+  "mississauga-directory-2025:21834": {
+    "city": "Mississauga",
+    "name": "Laari Adda",
+    "address": "3030 THOMAS ST, Unit 4",
+    "url": "https://laariadda.ca/",
+    "public_name": "Laari Adda",
+    "checked_on": "2026-11-23",
+    "signal": "hours"
+  },
+  "mississauga-directory-2025:23452": {
+    "city": "Mississauga",
+    "name": "Nando's",
+    "address": "5101 DIXIE RD, Unit 2 to 3",
+    "url": "https://www.nandos.ca/restaurants/dixie",
+    "public_name": "Nando's",
+    "checked_on": "2026-11-23",
+    "signal": "hours"
+  },
+  "mississauga-directory-2025:27410": {
+    "city": "Mississauga",
+    "name": "The Hakka Junction",
+    "address": "63 QUEEN ST S, Unit 1 to 3",
+    "url": "https://thehakkajunction.com/",
+    "public_name": "The Hakka Junction",
+    "checked_on": "2026-11-23",
+    "signal": "hours"
+  },
+  "toronto-licence:B50-3599704": {
+    "city": "Toronto",
+    "name": "ROB'S GOOD FOOD",
+    "address": "813 O'CONNOR DR",
+    "url": "https://www.robsgoodfood.com/",
+    "public_name": "Rob'S Good Food",
+    "checked_on": "2026-11-23",
+    "signal": "hours"
+  },
+  "toronto-licence:B50-4314945": {
+    "city": "Toronto",
+    "name": "SOUP NUTSY",
+    "address": "222 BAY ST, BOX 337",
+    "url": "https://soupnutsy.ca/",
+    "public_name": "Soup Nutsy",
+    "checked_on": "2026-11-23",
+    "signal": "ordering"
+  },
+  "toronto-licence:B50-4757010": {
+    "city": "Toronto",
+    "name": "KUNAFA'S",
+    "address": "1801 LAWRENCE AVE E, #2",
+    "url": "https://kunafas.com/",
+    "public_name": "Kunafa'S",
+    "checked_on": "2026-11-23",
+    "signal": "hours"
+  },
+  "toronto-licence:B50-5112142": {
+    "city": "Toronto",
+    "name": "CAKES AND BAKES SHOP",
+    "address": "2893 BLOOR ST W",
+    "url": "https://cakesandbakesshop.com/contact-us",
+    "public_name": "Cakes And Bakes Shop",
+    "checked_on": "2026-11-23",
+    "signal": "hours"
+  },
+  "toronto-licence:B50-5200176": {
+    "city": "Toronto",
+    "name": "ONYX CHOCOLATES",
+    "address": "601 GERRARD ST E",
+    "url": "https://onyxchocolates.com/",
+    "public_name": "Onyx Chocolates",
+    "checked_on": "2026-11-23",
+    "signal": "hours"
+  },
+  "toronto-licence:B50-5217416": {
+    "city": "Toronto",
+    "name": "RURU BAKED",
+    "address": "659 LANSDOWNE AVE",
+    "url": "https://www.rurubaked.com/",
+    "public_name": "Ruru Baked",
+    "checked_on": "2026-11-23",
+    "signal": "ordering"
+  },
+  "toronto-licence:B50-5487732": {
+    "city": "Toronto",
+    "name": "CHURROS 92",
+    "address": "1802 EGLINTON AVE W",
+    "url": "https://churros92.ca/",
+    "public_name": "Churros 92",
+    "checked_on": "2026-11-23",
+    "signal": "hours"
+  },
+  "toronto-licence:B71-3949565": {
+    "city": "Toronto",
+    "name": "ED'S REAL SCOOP",
+    "address": "920 QUEEN ST E",
+    "url": "https://www.edsrealscoop.com/locations",
+    "public_name": "Ed'S Real Scoop",
+    "checked_on": "2026-11-23",
+    "signal": "hours"
+  },
+  "toronto-licence:B71-4304263": {
+    "city": "Toronto",
+    "name": "ED'S REAL SCOOP",
+    "address": "2224 QUEEN ST E",
+    "url": "https://www.edsrealscoop.com/locations",
+    "public_name": "Ed'S Real Scoop",
+    "checked_on": "2026-11-23",
+    "signal": "hours"
+  },
+  "toronto-licence:B71-4534371": {
+    "city": "Toronto",
+    "name": "BOBBETTE & BELLE",
+    "address": "3347 YONGE ST",
+    "url": "https://bobbetteandbelle.com/",
+    "public_name": "Bobbette & Belle",
+    "checked_on": "2026-11-23",
+    "signal": "hours"
+  },
+  "toronto-licence:B71-4534774": {
+    "city": "Toronto",
+    "name": "FREE SPIRIT @ RIVERDALE HUB",
+    "address": "1326 GERRARD ST E",
+    "url": "https://riverdalehub.ca/free-spirit-cafe/",
+    "public_name": "Free Spirit @ Riverdale Hub",
+    "checked_on": "2026-11-23",
+    "signal": "hours"
+  },
+  "toronto-licence:B71-4722530": {
+    "city": "Toronto",
+    "name": "SWEET GALLERY",
+    "address": "350 BERING AVE",
+    "url": "https://thesweetgallery.com/",
+    "public_name": "Sweet Gallery",
+    "checked_on": "2026-11-23",
+    "signal": "hours"
+  },
+  "toronto-licence:B71-4743185": {
+    "city": "Toronto",
+    "name": "AFGHAN CUISINE",
+    "address": "66 OVERLEA BLVD, #9",
+    "url": "https://www.afghancuisinerestaurant.com/",
+    "public_name": "Afghan Cuisine",
+    "checked_on": "2026-11-23",
+    "signal": "hours"
+  },
+  "toronto-licence:B71-4863703": {
+    "city": "Toronto",
+    "name": "FORNO CULTURA",
+    "address": "1056 QUEEN ST W",
+    "url": "https://moca.ca/visit/",
+    "public_name": "Forno Cultura",
+    "checked_on": "2026-11-23",
+    "signal": "hours",
+    "supporting_urls": [
+      "https://www.fornocultura.com/locations/"
+    ]
+  },
+  "toronto-licence:B71-4911663": {
+    "city": "Toronto",
+    "name": "KITTEN AND THE BEAR",
+    "address": "1414 DUNDAS ST W",
+    "url": "https://www.kittenandthebear.com/pages/contact",
+    "public_name": "Kitten And The Bear",
+    "checked_on": "2026-11-23",
+    "signal": "hours"
+  }
+}

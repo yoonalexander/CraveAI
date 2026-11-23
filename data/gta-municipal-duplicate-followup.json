@@ -1,0 +1,862 @@
+{
+  "toronto-licence:B71-4430163": {
+    "catalog_id": "osm:node:3763471911",
+    "reason": "Mr. Tasty’s Drive-In and Mr. Tasty’s Restaurant identify the same business at 2743 Danforth Avenue. The operator number matches DineSafe and the mapped pin is 17 metres from the city point.",
+    "source_urls": [
+      "https://mrtastysdrive-in.com/",
+      "https://www.lostinontario.com/toronto/restaurants/mr-tastys-restaurant/",
+      "https://api.openstreetmap.org/api/0.6/node/3763471911.json"
+    ],
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B71-5323612": {
+    "catalog_id": "osm:node:6352705201",
+    "reason": "Jamaica House Toronto and Jamaica House Restaurant share 2531 Finch Avenue West and the same phone number in DineSafe and the map tags.",
+    "source_urls": [
+      "https://opengovca.com/toronto-business/B71-5323612",
+      "https://api.openstreetmap.org/api/0.6/node/6352705201.json"
+    ],
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B71-5352815": {
+    "catalog_id": "osm:node:13007739902",
+    "reason": "The operator uses both Blue Nile Restaurant and Blue Nile Ethiopian Cuisine at 1260 Danforth Avenue. The existing pin is six metres from the city point.",
+    "source_urls": [
+      "https://blueniletoronto.com/about/",
+      "https://api.openstreetmap.org/api/0.6/node/13007739902.json"
+    ],
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B71-5654409": {
+    "catalog_id": "osm:node:13194794031",
+    "reason": "A&W lists the branch at 642 Church Street. Its official phone exactly matches the pin nine metres away, which transposed the street number as 462.",
+    "source_urls": [
+      "https://web.aw.ca/en/locations/4487/toronto/642-church-street",
+      "https://api.openstreetmap.org/api/0.6/node/13194794031.json"
+    ],
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:14993": {
+    "catalog_id": "osm:node:4545114148",
+    "reason": "The existing 341 Pizza & Wings pin links the operator site, which lists the Credit Woodlands branch at the same street address. The municipal name spells out 3 For 1 and the pin is twelve metres away.",
+    "source_urls": [
+      "https://www.341pizzawings.com/locations-page",
+      "https://api.openstreetmap.org/api/0.6/node/4545114148.json"
+    ],
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:24015": {
+    "catalog_id": "osm:node:2158443538",
+    "reason": "The catalog pin uses P & J’s Hamburgers and unit A at 943 Lakeshore Road East. The directory name, unit and adjacent address variant identify the same branch, five metres away.",
+    "source_urls": [
+      "https://opengovca.com/mississauga-business/12282",
+      "https://api.openstreetmap.org/api/0.6/node/2158443538.json"
+    ],
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:24679": {
+    "catalog_id": "osm:node:732809326",
+    "reason": "Potluck’s operator site and public branch listing identify Potluck Caribbean Cuisine at 21 Dundas Street East. The existing pin is sixteen metres from the municipal point.",
+    "source_urls": [
+      "https://potluckrestaurant.ca/",
+      "https://byblacks.com/directory/restaurants/318-potluck-restaurant-a-caterers",
+      "https://api.openstreetmap.org/api/0.6/node/732809326.json"
+    ],
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B71-5682160": {
+    "catalog_id": "osm:node:4430831003",
+    "reason": "The mapped Roywoods and current DineSafe premise share their business phone. The operator gives 121 Fort York as the customer address, also identified as the convenience address in Toronto's licence records.",
+    "source_urls": [
+      "https://www.roywoods.ca/",
+      "https://opengovca.com/toronto-business/B71-5341045",
+      "https://api.openstreetmap.org/api/0.6/node/4430831003.json"
+    ],
+    "checked_on": "2026-11-21",
+    "verified_branch_address": "121 Fort York Blvd"
+  },
+  "toronto-licence:B71-4808336": {
+    "catalog_id": "osm:node:8356219111",
+    "reason": "The operator lists 10 William Sylvester Drive, which matches the current map pin. The Consumers Road licence and map record share the branch phone.",
+    "source_urls": [
+      "https://burgerspark.ca/",
+      "https://api.openstreetmap.org/api/0.6/node/8356219111.json"
+    ],
+    "checked_on": "2026-11-21",
+    "verified_branch_address": "10 William Sylvester Drive"
+  },
+  "toronto-licence:B71-4188628": {
+    "catalog_id": "osm:node:6548273324",
+    "reason": "The map tag and matching DineSafe premise use the same phone number for Orfus Wrap & Grill. Public business listings identify the unit at 3240 Dufferin.",
+    "source_urls": [
+      "https://www.restaurantji.com/on/north-york/orfus-wrap-and-grill-/",
+      "https://api.openstreetmap.org/api/0.6/node/6548273324.json"
+    ],
+    "checked_on": "2026-11-21",
+    "verified_branch_address": "3240 Dufferin St"
+  },
+  "toronto-licence:B71-5244425": {
+    "catalog_id": "osm:node:1288995614",
+    "reason": "The operator identifies its College location in the MaRS building at 101 College. DineSafe and map data share its phone.",
+    "source_urls": [
+      "https://mercatto.scvr.co/careers-1",
+      "https://mercatto.ca/menu/college-menu?location_id=2929",
+      "https://api.openstreetmap.org/api/0.6/node/1288995614.json"
+    ],
+    "checked_on": "2026-11-21",
+    "verified_branch_address": "101 College St"
+  },
+  "mississauga-directory-2025:15059": {
+    "catalog_id": "osm:way:91600282",
+    "reason": "The municipal record and mapped A&W have the same exact street address, confirmed by the branch menu. Their coordinates show different points on or near the site.",
+    "source_urls": [
+      "https://wnam-cdn.lacarte.menu/storage/media/companies_menu_pdf/77680778/aw-restaurant-mississauga-menu.pdf",
+      "https://api.openstreetmap.org/api/0.6/way/91600282.json"
+    ],
+    "checked_on": "2026-11-21",
+    "verified_branch_address": "1130 Dundas St E"
+  },
+  "toronto-licence:B71-5321082": {
+    "catalog_id": "osm:node:12756190451",
+    "reason": "The operator page and map record identify The Backyard Smokehouse at 264 Dupont. The municipal point is offset, but the street address and unusual name agree.",
+    "source_urls": [
+      "https://thebackyardsmokehouse.ca/bbq-restaurant-toronto",
+      "https://api.openstreetmap.org/api/0.6/node/12756190451.json"
+    ],
+    "checked_on": "2026-11-21",
+    "verified_branch_address": "264 Dupont St"
+  },
+  "toronto-licence:B71-5145449": {
+    "catalog_id": "osm:node:2956812733",
+    "reason": "Gilaneh has the same name, exact street address and branch phone in the map record and DineSafe. The reservation page confirms the restaurant at the hotel.",
+    "source_urls": [
+      "https://www.opentable.ca/gilaneh-westin-prince-toronto",
+      "https://api.openstreetmap.org/api/0.6/node/2956812733.json"
+    ],
+    "checked_on": "2026-11-21",
+    "verified_branch_address": "900 York Mills Rd"
+  },
+  "mississauga-directory-2025:26808": {
+    "catalog_id": "osm:node:7195643365",
+    "reason": "Subway’s operator identifies unit 39 at the municipal address. The operator-locator coordinate is 12 metres from the existing Subway pin within the plaza.",
+    "source_urls": [
+      "https://restaurants.subway.com/canada/on/mississauga/1151-dundas-street-west",
+      "https://api.openstreetmap.org/api/0.6/node/7195643365.json",
+      "https://data.alltheplaces.xyz/runs/latest/output/subway.geojson"
+    ],
+    "checked_on": "2026-11-21",
+    "verified_branch_address": "1151 Dundas St W, Unit 39"
+  },
+  "mississauga-directory-2025:26815": {
+    "catalog_id": "osm:node:4020625331",
+    "reason": "Subway’s operator identifies unit C7 at the municipal address. The operator-locator coordinate is eight metres from the existing Subway pin within the plaza.",
+    "source_urls": [
+      "https://restaurants.subway.com/canada/on/mississauga/925-rathburn-road-east",
+      "https://api.openstreetmap.org/api/0.6/node/4020625331.json",
+      "https://data.alltheplaces.xyz/runs/latest/output/subway.geojson"
+    ],
+    "checked_on": "2026-11-21",
+    "verified_branch_address": "925 Rathburn Rd E, Unit C7"
+  },
+  "mississauga-directory-2025:16012": {
+    "catalog_id": "osm:node:8410477605",
+    "reason": "Operator lists the 6039 Erin Mills Parkway branch, matching the mapped street number and municipal branch phone.",
+    "source_urls": [
+      "https://www.auntyskitchen.ca/",
+      "https://www.openstreetmap.org/node/8410477605"
+    ],
+    "checked_on": "2026-11-21",
+    "verified_branch_address": "6039 ERIN MILLS PKY"
+  },
+  "mississauga-directory-2025:16197": {
+    "catalog_id": "osm:node:3855202958",
+    "reason": "Operator identifies the Tomken Road branch at unit 1. The municipal number is shared with the nearby existing Bakhtar Kabab pin.",
+    "source_urls": [
+      "https://www.bakhtarkabab.ca/contact/mississauga-tomken/",
+      "https://www.openstreetmap.org/node/3855202958"
+    ],
+    "checked_on": "2026-11-21",
+    "verified_branch_address": "5925 TOMKEN RD, Unit 1"
+  },
+  "mississauga-directory-2025:18852": {
+    "catalog_id": "osm:node:11885207169",
+    "reason": "Operator identifies unit 1 at 3115 Winston Churchill Boulevard. The existing East Tea Can pin shares this branch’s public phone.",
+    "source_urls": [
+      "https://eastteacan.com/locations/",
+      "https://www.openstreetmap.org/node/11885207169"
+    ],
+    "checked_on": "2026-11-21",
+    "verified_branch_address": "3115 WINSTON CHURCHILL BLVD, Unit 1"
+  },
+  "mississauga-directory-2025:19387": {
+    "catalog_id": "osm:node:14031171201",
+    "reason": "Operator lists unit 133 at 1065 Canadian Place. The existing pin records the same unit with reordered address components and shares the municipal phone.",
+    "source_urls": [
+      "https://falafelplus.ca/",
+      "https://www.openstreetmap.org/node/14031171201"
+    ],
+    "checked_on": "2026-11-21",
+    "verified_branch_address": "1065 CANADIAN PL, Unit 133"
+  },
+  "mississauga-directory-2025:22539": {
+    "catalog_id": "osm:node:4721447453",
+    "reason": "The active pickup listing identifies the Erin Mills branch at unit 8. The existing Mary Brown’s pin shares the public branch phone.",
+    "source_urls": [
+      "https://www.ubereats.com/ca/store/mary-browns-6039-erin-mills-parkway-mississauga/gihTJpe-U4OiouH6LAQNTQ",
+      "https://www.openstreetmap.org/node/4721447453"
+    ],
+    "checked_on": "2026-11-21",
+    "verified_branch_address": "6039 ERIN MILLS PKY, Unit 8"
+  },
+  "mississauga-directory-2025:27728": {
+    "catalog_id": "osm:node:1407759610",
+    "reason": "Operator identifies the Creditview Road branch. The regional inspection record corroborates units 1 and 2, and the existing pin shares the municipal phone.",
+    "source_urls": [
+      "https://www.tomosushi.ca/mg_contacts",
+      "https://www.openstreetmap.org/node/1407759610",
+      "https://localhealthinspections.com/regions/mississauga?page=117"
+    ],
+    "checked_on": "2026-11-21",
+    "verified_branch_address": "4040 CREDITVIEW RD, Unit 1 & 2"
+  },
+  "mississauga-directory-2025:27960": {
+    "catalog_id": "osm:node:12993264247",
+    "reason": "The online ordering page identifies restaurant service at unit 5. The nearby Trithis pin shares the municipal branch phone.",
+    "source_urls": [
+      "https://enjoy2eat.ca/trithis/",
+      "https://www.openstreetmap.org/node/12993264247"
+    ],
+    "checked_on": "2026-11-21",
+    "verified_branch_address": "1177 CENTRAL PKY W, Unit 5"
+  },
+  "mississauga-directory-2025:15057": {
+    "catalog_id": "osm:node:6556405145",
+    "reason": "The directory or operator identifies this brand at Erin Mills Town Centre. The existing branch pin carries the same mall address and is located within the mall.",
+    "source_urls": [
+      "https://erinmills.ca/stores/erinmills-erin-mills-town-centre-a-w/",
+      "https://www.openstreetmap.org/node/6556405145"
+    ],
+    "checked_on": "2026-11-22",
+    "verified_branch_address": "5100 ERIN MILLS PKY, Unit FC6"
+  },
+  "mississauga-directory-2025:20271": {
+    "catalog_id": "osm:node:6556575931",
+    "reason": "The directory or operator identifies this brand at Erin Mills Town Centre. The existing branch pin carries the same mall address and is located within the mall.",
+    "source_urls": [
+      "https://erinmills.ca/stores/erinmills-erin-mills-town-centre-grill-it-up--2",
+      "https://www.openstreetmap.org/node/6556575931"
+    ],
+    "checked_on": "2026-11-22",
+    "verified_branch_address": "5100 ERIN MILLS PKY, Unit L001"
+  },
+  "mississauga-directory-2025:21289": {
+    "catalog_id": "osm:node:6556405146",
+    "reason": "The directory or operator identifies this brand at Erin Mills Town Centre. The existing branch pin carries the same mall address and is located within the mall.",
+    "source_urls": [
+      "https://erinmills.ca/stores/erinmills-erin-mills-town-centre-jimmy-the-greek",
+      "https://www.openstreetmap.org/node/6556405146"
+    ],
+    "checked_on": "2026-11-22",
+    "verified_branch_address": "5100 ERIN MILLS PKY, Unit FC005"
+  },
+  "mississauga-directory-2025:26825": {
+    "catalog_id": "osm:node:6556575935",
+    "reason": "The directory or operator identifies this brand at Erin Mills Town Centre. The existing branch pin carries the same mall address and is located within the mall.",
+    "source_urls": [
+      "https://restaurants.subway.com/canada/on/mississauga/5100-erin-mills-pkwy",
+      "https://www.openstreetmap.org/node/6556575935"
+    ],
+    "checked_on": "2026-11-22",
+    "verified_branch_address": "5100 ERIN MILLS PKY, Unit FC7"
+  },
+  "mississauga-directory-2025:27281": {
+    "catalog_id": "osm:node:6556389816",
+    "reason": "The directory or operator identifies this brand at Erin Mills Town Centre. The existing branch pin carries the same mall address and is located within the mall.",
+    "source_urls": [
+      "https://erinmills.ca/stores/erinmills-erin-mills-town-centre-thai-express",
+      "https://www.openstreetmap.org/node/6556389816"
+    ],
+    "checked_on": "2026-11-22",
+    "verified_branch_address": "5100 ERIN MILLS PKY, Unit FC4"
+  },
+  "mississauga-directory-2025:28035": {
+    "catalog_id": "osm:node:6556429857",
+    "reason": "The directory or operator identifies this brand at Erin Mills Town Centre. The existing branch pin carries the same mall address and is located within the mall.",
+    "source_urls": [
+      "https://turtlejacks.com/locations/turtle-jacks-erin-mills/",
+      "https://www.openstreetmap.org/node/6556429857"
+    ],
+    "checked_on": "2026-11-22",
+    "verified_branch_address": "5100 ERIN MILLS PKY, Unit b130b"
+  },
+  "mississauga-directory-2025:28336": {
+    "catalog_id": "osm:node:6556575943",
+    "reason": "The directory or operator identifies this brand at Erin Mills Town Centre. The existing branch pin carries the same mall address and is located within the mall.",
+    "source_urls": [
+      "https://erinmills.ca/stores/erinmills-erin-mills-town-centre-villa-madina",
+      "https://www.openstreetmap.org/node/6556575943"
+    ],
+    "checked_on": "2026-11-22",
+    "verified_branch_address": "5100 ERIN MILLS PKY"
+  },
+  "mississauga-directory-2025:21572": {
+    "catalog_id": "osm:node:6556575947",
+    "verified_branch_address": "5100 ERIN MILLS PKY, Unit FC9",
+    "reason": "The landlord lists KFC and Taco Bell as one operator storefront at food-court unit F009, also written FC9. The existing Taco Bell pin is inside the mall and links to the official branch.",
+    "source_urls": [
+      "https://erinmills.ca/stores/erinmills-erin-mills-town-centre-kfc-taco-bell/",
+      "https://assets.cushmanwakefield.com/-/pmedia/194994/1/erin-mills-town-centre---leasing-brochure.pdf",
+      "https://www.openstreetmap.org/node/6556575947",
+      "https://locations.tacobell.ca/en/on/mississauga/5100-erin-mills-parkway"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B50-4645860": {
+    "catalog_id": "osm:node:6712340457",
+    "reason": "The operator confirms one Toronto Eaton Centre branch. The landlord plan identifies the Urban Eatery location and the existing pin is on that concourse.",
+    "source_urls": [
+      "https://sbarro.com/locations/ON/TORONTO/Toronto-Eaton-Center/",
+      "https://assets.cadillacfairview.com/m/43273f2554bf438e/original/TECON20_LEASINGPLAN.pdf",
+      "https://www.openstreetmap.org/node/6712340457"
+    ],
+    "checked_on": "2026-11-22",
+    "verified_branch_address": "1 DUNDAS ST W, F-20"
+  },
+  "toronto-licence:B50-5145372": {
+    "catalog_id": "osm:node:12843046877",
+    "reason": "The restaurant’s branch page confirms its Commerce Court location. The existing Pantry pin is on the Commerce Court concourse, separately from the Richmond–Adelaide branch.",
+    "source_urls": [
+      "https://orderpantry.com/restaurants/",
+      "https://orderpantry.com/",
+      "https://www.openstreetmap.org/node/12843046877"
+    ],
+    "checked_on": "2026-11-22",
+    "verified_branch_address": "199 BAY ST, C174"
+  },
+  "toronto-licence:B50-5303843": {
+    "catalog_id": "osm:node:3698533568",
+    "reason": "The Exchange Tower directory identifies Thai Island in the same property as the existing Thai Island pin. The city record supplies the stall designation.",
+    "source_urls": [
+      "https://www.fcpex.ca/stores/map/thai-island",
+      "https://fcpex.ca/food",
+      "https://www.openstreetmap.org/node/3698533568"
+    ],
+    "checked_on": "2026-11-22",
+    "verified_branch_address": "130 KING ST W, #1S01"
+  },
+  "toronto-licence:B50-5482498": {
+    "catalog_id": "osm:node:1125689233",
+    "reason": "The brand’s branch page confirms the Exchange Tower location at 130 King West. The landlord lists the same tenant. This pin is distinct from the nearby Commerce Court branch.",
+    "source_urls": [
+      "https://sultansgrill.ca/stores/exchange-tower/",
+      "https://www.fcpex.ca/stores/map/sultans-mediterranean-grill",
+      "https://www.openstreetmap.org/node/1125689233"
+    ],
+    "checked_on": "2026-11-22",
+    "verified_branch_address": "130 KING ST W, CUFU 10"
+  },
+  "toronto-licence:B71-4542232": {
+    "catalog_id": "osm:node:6712340461",
+    "reason": "The operator confirms one Toronto Eaton Centre branch. The landlord plan identifies Szechuan Express in the Urban Eatery food court where the existing pin is located.",
+    "source_urls": [
+      "https://szechuanexpress.com/locations/toronto-eaton-centre",
+      "https://assets.cadillacfairview.com/m/43273f2554bf438e/original/TECON20_LEASINGPLAN.pdf",
+      "https://www.openstreetmap.org/node/6712340461"
+    ],
+    "checked_on": "2026-11-22",
+    "verified_branch_address": "1 DUNDAS ST W, F21"
+  },
+  "toronto-licence:B71-5319604": {
+    "catalog_id": "osm:node:13990460222",
+    "reason": "The operator confirms the Toronto Eaton Centre branch at the mall’s Yonge Street address. The catalog pin is inside the same mall and the city records identify stall J003.",
+    "source_urls": [
+      "https://www.chick-fil-a.ca/locations/on/toronto-eaton-centre",
+      "https://www.chick-fil-a.ca/press-room/chick-fil-a-announces-new-toronto-restaurant-to-open-on-thursday-may-25-at-cf-toronto-eaton-centre",
+      "https://www.openstreetmap.org/node/13990460222"
+    ],
+    "checked_on": "2026-11-22",
+    "verified_branch_address": "1 DUNDAS ST W, J003"
+  },
+  "toronto-licence:B71-5217856": {
+    "catalog_id": "osm:node:379632522",
+    "reason": "The operator identifies unit 11 at 5550 Lawrence East. The locator point is 2 metres from the existing Subway pin.",
+    "source_urls": [
+      "https://restaurants.subway.com/canada/on/ontario/5550-lawrence-ave-east",
+      "https://data.alltheplaces.xyz/runs/latest/output/subway.geojson",
+      "https://www.openstreetmap.org/node/379632522"
+    ],
+    "checked_on": "2026-11-22",
+    "verified_branch_address": "5550 LAWRENCE AVE E, #11"
+  },
+  "toronto-licence:B71-5309268": {
+    "catalog_id": "osm:node:297104309",
+    "reason": "The official directory gives 5921 Leslie and places the branch 8 metres from the existing Pizza Pizza pin.",
+    "source_urls": [
+      "https://www.pizzapizza.ca/restaurant-locator/ontario/north-york/",
+      "https://www.openstreetmap.org/node/297104309"
+    ],
+    "checked_on": "2026-11-22",
+    "verified_branch_address": "5921 LESLIE ST"
+  },
+  "toronto-licence:B71-5424985": {
+    "catalog_id": "osm:node:302411634",
+    "reason": "The official branch page gives 3040 Don Mills Road. Its published point and the existing Pizza Pizza pin are 44 metres apart at the same plaza.",
+    "source_urls": [
+      "https://www.pizzapizza.ca/restaurant-locator/ontario/toronto/3040-don-mills-road/",
+      "https://www.ubereats.com/ca/store/pizza-pizza-peanut-plaza-don-mills/6BB2VQPNQjW6VD7XFfjLDA",
+      "https://www.openstreetmap.org/node/302411634"
+    ],
+    "checked_on": "2026-11-22",
+    "verified_branch_address": "3040 DON MILLS RD"
+  },
+  "toronto-licence:B71-5485600": {
+    "catalog_id": "osm:node:5158208475",
+    "reason": "The official directory gives 23 Lapsley Road. Its published point is 38 metres from the existing Pizza Pizza pin at the same plaza.",
+    "source_urls": [
+      "https://www.pizzapizza.ca/restaurant-locator/ontario/scarborough/",
+      "https://www.openstreetmap.org/node/5158208475"
+    ],
+    "checked_on": "2026-11-22",
+    "verified_branch_address": "23 LAPSLEY RD"
+  },
+  "toronto-licence:B71-5682769": {
+    "catalog_id": "osm:node:302419695",
+    "reason": "The live branch page gives 5919 Leslie Street despite the older URL slug. Its published map point is 10 metres from the existing Subway pin.",
+    "source_urls": [
+      "https://restaurants.subway.com/canada/on/toronto/5915-leslie-street",
+      "https://www.openstreetmap.org/node/302419695"
+    ],
+    "checked_on": "2026-11-22",
+    "verified_branch_address": "5919 LESLIE ST"
+  },
+  "mississauga-directory-2025:24507": {
+    "catalog_id": "osm:node:414966346",
+    "reason": "The operator publishes 295 Eglinton Avenue East, unit 16. Its point is 34 metres from the existing Pizza Pizza pin at the plaza.",
+    "source_urls": [
+      "https://www.pizzapizza.ca/restaurant-locator/ontario/mississauga/",
+      "https://www.ubereats.com/ca/store/pizza-pizza-eglinton-ave-e/xSsXotX4QN6Vujbi8h91QA",
+      "https://www.openstreetmap.org/node/414966346"
+    ],
+    "checked_on": "2026-11-22",
+    "verified_branch_address": "295 EGLINTON AVE E, Unit 16"
+  },
+  "mississauga-directory-2025:24512": {
+    "catalog_id": "osm:node:3748566475",
+    "reason": "The operator and map agree on unit 1 at Grand Park. The official point is 14 metres from the existing Pizza Pizza pin.",
+    "source_urls": [
+      "https://www.pizzapizza.ca/restaurant-locator/ontario/mississauga/",
+      "https://www.openstreetmap.org/node/3748566475"
+    ],
+    "checked_on": "2026-11-22",
+    "verified_branch_address": "3960 GRAND PARK DR, Unit 1"
+  },
+  "mississauga-directory-2025:24513": {
+    "catalog_id": "osm:node:1518740651",
+    "reason": "The operator identifies unit 7 at 2690 Erin Centre. Its location is 16 metres from the existing Pizza Pizza pin. The municipal directory records A7 at the same branch address.",
+    "source_urls": [
+      "https://www.pizzapizza.ca/restaurant-locator/ontario/mississauga/",
+      "https://www.openstreetmap.org/node/1518740651"
+    ],
+    "checked_on": "2026-11-22",
+    "verified_branch_address": "2690 ERIN CENTRE BLVD, Unit A7"
+  },
+  "mississauga-directory-2025:24516": {
+    "catalog_id": "osm:node:3744131811",
+    "reason": "The operator lists one branch at 1585 Mississauga Valley and its point is 53 metres from the existing Pizza Pizza pin at that plaza. The branch’s municipal records give unit 6.",
+    "source_urls": [
+      "https://www.pizzapizza.ca/restaurant-locator/ontario/mississauga/",
+      "https://opengovca.com/mississauga-business/15098",
+      "https://www.openstreetmap.org/node/3744131811"
+    ],
+    "checked_on": "2026-11-22",
+    "verified_branch_address": "1585 MISSISSAUGA VALLEY BLVD, Unit 6"
+  },
+  "mississauga-directory-2025:26804": {
+    "catalog_id": "osm:node:7195649029",
+    "reason": "Campus Dining identifies Subway at the Instructional Centre. The campus map identifies that building on the 3359 Mississauga Road campus adjacent to the existing pin.",
+    "source_urls": [
+      "https://www.utm.utoronto.ca/hospitality/Food",
+      "https://www.utm.utoronto.ca/media/12281/download?inline=",
+      "https://www.utm.utoronto.ca/visitors/maps-and-directions",
+      "https://www.openstreetmap.org/node/7195649029"
+    ],
+    "checked_on": "2026-11-22",
+    "verified_branch_address": "3359 MISSISSAUGA RD"
+  },
+  "mississauga-directory-2025:26806": {
+    "catalog_id": "osm:node:1406559346",
+    "reason": "The municipal and operator branch phones match. The operator gives unit 105E and its point is 4 metres from the existing Subway pin.",
+    "source_urls": [
+      "https://restaurants.subway.com/canada/on/mississauga/6065-creditview-rd",
+      "https://data.alltheplaces.xyz/runs/latest/output/subway.geojson",
+      "https://www.openstreetmap.org/node/1406559346"
+    ],
+    "checked_on": "2026-11-22",
+    "verified_branch_address": "6065 CREDITVIEW RD, Unit 105"
+  },
+  "mississauga-directory-2025:26840": {
+    "catalog_id": "osm:node:4400187880",
+    "reason": "The operator confirms unit 1. The existing Subway pin is 15 metres from the locator point.",
+    "source_urls": [
+      "https://restaurants.subway.com/canada/on/mississauga/35-brunel-road",
+      "https://data.alltheplaces.xyz/runs/latest/output/subway.geojson",
+      "https://www.openstreetmap.org/node/4400187880"
+    ],
+    "checked_on": "2026-11-22",
+    "verified_branch_address": "35 BRUNEL RD, Unit 1"
+  },
+  "mississauga-directory-2025:26842": {
+    "catalog_id": "osm:node:1714830169",
+    "reason": "The operator address and the municipal branch phone agree. The existing Subway pin is 4 metres from the locator point.",
+    "source_urls": [
+      "https://restaurants.subway.com/canada/on/mississauga/3041-argentia-rd",
+      "https://data.alltheplaces.xyz/runs/latest/output/subway.geojson",
+      "https://www.openstreetmap.org/node/1714830169"
+    ],
+    "checked_on": "2026-11-22",
+    "verified_branch_address": "3041 ARGENTIA RD, Unit 3"
+  },
+  "mississauga-directory-2025:26847": {
+    "catalog_id": "osm:node:1213516529",
+    "reason": "The municipal and operator branch phones match. The operator identifies unit 3, building E, and its point is 4 metres from the existing unit 3 pin.",
+    "source_urls": [
+      "https://restaurants.subway.com/canada/on/mississauga/2136-burnhamthorpe-rd-w",
+      "https://data.alltheplaces.xyz/runs/latest/output/subway.geojson",
+      "https://www.openstreetmap.org/node/1213516529"
+    ],
+    "checked_on": "2026-11-22",
+    "verified_branch_address": "2136 BURNHAMTHORPE RD W, Unit 10"
+  },
+  "mississauga-directory-2025:26850": {
+    "catalog_id": "osm:node:7195579646",
+    "reason": "The operator gives unit 1. The existing Subway pin is 13 metres from the operator’s locator point.",
+    "source_urls": [
+      "https://restaurants.subway.com/canada/on/mississauga/7025-tomken-rd",
+      "https://data.alltheplaces.xyz/runs/latest/output/subway.geojson",
+      "https://www.openstreetmap.org/node/7195579646"
+    ],
+    "checked_on": "2026-11-22",
+    "verified_branch_address": "7025 TOMKEN RD, Unit 1"
+  },
+  "mississauga-directory-2025:26851": {
+    "catalog_id": "osm:node:2459875296",
+    "reason": "The operator gives unit 8. The existing Subway pin is 11 metres from the operator’s locator point.",
+    "source_urls": [
+      "https://restaurants.subway.com/canada/on/mississauga/4870-tomken-road",
+      "https://data.alltheplaces.xyz/runs/latest/output/subway.geojson",
+      "https://www.openstreetmap.org/node/2459875296"
+    ],
+    "checked_on": "2026-11-22",
+    "verified_branch_address": "4870 TOMKEN RD, Unit 8"
+  },
+  "toronto-licence:B50-4645953": {
+    "catalog_id": "osm:node:8592932226",
+    "reason": "The exact-address storefront marker is 12 metres from the catalog pin. Pickup and municipal sources confirm units 52 and 53 at 10 Mallard.",
+    "source_urls": [
+      "https://www.waze.com/live-map/directions/ca/on/toronto/dominos-pizza?to=place.ChIJ_-Y_A2PN1IkRftdMyLDS0_w",
+      "https://opengovca.com/toronto-business/B50-4645953",
+      "https://guava.failover.uber.com/ca/store/dominos-pizza-10-mallard-road-unit-52-%2653/C7PlNRkxVy6Ts4EnnffNyg",
+      "https://www.openstreetmap.org/node/8592932226"
+    ],
+    "checked_on": "2026-11-22",
+    "verified_branch_address": "10 MALLARD RD, #52 & 53"
+  },
+  "toronto-licence:B71-3250716": {
+    "catalog_id": "osm:node:5794386494",
+    "reason": "The 51 Niagara Street storefront marker is 4 metres from the existing Domino’s pin. The associated Toronto inspection names the same location.",
+    "source_urls": [
+      "https://www.waze.com/live-map/directions/dominos-pizza-niagara-st-51-toronto?to=place.w.183894452.1838944524.856011",
+      "https://localhealthinspections.com/regions/toronto?page=62",
+      "https://www.openstreetmap.org/node/5794386494"
+    ],
+    "checked_on": "2026-11-22",
+    "verified_branch_address": "51 NIAGARA ST"
+  },
+  "mississauga-directory-2025:16807": {
+    "catalog_id": "osm:way:143444821",
+    "reason": "The franchise operator confirms its 1490 Dixie Road branch. Its storefront marker is one metre from the existing Burger King pin. The directory point is farther away within the property.",
+    "source_urls": [
+      "https://redberry.ca/locations",
+      "https://www.waze.com/live-map/directions/burger-king-dixie-rd-1490-mississauga?to=place.w.183763380.1837830407.4257618",
+      "https://localhealthinspections.com/regions/mississauga?page=10",
+      "https://www.openstreetmap.org/way/143444821"
+    ],
+    "checked_on": "2026-11-22",
+    "verified_branch_address": "1490 DIXIE RD",
+    "verified_storefront": {
+      "lat": 43.593867227,
+      "lng": -79.565370896
+    }
+  },
+  "mississauga-directory-2025:16808": {
+    "catalog_id": "osm:node:378604006",
+    "reason": "The franchise operator lists 7014 Torbram Road. The exact-address storefront marker is 8 metres from the existing Burger King pin.",
+    "source_urls": [
+      "https://redberry.ca/locations",
+      "https://www.waze.com/live-map/directions/burger-king-torbram-rd-7014-mississauga?to=place.w.183697845.1837306129.8189269",
+      "https://www.openstreetmap.org/node/378604006"
+    ],
+    "checked_on": "2026-11-22",
+    "verified_branch_address": "7014 TORBRAM RD"
+  },
+  "mississauga-directory-2025:18546": {
+    "catalog_id": "osm:node:1407759987",
+    "reason": "The landlord identifies one Domino’s storefront in the south building at 4040 Creditview. The storefront marker is 11 metres from the catalog pin. Peel’s inspection gives the directory’s unit 13.",
+    "source_urls": [
+      "https://irp.cdn-website.com/29f2f584/files/uploaded/Pivotal%20CR%20-%20Deer%20Centre%20-%204040%20Creditview%20Rd%20-%20Marketing%20Brochure.pdf",
+      "https://www.waze.com/live-map/directions/ca/on/mississauga/dominos-pizza?to=place.ChIJtyzCcXIrO4gRikB_PM5g_gc",
+      "https://localhealthinspections.com/regions/mississauga?page=19",
+      "https://www.openstreetmap.org/node/1407759987"
+    ],
+    "checked_on": "2026-11-22",
+    "verified_branch_address": "4040 CREDITVIEW RD, Unit 13"
+  },
+  "mississauga-directory-2025:22640": {
+    "catalog_id": "osm:node:3999964432",
+    "reason": "The exact-address Glen Erin storefront marker is 5 metres from the catalog pin. The premises inspection identifies this McDonald’s branch.",
+    "source_urls": [
+      "https://www.waze.com/en/live-map/directions/mcdonalds-glen-erin-dr-5636-mississauga?to=place.w.183697844.1836781829.4562505",
+      "https://localhealthinspections.com/regions/mississauga?page=39",
+      "https://www.openstreetmap.org/node/3999964432"
+    ],
+    "checked_on": "2026-11-22",
+    "verified_branch_address": "5636 GLEN ERIN DR, Unit 12"
+  },
+  "toronto-licence:B71-5678570": {
+    "catalog_id": "toronto-licence:B50-5459019",
+    "verified_branch_address": "9 Milvan Dr, Unit 6-1",
+    "checked_on": "2026-11-22",
+    "reason": "The two licences share the same DineSafe premises ID and coordinates. The current inspection and operator order page confirm public unit 6-1, already listed under the other licence.",
+    "source_urls": [
+      "https://open.toronto.ca/dataset/dinesafe/",
+      "https://www.chentestaqueriaon.com/"
+    ]
+  },
+  "toronto-licence:B50-5422638": {
+    "catalog_id": "osm:node:6712340470",
+    "verified_branch_address": "220 Yonge St, F005",
+    "verified_phone": "4162606868",
+    "reviewed_inspection_address": "220 Yonge St Unit-F0005 M5B 2H1",
+    "checked_on": "2026-11-22",
+    "reason": "The landlord plan identifies Bingz at Eaton Centre stall F005 and the Downtown Yonge BIA confirms the branch and inspection phone. The existing OSM point identifies the same named stall within 220 Yonge; the municipal pin is at the other end of the same mall.",
+    "source_urls": [
+      "https://downtownyonge.com/places/bingz-crispy-burger/",
+      "https://assets.cadillacfairview.com/m/43273f2554bf438e/original/TECON20_LEASINGPLAN.pdf",
+      "https://www.lostinontario.com/toronto/fast-food/bingz-crispy-burger-yonge-street/"
+    ]
+  },
+  "toronto-licence:B71-5466594": {
+    "catalog_id": "osm:node:10032338694",
+    "verified_branch_address": "1364 Queen St E",
+    "reason": "The municipal site and branch directory both identify the Queen Street East KFC. The branch coordinates are 13 metres from the existing corner pin, which uses the Greenwood frontage address.",
+    "source_urls": [
+      "https://www.yellowpages.ca/bus/Ontario/Toronto/KFC/8213987.html",
+      "https://bizlocationdb.com/locations/kfc/canada/c/toronto",
+      "https://api.openstreetmap.org/api/0.6/node/10032338694.json"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B71-5668403": {
+    "catalog_id": "osm:node:7766352990",
+    "verified_branch_address": "3264 Lawrence Ave E",
+    "reason": "The operator and order page both identify Bendale at 3264 Lawrence Ave E. The existing map point uses the shortened name Bendale Restaurant and is three metres from the city point.",
+    "source_urls": [
+      "https://www.bendalewingsandbreakfast.ca/",
+      "https://www.ubereats.com/ca/store/bendale-daymoon-breakfast-%26-wings/qZ4f4dyvXo6wbPIxEnDioQ",
+      "https://api.openstreetmap.org/api/0.6/node/7766352990.json"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "mississauga-directory-2025:14994": {
+    "catalog_id": "osm:node:4537712725",
+    "verified_branch_address": "2325 Hurontario St, Unit 6",
+    "reason": "The 341 Pizza & Wings branch locator, ordering page, and existing pin match the municipal Hurontario branch and its branch phone.",
+    "source_urls": [
+      "https://www.341pizzawings.com/locations-page",
+      "https://341-mississauga.ezonlinefoodorders.com/",
+      "https://api.openstreetmap.org/api/0.6/node/4537712725.json"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "mississauga-directory-2025:17440": {
+    "catalog_id": "osm:node:7705368744",
+    "verified_branch_address": "1177 Central Pkwy W, Unit 66",
+    "reason": "The Golden Square site plan and the branch service listing agree on Chi's Congee at unit 66. The existing named pin is in the same plaza, within 83 metres of the municipal point.",
+    "source_urls": [
+      "https://www.croftonmoore.com/images/dyn/proprietes_16_27.pdf",
+      "https://www.restaurantji.com/on/mississauga/chis-congee-and-noodle-house-/",
+      "https://api.openstreetmap.org/api/0.6/node/7705368744.json"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "mississauga-directory-2025:17712": {
+    "catalog_id": "osm:node:1853670917",
+    "verified_branch_address": "280 Lakeshore Rd E",
+    "reason": "Colossus uses 280 on its booking page and 286 on its visit page, with the same Port Credit phone. The municipal record uses 284. The existing pin uses the booking address and phone across the same frontage.",
+    "source_urls": [
+      "https://colossusgreektaverna.com/book-a-table.html",
+      "https://colossusgreektaverna.com/visit-us.html",
+      "https://www.mississauga.ca/file/COM/2008gccommitteeminutes_June25.pdf",
+      "https://api.openstreetmap.org/api/0.6/node/1853670917.json"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "mississauga-directory-2025:18969": {
+    "catalog_id": "osm:node:4400187876",
+    "verified_branch_address": "35 Brunel Rd, Unit 1A",
+    "reason": "El Sombrero’s operator site, site-linked map point and branch menu agree on 35 Brunel Road and the existing pin’s phone.",
+    "source_urls": [
+      "https://www.elsombrero.ca/",
+      "https://restaurantguru.com/El-Sombrero-Toronto/menu",
+      "https://api.openstreetmap.org/api/0.6/node/4400187876.json"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "mississauga-directory-2025:19416": {
+    "catalog_id": "osm:node:7140125361",
+    "verified_branch_address": "1177 Central Pkwy W, Unit 23A",
+    "reason": "The operator confirms the Golden Square branch and the existing map pin records the same unit 23A and phone. The plaza map also labels the adjoining 23B space for the same operator.",
+    "source_urls": [
+      "https://owlfamily.ca/contact-us/",
+      "https://www.croftonmoore.com/images/dyn/proprietes_16_27.pdf",
+      "https://api.openstreetmap.org/api/0.6/node/7140125361.json"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "mississauga-directory-2025:19659": {
+    "catalog_id": "osm:node:726453082",
+    "verified_branch_address": "325 Central Pkwy W",
+    "reason": "Foodie North's municipal point and the existing pin refer to the branch at 325 Central Parkway West. The map’s operator domain and direct phone match the branch’s public address and phone.",
+    "source_urls": [
+      "https://www.profilecanada.com/companydetail.cfm?company=705006_Foodie_North_Mississauga_ON",
+      "https://www.tripadvisor.co.uk/Restaurant_Review-g154996-d10680037-Reviews-Foodie_North-Mississauga_Ontario.html",
+      "https://api.openstreetmap.org/api/0.6/node/726453082.json"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "mississauga-directory-2025:20335": {
+    "catalog_id": "osm:node:3959799484",
+    "verified_branch_address": "7070 Saint Barbara Blvd",
+    "reason": "The operator confirms Guru Lukshmi’s current units 45 and 50 at the same plaza. Its public branch phone matches the existing website-linked pin. The municipal listing uses unit 44 and represents the same operator at this property.",
+    "source_urls": [
+      "https://www.gurulukshmi.com/contact-us",
+      "https://www.yourcitywithin.com/places/indian/guru-lukshmi/",
+      "https://api.openstreetmap.org/api/0.6/node/3959799484.json"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "mississauga-directory-2025:20405": {
+    "catalog_id": "osm:node:4017888654",
+    "verified_branch_address": "6415 Erin Mills Pkwy, Unit 1",
+    "reason": "Hakka Legend’s branch menu gives suite B-1 at 6415 Erin Mills and its direct branch phone. This matches the municipal unit and existing map pin’s phone.",
+    "source_urls": [
+      "https://static1.squarespace.com/static/5ea735dd480478468a0331b1/t/633f6c9d710e743ee4246c77/1665100961032/hakkalegend_oakville_takeout-web.pdf",
+      "https://www.cylex-canada.ca/company/hakka-legend-asian-cuisine-24284897.html",
+      "https://api.openstreetmap.org/api/0.6/node/4017888654.json"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "mississauga-directory-2025:21571": {
+    "catalog_id": "osm:node:1782117599",
+    "verified_branch_address": "6740 Meadowvale Town Centre Cir",
+    "reason": "The branch receipt and public establishment listing agree on the Meadowvale KFC address and direct local phone. The existing pin shares the phone and is 29 metres from the municipal point.",
+    "source_urls": [
+      "https://www.scribd.com/document/1075585404/Receipt-Yum-CA-Kfc",
+      "https://www.opendi.ca/mississauga/1319040.html",
+      "https://api.openstreetmap.org/api/0.6/node/1782117599.json"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "mississauga-directory-2025:21952": {
+    "catalog_id": "osm:node:7196234084",
+    "verified_branch_address": "5618 Tenth Line W, Unit E7",
+    "reason": "The official locator, current inspection listing and ordering coordinates identify the same unit 7 branch at 5618 Tenth Line. The ordering pin is within four metres of the catalog point. The city directory uses the plaza’s adjacent civic number.",
+    "source_urls": [
+      "https://lazeezshawarma.com/locations/tenth-line-and-thomas",
+      "https://localhealthinspections.com/regions/mississauga/mississauga?page=35",
+      "https://www.ubereats.com/ca/brand-city/mississauga-on/lazeez-shawarma",
+      "https://api.openstreetmap.org/api/0.6/node/7196234084.json"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "mississauga-directory-2025:24459": {
+    "catalog_id": "osm:node:4004435209",
+    "verified_branch_address": "1275 Eglinton Ave E, Unit 62B",
+    "reason": "The previous city directory and current branch listing identify the same Pita & Grill at 1275 Eglinton. Both list the direct phone recorded on the existing map pin.",
+    "source_urls": [
+      "https://www.cylex-canada.ca/company/pita---grill-11913017.html",
+      "https://opengovca.com/mississauga-business/83618",
+      "https://api.openstreetmap.org/api/0.6/node/4004435209.json"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "mississauga-directory-2025:25208": {
+    "catalog_id": "osm:node:3957009937",
+    "verified_branch_address": "1177 Central Pkwy W, Unit 11",
+    "reason": "The Golden Square landlord identifies Red Lotus as the tenant of unit 11, confirmed by branch ordering. The catalog point names Red Lotus at the same civic address inside the plaza.",
+    "source_urls": [
+      "https://www.croftonmoore.com/images/dyn/proprietes_16_27.pdf",
+      "https://www.ubereats.com/ca/store/red-lotus-restaurant-%E6%BB%A1%E6%B1%9F%E7%BA%A2/cOK3ioIMTX2YFqn6UvlnQQ",
+      "https://api.openstreetmap.org/api/0.6/node/3957009937.json"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "mississauga-directory-2025:25964": {
+    "catalog_id": "osm:node:4004435210",
+    "verified_branch_address": "5030 Maingate Dr, Unit 19",
+    "reason": "The operator site and branch phone identify Shandra’s Roti Shop at suite 19. Both agree with the existing named map point.",
+    "source_urls": [
+      "https://www.shandrasrotishop.ca/",
+      "https://en.localwiki.org/mississauga/Shandra%27s_Roti_Shop",
+      "https://api.openstreetmap.org/api/0.6/node/4004435210.json"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "mississauga-directory-2025:26198": {
+    "catalog_id": "osm:node:3757673081",
+    "verified_branch_address": "5606 Tenth Line W, Unit 1",
+    "reason": "The Sizzlo’z operator locator confirms 5606 Tenth Line West, unit 1. The existing pin carries the same branch name and phone.",
+    "source_urls": [
+      "https://sizzlozcanada.ca/location",
+      "https://api.openstreetmap.org/api/0.6/node/3757673081.json"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "mississauga-directory-2025:27735": {
+    "catalog_id": "osm:node:2784290189",
+    "verified_branch_address": "1150 Lorne Park Rd",
+    "reason": "The operator menu and ordering contact agree with the catalog’s direct phone for Tony’s at 1150 Lorne Park. Peel’s inspection listing confirms the same premises in suite 10A.",
+    "source_urls": [
+      "https://tonyspizzaoriginal.com/",
+      "https://localhealthinspections.com/regions/mississauga?page=117",
+      "https://api.openstreetmap.org/api/0.6/node/2784290189.json"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "mississauga-directory-2025:17707": {
+    "catalog_id": "osm:node:13568207501",
+    "verified_branch_address": "3359 Mississauga Rd",
+    "verified_storefront": {
+      "lat": 43.54881,
+      "lng": -79.66596
+    },
+    "reason": "The university locates Colman Commons in Oscar Peterson Hall. A separately published campus point matches the existing map pin within 15 metres. The municipal coordinate marks the shared campus address.",
+    "source_urls": [
+      "https://www.utm.utoronto.ca/hospitality/Food",
+      "https://github.com/cobalt-uoft/datasets/blob/master/food.json",
+      "https://www.openstreetmap.org/node/13568207501"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B50-5237563": {
+    "catalog_id": "osm:node:12843046876",
+    "verified_branch_address": "199 Bay St, C-174",
+    "reason": "The operator lists this branch on the Commerce Court concourse. The linked map point identifies Chop Hop on the concourse level of the same property, separate from its other locations.",
+    "source_urls": [
+      "https://www.chophop.com/",
+      "https://www.commercecourt.ca/get-in-touch/",
+      "https://api.openstreetmap.org/api/0.6/node/12843046876.json"
+    ],
+    "checked_on": "2026-11-22"
+  }
+}

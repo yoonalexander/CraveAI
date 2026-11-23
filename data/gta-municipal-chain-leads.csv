@@ -1,0 +1,53 @@
+candidate_id,name,address,brand,locator_address,unit_agreement,distance_m,operator_url,locator_reference,locator_check_date,feed
+toronto-licence:B50-4296067,TIM HORTON'S,135 REXDALE BLVD,Tim Hortons,135 Rexdale Blvd,exact,17.6,,101651,2026-07-26T03:16:41Z,tim_hortons
+toronto-licence:B50-4933800,TIM HORTONS,1345 MARTIN GROVE RD,Tim Hortons,1345 Martin Grove Rd,exact,3.8,,106876,2026-11-06T22:18:16Z,tim_hortons
+toronto-licence:B50-5031273,TIM HORTONS,150 DUPONT ST,Tim Hortons,150 Dupont Street,exact,74.2,,102340,2026-01-25T18:17:05Z,tim_hortons
+toronto-licence:B71-3117591,TIM HORTON'S,"130 KING ST W, BOX 126",Tim Hortons,130 King St West,check,95.0,,101691,2026-10-18T18:16:39Z,tim_hortons
+toronto-licence:B71-3134089,TIM HORTON'S,1900 O'CONNOR DR,Tim Hortons,1900 O'Connor Drive,exact,21.2,,102156,2026-04-07T15:17:12Z,tim_hortons
+toronto-licence:B71-3238423,TIM HORTON'S,853 THE QUEENSWAY,Tim Hortons,853 The Queensway,exact,46.6,,100020,2026-11-12T05:15:57Z,tim_hortons
+toronto-licence:B71-3242302,TIM HORTON'S,1130 ALBION RD,Tim Hortons,1130 Albion Rd,exact,2.1,,101585,2025-04-25T16:16:54Z,tim_hortons
+toronto-licence:B71-3358069,TIM HORTON'S,581 PARLIAMENT ST,Tim Hortons,581 Parliament Street,exact,16.6,,102368,2026-08-29T21:17:00Z,tim_hortons
+toronto-licence:B71-3483851,TIM HORTONS,2291 ISLINGTON AVE,Tim Hortons,2291 Islington Ave,exact,17.2,,102674,2026-10-22T04:17:06Z,tim_hortons
+toronto-licence:B71-3599360,TIM HORTON'S,"75 ELLESMERE RD, B1",Tim Hortons,75 Ellesmere Road,check,64.1,,102817,2026-11-10T13:17:12Z,tim_hortons
+toronto-licence:B71-3720600,TIM HORTON'S,"111 CARLTON ST, KIOSK",Tim Hortons,"111 Carlton Street, BEST WESTERN PRIMROSE",check,21.5,,102357,2026-01-16T05:17:08Z,tim_hortons
+toronto-licence:B71-3950269,TIM HORTON'S,323 RICHMOND ST E,Tim Hortons,323 Richmond Street East,exact,33.9,,102000,2026-11-02T05:16:35Z,tim_hortons
+toronto-licence:B71-4532121,THAI EXPRESS,"5650 YONGE ST, #16",Thaï Express,5650 Yonge St,check,22.3,https://locations.thaiexpress.ca/on/toronto/5650-yonge-st,https://locations.thaiexpress.ca/on/toronto/5650-yonge-st,,thai_express_ca
+toronto-licence:B71-4836791,TIM HORTON'S,334 BLOOR ST W,Tim Hortons,334 Bloor St West,exact,7.2,,102582,2026-09-28T13:17:29Z,tim_hortons
+toronto-licence:B71-5412097,FAT BASTARD BURRITO,1222 ST CLAIR AVE W,Fat Bastard Burrito,"1222 St. Clair Ave W, Toronto, ON M6E 1B4",exact,3.9,https://cws.givex.com/cws5/fbbpwa/#/dashboard,68055757,,fat_bastard_burrito_ca
+toronto-licence:B71-5591944,BARBURRITO,"201 LLOYD MANOR RD, #101",BarBurrito,201 Lloyd Manor Rd,check,9.1,https://www.barburrito.ca/location/lloyd-manor/,6709,,barburrito_ca
+toronto-licence:B71-5633443,TIM HORTON'S,"250 WINCOTT DR, G8",Tim Hortons,250 - Wincott Dr,check,36.4,,122326,2026-11-16T22:18:56Z,tim_hortons
+toronto-licence:B71-5634709,TIM HORTON'S,800 LAWRENCE AVE E,Tim Hortons,800 Lawrence Ave E,exact,11.7,,100938,2026-03-31T20:16:35Z,tim_hortons
+toronto-licence:B71-5651191,FAT BASTARD BURRITO,"31 REXDALE BLVD, #3107",Fat Bastard Burrito,"31 Rexdale Blvd, #3107 Toronto, ON M9W 0G5",check,2.0,https://cws.givex.com/cws5/fbbpwa/#/dashboard,68055708,,fat_bastard_burrito_ca
+mississauga-directory-2025:26806,Subway,"6065 CREDITVIEW RD, Unit 105",Subway,6065 Creditview Rd. Unit 105E,check,80.4,https://restaurants.subway.com/fr_ca/canada/on/mississauga/6065-creditview-rd,https://restaurants.subway.com/#14919664,,subway
+mississauga-directory-2025:26808,Subway,"1151 DUNDAS ST W, Unit 39",Subway,1151 Dundas Street West Unit 39,exact,63.7,https://restaurants.subway.com/fr_ca/canada/on/mississauga/1151-dundas-street-west,https://restaurants.subway.com/#14920088,,subway
+mississauga-directory-2025:26815,Subway,"925 RATHBURN RD E, Unit C7",Subway,925 Rathburn Road East Unit C7,exact,89.1,https://restaurants.subway.com/fr_ca/canada/on/mississauga/925-rathburn-road-east,https://restaurants.subway.com/#14919009,,subway
+mississauga-directory-2025:27281,Thai Express,"5100 ERIN MILLS PKY, Unit FC4",Thaï Express,"5100 Erin Mills Pky, Erin Mills Town Centre",check,57.7,https://locations.thaiexpress.ca/on/mississauga/5100-erin-mills-pky,https://locations.thaiexpress.ca/on/mississauga/5100-erin-mills-pky,,thai_express_ca
+mississauga-directory-2025:27612,Tim Hortons,3285 DERRY RD W,Tim Hortons,3285 Derry Rd West,exact,2.5,,101713,2025-04-25T16:16:48Z,tim_hortons
+mississauga-directory-2025:27613,Tim Hortons,1327 DUNDAS ST E,Tim Hortons,1327 Dundas Street E,exact,2.6,,101711,2026-09-14T17:16:41Z,tim_hortons
+mississauga-directory-2025:27614,Tim Hortons,799 DUNDAS ST E,Tim Hortons,799 Dundas St E,exact,2.7,,100375,2025-12-27T05:16:22Z,tim_hortons
+mississauga-directory-2025:27615,Tim Hortons,"144 DUNDAS ST W, Unit 4",Tim Hortons,144 Dundas St W,check,14.4,,100233,2026-06-01T22:15:55Z,tim_hortons
+mississauga-directory-2025:27617,Tim Hortons,2991 ERIN CENTRE BLVD,Tim Hortons,2991 Erin Centre Blvd,exact,9.8,,101403,2025-04-25T16:16:43Z,tim_hortons
+mississauga-directory-2025:27619,Tim Hortons,"1211 HURONTARIO ST, Unit A",Tim Hortons,1211 Hurontario Street,check,7.5,,101571,2025-12-26T05:16:54Z,tim_hortons
+mississauga-directory-2025:27621,Tim Hortons,"780 SOUTH SHERIDAN WAY, Unit P2",Tim Hortons,780 South Sheridan Way,check,2.5,,100362,2026-10-14T04:16:06Z,tim_hortons
+mississauga-directory-2025:27623,Tim Hortons,4040 CREDITVIEW RD,Tim Hortons,4040 Creditview Road,exact,44.1,,102037,2025-01-01T05:16:47Z,tim_hortons
+mississauga-directory-2025:27626,Tim Hortons,780 BANCROFT DR,Tim Hortons,780 Bancroft Drive,exact,33.6,,102352,2026-07-28T17:17:41Z,tim_hortons
+mississauga-directory-2025:27627,Tim Hortons,3060 ARTESIAN DR,Tim Hortons,3060 Artesian Dr,exact,4.5,,106351,2026-07-20T12:18:18Z,tim_hortons
+mississauga-directory-2025:27628,Tim Hortons,5614 TENTH LINE WEST,Tim Hortons,5614 Tenth Line West,exact,2.4,,102555,2025-05-15T11:17:03Z,tim_hortons
+mississauga-directory-2025:27631,Tim Hortons,1212 SOUTHDOWN RD,Tim Hortons,1212 Southdown Road,exact,2.0,,103973,2026-10-14T04:17:39Z,tim_hortons
+mississauga-directory-2025:27634,Tim Hortons,450 DERRY RD W,Tim Hortons,450 Derry Road West,exact,5.2,,105778,2026-02-23T18:18:16Z,tim_hortons
+mississauga-directory-2025:27635,Tim Hortons,632 BURNHAMTHORPE RD W,Tim Hortons,632 Burnhamthorpe Rd. West,exact,23.7,,103964,2026-06-05T14:17:41Z,tim_hortons
+mississauga-directory-2025:27637,Tim Hortons,800 BANCROFT DR,Tim Hortons,800 Bancroft Dr,exact,0.8,,102506,2026-07-28T12:17:10Z,tim_hortons
+mississauga-directory-2025:27642,Tim Hortons,6767 AIRPORT RD,Tim Hortons,6767 Airport Road,exact,10.2,,101712,2026-06-02T19:16:37Z,tim_hortons
+mississauga-directory-2025:27643,Tim Hortons,7480 AIRPORT RD,Tim Hortons,7480 Airport Road,exact,19.8,,100653,2026-06-02T18:17:05Z,tim_hortons
+mississauga-directory-2025:27649,Tim Hortons,480 DERRY RD E,Tim Hortons,480 Derry Rd East,exact,30.4,,100803,2024-02-13T16:19:40Z,tim_hortons
+mississauga-directory-2025:27650,Tim Hortons,4595 TOMKEN RD,Tim Hortons,4595 Tomken Road,exact,33.9,,102603,2026-01-02T05:17:39Z,tim_hortons
+mississauga-directory-2025:27651,Tim Hortons,1801 DUNDAS ST E,Tim Hortons,1801 Dundas St East,exact,1.8,,102706,2026-11-12T21:17:13Z,tim_hortons
+mississauga-directory-2025:27654,Tim Hortons,3255 DUNDAS ST W,Tim Hortons,3255 Dundas St. West,exact,30.5,,105215,2026-10-12T09:17:52Z,tim_hortons
+mississauga-directory-2025:27655,Tim Hortons,5014 DIXIE RD,Tim Hortons,5014 Dixie Road,exact,1.7,,101362,2026-07-21T21:16:25Z,tim_hortons
+mississauga-directory-2025:27657,Tim Hortons,3445 HURONTARIO ST,Tim Hortons,3445 Hurontario St,exact,36.0,,101733,2026-08-05T16:16:45Z,tim_hortons
+mississauga-directory-2025:27662,Tim Hortons,6313 MISSISSAUGA RD,Tim Hortons,6313 Mississauga Rd,exact,0.7,,102787,2026-09-30T04:17:08Z,tim_hortons
+mississauga-directory-2025:27665,Tim Hortons,3110 ARGENTIA RD,Tim Hortons,3110 Argentia Road,exact,3.0,,103940,2025-04-25T16:18:15Z,tim_hortons
+mississauga-directory-2025:27666,Tim Hortons,2980 ARGENTIA RD,Tim Hortons,2980 Argentia Road,exact,2.3,,101976,2025-12-23T20:17:16Z,tim_hortons
+mississauga-directory-2025:27667,Tim Hortons,120 QUEEN ST S,Tim Hortons,120 Queen Street South,exact,5.4,,101134,2026-11-09T20:16:18Z,tim_hortons
+mississauga-directory-2025:27669,Tim Hortons,4100 DIXIE RD,Tim Hortons,4100 Dixie Rd,exact,43.7,,102682,2026-01-02T05:17:39Z,tim_hortons
+mississauga-directory-2025:27670,Tim Hortons,150 LAKESHORE RD E,Tim Hortons,150 Lakeshore Rd East,exact,32.4,,104188,2025-12-23T19:19:11Z,tim_hortons

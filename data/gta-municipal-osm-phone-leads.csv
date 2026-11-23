@@ -1,0 +1,31 @@
+candidate_id,name,address,city,catalog_id,catalog_name,catalog_address,distance_m,name_matches,street_matches,unit_agreement,osm_url
+toronto-licence:B50-5440826,SOUTHERN AROMA ON THE GO,"10 MELFORD DR, #17A",Toronto,osm:node:13885485701,Southern Aroma On The GO,10 Melford Drive,152.9,True,True,False,https://www.openstreetmap.org/node/13885485701
+toronto-licence:B71-3103801,PRINCE JAPANESE STEAKHOUSE,"5555 EGLINTON AVE W, E114-E116",Toronto,osm:node:3977952154,Prince Japanese Steak House,,164.7,True,False,False,https://www.openstreetmap.org/node/3977952154
+toronto-licence:B71-4184797,THAI EXPRESS,"1 DUNDAS ST W, F2",Toronto,osm:node:6712340472,Thaï Express,218 Yonge Street,156.0,True,False,False,https://www.openstreetmap.org/node/6712340472
+toronto-licence:B71-4691772,THE CAPTAIN'S BOIL,"1800 THE QUEENSWAY, #5-6",Toronto,osm:node:1859441257,The Captain's Boil,,151.7,True,False,False,https://www.openstreetmap.org/node/1859441257
+toronto-licence:B71-5224259,AFFY'S PREMIUM GRILL,69 LEBOVIC AVE,Toronto,osm:node:5335884074,Affy's Premium Grill,55 Lebovic Avenue,108.0,True,False,False,https://www.openstreetmap.org/node/5335884074
+mississauga-directory-2025:14994,3 For 1 Pizza Wings Ltd.,"2325 HURONTARIO ST, Unit 6",Mississauga,osm:node:4537712725,341 Pizza & Wings,,41.9,False,False,False,https://www.openstreetmap.org/node/4537712725
+mississauga-directory-2025:16012,Aunty's Kitchen,6039 ERIN MILLS PKY,Mississauga,osm:node:8410477605,Aunty's Kitchen,6039 Erin Mills Parkway,118.0,True,False,True,https://www.openstreetmap.org/node/8410477605
+mississauga-directory-2025:16197,Bakhtar Kabab Cuisine,"5925 TOMKEN RD, Unit 1",Mississauga,osm:node:3855202958,Bakhtar Kabab,,93.8,False,False,True,https://www.openstreetmap.org/node/3855202958
+mississauga-directory-2025:16249,BarBurrito,"40 BRISTOL RD E, Unit 5",Mississauga,osm:node:3968908304,BarBurrito,,126.2,True,False,False,https://www.openstreetmap.org/node/3968908304
+mississauga-directory-2025:16685,Bread and Salt Afghan Cusine,1490 DUNDAS ST E,Mississauga,osm:node:6444231645,Bread & Salt,,1.7,False,False,True,https://www.openstreetmap.org/node/6444231645
+mississauga-directory-2025:17165,Caribbean Sunset Restaurant,"1001 MEYERSIDE DR, Unit 8 & 9",Mississauga,osm:node:4432802761,Caribbean Sunrise,,35.2,False,False,False,https://www.openstreetmap.org/node/4432802761
+mississauga-directory-2025:17712,Colossus Greek Restaurant,284 LAKESHORE RD E,Mississauga,osm:node:1853670917,Colossus Greek Taverna,280 Lakeshore Road East,13.1,False,False,True,https://www.openstreetmap.org/node/1853670917
+mississauga-directory-2025:18322,Desi Hakka Affairs,"3415 DIXIE RD, Unit 4A",Mississauga,osm:node:7686019067,Kahramana Restaurant,,27.4,False,False,False,https://www.openstreetmap.org/node/7686019067
+mississauga-directory-2025:18852,East Tea Can Restaurant,"3115 WINSTON CHURCHILL BLVD, Unit 1",Mississauga,osm:node:11885207169,East Tea Can,,71.3,True,False,False,https://www.openstreetmap.org/node/11885207169
+mississauga-directory-2025:18969,El Sombrero Food Company,"35 BRUNEL RD, Unit 1A",Mississauga,osm:node:4400187876,El Sombrero,,113.7,False,False,False,https://www.openstreetmap.org/node/4400187876
+mississauga-directory-2025:19387,Falafel Plus,"1065 CANADIAN PL, Unit 133",Mississauga,osm:node:14031171201,Falafel Plus,"1065, Unit 133 Canadian Place",98.4,True,False,False,https://www.openstreetmap.org/node/14031171201
+mississauga-directory-2025:19416,"Famous Owl of Minerva, The","1177 CENTRAL PKY W, Unit 23A",Mississauga,osm:node:7140125361,The Famous Owl of Minerva,1177 Central Parkway West,101.2,False,False,True,https://www.openstreetmap.org/node/7140125361
+mississauga-directory-2025:19659,Foodie North,325 CENTRAL PKY W,Mississauga,osm:node:726453082,Foodie North,,130.9,True,False,True,https://www.openstreetmap.org/node/726453082
+mississauga-directory-2025:20335,Guru Lukshmi,"7070 SAINT BARBARA BLVD, Unit 44",Mississauga,osm:node:3959799484,Guru Lukshmi,,79.3,True,False,False,https://www.openstreetmap.org/node/3959799484
+mississauga-directory-2025:20405,Hakka Legend Asian Cuisine,"6415 ERIN MILLS PKY, Unit 1",Mississauga,osm:node:4017888654,Hakka Legend,,110.3,False,False,False,https://www.openstreetmap.org/node/4017888654
+mississauga-directory-2025:21571,KFC,"6740 MEADOWVALE TOWN CENTRE CIR, Unit 405 to 407",Mississauga,osm:node:1782117599,KFC,6740 Meadowvale Town Centre,29.5,True,False,False,https://www.openstreetmap.org/node/1782117599
+mississauga-directory-2025:21834,Laari Adda,"3030 THOMAS ST, Unit 4",Mississauga,osm:node:3758441380,Bistro Narra,,36.7,False,False,False,https://www.openstreetmap.org/node/3758441380
+mississauga-directory-2025:22539,Mary Brown's Chicken & Taters Inc.,"6039 ERIN MILLS PKY, Unit 8",Mississauga,osm:node:4721447453,Mary Brown's,6039 Erin Mills Parkway,86.1,False,False,False,https://www.openstreetmap.org/node/4721447453
+mississauga-directory-2025:24459,Pita & Grill,"1275 EGLINTON AVE E, Unit 62B",Mississauga,osm:node:4004435209,Pita & Grill,,127.1,True,False,False,https://www.openstreetmap.org/node/4004435209
+mississauga-directory-2025:25964,Shandra's Roti Shop,"5030 MAINGATE DR, Unit 19",Mississauga,osm:node:4004435210,Shandra's Roti Shop,,66.1,True,False,False,https://www.openstreetmap.org/node/4004435210
+mississauga-directory-2025:27410,The Hakka Junction,"63 QUEEN ST S, Unit 1 to 3",Mississauga,osm:node:2527507509,Jing Thai,,6.2,False,False,False,https://www.openstreetmap.org/node/2527507509
+mississauga-directory-2025:27565,The Wing Factory,"510 DRIFTCURRENT DR, Unit 14",Mississauga,osm:node:3941951555,The Wingery,,20.1,False,False,False,https://www.openstreetmap.org/node/3941951555
+mississauga-directory-2025:27728,Tomo Sushi,"4040 CREDITVIEW RD, Unit 1 & 2",Mississauga,osm:node:1407759610,Tomo Sushi,,80.8,True,False,False,https://www.openstreetmap.org/node/1407759610
+mississauga-directory-2025:27735,Tonys Panini & Pizza,"1150 LORNE PARK RD, Unit 10A & 11",Mississauga,osm:node:2784290189,Tony’s Panini & Pizza,,74.9,True,False,False,https://www.openstreetmap.org/node/2784290189
+mississauga-directory-2025:27960,Trithis Restaurant,"1177 CENTRAL PKY W, Unit 5",Mississauga,osm:node:12993264247,Trithis Restaurant,1177 Central Parkway West,87.1,True,False,False,https://www.openstreetmap.org/node/12993264247

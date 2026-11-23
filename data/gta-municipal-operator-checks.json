@@ -1,0 +1,130 @@
+{
+  "toronto-licence:B50-4202167": {
+    "city": "Toronto",
+    "name": "Kabalen",
+    "address": "3778 Bathurst St",
+    "url": "https://www.kabalenrestaurant.com/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B50-4948119": {
+    "city": "Toronto",
+    "name": "Anna Roti House",
+    "address": "2367 Kingston Rd",
+    "url": "https://www.annarotihouse.com/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B50-5331334": {
+    "city": "Toronto",
+    "name": "THG’s Hot Chicken",
+    "address": "4830 Sheppard Ave E, Unit 8",
+    "url": "https://www.thgshotchicken.com/locations",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:16678": {
+    "city": "Mississauga",
+    "name": "Brasas Latin Food",
+    "address": "1195 Queensway E, Unit 23",
+    "url": "https://brasaslatinfood.com/contact",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:17370": {
+    "city": "Mississauga",
+    "name": "Charminar Indian Cuisine",
+    "address": "5023 Spectrum Way, Unit B2",
+    "url": "https://charminarindiancuisine.com/contactus-mississauga",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:17383": {
+    "city": "Mississauga",
+    "name": "Chat Hut",
+    "address": "7106 Airport Rd",
+    "url": "https://www.chathut.ca/order-online.html",
+    "signal": "ordering",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:20742": {
+    "city": "Mississauga",
+    "name": "Huevos Gourmet",
+    "address": "241 Lakeshore Rd E",
+    "url": "https://www.huevosgourmet.ca/contact",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:21389": {
+    "city": "Mississauga",
+    "name": "K&B Sushi",
+    "address": "6400 Millcreek Dr, Unit 1",
+    "url": "https://kbsushi.com/contacts/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:21697": {
+    "city": "Mississauga",
+    "name": "Kolachi Inn",
+    "address": "1055 Canadian Pl, Unit 115",
+    "url": "https://kolachiinn.ca/order-online/",
+    "signal": "ordering",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:22422": {
+    "city": "Mississauga",
+    "name": "Mandi Afandi",
+    "address": "5120 Dixie Rd, Unit 1",
+    "url": "https://mandiafandi.ca/",
+    "signal": "ordering",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:24491": {
+    "city": "Mississauga",
+    "name": "Pizza Nostra",
+    "address": "245 Lakeshore Rd E",
+    "url": "https://www.pizzanostrainc.com/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:24678": {
+    "city": "Mississauga",
+    "name": "Potluck Restaurant",
+    "address": "1107 Britannia Rd E",
+    "url": "https://potluckrestaurant.ca/contact",
+    "signal": "ordering",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:25965": {
+    "city": "Mississauga",
+    "name": "Shanghai Taste",
+    "address": "3075 Ridgeway Dr, Unit 30",
+    "url": "https://shanghaitaste.ca/location/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:26835": {
+    "city": "Mississauga",
+    "name": "Subway",
+    "address": "3470 Platinum Dr, Unit 40",
+    "url": "https://restaurants.subway.com/canada/on/mississauga/3470-platinum-dr",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:27126": {
+    "city": "Mississauga",
+    "name": "Taps Public House",
+    "address": "6570 Meadowvale Town Centre Cir",
+    "url": "https://tapspublichouse.ca/reservations/",
+    "signal": "reservations",
+    "checked_on": "2026-11-21"
+  },
+  "mississauga-directory-2025:27162": {
+    "city": "Mississauga",
+    "name": "Taza Xpress",
+    "address": "4553 Hurontario St",
+    "url": "https://tazaxpress.ca/taza-xpress-hurontario-street/",
+    "signal": "hours",
+    "checked_on": "2026-11-21"
+  }
+}

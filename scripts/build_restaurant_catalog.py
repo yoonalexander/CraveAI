@@ -31,8 +31,9 @@ def website(tags):
 
 
 class Extractor(osmium.SimpleHandler):
-    def __init__(self):
+    def __init__(self, amenities=FOOD_AMENITIES):
         super().__init__()
+        self.amenities = amenities
         self.boundaries = {}
         self.restaurants = {}
 
@@ -46,14 +47,14 @@ class Extractor(osmium.SimpleHandler):
         }
 
     def node(self, node):
-        if node.tags.get("amenity") in FOOD_AMENITIES and node.tags.get("name") and node.location.valid():
+        if node.tags.get("amenity") in self.amenities and node.tags.get("name") and node.location.valid():
             self.add("node", node.id, node.tags, round(node.lat, 6), round(node.lon, 6))
 
     def area(self, area):
         tags = area.tags
         name = tags.get("name")
         boundary = tags.get("boundary") == "administrative" and name in CITIES
-        restaurant = tags.get("amenity") in FOOD_AMENITIES and name
+        restaurant = tags.get("amenity") in self.amenities and name
         if not boundary and not restaurant:
             return
         try:

@@ -1,0 +1,831 @@
+{
+  "toronto-licence:B71-5475385": {
+    "disposition": "inactive_record",
+    "reason": "PLANTA confirmed its Yorkville restaurant closed on May 19, 2026. Reporting and photographs identify 1221 Bay Street. The older restaurant page and CaféTO record remain visible.",
+    "source_urls": [
+      "https://retail-insider.com/retail-insider/2026/05/planta-closes-toronto-restaurants-in-yorkville-and-queen-west/",
+      "https://www.torontotoday.ca/local/food-dining/planta-closes-toronto-locations-vegan-chain-12304850"
+    ],
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B50-0004525": {
+    "disposition": "out_of_scope",
+    "reason": "This candidate identifies the meat wholesaler at the matching address. The linked 2023 DineSafe category is Butcher Shop. Both sources point to the retail, wholesale, or institutional premises itself.",
+    "source_urls": [
+      "https://open.toronto.ca/dataset/dinesafe/",
+      "https://docs.overturemaps.org/blog/2026/11/18/release-notes/"
+    ],
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B50-0008759": {
+    "disposition": "out_of_scope",
+    "reason": "This candidate identifies the specialty foods store at the matching address. The linked 2023 DineSafe category is Supermarket. Both sources point to the retail, wholesale, or institutional premises itself.",
+    "source_urls": [
+      "https://open.toronto.ca/dataset/dinesafe/",
+      "https://docs.overturemaps.org/blog/2026/11/18/release-notes/"
+    ],
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B50-0011225": {
+    "disposition": "out_of_scope",
+    "reason": "This candidate identifies the specialty foods store at the matching address. The linked 2023 DineSafe category is Supermarket. Both sources point to the retail, wholesale, or institutional premises itself.",
+    "source_urls": [
+      "https://open.toronto.ca/dataset/dinesafe/",
+      "https://docs.overturemaps.org/blog/2026/11/18/release-notes/"
+    ],
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B50-0026882": {
+    "disposition": "out_of_scope",
+    "reason": "This candidate identifies the specialty foods store at the matching address. The linked 2023 DineSafe category is Supermarket. Both sources point to the retail, wholesale, or institutional premises itself.",
+    "source_urls": [
+      "https://open.toronto.ca/dataset/dinesafe/",
+      "https://docs.overturemaps.org/blog/2026/11/18/release-notes/"
+    ],
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B50-3364449": {
+    "disposition": "out_of_scope",
+    "reason": "This candidate identifies the specialty foods store at the matching address. The linked 2023 DineSafe category is Supermarket. Both sources point to the retail, wholesale, or institutional premises itself.",
+    "source_urls": [
+      "https://open.toronto.ca/dataset/dinesafe/",
+      "https://docs.overturemaps.org/blog/2026/11/18/release-notes/"
+    ],
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B50-3618916": {
+    "disposition": "out_of_scope",
+    "reason": "This candidate identifies the department store at the matching address. The linked 2023 DineSafe category is Supermarket. Both sources point to the retail, wholesale, or institutional premises itself.",
+    "source_urls": [
+      "https://open.toronto.ca/dataset/dinesafe/",
+      "https://docs.overturemaps.org/blog/2026/11/18/release-notes/"
+    ],
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B50-3838152": {
+    "disposition": "out_of_scope",
+    "reason": "This candidate identifies the convenience store at the matching address. The linked 2023 DineSafe category is Supermarket. Both sources point to the retail, wholesale, or institutional premises itself.",
+    "source_urls": [
+      "https://open.toronto.ca/dataset/dinesafe/",
+      "https://docs.overturemaps.org/blog/2026/11/18/release-notes/"
+    ],
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B50-4064210": {
+    "disposition": "out_of_scope",
+    "reason": "This candidate identifies the food and beverage store at the matching address. The linked 2023 DineSafe category is Food Store (Convenience/Variety). Both sources point to the retail, wholesale, or institutional premises itself.",
+    "source_urls": [
+      "https://open.toronto.ca/dataset/dinesafe/",
+      "https://docs.overturemaps.org/blog/2026/11/18/release-notes/"
+    ],
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B50-4074433": {
+    "disposition": "out_of_scope",
+    "reason": "This candidate identifies the specialty foods store at the matching address. The linked 2023 DineSafe category is Supermarket. Both sources point to the retail, wholesale, or institutional premises itself.",
+    "source_urls": [
+      "https://open.toronto.ca/dataset/dinesafe/",
+      "https://docs.overturemaps.org/blog/2026/11/18/release-notes/"
+    ],
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B50-4203264": {
+    "disposition": "out_of_scope",
+    "reason": "This candidate identifies the specialty foods store at the matching address. The linked 2023 DineSafe category is Food Store (Convenience/Variety). Both sources point to the retail, wholesale, or institutional premises itself.",
+    "source_urls": [
+      "https://open.toronto.ca/dataset/dinesafe/",
+      "https://docs.overturemaps.org/blog/2026/11/18/release-notes/"
+    ],
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B50-4423937": {
+    "disposition": "out_of_scope",
+    "reason": "This candidate identifies the specialty foods store at the matching address. The linked 2023 DineSafe category is Supermarket. Both sources point to the retail, wholesale, or institutional premises itself.",
+    "source_urls": [
+      "https://open.toronto.ca/dataset/dinesafe/",
+      "https://docs.overturemaps.org/blog/2026/11/18/release-notes/"
+    ],
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B50-4533590": {
+    "disposition": "out_of_scope",
+    "reason": "This candidate identifies the specialty foods store at the matching address. The linked 2023 DineSafe category is Food Store (Convenience/Variety). Both sources point to the retail, wholesale, or institutional premises itself.",
+    "source_urls": [
+      "https://open.toronto.ca/dataset/dinesafe/",
+      "https://docs.overturemaps.org/blog/2026/11/18/release-notes/"
+    ],
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B50-4748494": {
+    "disposition": "out_of_scope",
+    "reason": "This candidate identifies the specialty foods store at the matching address. The linked 2023 DineSafe category is Supermarket. Both sources point to the retail, wholesale, or institutional premises itself.",
+    "source_urls": [
+      "https://open.toronto.ca/dataset/dinesafe/",
+      "https://docs.overturemaps.org/blog/2026/11/18/release-notes/"
+    ],
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B50-4801846": {
+    "disposition": "out_of_scope",
+    "reason": "This candidate identifies the health food store at the matching address. The linked 2023 DineSafe category is Supermarket. Both sources point to the retail, wholesale, or institutional premises itself.",
+    "source_urls": [
+      "https://open.toronto.ca/dataset/dinesafe/",
+      "https://docs.overturemaps.org/blog/2026/11/18/release-notes/"
+    ],
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B50-4880651": {
+    "disposition": "out_of_scope",
+    "reason": "This candidate identifies the specialty foods store at the matching address. The linked 2023 DineSafe category is Supermarket. Both sources point to the retail, wholesale, or institutional premises itself.",
+    "source_urls": [
+      "https://open.toronto.ca/dataset/dinesafe/",
+      "https://docs.overturemaps.org/blog/2026/11/18/release-notes/"
+    ],
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B50-4947120": {
+    "disposition": "out_of_scope",
+    "reason": "This candidate identifies the grocery store at the matching address. The linked 2023 DineSafe category is Food Store (Convenience/Variety). Both sources point to the retail, wholesale, or institutional premises itself.",
+    "source_urls": [
+      "https://open.toronto.ca/dataset/dinesafe/",
+      "https://docs.overturemaps.org/blog/2026/11/18/release-notes/"
+    ],
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B50-5102261": {
+    "disposition": "out_of_scope",
+    "reason": "This candidate identifies the department store at the matching address. The linked 2023 DineSafe category is Supermarket. Both sources point to the retail, wholesale, or institutional premises itself.",
+    "source_urls": [
+      "https://open.toronto.ca/dataset/dinesafe/",
+      "https://docs.overturemaps.org/blog/2026/11/18/release-notes/"
+    ],
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B50-5132332": {
+    "disposition": "out_of_scope",
+    "reason": "This candidate identifies the specialty foods store at the matching address. The linked 2023 DineSafe category is Food Store (Convenience/Variety). Both sources point to the retail, wholesale, or institutional premises itself.",
+    "source_urls": [
+      "https://open.toronto.ca/dataset/dinesafe/",
+      "https://docs.overturemaps.org/blog/2026/11/18/release-notes/"
+    ],
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B50-5141894": {
+    "disposition": "out_of_scope",
+    "reason": "This candidate identifies the grocery store at the matching address. The linked 2023 DineSafe category is Food Store (Convenience/Variety). Both sources point to the retail, wholesale, or institutional premises itself.",
+    "source_urls": [
+      "https://open.toronto.ca/dataset/dinesafe/",
+      "https://docs.overturemaps.org/blog/2026/11/18/release-notes/"
+    ],
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B50-5144770": {
+    "disposition": "out_of_scope",
+    "reason": "This candidate identifies the grocery store at the matching address. The linked 2023 DineSafe category is Food Store (Convenience/Variety). Both sources point to the retail, wholesale, or institutional premises itself.",
+    "source_urls": [
+      "https://open.toronto.ca/dataset/dinesafe/",
+      "https://docs.overturemaps.org/blog/2026/11/18/release-notes/"
+    ],
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B50-5145338": {
+    "disposition": "out_of_scope",
+    "reason": "This candidate identifies the grocery store at the matching address. The linked 2023 DineSafe category is Food Store (Convenience/Variety). Both sources point to the retail, wholesale, or institutional premises itself.",
+    "source_urls": [
+      "https://open.toronto.ca/dataset/dinesafe/",
+      "https://docs.overturemaps.org/blog/2026/11/18/release-notes/"
+    ],
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B50-5324019": {
+    "disposition": "out_of_scope",
+    "reason": "This candidate identifies the pharmacy at the matching address. The linked 2023 DineSafe category is Food Store (Convenience/Variety). Both sources point to the retail, wholesale, or institutional premises itself.",
+    "source_urls": [
+      "https://open.toronto.ca/dataset/dinesafe/",
+      "https://docs.overturemaps.org/blog/2026/11/18/release-notes/"
+    ],
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B50-5352063": {
+    "disposition": "out_of_scope",
+    "reason": "This candidate identifies the shopping mall at the matching address. The linked 2023 DineSafe category is Supermarket. Both sources point to the retail, wholesale, or institutional premises itself.",
+    "source_urls": [
+      "https://open.toronto.ca/dataset/dinesafe/",
+      "https://docs.overturemaps.org/blog/2026/11/18/release-notes/"
+    ],
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B50-5404292": {
+    "disposition": "out_of_scope",
+    "reason": "This candidate identifies the grocery store at the matching address. The linked 2023 DineSafe category is Food Store (Convenience/Variety). Both sources point to the retail, wholesale, or institutional premises itself.",
+    "source_urls": [
+      "https://open.toronto.ca/dataset/dinesafe/",
+      "https://docs.overturemaps.org/blog/2026/11/18/release-notes/"
+    ],
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B50-5419290": {
+    "disposition": "out_of_scope",
+    "reason": "This candidate identifies the butcher shop at the matching address. The linked 2023 DineSafe category is Food Depot. Both sources point to the retail, wholesale, or institutional premises itself.",
+    "source_urls": [
+      "https://open.toronto.ca/dataset/dinesafe/",
+      "https://docs.overturemaps.org/blog/2026/11/18/release-notes/"
+    ],
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B71-5305198": {
+    "disposition": "out_of_scope",
+    "reason": "This candidate identifies the retirement home at the matching address. The linked 2023 DineSafe category is Retirement Homes(Licensed). Both sources point to the retail, wholesale, or institutional premises itself.",
+    "source_urls": [
+      "https://open.toronto.ca/dataset/dinesafe/",
+      "https://docs.overturemaps.org/blog/2026/11/18/release-notes/"
+    ],
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B71-5308946": {
+    "disposition": "out_of_scope",
+    "reason": "This candidate identifies the specialty foods store at the matching address. The linked 2023 DineSafe category is Supermarket. Both sources point to the retail, wholesale, or institutional premises itself.",
+    "source_urls": [
+      "https://open.toronto.ca/dataset/dinesafe/",
+      "https://docs.overturemaps.org/blog/2026/11/18/release-notes/"
+    ],
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B50-5112575": {
+    "disposition": "out_of_scope",
+    "reason": "The operator describes an event catering service at 963 O’Connor Drive. The municipal inspection history classifies this premises as a Food Caterer and the public site offers event catering.",
+    "source_urls": [
+      "https://www.cateringbynikos.com/contact-us",
+      "https://www.cateringbynikos.com/menus",
+      "https://open.toronto.ca/dataset/dinesafe/"
+    ],
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B50-5481072": {
+    "disposition": "out_of_scope",
+    "reason": "The operator’s site identifies the Wilson Avenue premises as a custom cake and confectionery bakery with scheduled pickup. The online store sells baked sweets and does not list prepared meals.",
+    "source_urls": [
+      "https://www.electriclovebakeshop.com/frequently-asked-questions",
+      "https://www.electriclovebakeshop.com/online-ordering"
+    ],
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B50-3843595": {
+    "disposition": "out_of_scope",
+    "reason": "This city record identifies the Food Basics grocery store. The operator’s branch page gives the same street address.",
+    "source_urls": [
+      "https://www.foodbasics.ca/en/find-a-grocery/100631",
+      "https://prod-ereceipt.foodbasics.ca/en/find-your-food-basics/holiday-store-hours"
+    ],
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B50-5201080": {
+    "disposition": "out_of_scope",
+    "reason": "The operator identifies the precise address as the Mount Pleasant and Eglinton Shoppers Drug Mart pharmacy and retail store.",
+    "source_urls": [
+      "https://www.shoppersdrugmart.ca/store-locator/store/0818?lang=en",
+      "https://www.shoppersdrugmart.ca/en/store-locator/store/818?lang=en"
+    ],
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B50-4706253": {
+    "disposition": "out_of_scope",
+    "reason": "This candidate identifies H Mart’s Bloor grocery store at 703 Yonge Street. Review any separately identified dining counter on its own record.",
+    "source_urls": [
+      "https://www.hmartca.com/bloor",
+      "https://www.hmartca.com/"
+    ],
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B50-3952788": {
+    "disposition": "out_of_scope",
+    "reason": "This candidate identifies the Longo’s Elizabeth grocery store at 111 Elizabeth Street. Review any separately identified dining counter on its own record.",
+    "source_urls": [
+      "https://www.longos.com/store-details/Longos%20Elizabeth",
+      "https://www.longos.com/"
+    ],
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B71-5107922": {
+    "disposition": "out_of_scope",
+    "reason": "The branch locator identifies the 29 Bathurst Street premises as the Front and Bathurst Farm Boy grocery store. The branch opening announcement corroborates it.",
+    "source_urls": [
+      "https://www.farmboy.ca/stores/front-and-bathurst/",
+      "https://www.farmboy.ca/company-news/farm-boy-opens-third-downtown-toronto-location-january-28-2021/"
+    ],
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B50-4533132": {
+    "disposition": "out_of_scope",
+    "reason": "This candidate identifies Metro’s Humber Bay Park grocery store at the same address. The branch opening announcement identifies the grocery premises.",
+    "source_urls": [
+      "https://api.metro.ca/trouver-une-epicerie/373",
+      "https://corpo.metro.ca/en/media/newsroom/2015/humber-bay-park.html"
+    ],
+    "checked_on": "2026-11-21"
+  },
+  "toronto-licence:B50-5416287": {
+    "disposition": "inactive_record",
+    "reason": "The last La Cubana location at Wellington Market closed in late summer 2026. The old landlord plan and pickup page predate the closure reporting.",
+    "source_urls": [
+      "https://www.tcf-fca.ca/la-cubana-toronto-final-location-closed-2026/",
+      "https://stephanie-dickison.squarespace.com/articles/open-closed-toronto-gta-restaurant-news-august-27-september-2-2026",
+      "https://www.corner.inc/place/ptQ1ePXN39qc"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "mississauga-directory-2025:24930": {
+    "disposition": "out_of_scope",
+    "reason": "The candidate names the mall’s dedicated chocolatier. The current landlord directory identifies the same retailer at a different unit and lists confectionery retail.",
+    "source_urls": [
+      "https://erinmills.ca/whatsinstore/store/purdyschocolatier",
+      "https://erinmills.ca/whatsinstore/brand/purdyschocolatier"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "mississauga-directory-2025:27253": {
+    "disposition": "inactive_record",
+    "reason": "The landlord plan identifies Dickey’s Barbecue Pit at food-court stall F010, the Teriyaki Experience candidate’s FC10. The landlord directory and Dickey’s opening announcement confirm the replacement at Erin Mills Town Centre.",
+    "source_urls": [
+      "https://assets.cushmanwakefield.com/-/pmedia/194994/1/erin-mills-town-centre---leasing-brochure.pdf",
+      "https://erinmills.ca/stores/dickey-s-barbeque-pit/",
+      "https://www.dickeys.com/press/press-releases/dickey-s-barbecue-pit-now-open-in-mississauga-as-brand-accelerates-canada-expansion"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "mississauga-directory-2025:24113": {
+    "disposition": "out_of_scope",
+    "reason": "Papiyona’s operator identifies the exact unit as its furniture and home décor showroom.",
+    "source_urls": [
+      "https://www.papiyona.com/pages/home-decor-furniture-store-mississauga",
+      "https://www.papiyona.com/pages/store-locations"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "mississauga-directory-2025:25436": {
+    "disposition": "out_of_scope",
+    "reason": "Pearson identifies Rock Squeeze as the Terminal 1 gate E74 concession. Only screened international travellers can reach this counter. The directory’s Dixie Road address is not the public-facing service location.",
+    "source_urls": [
+      "https://www.torontopearson.com/en/shop-dine-relax/toronto-airport-restaurants/rock-squeeze",
+      "https://www.torontopearson.com/en/at-the-airport/terminal-maps"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "mississauga-directory-2025:25785": {
+    "disposition": "out_of_scope",
+    "reason": "Operator and appointment listing identify a beauty salon at unit 109; the current listing uses the Miréa name. This unit is a personal-service premises.",
+    "source_urls": [
+      "https://sarabeautysalon.ca/our-salon",
+      "https://www.fresha.com/lvp/sara-beauty-salon-platinum-drive-mississauga-8JL4J3"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "mississauga-directory-2025:26668": {
+    "disposition": "out_of_scope",
+    "reason": "The candidate names gate F60. Pearson identifies that Starbucks as the Terminal 1 U.S. departures concession behind security, rather than public service at the Dixie Road address.",
+    "source_urls": [
+      "https://author.torontopearson.com/en/shop-dine-relax/toronto-airport-restaurants/starbucks-t1-after-gate-f60",
+      "https://www.torontopearson.com/en/at-the-airport/terminal-maps"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "mississauga-directory-2025:27123": {
+    "disposition": "out_of_scope",
+    "reason": "Pearson identifies Tap & Pour as the Terminal 3 gate B3 concession behind security. The registered Dixie Road address is not its public-facing service location.",
+    "source_urls": [
+      "https://author.torontopearson.com/en/shop-dine-relax/toronto-airport-restaurants/tap-and-pour",
+      "https://www.torontopearson.com/en/corporate/media/press-releases/2026-11-02"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "mississauga-directory-2025:28447": {
+    "disposition": "out_of_scope",
+    "reason": "Pearson’s branch page places this Wahlburgers at Terminal 1 gate F67 behind U.S. departures security. It does not operate as a public restaurant at the candidate’s Dixie Road address.",
+    "source_urls": [
+      "https://www.torontopearson.com/en/shop-dine-relax/toronto-airport-restaurants/wahlburgers-t1-after-us-f67",
+      "https://www.torontopearson.com/en/at-the-airport/terminal-maps"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B50-4417668": {
+    "disposition": "out_of_scope",
+    "reason": "The operator identifies the Tank House Lane premises as its chocolate factory and shop. The location publishes a drinks menu and confectionery pickup.",
+    "source_urls": [
+      "https://www.somachocolate.com/pages/distillery-district-location",
+      "https://www.somachocolate.com/pages/tree-parts-spreads-etc"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B50-4200510": {
+    "disposition": "out_of_scope",
+    "reason": "The city inspection history identifies a supermarket and the operator’s Woodbine store serves grocery orders at this address.",
+    "checked_on": "2026-11-22",
+    "source_urls": [
+      "https://open.toronto.ca/dataset/dinesafe/",
+      "https://www.valumart.ca/en/classic-potato-chips/p/21241032_EA"
+    ]
+  },
+  "toronto-licence:B50-4311639": {
+    "disposition": "out_of_scope",
+    "reason": "The inspection history identifies the Centra supermarket. A food supplier’s locator and the store map both identify the same grocery outlet at 2592 Finch.",
+    "checked_on": "2026-11-22",
+    "source_urls": [
+      "https://open.toronto.ca/dataset/dinesafe/",
+      "https://tazaproducts.com/location",
+      "https://www.waze.com/en-GB/live-map/directions/centra-food-market-finch-ave-w-2592-toronto?to=place.w.183763381.1837895959.6750019"
+    ]
+  },
+  "toronto-licence:B50-4423103": {
+    "disposition": "out_of_scope",
+    "reason": "The candidate is the supermarket premises for Walmart store 1139. The retailer identifies the same store number and address. Any independently named restaurant in the store is a separate venue.",
+    "checked_on": "2026-11-22",
+    "source_urls": [
+      "https://open.toronto.ca/dataset/dinesafe/",
+      "https://www.walmart.ca/store/1139-toronto-on"
+    ]
+  },
+  "toronto-licence:B50-4538062": {
+    "disposition": "out_of_scope",
+    "reason": "The inspection history identifies this premises as a supermarket. The exact address appears as a Real Canadian Superstore in the affiliated in-store brand locator and in a city property filing.",
+    "checked_on": "2026-11-22",
+    "source_urls": [
+      "https://open.toronto.ca/dataset/dinesafe/",
+      "https://www.joefresh.com/ca/store-list/brandshop",
+      "https://www.toronto.ca/legdocs/mmis/2024/cc/comm/communicationfile-182382.pdf"
+    ]
+  },
+  "toronto-licence:B50-4538064": {
+    "disposition": "out_of_scope",
+    "reason": "The inspection history identifies this premises as a supermarket. The exact address appears as a Real Canadian Superstore in the affiliated in-store brand locator and in a city property filing.",
+    "checked_on": "2026-11-22",
+    "source_urls": [
+      "https://open.toronto.ca/dataset/dinesafe/",
+      "https://www.joefresh.com/ca/store-list/brandshop",
+      "https://www.toronto.ca/legdocs/mmis/2024/cc/comm/communicationfile-182382.pdf"
+    ]
+  },
+  "toronto-licence:B50-4720202": {
+    "disposition": "out_of_scope",
+    "reason": "The inspection history identifies this premises as a supermarket. The exact address appears as a Real Canadian Superstore in the affiliated in-store brand locator and in a city property filing.",
+    "checked_on": "2026-11-22",
+    "source_urls": [
+      "https://open.toronto.ca/dataset/dinesafe/",
+      "https://www.joefresh.com/ca/store-list/brandshop",
+      "https://www.toronto.ca/legdocs/mmis/2024/cc/comm/communicationfile-182382.pdf"
+    ]
+  },
+  "toronto-licence:B50-4842277": {
+    "disposition": "out_of_scope",
+    "reason": "The city inspected the warehouse premises. The operator lists the warehouse and a distinct food court at the same address, so the warehouse record is excluded and the food court remains a separate discovery lead.",
+    "checked_on": "2026-11-22",
+    "source_urls": [
+      "https://open.toronto.ca/dataset/dinesafe/",
+      "https://www.costco.ca/w/-/on/thorncliffe-park/1316"
+    ]
+  },
+  "toronto-licence:B50-4905029": {
+    "disposition": "out_of_scope",
+    "reason": "The municipal history identifies a supermarket. Sobeys lists the same address as a grocery store with a Sobeys pharmacy.",
+    "checked_on": "2026-11-22",
+    "source_urls": [
+      "https://open.toronto.ca/dataset/dinesafe/",
+      "https://www.sobeyspharmacy.com/store-locator/",
+      "https://www.sobeys.com/store-locator"
+    ]
+  },
+  "toronto-licence:B50-4906402": {
+    "disposition": "out_of_scope",
+    "reason": "The inspection history and operator both identify a grocery store at 841 Brown’s Line. This candidate covers the supermarket premises.",
+    "checked_on": "2026-11-22",
+    "source_urls": [
+      "https://open.toronto.ca/dataset/dinesafe/",
+      "https://www.farmboy.ca/stores/"
+    ]
+  },
+  "toronto-licence:B50-4961603": {
+    "disposition": "out_of_scope",
+    "reason": "Metro identifies this exact location as its Bathurst and Steeles grocery store, agreeing with the municipal supermarket classification.",
+    "checked_on": "2026-11-22",
+    "source_urls": [
+      "https://open.toronto.ca/dataset/dinesafe/",
+      "https://www.metro.ca/en/find-a-grocery/382"
+    ]
+  },
+  "toronto-licence:B50-5201278": {
+    "disposition": "out_of_scope",
+    "reason": "The operator identifies Richard and Ruth’s NOFRILLS at this address, agreeing with the municipal supermarket classification.",
+    "checked_on": "2026-11-22",
+    "source_urls": [
+      "https://open.toronto.ca/dataset/dinesafe/",
+      "https://www.nofrills.ca/en/collection/balikbayan"
+    ]
+  },
+  "toronto-licence:B50-5223986": {
+    "disposition": "out_of_scope",
+    "reason": "The inspection history identifies a food depot. The seafood supplier lists its Davenport premises and the wholesale directory corroborates that use.",
+    "checked_on": "2026-11-22",
+    "source_urls": [
+      "https://open.toronto.ca/dataset/dinesafe/",
+      "https://coasttocoastseafood.ca/pages/contact",
+      "https://www.manta.com/ic/m1rs81x/ca/coast-to-coast-seafood"
+    ]
+  },
+  "toronto-licence:B71-3010746": {
+    "disposition": "out_of_scope",
+    "reason": "The archived inspection identifies a private club. The operator identifies the Dorchester address as its member-operated dance venue and publishes its dance programming.",
+    "checked_on": "2026-11-22",
+    "source_urls": [
+      "https://open.toronto.ca/dataset/dinesafe/",
+      "https://www.30-up.com/j36/index.php/about-the-30-up",
+      "https://30upclub.wordpress.com/contact/"
+    ]
+  },
+  "toronto-licence:B71-4418478": {
+    "disposition": "out_of_scope",
+    "reason": "The city record covers the grocery market and the operator’s locator confirms the market under the same name at 20 Ashtonbee. Separate food counters at this address can be evaluated independently.",
+    "checked_on": "2026-11-22",
+    "source_urls": [
+      "https://open.toronto.ca/dataset/dinesafe/",
+      "https://www.groupeadonis.ca/en/on/find-us"
+    ]
+  },
+  "toronto-licence:B71-4734567": {
+    "disposition": "out_of_scope",
+    "reason": "The inspection history and operator’s Wellesley booking page both identify a supermarket. This candidate is the grocery premises at 558 Yonge.",
+    "checked_on": "2026-11-22",
+    "source_urls": [
+      "https://open.toronto.ca/dataset/dinesafe/",
+      "https://www.galleriasm.com/Home/ChangStore"
+    ]
+  },
+  "toronto-licence:B71-5332118": {
+    "disposition": "out_of_scope",
+    "reason": "The merchant’s current store page confirms a specialty cheese shop at the licensed address. The documented ground-floor fitout is for retail cheese sales.",
+    "checked_on": "2026-11-22",
+    "source_urls": [
+      "https://open.toronto.ca/dataset/dinesafe/",
+      "https://www.cheesyplace.com/pages/contact-us",
+      "https://nhest.ca/address/toronto/2940-bloor-st-w"
+    ]
+  },
+  "toronto-licence:B50-3356798": {
+    "disposition": "out_of_scope",
+    "reason": "The operator identifies the Shorncliffe premises as its retail butcher and pickup counter for custom-cut meat. The same premises appears as a butcher on the map.",
+    "checked_on": "2026-11-22",
+    "source_urls": [
+      "https://butchershoppedirect.com/pages/faq",
+      "https://www.openstreetmap.org/node/4497207589"
+    ]
+  },
+  "toronto-licence:B50-4185134": {
+    "disposition": "out_of_scope",
+    "reason": "The city’s bakery record and the current exact-address operator catalog identify a custom cake and bakery shop.",
+    "checked_on": "2026-11-22",
+    "source_urls": [
+      "https://www.cakestar.ca/cakes",
+      "https://www.openstreetmap.org/node/2153230505"
+    ]
+  },
+  "toronto-licence:B50-4852799": {
+    "disposition": "out_of_scope",
+    "reason": "The operator identifies the Danforth flagship as a chocolate shop and the exact-address map record agrees.",
+    "checked_on": "2026-11-22",
+    "source_urls": [
+      "https://www.marysbsweets.com/pages/store-locator",
+      "https://www.openstreetmap.org/node/12995864470"
+    ]
+  },
+  "toronto-licence:B50-5221930": {
+    "disposition": "out_of_scope",
+    "reason": "The exact-address pickup catalog and storefront reporting identify a packaged snack and candy shop.",
+    "checked_on": "2026-11-22",
+    "source_urls": [
+      "https://order.online/store/luckys-exotic-bodega-24054735/",
+      "https://dailyhive.com/toronto/luckys-exotic-bodega-snack-shop-toronto"
+    ]
+  },
+  "toronto-licence:B50-5117034": {
+    "disposition": "out_of_scope",
+    "reason": "The branch's current operator page and branch pickup catalog identify it as a cookie bakery. Its current products are desserts, with no evidence of a public meal counter.",
+    "checked_on": "2026-11-22",
+    "source_urls": [
+      "https://thenightbaker.com/danforth-ave-location/",
+      "https://order.online/store/the-night-baker-danforth-ave-2264735"
+    ]
+  },
+  "toronto-licence:B71-4726252": {
+    "disposition": "out_of_scope",
+    "reason": "The operator describes the wine bar and restaurant as a former use. It now advertises a retail cheese, wine, and fine-foods shop at the same address with occasional ticketed tastings.",
+    "checked_on": "2026-11-22",
+    "source_urls": [
+      "https://goodcheese.ca/pages/meet-the-team",
+      "https://goodcheese.ca/pages/about",
+      "https://goodcheese.ca/"
+    ]
+  },
+  "toronto-licence:B50-5567059": {
+    "disposition": "out_of_scope",
+    "reason": "The branch-specific current order menu at 102 Peter St lists tea, fruit drinks and desserts. The municipal licence covers the same beverage shop.",
+    "checked_on": "2026-11-22",
+    "source_urls": [
+      "https://www.ubereats.com/ca/store/its-tea-downtown/ZsFqnY_tVGOSBJBKODQypg",
+      "https://opengovca.com/toronto-business/B50-5567059"
+    ]
+  },
+  "toronto-licence:B50-5614563": {
+    "disposition": "out_of_scope",
+    "reason": "The operator identifies the 252 Queen St W branch and describes its specialty as candied fruit. The current branch menu identifies dessert products and no meal counter.",
+    "checked_on": "2026-11-22",
+    "source_urls": [
+      "https://www.tanghulutanghulu.com/pages/about-us",
+      "https://restaurantguru.com/Tanghulu-Tanghulu-Toronto"
+    ]
+  },
+  "toronto-licence:B71-5593669": {
+    "disposition": "out_of_scope",
+    "reason": "The exact branch's operator locator and ordering menu identify a donut and specialty-drink counter. The decision covers this stall at 210 Augusta only.",
+    "checked_on": "2026-11-22",
+    "source_urls": [
+      "https://www.marrymemochi.ca/visit-us-locations-1",
+      "https://www.ubereats.com/ca/store/marry-me-mochi-kensington/L-komgZnUmSMnxDDFHx0cg"
+    ]
+  },
+  "toronto-licence:B50-5132579": {
+    "disposition": "out_of_scope",
+    "reason": "The operator’s current branch-specific menu at 1007 Kingston Road describes an ice cream shop. Recent coverage confirms the same location and dessert service.",
+    "checked_on": "2026-11-22",
+    "source_urls": [
+      "https://www.brettsicecream.com/our-menu-brett-s-ice-cream",
+      "https://www.hungry416.com/bretts-ice-cream-toronto-window-summer-stop/"
+    ]
+  },
+  "toronto-licence:B50-5476283": {
+    "disposition": "out_of_scope",
+    "reason": "The Well's directory and published lease plan identify the UG41 cookie shop. The operator’s branch ordering menu lists cookies and dessert drinks.",
+    "source_urls": [
+      "https://thewelltoronto.com/directory/crumbl/",
+      "https://crumblcookies.com/stores/on/toronto-area/onthewell",
+      "https://thewelltoronto.com/wp-content/uploads/2026/02/The-Well-Leasing-Brochure-February-24-2026.pdf"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B50-5594121": {
+    "disposition": "out_of_scope",
+    "reason": "The property and operator identify the current Wellington Market location as a cake and cupcake shop, with no public meal service in its current offering.",
+    "source_urls": [
+      "https://thewelltoronto.com/directory/cupcakecentral-ca/",
+      "https://cupcakecentral.ca/"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B50-5638928": {
+    "disposition": "out_of_scope",
+    "reason": "The property and operator identify the Wellington Market branch as offering candied fruit and chocolate desserts.",
+    "source_urls": [
+      "https://thewelltoronto.com/directory/tanghulu-tanghulu/",
+      "https://www.tanghulutanghulu.com/pages/about-us"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "mississauga-directory-2025:19654": {
+    "disposition": "out_of_scope",
+    "reason": "The landlord lists Food Fiesta as a grocery tenant. The inspection listing identifies the exact unit 60A as a supermarket.",
+    "source_urls": [
+      "https://westwoodsquare.ca/store/food-fiesta/",
+      "https://localhealthinspections.com/map/facility/food-fiesta-60a-7205-goreway-dr-mississauga-on-l4t-2t9-supermarket-mississauga"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "mississauga-directory-2025:18128": {
+    "disposition": "out_of_scope",
+    "reason": "Dana is the campus food service contractor, whose staffed public counters are published under separate names. The candidate is the contractor entry at the general campus address.",
+    "source_urls": [
+      "https://www.utm.utoronto.ca/hospitality/Food",
+      "https://www.utm.utoronto.ca/hospitality/Food/MoreInformation",
+      "https://www.utm.utoronto.ca/main-news/whats-new-food-u-t-explore-new-dining-options-across-three-campuses-0"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B50-0001819": {
+    "disposition": "out_of_scope",
+    "reason": "The market lease identifies this premises as a seafood retailer, and the operator at the exact address specializes in fresh and frozen seafood orders.",
+    "source_urls": [
+      "https://mikesfishmarket.ca/",
+      "https://www.toronto.ca/legdocs/mmis/2023/gg/bgrd/backgroundfile-240018.pdf"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B50-4690192": {
+    "disposition": "out_of_scope",
+    "reason": "The municipal market directory identifies unit 27 as a butcher stall retailing meat and poultry. The market lease confirms the same tenant.",
+    "source_urls": [
+      "https://www.stlawrencemarket.com/vendors/vendor_detail/112",
+      "https://www.toronto.ca/legdocs/mmis/2023/gg/bgrd/backgroundfile-240018.pdf"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B50-4927129": {
+    "disposition": "out_of_scope",
+    "reason": "The market directory identifies B31 as the same Stonemill bakehouse and describes bread, pastries and baked products. The market tenant list identifies the retail bakery.",
+    "source_urls": [
+      "https://www.stlawrencemarket.com/vendors/vendor_detail/104",
+      "https://www.toronto.ca/legdocs/mmis/2023/gg/bgrd/backgroundfile-240018.pdf"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B50-5330160": {
+    "disposition": "out_of_scope",
+    "reason": "The named B10 stall is identified by the market as a produce merchant supplying fresh fruit and vegetables. The market shopping guide confirms produce ordering at the same named stall.",
+    "source_urls": [
+      "https://www.stlawrencemarket.com/vendors/vendor_detail/88",
+      "https://www.stlawrencemarket.com/pages/alternative_shopping_methods"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B71-5380618": {
+    "disposition": "inactive_record",
+    "reason": "The Patrician Grill advertised closure at 219 King St E. Contemporary reporting and the community history confirm the restaurant closed in May 2026.",
+    "source_urls": [
+      "https://patriciangrill.com/contact-us/",
+      "https://www.torontotoday.ca/local/food-dining/patrician-grill-diner-closing-11863233",
+      "https://macedonianhistory.ca/businesses/patrician-grill"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "mississauga-directory-2025:27950": {
+    "disposition": "inactive_record",
+    "reason": "The exact-address ordering page records the former Triple O’s branch as closed in April 2026. Harvey’s official branch locator now lists the restaurant at 1520 Courtneypark Drive East.",
+    "source_urls": [
+      "https://www.ubereats.com/ca/store/triple-os-mississauga/r4FA-3DKWA-ypa_C-IJsZg",
+      "https://www.harveys.ca/en/locations/on/mississauga/1520-courtney-park-dr",
+      "https://www.tripleos.com/locations/all/"
+    ],
+    "checked_on": "2026-11-22"
+  },
+  "toronto-licence:B50-3355928": {
+    "disposition": "out_of_scope",
+    "checked_on": "2026-11-22",
+    "reason": "Toronto’s community food report and an exact-address grocery supplier listing identify this as a grocery shop. The November Overture match also classifies it as grocery.",
+    "source_urls": [
+      "https://www.toronto.ca/legdocs/mmis/2021/ec/bgrd/backgroundfile-168287.pdf",
+      "https://fairsharemarketing.ca/stores/ambal-trading/"
+    ]
+  },
+  "toronto-licence:B50-3603621": {
+    "disposition": "out_of_scope",
+    "checked_on": "2026-11-22",
+    "reason": "Exact-address branch records and the November Overture match identify this as a supermarket at 2742 Danforth. The city planning report confirms the market storefront and does not identify a separate restaurant tenant there.",
+    "source_urls": [
+      "https://www.toronto.ca/legdocs/mmis/2025/pb/bgrd/backgroundfile-257565.pdf",
+      "https://fraud.ca/on/toronto/danforth-market",
+      "https://crm.agentlocator.ca/UserFiles/1877/files/48%20Norwood%20Terrace%20Neighbourhood%20Report.pdf"
+    ]
+  },
+  "toronto-licence:B50-3948449": {
+    "disposition": "out_of_scope",
+    "checked_on": "2026-11-22",
+    "reason": "The exact-address business profiles and the November Overture match identify this as a discount retailer or supermarket.",
+    "source_urls": [
+      "https://www.bbb.org/ca/on/toronto/profile/discount-stores/price-war-0107-1236156",
+      "https://www.cylex-canada.ca/company/price-war-24196764.html"
+    ]
+  },
+  "mississauga-directory-2025:26656": {
+    "checked_on": "2026-11-22",
+    "disposition": "inactive_record",
+    "reason": "The branch history records the former Starbucks at 5960 Dixie Road as closed around September 2024. A Shelby's subsequently opened at the exact address and appears in Peel inspection records.",
+    "source_urls": [
+      "https://www.starbuckseverywhere.net/PeelRegion.htm",
+      "https://deepakanandmpp.ca/gems-of-mississauga-malton-shelbys-legendary-shawarma/",
+      "https://localhealthinspections.com/map/facility/shelbys-legendary-shawarma-5960-dixie-rd-mississauga-on-l4w-1e9-restaurant-mississauga"
+    ]
+  },
+  "toronto-licence:B71-5543579": {
+    "checked_on": "2026-11-22",
+    "disposition": "inactive_record",
+    "reason": "The exact 350 Bay Street branch posted a permanent closure notice. In-person reporting confirmed it closed in September 2026, and the branch closure list corroborates the address.",
+    "source_urls": [
+      "https://6ixretail.com/2026/09/starbucks-closes-locations-september-2026/",
+      "https://www.starbuckseverywhere.net/StarbucksClosures_Sep2026.htm"
+    ]
+  },
+  "mississauga-directory-2025:29467": {
+    "disposition": "dropped_insufficient_evidence",
+    "checked_on": "2026-11-22",
+    "reason": "The exact 2965 Argentia address is a staffed RBC branch. The employment directory and current ordering service both give 2963 Argentia for the nearby Starbucks, and no source confirmed a separate public counter at 2965.",
+    "source_urls": [
+      "https://maps.rbcroyalbank.com/ON-MISSISSAUGA-branch-9987",
+      "https://opengovca.com/mississauga-business/57348",
+      "https://www.doordash.com/city/mississauga-on/b/starbucks-11139432/"
+    ]
+  },
+  "mississauga-directory-2025:23335": {
+    "disposition": "inactive_record",
+    "checked_on": "2026-11-23",
+    "reason": "The former Mucho Burrito ordering page for Unit 3 has been closed since June 2025, and Tahini's official locator confirms current restaurant service in the same unit.",
+    "source_urls": [
+      "https://www.ubereats.com/ca/store/z-mucho-burrito/JWOsG8DjTBCJUFIac2vi3A",
+      "https://tahinis.com/locations/on/mississauga-argentia-rd-winston-churchill/"
+    ]
+  }
+}

@@ -273,10 +273,28 @@ the existing text and price schema, subtract the 48 dishes already stored
 from the two enrichment scenarios, and hold unrelated database growth
 constant.
 
-**Stage 5 decision.** Improve Toronto and Mississauga before adding a third
+**Original Stage 5 decision.** Improve Toronto and Mississauga before adding a third
 city. About 0.15% of listings have a reviewed dish, and only a quarter have
 a website. Start with the 126 listings that already yielded candidates,
 then use what works to recover more official menu links and review
 unresolved municipal listings. Aim for one or two useful dishes with
 published prices where available. Revisit expansion after the next batch
 shows how many reviewed dishes and priced venues the process can add.
+
+### Municipal follow-up
+
+- [x] Reconcile the three review ledgers to the 3,386 original candidate IDs.
+- [x] Publish the first 1,089 additions and the final 1,166 additions from existing city records.
+- [x] Close the remaining candidates using the saved eligibility, location, and duplicate evidence.
+- [x] Confirm the final publication in the hosted database.
+
+The hosted catalog has **10,111 active listings** and takes **2.28 MB**
+including indexes. The 3,386-candidate queue closed with **2,255 added**
+and **1,131 otherwise resolved**. Menus are optional for admission.
+[Restaurant ingestion runbook](restaurant-ingestion.md) ·
+[Municipal review and candidate ledger](municipal-candidate-review.md)
+
+### Live map cache
+
+- [x] Reuse recent independently sourced map results in the browser tab for up to 10 minutes.
+- [x] Keep the cache within 256 KiB and fill it through regular map use.

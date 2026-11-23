@@ -79,6 +79,39 @@ export type DiscoveryCoverage = {
   resetAt: string | null;
 };
 
+const MAP_CACHE_KEY = "craveai-map-cache-v1";
+const MAP_CACHE_TTL_MS = 10 * 60 * 1000;
+// Bound the serialized cache to 256 KiB even at two bytes per code unit.
+const MAP_CACHE_MAX_LENGTH = 128 * 1024;
+
+type CachedMapArea = { query: string; expiresAt: number; places: Suggestion[] };
+
+function readMapCache(): CachedMapArea[] {
+  try {
+    const stored = sessionStorage.getItem(MAP_CACHE_KEY);
+    const entries: CachedMapArea[] = stored ? JSON.parse(stored) : [];
+    return entries.filter((entry) => entry.expiresAt > Date.now());
+  } catch {
+    return [];
+  }
+}
+
+function cacheMapArea(query: string, places: Suggestion[], entries: CachedMapArea[]) {
+  const entry = { query, expiresAt: Date.now() + MAP_CACHE_TTL_MS, places };
+  if (JSON.stringify([entry]).length > MAP_CACHE_MAX_LENGTH) return;
+  const recent = [entry, ...entries.filter((item) => item.query !== query)];
+  let serialized = JSON.stringify(recent);
+  while (serialized.length > MAP_CACHE_MAX_LENGTH) {
+    recent.pop();
+    serialized = JSON.stringify(recent);
+  }
+  try {
+    sessionStorage.setItem(MAP_CACHE_KEY, serialized);
+  } catch {
+    // Browser storage is optional. The live request still works.
+  }
+}
+
 export async function fetchSuggestions(
     lat: number,
     lng: number,
@@ -101,8 +134,16 @@ export async function fetchSuggestions(
   }
   if (options?.name) search.set("name", options.name);
   if (options?.includeProvider) search.set("include_provider", "true");
+  const query = search.toString();
+  const cacheable = !options?.name && !options?.includeProvider;
+  signal?.throwIfAborted();
+  const cached = cacheable ? readMapCache().find((entry) => entry.query === query) : undefined;
+  if (cached) {
+    onCoverage?.({ partialReason: "catalog", resetAt: null });
+    return cached.places;
+  }
   const response = await apiFetch(
-    `/places/suggestions?${search.toString()}`,
+    `/places/suggestions?${query}`,
     { signal },
     { csrf: false },
   );
@@ -114,6 +155,11 @@ export async function fetchSuggestions(
   }
   const places: Suggestion[] = await response.json();
   const coverage = response.headers.get("x-places-coverage");
+  if (cacheable && !signal?.aborted && coverage === "catalog" &&
+      response.headers.get("x-places-requests") === "0" && places.length > 0 &&
+      places.every((place) => place.source && catalogSourceForId(place.place_id) === place.source)) {
+    cacheMapArea(query, places, readMapCache());
+  }
   onCoverage?.({
     partialReason: coverage && coverage !== "complete" ? coverage : null,
     resetAt: response.headers.get("x-ratelimit-reset"),
