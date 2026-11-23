@@ -98,15 +98,29 @@ describe("MapView viewport confirmation", () => {
       suggestions: [], recommendations: [place] };
     const { unmount } = render(<MapView {...props} />);
     await settleMapLoad();
-    const picker = screen.getByRole("combobox", { name: "Map style" });
-    expect(picker).toHaveValue("standard");
+    const picker = () => screen.getByRole("button", { name: /^Map style:/ });
+    const chooseStyle = (name: string) => {
+      fireEvent.click(picker());
+      fireEvent.click(screen.getByRole("menuitemradio", { name }));
+    };
+    expect(picker()).toHaveAccessibleName("Map style: Standard");
     const pin = screen.getByRole("button", { name: "Show Inside on map" });
     fireEvent.click(screen.getByRole("button", { name: "Pan map" }));
     const searchButton = screen.getByRole("button", { name: "Search this area" });
+    expect(searchButton.closest(".map-controls")).toBe(picker().closest(".map-controls"));
     mapHarness.setCenter.mockClear();
     mapHarness.setZoom.mockClear();
 
-    fireEvent.change(picker, { target: { value: "minimal" } });
+    fireEvent.keyDown(picker(), { key: "ArrowDown" });
+    const standard = screen.getByRole("menuitemradio", { name: "Standard" });
+    expect(standard).toHaveFocus();
+    expect(standard).toHaveAttribute("aria-checked", "true");
+    fireEvent.keyDown(standard, { key: "ArrowDown" });
+    const minimal = screen.getByRole("menuitemradio", { name: "Minimal" });
+    expect(minimal).toHaveFocus();
+    fireEvent.click(minimal);
+    expect(picker()).toHaveFocus();
+    expect(screen.queryByRole("menu")).not.toBeInTheDocument();
     expect(mapHarness.applyOptions).toHaveBeenLastCalledWith(expect.objectContaining({
       mapTypeId: "roadmap", styles: expect.arrayContaining([
         { featureType: "road.local", elementType: "labels", stylers: [{ visibility: "off" }] },
@@ -114,11 +128,11 @@ describe("MapView viewport confirmation", () => {
         { featureType: "road.highway", elementType: "geometry.fill", stylers: [{ color: "#c8d9c0" }] },
       ]),
     }));
-    fireEvent.change(picker, { target: { value: "dark" } });
+    chooseStyle("Dark");
     expect(mapHarness.applyOptions).toHaveBeenLastCalledWith(expect.objectContaining({
       mapTypeId: "roadmap", styles: expect.arrayContaining([{ elementType: "geometry", stylers: [{ color: "#252d33" }] }]),
     }));
-    fireEvent.change(picker, { target: { value: "satellite" } });
+    chooseStyle("Satellite");
     expect(mapHarness.applyOptions).toHaveBeenLastCalledWith(expect.objectContaining({ mapTypeId: "hybrid", styles: null }));
     expect(screen.getByRole("button", { name: "Show Inside on map" })).toBe(pin);
     expect(screen.getByRole("button", { name: "Search this area" })).toBe(searchButton);
@@ -129,8 +143,15 @@ describe("MapView viewport confirmation", () => {
 
     unmount();
     render(<MapView {...props} />);
-    expect(screen.getByRole("combobox", { name: "Map style" })).toHaveValue("satellite");
-    fireEvent.change(screen.getByRole("combobox", { name: "Map style" }), { target: { value: "standard" } });
+    expect(picker()).toHaveAccessibleName("Map style: Satellite");
+    fireEvent.click(picker());
+    fireEvent.keyDown(screen.getByRole("menuitemradio", { name: "Satellite" }), { key: "Escape" });
+    expect(screen.queryByRole("menu")).not.toBeInTheDocument();
+    expect(picker()).toHaveFocus();
+    fireEvent.click(picker());
+    fireEvent.pointerDown(screen.getByRole("button", { name: "Pan map" }));
+    expect(screen.queryByRole("menu")).not.toBeInTheDocument();
+    chooseStyle("Standard");
     expect(mapHarness.applyOptions).toHaveBeenLastCalledWith(expect.objectContaining({
       mapTypeId: "roadmap", styles: expect.arrayContaining([expect.objectContaining({ featureType: "poi.business" })]),
     }));
