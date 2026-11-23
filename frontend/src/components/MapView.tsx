@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { GoogleMap, InfoWindow, Marker, OverlayView } from "@react-google-maps/api";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { GoogleMap, InfoWindow, Marker, OVERLAY_MOUSE_TARGET, OverlayViewF } from "@react-google-maps/api";
 import { FilterEvidence } from "./FilterEvidence";
 
 import type { ChatRecommendation } from "../api/chat";
@@ -13,7 +13,7 @@ import { PinIcon, SearchIcon } from "./Icons";
 import { LocationLoader } from "./LoadingIndicators";
 import { RestaurantPhotos } from "./RestaurantPhotos";
 import { MapRestaurantList } from "./MapRestaurantList";
-import { getMapRestaurants, hasMapCoordinates as hasCoordinates, sameMapRestaurant } from "../utils/mapRestaurants";
+import { getMapRestaurants, hasMapCoordinates as hasCoordinates, sameMapRestaurant, type MapRestaurant } from "../utils/mapRestaurants";
 
 type MapViewProps = {
   originLocation: Coordinates | null;
@@ -207,12 +207,12 @@ export function MapView({
           title={originIsDevice ? "You are here" : `Selected location: ${locationLabel}`}
           zIndex={1000}
         />
-        {entries.map((entry) => (
+        {entries.map((entry) => entry.recommendationNumber === undefined ? null : (
           <RestaurantMarker
             key={entry.key}
+            entry={entry}
             number={entry.recommendationNumber}
-            onSelect={() => selectPlace(entry.place, entry.key)}
-            place={entry.place}
+            onSelect={selectPlace}
           />
         ))}
         {selectedPlace && hasCoordinates(selectedPlace) ? (
@@ -286,34 +286,36 @@ export function MapView({
   );
 }
 
-function RestaurantMarker({
-  place,
+const RestaurantMarker = memo(function RestaurantMarker({
+  entry,
   number,
   onSelect,
 }: {
-  place: (Suggestion | ChatRecommendation) & Coordinates;
-  number?: number;
-  onSelect: () => void;
+  entry: MapRestaurant;
+  number: number;
+  onSelect: (place: MapRestaurant["place"], key: string) => void;
 }): JSX.Element {
-  const rating = typeof place.rating === "number" ? place.rating.toFixed(1) : null;
+  const { place } = entry;
+  const { lat, lng } = place;
+  // OverlayViewF reattaches its Maps overlay if the position object changes.
+  const position = useMemo(() => ({ lat, lng }), [lat, lng]);
   return (
-    <OverlayView
-      mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
-      position={{ lat: place.lat, lng: place.lng }}
+    <OverlayViewF
+      mapPaneName={OVERLAY_MOUSE_TARGET}
+      position={position}
     >
       <button
         aria-label={`Show ${place.name} on map`}
-        onClick={onSelect}
+        onClick={() => onSelect(place, entry.key)}
         type="button"
-        className={`restaurant-map-marker${number ? " is-recommendation" : ""}${rating === null ? " is-unrated" : ""}`}
-        title={rating === null ? place.name : `${place.name}, ${rating} stars`}
+        className="restaurant-map-marker"
+        title={place.name}
       >
-        {number ? <span>{number}</span> : null}
-        {rating !== null ? <strong>★ {rating}</strong> : number ? null : <PinIcon width={16} height={16} />}
+        <span>{number}</span>
       </button>
-    </OverlayView>
+    </OverlayViewF>
   );
-}
+});
 
 function MapState({ title, children, loading = false }: { title: string; children: React.ReactNode; loading?: boolean }): JSX.Element {
   return (

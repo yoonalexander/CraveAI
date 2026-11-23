@@ -1126,27 +1126,23 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   display: inline-flex;
   min-height: 32px;
   align-items: center;
-  gap: 4px;
-  padding: 5px 9px;
-  border: 1px solid #d8d9d5;
+  justify-content: center;
+  min-width: 34px;
+  padding: 5px;
+  border: 1px solid #5d9158;
   border-radius: 9px;
-  color: #282a27;
   background: #fff;
-  box-shadow: 0 3px 8px rgba(26,31,24,.24);
+  box-shadow: 0 4px 11px rgba(49,92,45,.28);
   font-size: 11px;
   line-height: 1;
   white-space: nowrap;
   cursor: pointer;
   transform: translate(-50%,calc(-100% - 8px));
 }
-.restaurant-map-marker::after { position: absolute; bottom: -5px; left: 50%; width: 9px; height: 9px; border-right: 1px solid #d8d9d5; border-bottom: 1px solid #d8d9d5; background: #fff; content: ""; transform: translateX(-50%) rotate(45deg); }
-.restaurant-map-marker:hover { z-index: 20; transform: translate(-50%,calc(-100% - 8px)) scale(1.06); }
+.restaurant-map-marker::after { position: absolute; bottom: -5px; left: 50%; width: 9px; height: 9px; border-right: 1px solid #5d9158; border-bottom: 1px solid #5d9158; background: #fff; content: ""; transform: translateX(-50%) rotate(45deg); }
+.restaurant-map-marker:hover { z-index: 20; }
 .restaurant-map-marker:focus-visible { z-index: 20; outline: 2px solid #477b45; outline-offset: 3px; }
-.restaurant-map-marker strong { font-weight: 800; }
-.restaurant-map-marker.is-unrated { width: 36px; justify-content: center; padding-inline: 0; color: #356134; }
 .restaurant-map-marker span { display: grid; width: 20px; height: 20px; place-items: center; border-radius: 50%; color: #fff; background: #4f884b; font-weight: 850; }
-.restaurant-map-marker.is-recommendation { border-color: #5d9158; color: #2f5d2d; box-shadow: 0 4px 11px rgba(49,92,45,.28); }
-.restaurant-map-marker.is-recommendation::after { border-color: #5d9158; }
 .restaurant-map-marker, .restaurant-map-popup { font-family: var(--font-family-sans); }
 .restaurant-map-popup { display: flex; max-width: 260px; flex-direction: column; gap: 7px; padding: 3px; color: #282a27; font-size: 13px; line-height: 1.4; }
 .restaurant-map-popup strong { font-size: 15px; }

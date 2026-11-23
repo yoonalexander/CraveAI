@@ -24,13 +24,13 @@ export function MapRestaurantList({ entries, selectedKey, origin, areaLabel, isL
   return <section className="map-restaurant-list" aria-labelledby="map-list-title">
     <header><p>{areaLabel}</p><h2 id="map-list-title">Restaurants on this map</h2>
       <p role="status">{entries.length} restaurant{entries.length === 1 ? "" : "s"}{chatCount ? ` · ${chatCount} added from chat` : ""}</p>
-      <p>All loaded pins, not just the visible map. Nearby pins follow filters; chat picks stay included.</p>
+      <p>Nearby restaurants follow your filters. Chat recommendations appear as numbered pins.</p>
       {!mapAvailable ? <p>In-app map is not ready. Google Maps links are available.</p> : null}
-      {isLoading ? <p role="status">Updating restaurants… {entries.length ? "Current pins remain available until the search finishes." : "The first load may take about a minute."}</p> : null}
+      {isLoading ? <p role="status">Updating restaurants… {entries.length ? "Current results remain available until the search finishes." : "The first load may take about a minute."}</p> : null}
       {error ? <div className="map-list-notice" role="alert"><p>{error}</p>{canRetry && onRetry ? <button type="button" onClick={onRetry} disabled={isLoading}>Try again</button> : null}</div> : null}
       {coverageNotice ? <p className="map-list-notice">{coverageNotice}</p> : null}
     </header>
-    {entries.length ? <ul aria-label="Pinned restaurants">{entries.map((entry) => {
+    {entries.length ? <ul aria-label="Restaurant results">{entries.map((entry) => {
       const place = entry.place;
       const query = new URLSearchParams({ api: "1", query: `${place.lat},${place.lng}` });
       if (place.place_id && !catalogSourceForId(place.place_id)) {
@@ -51,7 +51,7 @@ export function MapRestaurantList({ entries, selectedKey, origin, areaLabel, isL
             <a href={`https://www.google.com/maps/search/?${query}`} target="_blank" rel="noreferrer">Open in Google Maps</a></div>
         </div>
       </article></li>;
-    })}</ul> : !isLoading ? <div className="map-list-empty"><PinIcon /><h3>{error ? "Restaurants are unavailable" : "No restaurant pins to show"}</h3><p>{error ? "Try the search again or choose another area." : "Clear a filter or choose another search area. You can browse without starting a chat."}</p></div> : null}
+    })}</ul> : !isLoading ? <div className="map-list-empty"><PinIcon /><h3>{error ? "Restaurants are unavailable" : "No restaurants to show"}</h3><p>{error ? "Try the search again or choose another area." : "Clear a filter or choose another search area."}</p></div> : null}
     {entries.some(({ place }) => place.place_id && !catalogSourceForId(place.place_id)) ?
       <a className="map-list-attribution" href="https://maps.google.com/" target="_blank" rel="noreferrer">Restaurant data by Google Maps</a> : null}
   </section>;

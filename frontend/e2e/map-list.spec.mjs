@@ -35,7 +35,7 @@ for (const theme of ["light", "dark"]) {
     await activate(view.getByRole("button", { name: "List 60" }), hasTouch);
     const list = page.getByRole("region", { name: "Restaurants on this map" });
     await expect(list.getByRole("listitem")).toHaveCount(60);
-    await expect(list.getByText(/All loaded pins, not just/)).toBeVisible();
+    await expect(list.getByText(/Chat recommendations appear as numbered pins/)).toBeVisible();
     await expect(list.getByAltText("Google Maps photo of Restaurant 0")).toBeVisible();
     // The browser fixture intentionally has no Maps key; browsing still works.
     await expect(list.getByRole("button", { name: "Show Restaurant 0 on map" })).toBeDisabled();

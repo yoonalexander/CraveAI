@@ -8,6 +8,7 @@ const mapHarness = vi.hoisted(() => ({
   bounds: { north: 43.75, south: 43.65, east: -79.34, west: -79.46 },
   panTo: vi.fn(),
   setZoom: vi.fn(),
+  attachOverlay: vi.fn(),
 }));
 vi.mock("../api/photos", () => ({ fetchPlacePhoto: vi.fn(async (place_id: string, index: number) => ({ place_id, index, total: 0, photo: null })), PhotoLimitError: class extends Error {} }));
 
@@ -29,8 +30,10 @@ vi.mock("@react-google-maps/api", async () => {
       getSouthWest: () => ({ lat: () => mapHarness.bounds.south, lng: () => mapHarness.bounds.west }),
     }),
   };
-  const OverlayView = ({ children }: { children: React.ReactNode }) => <>{children}</>;
-  OverlayView.OVERLAY_MOUSE_TARGET = "overlayMouseTarget";
+  const OverlayViewF = ({ children, position }: { children: React.ReactNode; position: google.maps.LatLngLiteral }) => {
+    React.useEffect(() => { mapHarness.attachOverlay(position); }, [position]);
+    return <>{children}</>;
+  };
   return {
     GoogleMap: (props: {
       children: React.ReactNode;
@@ -54,7 +57,8 @@ vi.mock("@react-google-maps/api", async () => {
     InfoWindow: ({ children, onCloseClick }: { children: React.ReactNode; onCloseClick: () => void }) => (
       <div role="dialog"><button onClick={onCloseClick} type="button">Close restaurant</button>{children}</div>
     ),
-    OverlayView,
+    OverlayViewF,
+    OVERLAY_MOUSE_TARGET: "overlayMouseTarget",
   };
 });
 
@@ -75,10 +79,11 @@ beforeEach(() => {
   mapHarness.bounds = { north: 43.75, south: 43.65, east: -79.34, west: -79.46 };
   mapHarness.panTo.mockClear();
   mapHarness.setZoom.mockClear();
+  mapHarness.attachOverlay.mockClear();
 });
 
 describe("MapView viewport confirmation", () => {
-  it("lists every loaded pin once, including chat-only venues, and focuses the exact restaurant repeatedly", async () => {
+  it("lists nearby and chat restaurants once and focuses the exact restaurant repeatedly", async () => {
     const inside = { place_id: "inside", name: "Inside", rating: 4.4, address: "1 Main Street", reason: "Nearby", lat: 43.7, lng: -79.4 };
     const outside = { name: "Outside", place_id: "outside", lat: 43.9, lng: -79.3 };
     const props = { confirmedArea: area, isLocating: false, isSearching: false, locationLabel: "Toronto", onSearchArea: vi.fn(), originIsDevice: true,
@@ -87,14 +92,14 @@ describe("MapView viewport confirmation", () => {
     expect(screen.getAllByRole("button", { name: /Show .* on map/ })).toHaveLength(2);
     fireEvent.click(screen.getByRole("button", { name: "List 2" }));
     await settleMapLoad();
-    const list = screen.getByRole("list", { name: "Pinned restaurants" });
+    const list = screen.getByRole("list", { name: "Restaurant results" });
     expect(within(list).getAllByRole("listitem")).toHaveLength(2);
-    expect(screen.getByText(/All loaded pins, not just/)).toBeInTheDocument();
+    expect(screen.getByText(/Chat recommendations appear as numbered pins/)).toBeInTheDocument();
     expect(screen.getByText("Chat pick 2")).toBeInTheDocument();
     expect(screen.getByText(/Rating unavailable/)).toBeInTheDocument();
     expect(screen.getByText("Address unavailable")).toBeInTheDocument();
     fireEvent.click(within(list).getByRole("button", { name: "Show Outside on map" }));
-    expect(screen.queryByRole("list", { name: "Pinned restaurants" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("list", { name: "Restaurant results" })).not.toBeInTheDocument();
     expect(mapHarness.panTo).toHaveBeenLastCalledWith({ lat: 43.9, lng: -79.3 });
     expect(screen.getByRole("dialog")).toHaveTextContent("Outside");
     expect(screen.getByRole("button", { name: "Map" })).toHaveFocus();
@@ -106,23 +111,24 @@ describe("MapView viewport confirmation", () => {
     expect(props.onSearchArea).not.toHaveBeenCalled();
   });
 
-  it("keeps selection, counts, refresh errors and filters aligned with the pinned set, independently of viewport movement", async () => {
+  it("keeps selection, counts, refresh errors and filters aligned with the list during viewport movement", async () => {
     const inside = { place_id: "inside", name: "Inside", rating: 4.4, address: "1 Main Street", reason: "Nearby", lat: 43.7, lng: -79.4 };
     const props = { confirmedArea: area, isLocating: false, isSearching: false, locationLabel: "Toronto", onSearchArea: vi.fn(), originIsDevice: true,
       originLocation: area.center, recenterVersion: 1, suggestions: [inside], recommendations: [] };
     const { rerender } = render(<MapView {...props} />); await settleMapLoad();
+    fireEvent.click(screen.getByRole("button", { name: "List 1" }));
     fireEvent.click(screen.getByRole("button", { name: "Show Inside on map" }));
     fireEvent.click(screen.getByRole("button", { name: "Pan map" }));
     fireEvent.click(screen.getByRole("button", { name: "List 1" }));
     await settleMapLoad();
     expect(screen.getByRole("button", { name: "Show Inside on map" })).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByRole("list", { name: "Pinned restaurants" })).toBeInTheDocument();
+    expect(screen.getByRole("list", { name: "Restaurant results" })).toBeInTheDocument();
     rerender(<MapView {...props} isSearching error="Could not search. Previous results are still shown." />);
-    expect(screen.getByText(/Current pins remain available/)).toBeInTheDocument();
+    expect(screen.getByText(/Current results remain available/)).toBeInTheDocument();
     expect(screen.getByRole("alert")).toHaveTextContent("Previous results");
     rerender(<MapView {...props} suggestions={[]} />);
     expect(screen.getByRole("button", { name: "List 0" })).toBeInTheDocument();
-    expect(screen.getByText("No restaurant pins to show")).toBeInTheDocument();
+    expect(screen.getByText("No restaurants to show")).toBeInTheDocument();
     fireEvent.keyDown(screen.getByRole("button", { name: "List 0" }), { key: "Escape" });
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Map" })).toHaveFocus();
@@ -132,48 +138,54 @@ describe("MapView viewport confirmation", () => {
     expect(screen.getByText("New area")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Show Inside on map" })).toHaveAttribute("aria-pressed", "false");
   });
-  it("renders every nearby pin and opens restaurant information on click", async () => {
+  it("numbers recommendations in chat order and opens restaurant information on click", async () => {
     const suggestions = [0, 1, 2].map((index) => ({
       place_id: `place-${index}`, name: `Restaurant ${index}`, rating: 4.3,
       address: `${index} Main Street`, reason: "Nearby", lat: 43.7 + index * 0.0001, lng: -79.4,
     }));
     render(<MapView confirmedArea={area} isLocating={false} isSearching={false} locationLabel="Toronto"
       onSearchArea={vi.fn()} originIsDevice originLocation={area.center} recenterVersion={1}
-      recommendations={[]} suggestions={suggestions} />);
+      recommendations={[suggestions[2], suggestions[0], suggestions[1]]} suggestions={suggestions} />);
     await settleMapLoad();
     expect(screen.getAllByRole("button", { name: /Show Restaurant/ })).toHaveLength(3);
-    expect(screen.queryByText(/spots/)).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Show Restaurant 2 on map" })).toHaveTextContent(/^1$/);
+    expect(screen.getByRole("button", { name: "Show Restaurant 0 on map" })).toHaveTextContent(/^2$/);
+    expect(screen.getByRole("button", { name: "Show Restaurant 1 on map" })).toHaveTextContent(/^3$/);
     fireEvent.pointerDown(screen.getByRole("button", { name: "Show Restaurant 1 on map" }));
     fireEvent.click(screen.getByRole("button", { name: "Show Restaurant 1 on map" }));
     expect(mapHarness.panTo).toHaveBeenCalledWith({ lat: suggestions[1].lat, lng: suggestions[1].lng });
     expect(screen.getByRole("dialog")).toHaveTextContent("Restaurant 1");
     expect(screen.getByRole("dialog")).toHaveTextContent("1 Main Street");
+    expect(screen.getByRole("dialog")).toHaveTextContent("★ 4.3");
     expect(screen.getByRole("link", { name: "Open in Google Maps" })).toHaveAttribute("href", expect.stringContaining("query_place_id=place-1"));
     expect(screen.queryByRole("button", { name: "Search this area" })).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Close restaurant" }));
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
-  it("renders sixty restaurant pins and does not search when the map is moved", async () => {
+  it("shows only chat pins and keeps them attached when the map moves or nearby results refresh", async () => {
     const suggestions = Array.from({ length: 60 }, (_, index) => ({
       place_id: `place-${index}`, name: `Restaurant ${index}`, rating: index % 2 ? null : 3.6,
       address: `${index} Main Street`, reason: "Nearby", lat: 43.7 + index * 0.0001, lng: -79.4,
     }));
     const onSearchArea = vi.fn();
-    render(<MapView confirmedArea={area} isLocating={false} isSearching={false} locationLabel="Toronto"
-      onSearchArea={onSearchArea} originIsDevice originLocation={area.center} recenterVersion={1}
-      recommendations={[]} suggestions={suggestions} />);
+    const props = { confirmedArea: area, isLocating: false, isSearching: false, locationLabel: "Toronto",
+      onSearchArea, originIsDevice: true, originLocation: area.center, recenterVersion: 1, recommendations: [] };
+    const { rerender } = render(<MapView {...props} suggestions={suggestions} />);
     await settleMapLoad();
-    expect(screen.getAllByRole("button", { name: /Show Restaurant/ })).toHaveLength(60);
-    expect(screen.getByRole("button", { name: "Show Restaurant 0 on map" })).toHaveTextContent("★ 3.6");
-    const unrated = screen.getByRole("button", { name: "Show Restaurant 1 on map" });
-    expect(unrated).toHaveClass("is-unrated");
-    expect(unrated).toHaveAttribute("title", "Restaurant 1");
-    expect(unrated).toHaveTextContent(/^$/);
+    expect(screen.queryAllByRole("button", { name: /Show Restaurant/ })).toHaveLength(0);
+    expect(screen.getByRole("button", { name: "List 60" })).toBeInTheDocument();
+    const recommendations = suggestions.slice(0, 3);
+    rerender(<MapView {...props} suggestions={suggestions} recommendations={recommendations} />);
+    expect(screen.getAllByRole("button", { name: /Show Restaurant/ })).toHaveLength(3);
     fireEvent.click(screen.getByRole("button", { name: "Pan map" }));
     expect(onSearchArea).not.toHaveBeenCalled();
-    fireEvent.click(unrated);
-    expect(screen.getByRole("dialog")).toHaveTextContent("Restaurant 1");
+    const updated = suggestions.map((suggestion) => ({ ...suggestion, rating: 4.7 }));
+    rerender(<MapView {...props} suggestions={updated} recommendations={recommendations} />);
+    expect(mapHarness.attachOverlay).toHaveBeenCalledTimes(3);
+    expect(screen.getByRole("button", { name: "Show Restaurant 1 on map" })).toHaveTextContent(/^2$/);
+    rerender(<MapView {...props} suggestions={updated} />);
+    expect(screen.queryAllByRole("button", { name: /Show Restaurant/ })).toHaveLength(0);
   });
 
   it("focuses chat-only places repeatedly and keeps the original recommendation number", async () => {

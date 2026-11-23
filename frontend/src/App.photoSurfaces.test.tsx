@@ -7,16 +7,15 @@ import { AuthProvider } from "./context/AuthContext";
 // shared gallery, navigation, hydration and API client run together.
 vi.mock("@react-google-maps/api", async () => {
   const React = await vi.importActual<typeof import("react")>("react");
-  const map = { setCenter: vi.fn(), setZoom: vi.fn(), fitBounds: vi.fn(), panTo: vi.fn() };
-  const OverlayView = ({ children }: { children: React.ReactNode }) => <>{children}</>;
-  OverlayView.OVERLAY_MOUSE_TARGET = "overlayMouseTarget";
+  const map = { setCenter: vi.fn(), setZoom: vi.fn(), fitBounds: vi.fn(), panTo: vi.fn(), getZoom: () => 13 };
+  const OverlayViewF = ({ children }: { children: React.ReactNode }) => <>{children}</>;
   return {
     useJsApiLoader: () => ({ isLoaded: true, loadError: undefined }),
     GoogleMap: ({ children, onLoad, onUnmount }: { children: React.ReactNode; onLoad: (value: typeof map) => void; onUnmount: () => void }) => {
       React.useEffect(() => { onLoad(map); return onUnmount; }, []);
       return <>{children}</>;
     },
-    OverlayView, Marker: () => null,
+    OverlayViewF, OVERLAY_MOUSE_TARGET: "overlayMouseTarget", Marker: () => null,
     InfoWindow: ({ children, onCloseClick }: { children: React.ReactNode; onCloseClick: () => void }) => <div role="dialog" aria-label="Restaurant information"><button onClick={onCloseClick}>Close restaurant</button>{children}</div>,
   };
 });
@@ -53,6 +52,7 @@ it("uses the correct venue photos across map, chat, Discovery and Likes without 
     return new Response(JSON.stringify(data), { headers: { "Content-Type": "application/json" } });
   }));
   render(<AuthProvider><App /></AuthProvider>);
+  fireEvent.click(await screen.findByRole("button", { name: "List 2" }));
   fireEvent.click(await screen.findByRole("button", { name: "Show Ramen House on map" }));
   const popup = screen.getByRole("dialog", { name: "Restaurant information" });
   expect(await within(popup).findByAltText("Google Maps photo of Ramen House")).toHaveAttribute("src", "https://lh3.googleusercontent.com/place-0-0");
@@ -61,6 +61,10 @@ it("uses the correct venue photos across map, chat, Discovery and Likes without 
   fireEvent.change(composer, { target: { value: "Thai dinner" } });
   fireEvent.keyDown(composer, { key: "Enter" });
   await screen.findByText("Try the Thai kitchen.");
+  const pin = await screen.findByRole("button", { name: "Show Thai Kitchen on map" });
+  expect(pin).toHaveTextContent(/^1$/);
+  fireEvent.click(pin);
+  expect(screen.getByRole("dialog", { name: "Restaurant information" })).toHaveTextContent("★ 4.4");
   const chat = document.querySelector(".chat-recommendations") as HTMLElement;
   expect(await within(chat).findByAltText("Google Maps photo of Thai Kitchen")).toHaveAttribute("src", "https://lh3.googleusercontent.com/place-1-0");
   fireEvent.click(screen.getByRole("link", { name: "Discovery" }));
