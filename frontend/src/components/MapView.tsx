@@ -60,9 +60,21 @@ const standardStyles: google.maps.MapTypeStyle[] = [
 const mapOptionsByStyle: Record<MapStyle, google.maps.MapOptions> = {
   standard: { ...mapOptions, mapTypeId: "roadmap", styles: standardStyles },
   minimal: { ...mapOptions, mapTypeId: "roadmap", styles: [
+    { elementType: "geometry", stylers: [{ color: "#f6f6ef" }] },
+    { elementType: "labels.icon", stylers: [{ visibility: "off" }] },
+    { elementType: "labels.text.fill", stylers: [{ color: "#34452e" }] },
+    { elementType: "labels.text.stroke", stylers: [{ color: "#f6f6ef" }] },
+    { featureType: "administrative.land_parcel", stylers: [{ visibility: "off" }] },
     { featureType: "poi", elementType: "labels", stylers: [{ visibility: "off" }] },
+    { featureType: "poi.park", elementType: "geometry", stylers: [{ color: "#e5eedf" }] },
     { featureType: "road.local", elementType: "labels", stylers: [{ visibility: "off" }] },
+    { featureType: "road", elementType: "geometry.fill", stylers: [{ color: "#ffffff" }] },
+    { featureType: "road", elementType: "geometry.stroke", stylers: [{ color: "#e3e8dd" }] },
+    { featureType: "road.arterial", elementType: "geometry.stroke", stylers: [{ color: "#d3ddce" }] },
+    { featureType: "road.highway", elementType: "geometry.fill", stylers: [{ color: "#c8d9c0" }] },
+    { featureType: "road.highway", elementType: "geometry.stroke", stylers: [{ color: "#b8ccae" }] },
     { featureType: "transit", stylers: [{ visibility: "off" }] },
+    { featureType: "water", elementType: "geometry", stylers: [{ color: "#cbded8" }] },
   ] },
   dark: { ...mapOptions, mapTypeId: "roadmap", styles: [
     ...standardStyles,

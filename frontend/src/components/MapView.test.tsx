@@ -108,7 +108,11 @@ describe("MapView viewport confirmation", () => {
 
     fireEvent.change(picker, { target: { value: "minimal" } });
     expect(mapHarness.applyOptions).toHaveBeenLastCalledWith(expect.objectContaining({
-      mapTypeId: "roadmap", styles: expect.arrayContaining([expect.objectContaining({ featureType: "road.local" })]),
+      mapTypeId: "roadmap", styles: expect.arrayContaining([
+        { featureType: "road.local", elementType: "labels", stylers: [{ visibility: "off" }] },
+        { featureType: "poi.park", elementType: "geometry", stylers: [{ color: "#e5eedf" }] },
+        { featureType: "road.highway", elementType: "geometry.fill", stylers: [{ color: "#c8d9c0" }] },
+      ]),
     }));
     fireEvent.change(picker, { target: { value: "dark" } });
     expect(mapHarness.applyOptions).toHaveBeenLastCalledWith(expect.objectContaining({
