@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { GoogleMap, InfoWindow, Marker, OVERLAY_MOUSE_TARGET, OverlayViewF } from "@react-google-maps/api";
 import { FilterEvidence } from "./FilterEvidence";
 
@@ -9,7 +9,7 @@ import { useGoogleMaps } from "../context/GoogleMapsContext";
 import type { Coordinates, SearchArea, ViewportBounds } from "../types/searchArea";
 import { calculateDistanceKm } from "../utils/suggestionPool";
 import { recordStartupTiming } from "../utils/startupTelemetry";
-import { PinIcon, SearchIcon } from "./Icons";
+import { ChevronDownIcon, PinIcon, SearchIcon } from "./Icons";
 import { LocationLoader } from "./LoadingIndicators";
 import { RestaurantPhotos } from "./RestaurantPhotos";
 import { MapRestaurantList } from "./MapRestaurantList";
@@ -40,6 +40,7 @@ const MAX_VIEWPORT_RADIUS_METERS = 20_000;
 const MAP_STYLE_STORAGE_KEY = "craveai:map-style:v1";
 const MAP_STYLE_LABELS = { standard: "Standard", minimal: "Minimal", dark: "Dark", satellite: "Satellite" };
 type MapStyle = keyof typeof MAP_STYLE_LABELS;
+const MAP_STYLES = Object.keys(MAP_STYLE_LABELS) as MapStyle[];
 
 const mapOptions: google.maps.MapOptions = {
   clickableIcons: false,
@@ -294,6 +295,7 @@ export function MapView({
   }
 
   const tooWide = Boolean(draftArea && draftArea.radius > MAX_VIEWPORT_RADIUS_METERS);
+  const searchLabel = tooWide ? "Zoom in to search this area" : isSearching ? "Searching…" : "Search this area";
 
   return (
     <section
@@ -307,22 +309,34 @@ export function MapView({
       onPointerDown={(event) => { if (!showList && (event.target as HTMLElement).closest(".map-canvas")) interactionArmed.current = true; }}
       onWheel={(event) => { if (!showList && (event.target as HTMLElement).closest(".map-canvas")) interactionArmed.current = true; }}
     >
-      <div className="map-view-control" role="group" aria-label="Restaurant view">
-        <button ref={mapButton} type="button" aria-pressed={!showList} aria-controls="restaurant-map-canvas" onClick={() => changeListOpen(false)}><PinIcon />Map</button>
-        <button type="button" aria-pressed={showList} aria-controls="map-restaurant-results" onClick={() => changeListOpen(true)}>List <span>{entries.length}</span></button>
-        {!showList && mapReady ? (
-          <select aria-label="Map style" className="map-style-picker" value={mapStyle} onChange={(event) => {
-            const style = event.currentTarget.value;
-            if (!isMapStyle(style)) return;
+      <div className="map-controls">
+        <div className="map-view-control" role="group" aria-label="Restaurant view">
+          <button ref={mapButton} type="button" aria-pressed={!showList} aria-controls="restaurant-map-canvas" onClick={() => changeListOpen(false)}><PinIcon />Map</button>
+          <button type="button" aria-pressed={showList} aria-controls="map-restaurant-results" onClick={() => changeListOpen(true)}>List <span>{entries.length}</span></button>
+          {!showList && mapReady ? <MapStylePicker value={mapStyle} onChange={(style) => {
             setMapStyle(style);
             try {
               window.localStorage.setItem(MAP_STYLE_STORAGE_KEY, style);
             } catch {
               // The selected style still works when browser storage is unavailable.
             }
-          }}>
-            {Object.entries(MAP_STYLE_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
-          </select>
+          }} /> : null}
+        </div>
+        {!showList && draftArea ? (
+          <button
+            aria-label={searchLabel}
+            className={`search-this-area-button${tooWide ? " is-warning" : ""}`}
+            disabled={isSearching || tooWide}
+            onClick={() => onSearchArea(draftArea)}
+            title={searchLabel}
+            type="button"
+          >
+            <SearchIcon />
+            <span className="map-search-label">{searchLabel}</span>
+            <span className="map-search-short-label" aria-hidden="true">
+              {tooWide ? "Zoom in" : isSearching ? "Searching…" : "Search"}
+            </span>
+          </button>
         ) : null}
       </div>
       <div className="map-canvas" id="restaurant-map-canvas" aria-hidden={showList}>{content}</div>
@@ -336,19 +350,74 @@ export function MapView({
           changeListOpen(false); mapButton.current?.focus();
         }} />
       </div> : null}
-      {!showList && draftArea ? (
-        <button
-          className={`search-this-area-button${tooWide ? " is-warning" : ""}`}
-          disabled={isSearching || tooWide}
-          onClick={() => onSearchArea(draftArea)}
-          type="button"
-        >
-          <SearchIcon />
-          {tooWide ? "Zoom in to search this area" : isSearching ? "Searching…" : "Search this area"}
-        </button>
-      ) : null}
       {!showList && isSearching ? <div className="map-searching-badge" role="status">Updating this map area…</div> : null}
     </section>
+  );
+}
+
+function MapStylePicker({ value, onChange }: { value: MapStyle; onChange: (style: MapStyle) => void }): JSX.Element {
+  const menuId = useId();
+  const pickerRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    menuRef.current?.querySelector<HTMLButtonElement>('[aria-checked="true"]')?.focus();
+    const dismissOutside = (event: PointerEvent) => {
+      if (!pickerRef.current?.contains(event.target as Node)) setOpen(false);
+    };
+    document.addEventListener("pointerdown", dismissOutside);
+    return () => document.removeEventListener("pointerdown", dismissOutside);
+  }, [open]);
+
+  const closeAndFocus = () => {
+    setOpen(false);
+    triggerRef.current?.focus();
+  };
+
+  return (
+    <div className="map-style-picker" ref={pickerRef} onBlur={(event) => {
+      if (!event.currentTarget.contains(event.relatedTarget)) setOpen(false);
+    }}>
+      <button ref={triggerRef} className="map-style-trigger" type="button"
+        aria-label={`Map style: ${MAP_STYLE_LABELS[value]}`} aria-haspopup="menu" aria-expanded={open}
+        aria-controls={open ? menuId : undefined} onClick={() => setOpen(!open)}
+        onKeyDown={(event) => {
+          if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+            event.preventDefault();
+            setOpen(true);
+          }
+        }}>
+        {MAP_STYLE_LABELS[value]}<ChevronDownIcon />
+      </button>
+      {open ? <div id={menuId} ref={menuRef} className="map-style-menu" role="menu" aria-label="Map style"
+        onKeyDown={(event) => {
+          if (event.key === "Escape") {
+            event.preventDefault();
+            event.stopPropagation();
+            closeAndFocus();
+            return;
+          }
+          const options = Array.from(event.currentTarget.querySelectorAll<HTMLButtonElement>("button"));
+          const index = options.indexOf(document.activeElement as HTMLButtonElement);
+          const last = options.length - 1;
+          const next = event.key === "Home" ? 0 : event.key === "End" ? last
+            : event.key === "ArrowDown" ? (index + 1) % options.length
+            : event.key === "ArrowUp" ? (index <= 0 ? last : index - 1) : -1;
+          if (next < 0) return;
+          event.preventDefault();
+          options[next]?.focus();
+        }}>
+        {MAP_STYLES.map((style) => <button key={style} type="button" role="menuitemradio" tabIndex={-1}
+          aria-checked={value === style} onClick={() => { onChange(style); closeAndFocus(); }}>
+          <span className="map-style-swatch" data-style={style} aria-hidden="true" />
+          {MAP_STYLE_LABELS[style]}
+          {value === style ? <span className="map-style-check" aria-hidden="true">✓</span> : null}
+        </button>)}
+      </div> : null}
+    </div>
   );
 }
 
