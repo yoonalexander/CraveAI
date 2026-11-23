@@ -120,6 +120,7 @@ export function Sidebar({
     return (
       <a
         aria-current={active ? "page" : undefined}
+        aria-label={item.label}
         className="sidebar-link"
         href={item.path}
         key={item.path}
@@ -229,7 +230,7 @@ export function Sidebar({
                 <strong>Get responses tailored to you</strong>
                 <p>Log in to save spots and get answers based on your preferences.</p>
               </div>
-              <a className="sidebar-login-button" href="/login">
+              <a aria-label="Log in" className="sidebar-login-button" href="/login">
                 <UserIcon className="sidebar-icon sidebar-login-icon" />
                 <span>Log in</span>
               </a>
