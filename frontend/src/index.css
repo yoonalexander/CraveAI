@@ -1060,6 +1060,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .map-view-control button[aria-pressed="true"] { border-color: #b0c6a6; background: #eaf2e5; color: #315b2a; }
 .map-view-control button svg { width: 16px; height: 16px; }
 .map-view-control button span { min-width: 20px; padding: 2px 5px; border-radius: 5px; background: #eff3ec; font-size: 11px; }
+.map-style-picker { min-height: 44px; min-width: 0; padding: 8px; border: 1px solid #d3ddce; border-radius: 9px; background: #fff; color: #34452e; font: inherit; font-size: 13px; font-weight: 650; cursor: pointer; }
 .map-surface .search-this-area-button { top: 76px; }
 .map-list-surface { position: absolute; z-index: 3; inset: 0; padding-top: 76px; background: #f5f8f2; }
 .map-restaurant-list { height: 100%; overflow-y: auto; overscroll-behavior: contain; padding: 0 16px 18px; color: #303b2b; }
@@ -1090,6 +1091,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .map-list-empty p { font-size: 13px; line-height: 1.5; }
 .dark .map-view-control, .dark .map-list-card { color: #e1ebd9; background: #2b3825; border-color: #536c45; }
 .dark .map-view-control button { color: #e1ebd9; }
+.dark .map-style-picker { background: #2b3825; color: #e1ebd9; border-color: #536c45; color-scheme: dark; }
 .dark .map-view-control button[aria-pressed="true"], .dark .map-view-control button span, .dark .map-list-chat-label, .dark .map-list-actions button, .dark .map-list-notice { color: #e2f2d5; background: #405734; border-color: #869f76; }
 .dark .map-list-surface { background: #202d1b; }
 .dark .map-restaurant-list { color: #e1ebd9; }

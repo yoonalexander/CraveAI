@@ -7,7 +7,9 @@ const mapHarness = vi.hoisted(() => ({
   center: { lat: 43.7, lng: -79.4 },
   bounds: { north: 43.75, south: 43.65, east: -79.34, west: -79.46 },
   panTo: vi.fn(),
+  setCenter: vi.fn(),
   setZoom: vi.fn(),
+  applyOptions: vi.fn(),
   attachOverlay: vi.fn(),
 }));
 vi.mock("../api/photos", () => ({ fetchPlacePhoto: vi.fn(async (place_id: string, index: number) => ({ place_id, index, total: 0, photo: null })), PhotoLimitError: class extends Error {} }));
@@ -20,7 +22,7 @@ vi.mock("@react-google-maps/api", async () => {
   const React = await vi.importActual<typeof import("react")>("react");
   const fakeMap = {
     fitBounds: vi.fn(),
-    setCenter: vi.fn(),
+    setCenter: mapHarness.setCenter,
     setZoom: mapHarness.setZoom,
     panTo: mapHarness.panTo,
     getZoom: () => 13,
@@ -37,6 +39,7 @@ vi.mock("@react-google-maps/api", async () => {
   return {
     GoogleMap: (props: {
       children: React.ReactNode;
+      options: google.maps.MapOptions;
       onDragStart: () => void;
       onIdle: () => void;
       onLoad: (map: typeof fakeMap) => void;
@@ -46,6 +49,7 @@ vi.mock("@react-google-maps/api", async () => {
         props.onLoad(fakeMap);
         return props.onUnmount;
       }, []);
+      React.useEffect(() => { mapHarness.applyOptions(props.options); }, [props.options]);
       return (
         <div>
           <button onClick={() => { props.onDragStart(); props.onIdle(); }} type="button">Pan map</button>
@@ -78,11 +82,56 @@ beforeEach(() => {
   mapHarness.center = { lat: 43.7, lng: -79.4 };
   mapHarness.bounds = { north: 43.75, south: 43.65, east: -79.34, west: -79.46 };
   mapHarness.panTo.mockClear();
+  mapHarness.setCenter.mockClear();
   mapHarness.setZoom.mockClear();
+  mapHarness.applyOptions.mockClear();
   mapHarness.attachOverlay.mockClear();
+  window.localStorage.removeItem("craveai:map-style:v1");
 });
 
 describe("MapView viewport confirmation", () => {
+  it("switches and remembers map styles without recentering, replacing chat pins, or searching", async () => {
+    const place = { place_id: "inside", name: "Inside", rating: 4.4, lat: 43.7, lng: -79.4 };
+    const onSearchArea = vi.fn();
+    const props = { confirmedArea: area, isLocating: false, isSearching: false, locationLabel: "Toronto",
+      onSearchArea, originIsDevice: true, originLocation: area.center, recenterVersion: 1,
+      suggestions: [], recommendations: [place] };
+    const { unmount } = render(<MapView {...props} />);
+    await settleMapLoad();
+    const picker = screen.getByRole("combobox", { name: "Map style" });
+    expect(picker).toHaveValue("standard");
+    const pin = screen.getByRole("button", { name: "Show Inside on map" });
+    fireEvent.click(screen.getByRole("button", { name: "Pan map" }));
+    const searchButton = screen.getByRole("button", { name: "Search this area" });
+    mapHarness.setCenter.mockClear();
+    mapHarness.setZoom.mockClear();
+
+    fireEvent.change(picker, { target: { value: "minimal" } });
+    expect(mapHarness.applyOptions).toHaveBeenLastCalledWith(expect.objectContaining({
+      mapTypeId: "roadmap", styles: expect.arrayContaining([expect.objectContaining({ featureType: "road.local" })]),
+    }));
+    fireEvent.change(picker, { target: { value: "dark" } });
+    expect(mapHarness.applyOptions).toHaveBeenLastCalledWith(expect.objectContaining({
+      mapTypeId: "roadmap", styles: expect.arrayContaining([{ elementType: "geometry", stylers: [{ color: "#252d33" }] }]),
+    }));
+    fireEvent.change(picker, { target: { value: "satellite" } });
+    expect(mapHarness.applyOptions).toHaveBeenLastCalledWith(expect.objectContaining({ mapTypeId: "hybrid", styles: null }));
+    expect(screen.getByRole("button", { name: "Show Inside on map" })).toBe(pin);
+    expect(screen.getByRole("button", { name: "Search this area" })).toBe(searchButton);
+    expect(mapHarness.attachOverlay).toHaveBeenCalledOnce();
+    expect(mapHarness.setCenter).not.toHaveBeenCalled();
+    expect(mapHarness.setZoom).not.toHaveBeenCalled();
+    expect(onSearchArea).not.toHaveBeenCalled();
+
+    unmount();
+    render(<MapView {...props} />);
+    expect(screen.getByRole("combobox", { name: "Map style" })).toHaveValue("satellite");
+    fireEvent.change(screen.getByRole("combobox", { name: "Map style" }), { target: { value: "standard" } });
+    expect(mapHarness.applyOptions).toHaveBeenLastCalledWith(expect.objectContaining({
+      mapTypeId: "roadmap", styles: expect.arrayContaining([expect.objectContaining({ featureType: "poi.business" })]),
+    }));
+  });
+
   it("lists nearby and chat restaurants once and focuses the exact restaurant repeatedly", async () => {
     const inside = { place_id: "inside", name: "Inside", rating: 4.4, address: "1 Main Street", reason: "Nearby", lat: 43.7, lng: -79.4 };
     const outside = { name: "Outside", place_id: "outside", lat: 43.9, lng: -79.3 };

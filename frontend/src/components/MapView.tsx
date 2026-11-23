@@ -37,6 +37,9 @@ type MapViewProps = {
 };
 
 const MAX_VIEWPORT_RADIUS_METERS = 20_000;
+const MAP_STYLE_STORAGE_KEY = "craveai:map-style:v1";
+const MAP_STYLE_LABELS = { standard: "Standard", minimal: "Minimal", dark: "Dark", satellite: "Satellite" };
+type MapStyle = keyof typeof MAP_STYLE_LABELS;
 
 const mapOptions: google.maps.MapOptions = {
   clickableIcons: false,
@@ -47,11 +50,47 @@ const mapOptions: google.maps.MapOptions = {
   streetViewControl: false,
   zoomControl: true,
   zoomControlOptions: { position: 7 },
-  styles: [
-    { featureType: "poi.business", stylers: [{ visibility: "off" }] },
-    { featureType: "transit", stylers: [{ visibility: "off" }] },
-  ],
 };
+
+const standardStyles: google.maps.MapTypeStyle[] = [
+  { featureType: "poi.business", stylers: [{ visibility: "off" }] },
+  { featureType: "transit", stylers: [{ visibility: "off" }] },
+];
+
+const mapOptionsByStyle: Record<MapStyle, google.maps.MapOptions> = {
+  standard: { ...mapOptions, mapTypeId: "roadmap", styles: standardStyles },
+  minimal: { ...mapOptions, mapTypeId: "roadmap", styles: [
+    { featureType: "poi", elementType: "labels", stylers: [{ visibility: "off" }] },
+    { featureType: "road.local", elementType: "labels", stylers: [{ visibility: "off" }] },
+    { featureType: "transit", stylers: [{ visibility: "off" }] },
+  ] },
+  dark: { ...mapOptions, mapTypeId: "roadmap", styles: [
+    ...standardStyles,
+    { elementType: "geometry", stylers: [{ color: "#252d33" }] },
+    { elementType: "labels.text.fill", stylers: [{ color: "#c5d0d6" }] },
+    { elementType: "labels.text.stroke", stylers: [{ color: "#252d33" }] },
+    { featureType: "administrative", elementType: "geometry.stroke", stylers: [{ color: "#52616b" }] },
+    { featureType: "poi.park", elementType: "geometry", stylers: [{ color: "#2d4238" }] },
+    { featureType: "road", elementType: "geometry", stylers: [{ color: "#43515b" }] },
+    { featureType: "road", elementType: "geometry.stroke", stylers: [{ color: "#303b43" }] },
+    { featureType: "road.highway", elementType: "geometry.fill", stylers: [{ color: "#6a6856" }] },
+    { featureType: "water", elementType: "geometry", stylers: [{ color: "#172b3a" }] },
+  ] },
+  satellite: { ...mapOptions, mapTypeId: "hybrid", styles: null },
+};
+
+function isMapStyle(value: string | null): value is MapStyle {
+  return value !== null && Object.prototype.hasOwnProperty.call(MAP_STYLE_LABELS, value);
+}
+
+function readMapStyle(): MapStyle {
+  try {
+    const saved = window.localStorage.getItem(MAP_STYLE_STORAGE_KEY);
+    return isMapStyle(saved) ? saved : "standard";
+  } catch {
+    return "standard";
+  }
+}
 
 export function MapView({
   originLocation,
@@ -83,6 +122,7 @@ export function MapView({
   const [selectedPlace, setSelectedPlace] = useState<Suggestion | ChatRecommendation | null>(null);
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const [localListOpen, setLocalListOpen] = useState(false);
+  const [mapStyle, setMapStyle] = useState(readMapStyle);
   const mapButton = useRef<HTMLButtonElement>(null);
   const showList = listOpen ?? localListOpen;
   const entries = useMemo(() => getMapRestaurants(suggestions, recommendations), [suggestions, recommendations]);
@@ -198,7 +238,7 @@ export function MapView({
         }}
         onUnmount={() => { mapRef.current = null; setMapReady(false); }}
         onZoomChanged={captureViewport}
-        options={mapOptions}
+        options={mapOptionsByStyle[mapStyle]}
         zoom={13}
       >
         <Marker
@@ -258,6 +298,20 @@ export function MapView({
       <div className="map-view-control" role="group" aria-label="Restaurant view">
         <button ref={mapButton} type="button" aria-pressed={!showList} aria-controls="restaurant-map-canvas" onClick={() => changeListOpen(false)}><PinIcon />Map</button>
         <button type="button" aria-pressed={showList} aria-controls="map-restaurant-results" onClick={() => changeListOpen(true)}>List <span>{entries.length}</span></button>
+        {!showList && mapReady ? (
+          <select aria-label="Map style" className="map-style-picker" value={mapStyle} onChange={(event) => {
+            const style = event.currentTarget.value;
+            if (!isMapStyle(style)) return;
+            setMapStyle(style);
+            try {
+              window.localStorage.setItem(MAP_STYLE_STORAGE_KEY, style);
+            } catch {
+              // The selected style still works when browser storage is unavailable.
+            }
+          }}>
+            {Object.entries(MAP_STYLE_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+          </select>
+        ) : null}
       </div>
       <div className="map-canvas" id="restaurant-map-canvas" aria-hidden={showList}>{content}</div>
       {showList ? <div id="map-restaurant-results" className="map-list-surface"><MapRestaurantList
