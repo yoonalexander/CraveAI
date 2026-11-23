@@ -165,8 +165,15 @@ describe("MapView viewport confirmation", () => {
       recommendations={[]} suggestions={suggestions} />);
     await settleMapLoad();
     expect(screen.getAllByRole("button", { name: /Show Restaurant/ })).toHaveLength(60);
+    expect(screen.getByRole("button", { name: "Show Restaurant 0 on map" })).toHaveTextContent("★ 3.6");
+    const unrated = screen.getByRole("button", { name: "Show Restaurant 1 on map" });
+    expect(unrated).toHaveClass("is-unrated");
+    expect(unrated).toHaveAttribute("title", "Restaurant 1");
+    expect(unrated).toHaveTextContent(/^$/);
     fireEvent.click(screen.getByRole("button", { name: "Pan map" }));
     expect(onSearchArea).not.toHaveBeenCalled();
+    fireEvent.click(unrated);
+    expect(screen.getByRole("dialog")).toHaveTextContent("Restaurant 1");
   });
 
   it("focuses chat-only places repeatedly and keeps the original recommendation number", async () => {

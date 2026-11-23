@@ -1143,6 +1143,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .restaurant-map-marker:hover { z-index: 20; transform: translate(-50%,calc(-100% - 8px)) scale(1.06); }
 .restaurant-map-marker:focus-visible { z-index: 20; outline: 2px solid #477b45; outline-offset: 3px; }
 .restaurant-map-marker strong { font-weight: 800; }
+.restaurant-map-marker.is-unrated { width: 36px; justify-content: center; padding-inline: 0; color: #356134; }
 .restaurant-map-marker span { display: grid; width: 20px; height: 20px; place-items: center; border-radius: 50%; color: #fff; background: #4f884b; font-weight: 850; }
 .restaurant-map-marker.is-recommendation { border-color: #5d9158; color: #2f5d2d; box-shadow: 0 4px 11px rgba(49,92,45,.28); }
 .restaurant-map-marker.is-recommendation::after { border-color: #5d9158; }

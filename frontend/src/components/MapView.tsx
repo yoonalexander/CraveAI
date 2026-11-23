@@ -295,6 +295,7 @@ function RestaurantMarker({
   number?: number;
   onSelect: () => void;
 }): JSX.Element {
+  const rating = typeof place.rating === "number" ? place.rating.toFixed(1) : null;
   return (
     <OverlayView
       mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
@@ -304,11 +305,11 @@ function RestaurantMarker({
         aria-label={`Show ${place.name} on map`}
         onClick={onSelect}
         type="button"
-        className={`restaurant-map-marker${number ? " is-recommendation" : ""}`}
-        title={`${place.name}${typeof place.rating === "number" ? `, ${place.rating.toFixed(1)} stars` : ""}`}
+        className={`restaurant-map-marker${number ? " is-recommendation" : ""}${rating === null ? " is-unrated" : ""}`}
+        title={rating === null ? place.name : `${place.name}, ${rating} stars`}
       >
         {number ? <span>{number}</span> : null}
-        <strong>{typeof place.rating === "number" ? `★ ${place.rating.toFixed(1)}` : "Restaurant"}</strong>
+        {rating !== null ? <strong>★ {rating}</strong> : number ? null : <PinIcon width={16} height={16} />}
       </button>
     </OverlayView>
   );
